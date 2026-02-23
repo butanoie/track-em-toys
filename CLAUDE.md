@@ -21,6 +21,43 @@ These rules are ABSOLUTE:
 - NEVER Modify provisioning profiles or entitlements GUIs
 - NEVER Run database migrations on production without explicit instruction
 
+## Project Overview
+Toy collection catalog & pricing app for serious collectors.
+Monorepo with four components: ios/, api/, web/, ml/
+Plus shared Swift Package: packages/TrackEmToysDataKit/
+
+## IDE Setup
+- VS Code: Primary IDE for api/, web/, docs/, ml/ (workspace: track-em-toys.code-workspace)
+- Xcode: iOS-only (ios/ and packages/TrackEmToysDataKit/)
+- Claude Code: Runs in VS Code integrated terminal or standalone
+
+## Architecture
+- iOS/macOS: Swift 6, SwiftUI, SwiftData + CloudKit sync, MVVM w/ @Observable
+- Web: React 19 + TypeScript, Shadcn/ui, Tailwind CSS 4, TanStack Query
+- Backend: Node.js 22 LTS, Fastify 5, TypeScript, PostgreSQL 17, ES256 JWT
+- ML: Core ML + Create ML, transfer learning image classification (~7 MB models)
+
+## Data Architecture
+- PostgreSQL: Shared catalog (no user_id) + private collections (user_id + RLS)
+- SwiftData: Local-first with CloudKit sync, single-user architecture
+- RLS uses (SELECT current_app_user_id()) subselect wrapper for initPlan caching
+- JWT: ES256 asymmetric signing, JWKS discovery, SHA-256 refresh token hashing
+- RLS policies: always use the (SELECT ...) wrapper, never bare function calls
+
+
+## Code Conventions
+- Swift: async/await always, SwiftUI over UIKit, SF Symbols for icons
+- TypeScript: strict mode, no 'any', Fastify schema validation
+- React: functional components, TanStack Query for server state, Zod for schemas
+- All: conventional commits with scope (ios, web, api, ml, shared, infra)
+
+## Build Commands
+- iOS: xcodebuild -scheme track-em-toys -destination 'platform=iOS Simulator,name=iPhone 16'
+- API: cd api && npm run dev
+- Web: cd web && npm run dev
+- Tests (API): cd api && npm test
+- Tests (Web): cd web && npm run test
+
 
 ## Security Guidelines for Documentation
 
@@ -61,11 +98,6 @@ Monorepo. Four active components: ios/, packages/TrackEmToysDataKit/, api/, web/
 - SwiftUI only (no UIKit/AppKit unless forced by a framework)
 - SwiftData for persistence, async/await throughout, SF Symbols for icons
 - Minimum deployment: iOS 17, macOS 14
-
-## Build Commands
-- iOS: xcodebuild -scheme track-em-toys -destination 'platform=iOS Simulator,name=iPhone 16'
-- API: cd api && npm run dev
-- Web: cd web && npm run dev
 
 ## API
 - [Node.js/FastAPI — fill in once decided]
