@@ -1,0 +1,17 @@
+# Xcode — keep the project file, ignore derived state
+ios/DerivedData/
+ios/*.xcworkspace/xcuserdata/
+ios/**/*.xcuserstate
+*.moved-aside
+
+# ML training data is large — consider Git LFS or exclude raw photos
+ml/training-data/**/*.jpg
+ml/training-data/**/*.png
+# But track the models themselves (they're ~7MB, worth versioning)
+!ml/models/*.mlmodel
+
+# Environment files — never commit secrets
+.env
+.env.local
+api/.env
+.DS_Store

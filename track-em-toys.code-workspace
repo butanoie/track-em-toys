@@ -1,0 +1,8 @@
+{
+  "folders": [
+    { "name": "API", "path": "./api" },
+    { "name": "Web", "path": "./web" },
+    { "name": "Docs", "path": "./docs" },
+    { "name": "ML", "path": "./ml" }
+  ]
+}
