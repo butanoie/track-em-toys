@@ -23,11 +23,11 @@ Track'em Toys needs user authentication before any private collection features c
 
 ### Files to Create
 
-- `api/migrations/001_create_users.sql`
-- `api/migrations/002_create_oauth_accounts.sql`
-- `api/migrations/003_create_refresh_tokens.sql`
-- `api/migrations/004_rls_session_context.sql`
-- `api/migrations/005_create_auth_events.sql`
+- `api/db/migrations/001_create_users.sql`
+- `api/db/migrations/002_create_oauth_accounts.sql`
+- `api/db/migrations/003_create_refresh_tokens.sql`
+- `api/db/migrations/004_rls_session_context.sql`
+- `api/db/migrations/005_create_auth_events.sql`
 
 ### Schema
 
@@ -149,13 +149,13 @@ When a user requests deletion (or Apple sends `account-delete` webhook):
 
 ### `raw_profile` Cleanup
 
-The `oauth_accounts.raw_profile` JSONB column stores the full provider response on first sign-in. The application layer should:
-- Only read `sub`, `email`, `email_verified`, `name`, and `picture` from the payload at sign-in time
-- A scheduled job nullifies `raw_profile` on rows older than 30 days:
-  ```sql
-  UPDATE oauth_accounts SET raw_profile = NULL
-  WHERE raw_profile IS NOT NULL AND created_at < NOW() - INTERVAL '30 days';
-  ```
+The `oauth_accounts.raw_profile` JSONB column stores only whitelisted fields from the provider response (`sub`, `email_verified`) — not the full claims payload. The application layer extracts `sub`, `email`, `email_verified`, `name`, and `picture` from claims at sign-in time and stores them in typed columns; `raw_profile` is a minimal audit record.
+
+A scheduled job nullifies `raw_profile` on rows older than 30 days:
+```sql
+UPDATE oauth_accounts SET raw_profile = NULL
+WHERE raw_profile IS NOT NULL AND created_at < NOW() - INTERVAL '30 days';
+```
 
 ---
 
@@ -168,22 +168,20 @@ The `oauth_accounts.raw_profile` JSONB column stores the full provider response 
 ```
 api/
   src/
-    index.ts               — Entry point
+    index.ts               — Entry point, graceful shutdown
     server.ts              — Fastify instance, plugin registration
-    config.ts              — Env var loading + validation
+    config.ts              — Env var loading + validation (rejects CORS_ORIGIN=*)
     db/
-      pool.ts              — pg Pool singleton
+      pool.ts              — pg Pool singleton, withTransaction(fn, userId?) for RLS
       queries.ts           — Parameterized SQL query functions
     auth/
-      routes.ts            — Auth route registration
-      apple.ts             — Apple id_token verification + client secret gen
+      routes.ts            — Auth route registration, HttpError for transaction aborts
+      apple.ts             — Apple id_token verification (explicit issuer validation)
       google.ts            — Google id_token verification
       tokens.ts            — Refresh token creation/rotation, SHA-256 hashing
       key-store.ts         — ES256 key loading, kid→public key map for rotation
       jwks.ts              — GET /.well-known/jwks.json (jose exportJWK)
-      schemas.ts           — JSON Schema for request/response validation
-    hooks/
-      set-user-context.ts  — onRequest: SET app.user_id for RLS
+      schemas.ts           — JSON Schema for request/response validation (with maxLength)
     types/
       index.ts             — User, OAuthAccount, TokenPayload types
   package.json
@@ -225,16 +223,17 @@ Flow:
 8. Generate 15-min access JWT (ES256) + 30-day refresh token (random 32 bytes, SHA-256 hashed in DB)
 9. Log `signin` event to `auth_events` with IP and user-agent
 
-> **Transaction requirement:** Steps 3–9 must execute within a single database transaction. If any step fails, roll back to prevent orphaned records (e.g., user created without oauth_account). Use `pg` client's `BEGIN`/`COMMIT`/`ROLLBACK` via a dedicated client from the pool.
+> **Transaction requirement:** Steps 3–9 must execute within a single database transaction. If any step fails, roll back to prevent orphaned records (e.g., user created without oauth_account). Use `withTransaction(fn, userId?)` which wraps `pg` client's `BEGIN`/`COMMIT`/`ROLLBACK` via a dedicated client from the pool. Early-exit error conditions inside the transaction throw `HttpError` (which triggers ROLLBACK); the route handler catches `HttpError` outside the transaction and sends the HTTP response. Never call `reply.send()` inside a transaction callback — this would commit writes in rejected flows.
 
 > **Concurrent first-login:** Two simultaneous first-login requests for the same provider user will race to step 6. Use `INSERT INTO oauth_accounts ... ON CONFLICT (provider, provider_user_id) DO NOTHING RETURNING *`. If the insert returns no row, retry the lookup (step 3) to find the row created by the other request.
 
-**POST /auth/refresh** — Rate limit: 5/min per IP
+**POST /auth/refresh** — Rate limit: 5/min per token hash (falls back to IP if no body)
 ```
 Request:  { refresh_token: string }
 Response: { access_token, refresh_token }
 ```
-Flow: Hash token → find in DB (not revoked, not expired) → revoke old → create new (rotation) → issue new access JWT. Revoke + create must be atomic (single transaction).
+Rate-limiting keys on the token hash (not just IP) to prevent bypass via IP rotation.
+Flow: Hash token → check for reuse (revoked token presented → revoke ALL user tokens + log `token_reuse_detected`) → find active token in DB (not revoked, not expired) → check user not deactivated → revoke old → create new (rotation) → issue new access JWT. Revoke + create must be atomic (single transaction).
 
 **POST /auth/logout** — Requires valid access token
 ```
@@ -332,10 +331,19 @@ The `apple-signin-auth` library's `verifyIdToken()` accepts a `nonce` option for
 - Rejects tokens from deactivated users: check `users.deactivated_at IS NOT NULL` with a short-TTL in-memory cache (60s) to avoid a DB query on every request. Cache is invalidated when `deactivated_at` is set via the deactivation endpoint.
 - Returns 401 if missing/invalid/expired
 
-### RLS Context Hook
+### RLS Context via `withTransaction`
 
-- `onRequest` hook after auth middleware on DB-accessing routes
-- Executes `SELECT set_config('app.user_id', $1, true)` with `request.user.id`
+RLS context (`app.user_id`) is **not** set via a Fastify hook. An `onRequest` hook would execute `set_config` on a connection that is immediately returned to the pool — the route handler's business logic would then get a different connection where `app.user_id` is unset, silently bypassing RLS.
+
+Instead, `withTransaction(fn, userId?)` accepts an optional `userId` parameter and executes `SELECT set_config('app.user_id', $1, true)` as the first statement inside the transaction, on the same connection that executes the business logic:
+
+```typescript
+// Authenticated routes pass request.user.sub:
+const result = await withTransaction(async (client) => {
+  // client already has app.user_id set — RLS policies apply
+  await client.query('SELECT * FROM user_collection_items')
+}, request.user.sub)
+```
 
 ### Environment Variables
 
@@ -350,7 +358,25 @@ APPLE_TEAM_ID=     APPLE_KEY_ID=     APPLE_PRIVATE_KEY=
 APPLE_BUNDLE_ID=   APPLE_SERVICES_ID=
 GOOGLE_WEB_CLIENT_ID=   GOOGLE_IOS_CLIENT_ID=
 PORT=3000          CORS_ORIGIN=http://localhost:5173
+TRUST_PROXY=false
 ```
+
+**Config validation at startup:**
+- `CORS_ORIGIN=*` is rejected when credentials are enabled (prevents CORS bypass)
+- Empty string env vars are treated as unset (not silently used)
+- `TRUST_PROXY=true` enables Fastify's `trustProxy` for correct `request.ip` behind reverse proxies
+
+### Input Validation
+
+All request body fields have `maxLength` constraints enforced by Fastify JSON Schema validation:
+- `id_token`: 8192 chars (JWT tokens can be large)
+- `nonce`: 256 chars
+- `user_info.name`: 255 chars (matches DB column limit)
+- `refresh_token`: 256 chars
+
+User-supplied `display_name` values are sanitized (control characters stripped, whitespace trimmed) before storage.
+
+The `raw_profile` JSONB column stores only whitelisted fields (`sub`, `email_verified`) — not the full OAuth claims payload — to minimize PII accumulation.
 
 ### Validation
 
@@ -514,7 +540,7 @@ For Apple private relay users (`@privaterelay.appleid.com`) who can't be auto-li
 
 ### Refresh Token Reuse Detection
 
-If a revoked token is presented → revoke ALL refresh tokens for that user (possible token theft) + log `token_reuse_detected` event to `auth_events`.
+> **Note:** Already implemented in Phase 2 (`POST /auth/refresh`). If a revoked token is presented → revoke ALL refresh tokens for that user (possible token theft) + log `token_reuse_detected` event to `auth_events`. The refresh endpoint rate limit is keyed by token hash (not just IP) to prevent bypass via IP rotation.
 
 ### Cleanup Jobs
 
@@ -535,6 +561,7 @@ DELETE FROM auth_events WHERE created_at < NOW() - INTERVAL '90 days';
 ```
 
 **raw_profile cleanup (30 days):**
+> **Note:** As of Phase 2, `raw_profile` only stores whitelisted fields (`sub`, `email_verified`), not full OAuth claims. This cleanup job is still useful for data minimization but the PII risk is significantly reduced.
 ```sql
 UPDATE oauth_accounts SET raw_profile = NULL
 WHERE raw_profile IS NOT NULL AND created_at < NOW() - INTERVAL '30 days';
@@ -548,12 +575,21 @@ WHERE deactivated_at IS NOT NULL AND deactivated_at < NOW() - INTERVAL '30 days'
 
 ### Security Hardening
 
-- Rate limiting on all auth endpoints (configured in Phase 2)
+Already implemented in Phase 2:
+- ✅ Rate limiting on all auth endpoints (per-IP for signin/link-account, per-token-hash for refresh)
+- ✅ Refresh token rotation on every use with reuse detection
+- ✅ ES256 asymmetric JWT signing with `kid` header for zero-downtime key rotation
+- ✅ Auth event audit log for incident investigation and token reuse detection
+- ✅ Input validation with `maxLength` constraints on all request fields
+- ✅ `raw_profile` PII minimization (whitelisted fields only)
+- ✅ Display name sanitization (control characters stripped)
+- ✅ CORS origin validation (rejects `*` with credentials)
+- ✅ `trustProxy` configuration for correct IP resolution behind reverse proxies
+- ✅ Transaction error handling via `HttpError` (no `reply.send()` inside transactions)
+
+Remaining for Phase 5:
 - `Content-Type: application/json` enforcement (blocks CSRF via form submission)
 - `Referer`/`Origin` header check as defense-in-depth
-- Refresh token rotation on every use
-- ES256 asymmetric JWT signing with `kid` header for zero-downtime key rotation
-- Auth event audit log for incident investigation and token reuse detection
 
 ---
 

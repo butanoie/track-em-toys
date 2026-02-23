@@ -10,8 +10,18 @@ ml/training-data/**/*.png
 # But track the models themselves (they're ~7MB, worth versioning)
 !ml/models/*.mlmodel
 
+# Dependencies
+node_modules/
+
+# Build output
+api/dist/
+
 # Environment files — never commit secrets
 .env
 .env.local
 api/.env
+
+# Private keys
+*.pem
+*.p8
 .DS_Store

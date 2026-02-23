@@ -43,8 +43,18 @@ When documenting configuration and setup:
 Monorepo. Four active components: ios/, packages/TrackEmToysDataKit/, api/, web/
 
 ## CRITICAL RULES
-- New Swift files go in ios/track-em-toys/ — Xcode uses folder references (blue folders), 
+- New Swift files go in ios/track-em-toys/ — Xcode uses folder references (blue folders),
   auto-detected, no .pbxproj edit needed
+
+## Testing Requirements
+- ALWAYS write unit tests for any new or updated code
+- Tests are mandatory, not optional — no code change is complete without corresponding tests
+- For new code: write tests covering the primary functionality, edge cases, and error paths
+- For updated code: update existing tests to reflect changes AND add new tests for new behavior
+- Swift tests go in the Xcode test target using XCTest or Swift Testing framework
+- API tests use the project's configured test runner (e.g., vitest, jest)
+- Web tests use the project's configured test runner
+- Run tests after writing them to verify they pass before considering the task done
 
 ## iOS / Swift
 - Swift 6, strict concurrency
@@ -59,7 +69,7 @@ Monorepo. Four active components: ios/, packages/TrackEmToysDataKit/, api/, web/
 
 ## API
 - [Node.js/FastAPI — fill in once decided]
-- All DB changes via migration files in api/migrations/, never direct schema edits
+- All DB changes via migration files in api/db/migrations/, never direct schema edits
 
 ## Commit Standards
 - Write clear, descriptive commit messages
