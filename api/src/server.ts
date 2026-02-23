@@ -85,11 +85,23 @@ export async function buildServer() {
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         await request.jwtVerify()
-      } catch {
+      } catch (err) {
+        request.log.debug({ err }, 'JWT verification failed')
         return reply.code(401).send({ error: 'Unauthorized' })
       }
     },
   )
+
+  // ─── Content-Type enforcement ─────────────────────────────────────────
+  // Reject non-JSON POST requests to auth endpoints. Blocks CSRF via form
+  // submission (application/x-www-form-urlencoded or multipart/form-data).
+
+  fastify.addHook('preValidation', async (request, reply) => {
+    const contentType = request.headers['content-type'] ?? ''
+    if (request.method === 'POST' && request.url.startsWith('/auth/') && !contentType.startsWith('application/json')) {
+      return reply.code(415).send({ error: 'Content-Type must be application/json' })
+    }
+  })
 
   // ─── Health check ──────────────────────────────────────────────────────
 

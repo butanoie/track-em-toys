@@ -11,6 +11,7 @@ import {
   createOAuthAccount,
   findOAuthAccountsByUserId,
   userHasProvider,
+  updateOAuthAccountUserId,
   createRefreshToken,
   findActiveRefreshToken,
   findRefreshTokenByHash,
@@ -349,6 +350,19 @@ describe('queries', () => {
 
       const result = await userHasProvider(client, 'user-1', 'apple')
       expect(result).toBe(false)
+    })
+  })
+
+  describe('updateOAuthAccountUserId', () => {
+    it('should update the user_id on the oauth account row', async () => {
+      vi.mocked(client.query).mockResolvedValue({ rows: [], rowCount: 1 } as never)
+
+      await updateOAuthAccountUserId(client, 'oauth-1', 'user-new')
+
+      expect(client.query).toHaveBeenCalledWith(
+        'UPDATE oauth_accounts SET user_id = $2 WHERE id = $1',
+        ['oauth-1', 'user-new'],
+      )
     })
   })
 

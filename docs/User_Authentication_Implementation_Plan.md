@@ -169,7 +169,7 @@ WHERE raw_profile IS NOT NULL AND created_at < NOW() - INTERVAL '30 days';
 api/
   src/
     index.ts               — Entry point, graceful shutdown
-    server.ts              — Fastify instance, plugin registration
+    server.ts              — Fastify instance, plugin registration, Content-Type enforcement
     config.ts              — Env var loading + validation (rejects CORS_ORIGIN=*)
     db/
       pool.ts              — pg Pool singleton, withTransaction(fn, userId?) for RLS
@@ -179,6 +179,7 @@ api/
       apple.ts             — Apple id_token verification (explicit issuer validation)
       google.ts            — Google id_token verification
       tokens.ts            — Refresh token creation/rotation, SHA-256 hashing
+      cookies.ts           — httpOnly cookie helpers for refresh token (set/clear)
       key-store.ts         — ES256 key loading, kid→public key map for rotation
       jwks.ts              — GET /.well-known/jwks.json (jose exportJWK)
       schemas.ts           — JSON Schema for request/response validation (with maxLength)
@@ -210,6 +211,7 @@ tsx (dev)             vitest (dev)            @types/pg (dev)
 ```
 Request:  { provider: "apple" | "google", id_token: string, nonce?: string, user_info?: { name?: string } }
 Response: { access_token, refresh_token, user: { id, email, display_name, avatar_url } }
+Cookie:   Set-Cookie: refresh_token=<token>; HttpOnly; Secure; SameSite=Strict; Path=/auth
 ```
 `nonce` is required when `provider = "apple"` (raw nonce for replay protection; see Apple Sign-In Nonce).
 Flow:
@@ -220,28 +222,33 @@ Flow:
 5. If not found + `email_verified = true` from token → check `users` by email where `users.email_verified = true` (account linking). Both sides must have verified emails to prevent email takeover.
 6. If not found + no match → create new user + oauth_account
 7. Apple first login: store `user_info.name` as `display_name` (sent only once by Apple — persist name client-side until confirmed saved; see Apple Name Persistence below)
-8. Generate 15-min access JWT (ES256) + 30-day refresh token (random 32 bytes, SHA-256 hashed in DB)
+8. Generate 30-day refresh token inside the transaction (random 32 bytes, SHA-256 hashed in DB). Sign the 15-min access JWT (ES256) **after** the transaction commits.
 9. Log `signin` event to `auth_events` with IP and user-agent
+10. Set refresh token as `httpOnly; Secure; SameSite=Strict` cookie on the response (web clients use cookie; native clients use JSON body)
 
-> **Transaction requirement:** Steps 3–9 must execute within a single database transaction. If any step fails, roll back to prevent orphaned records (e.g., user created without oauth_account). Use `withTransaction(fn, userId?)` which wraps `pg` client's `BEGIN`/`COMMIT`/`ROLLBACK` via a dedicated client from the pool. Early-exit error conditions inside the transaction throw `HttpError` (which triggers ROLLBACK); the route handler catches `HttpError` outside the transaction and sends the HTTP response. Never call `reply.send()` inside a transaction callback — this would commit writes in rejected flows.
+> **Transaction requirement:** Steps 3–7 and 9 execute within a single database transaction; step 8 (JWT signing via `reply.jwtSign()`) is deferred to **after** the transaction commits. This decouples the HTTP/JWT layer from the database lifecycle — if JWT signing fails after commit, no orphaned DB state is created (the user simply retries). The transaction returns `userId` + `refreshToken` + `user`, and the route handler signs the JWT after `COMMIT`. Never call `reply.send()` or `reply.jwtSign()` inside a transaction callback.
 
-> **Concurrent first-login:** Two simultaneous first-login requests for the same provider user will race to step 6. Use `INSERT INTO oauth_accounts ... ON CONFLICT (provider, provider_user_id) DO NOTHING RETURNING *`. If the insert returns no row, retry the lookup (step 3) to find the row created by the other request.
+> **Concurrent first-login:** Two simultaneous first-login requests for the same provider user will race to step 6. To prevent orphan user rows, insert `oauth_accounts` **first** (with `ON CONFLICT (provider, provider_user_id) DO NOTHING RETURNING *`). If the insert succeeds, the winning request creates the user and links it via `updateOAuthAccountUserId`. If the insert returns no row, re-fetch the existing `oauth_account` and its user — and validate the user is not deactivated before proceeding.
+
+> **Deactivation checks on race-condition paths:** Every code path that re-fetches a user after a concurrent-insert conflict must validate `user.deactivated_at IS NULL`. This is enforced by the shared `handleOAuthConflict()` helper which calls `assertNotDeactivated()` on the resolved user.
 
 **POST /auth/refresh** — Rate limit: 5/min per token hash (falls back to IP if no body)
 ```
-Request:  { refresh_token: string }
+Request:  { refresh_token?: string }   — optional; also accepted via httpOnly cookie
 Response: { access_token, refresh_token }
 ```
 Rate-limiting keys on the token hash (not just IP) to prevent bypass via IP rotation.
-Flow: Hash token → check for reuse (revoked token presented → revoke ALL user tokens + log `token_reuse_detected`) → find active token in DB (not revoked, not expired) → check user not deactivated → revoke old → create new (rotation) → issue new access JWT. Revoke + create must be atomic (single transaction).
+The refresh token is accepted from the JSON body **or** the `refresh_token` httpOnly cookie (web clients send it automatically). Body takes precedence if both are present.
+Flow: Hash token → check for reuse (revoked token presented → revoke ALL user tokens + log `token_reuse_detected`) → find active token in DB (not revoked, not expired) → check user not deactivated → revoke old → create new (rotation) → issue new access JWT after transaction commits. Revoke + create must be atomic (single transaction). The rotated refresh token is set as an httpOnly cookie on the response.
 
 **POST /auth/logout** — Requires valid access token
 ```
-Request:  { refresh_token: string }
+Request:  { refresh_token?: string }   — optional; also accepted via httpOnly cookie
 Response: 204 No Content
 ```
+Before revoking, the endpoint verifies the refresh token belongs to the authenticated user (`token.user_id === request.user.sub`). Returns 403 if the token belongs to a different user. Clears the httpOnly cookie on the response.
 
-**POST /auth/link-account** — Requires valid access token, rate limit: 5/min per user
+**POST /auth/link-account** — Requires valid access token, rate limit: 5/min per user (keyed by user ID, not IP)
 ```
 Request:  { provider: "apple" | "google", id_token: string, nonce?: string }
 Response: { user with updated linked accounts }
@@ -328,6 +335,7 @@ The `apple-signin-auth` library's `verifyIdToken()` accepts a `nonce` option for
 - Resolves public key by `kid` header via dynamic secret callback
 - Verifies `iss = 'track-em-toys'` and `aud = 'track-em-toys-api'` (configured in plugin registration)
 - Attaches decoded `sub` (user_id) to `request.user`
+- Logs JWT verification failures at `debug` level for troubleshooting (expired, malformed, wrong audience, unknown kid) while returning a generic 401 to clients (no information leakage)
 - Rejects tokens from deactivated users: check `users.deactivated_at IS NOT NULL` with a short-TTL in-memory cache (60s) to avoid a DB query on every request. Cache is invalidated when `deactivated_at` is set via the deactivation endpoint.
 - Returns 401 if missing/invalid/expired
 
@@ -576,7 +584,7 @@ WHERE deactivated_at IS NOT NULL AND deactivated_at < NOW() - INTERVAL '30 days'
 ### Security Hardening
 
 Already implemented in Phase 2:
-- ✅ Rate limiting on all auth endpoints (per-IP for signin/link-account, per-token-hash for refresh)
+- ✅ Rate limiting on all auth endpoints (per-IP for signin, per-user for link-account, per-token-hash for refresh)
 - ✅ Refresh token rotation on every use with reuse detection
 - ✅ ES256 asymmetric JWT signing with `kid` header for zero-downtime key rotation
 - ✅ Auth event audit log for incident investigation and token reuse detection
@@ -585,10 +593,15 @@ Already implemented in Phase 2:
 - ✅ Display name sanitization (control characters stripped)
 - ✅ CORS origin validation (rejects `*` with credentials)
 - ✅ `trustProxy` configuration for correct IP resolution behind reverse proxies
-- ✅ Transaction error handling via `HttpError` (no `reply.send()` inside transactions)
+- ✅ Transaction error handling via `HttpError` (no `reply.send()` or `reply.jwtSign()` inside transactions)
+- ✅ `Content-Type: application/json` enforcement on all POST `/auth/*` endpoints (blocks CSRF via form submission)
+- ✅ httpOnly cookie for refresh token (`Secure; SameSite=Strict; path=/auth`)
+- ✅ Logout token ownership verification (prevents revoking another user's token)
+- ✅ Deactivation checks on all race-condition fallback paths
+- ✅ JWT signing deferred to after transaction COMMIT (decouples HTTP/JWT from DB lifecycle)
+- ✅ Debug-level logging for JWT verification failures (aids troubleshooting without leaking info to clients)
 
 Remaining for Phase 5:
-- `Content-Type: application/json` enforcement (blocks CSRF via form submission)
 - `Referer`/`Origin` header check as defense-in-depth
 
 ---

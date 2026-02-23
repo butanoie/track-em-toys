@@ -39,7 +39,6 @@ export const signinSchema = {
 export const refreshSchema = {
   body: {
     type: 'object',
-    required: ['refresh_token'],
     properties: {
       refresh_token: { type: 'string', minLength: 1, maxLength: 256 },
     },
@@ -59,7 +58,6 @@ export const refreshSchema = {
 export const logoutSchema = {
   body: {
     type: 'object',
-    required: ['refresh_token'],
     properties: {
       refresh_token: { type: 'string', minLength: 1, maxLength: 256 },
     },

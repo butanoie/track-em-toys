@@ -8,6 +8,11 @@ import type {
   UserResponse,
 } from '../types/index.js'
 
+/** Re-export PoolClient so route helpers can accept a typed client parameter. */
+export type { PoolClient as QueriesClient } from './pool.js'
+/** Re-export row types for use in route helpers. */
+export type { User as UserRow, OAuthAccount as OAuthAccountRow } from '../types/index.js'
+
 // ─── Users ───────────────────────────────────────────────────────────────────
 
 /**
@@ -324,6 +329,27 @@ export async function logAuthEvent(
       params.user_agent,
       params.metadata ? JSON.stringify(params.metadata) : null,
     ],
+  )
+}
+
+// ─── OAuth Account Updates ──────────────────────────────────────────────────
+
+/**
+ * Update the user_id on an OAuth account row. Used during concurrent first-login
+ * to link a placeholder oauth_account to the newly created user.
+ *
+ * @param client - Database client
+ * @param oauthAccountId - OAuth account UUID to update
+ * @param userId - New user UUID to set
+ */
+export async function updateOAuthAccountUserId(
+  client: PoolClient,
+  oauthAccountId: string,
+  userId: string,
+): Promise<void> {
+  await client.query(
+    'UPDATE oauth_accounts SET user_id = $2 WHERE id = $1',
+    [oauthAccountId, userId],
   )
 }
 
