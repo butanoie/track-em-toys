@@ -164,6 +164,8 @@ Stack: React 19, TypeScript strict mode, Vite 6, TanStack Router + Query, Tailwi
 - NEVER use `as unknown as T` in non-test code — write a proper type guard instead
 
 ## Commit Standards
+- NEVER commit unless the user explicitly says to commit — creating files, fixing bugs, or writing changelogs does NOT imply committing
+- Completing a task (e.g. "create a changelog", "add ESLint") is NOT permission to commit; wait for explicit instruction
 - Write clear, descriptive commit messages
 - Follow conventional commits format
 - Reference issue numbers when applicable
