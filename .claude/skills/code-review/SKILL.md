@@ -60,3 +60,27 @@ For each finding, include:
 - Suggested fix
 
 If a domain has no issues, note it briefly (e.g., "API changes look good — no issues found.").
+
+## 6. Update Agent Guidelines (Self-Improving Loop)
+
+After presenting results, for every **Critical** or **High** severity finding:
+
+1. Identify the domain agent whose instructions should prevent this class of issue
+   (e.g. `backend-dev` for API findings, `ios-dev` for Swift findings).
+
+2. Read the agent's instruction file (e.g. `.claude/agents/backend-dev.md`).
+
+3. Check whether the agent's Pre-Submission Checklist already has a check that would have
+   caught this finding. Look for grep commands, rules, or patterns that cover the same root cause.
+
+4. **If no existing check covers it**, add a new numbered checklist item to the agent file:
+   - Write a `bash` grep command that mechanically detects the anti-pattern (zero results = passing)
+   - Add a brief rule explaining what's wrong and the correct pattern
+   - Add a `### Key Pattern` code block showing correct vs. wrong usage if the pattern is non-obvious
+   - Number it sequentially after the last existing item
+
+5. Do **not** add duplicate rules. If the pattern is already covered (even partially), skip or
+   extend the existing rule rather than adding a new one.
+
+This step runs automatically after every review — no user prompt needed. It ensures each review
+permanently improves the agent's ability to avoid the same class of issue in future code.

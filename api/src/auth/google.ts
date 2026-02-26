@@ -1,6 +1,7 @@
 import { OAuth2Client } from 'google-auth-library'
 import { config } from '../config.js'
 import type { ProviderClaims } from '../types/index.js'
+import { isNetworkError, ProviderVerificationError } from './errors.js'
 
 const client = new OAuth2Client()
 
@@ -16,17 +17,33 @@ export async function verifyGoogleToken(
     (v): v is string => v !== undefined,
   )
   if (audience.length === 0) {
+    // Infrastructure misconfiguration — not a client validation failure
     throw new Error('Google Sign-In is not configured — set GOOGLE_WEB_CLIENT_ID or GOOGLE_IOS_CLIENT_ID')
   }
 
-  const ticket = await client.verifyIdToken({
-    idToken,
-    audience,
+  // client.verifyIdToken throws for invalid tokens (bad signature, expired, wrong audience).
+  // These are validation failures → ProviderVerificationError.
+  // Network/JWKS fetch failures throw plain Error → propagated as-is for 503 handling.
+  const ticket = await client.verifyIdToken({ idToken, audience }).catch((err: unknown) => {
+    // Re-throw network errors (ECONNRESET, ETIMEDOUT, ENOTFOUND, etc.) as-is
+    // so the route handler can return 503 instead of misclassifying as 401.
+    if (isNetworkError(err)) throw err
+    throw new ProviderVerificationError(err instanceof Error ? err.message : 'Google token verification failed')
   })
 
   const payload = ticket.getPayload()
   if (!payload) {
-    throw new Error('Google token payload is empty')
+    throw new ProviderVerificationError('Google token payload is empty')
+  }
+
+  const audList = Array.isArray(payload.aud) ? payload.aud : [payload.aud]
+  let clientType: ProviderClaims['client_type']
+  if (config.google.iosClientId && audList.includes(config.google.iosClientId)) {
+    clientType = 'native'
+  } else if (config.google.webClientId && audList.includes(config.google.webClientId)) {
+    clientType = 'web'
+  } else {
+    throw new ProviderVerificationError(`Google id_token audience "${audList.join(', ')}" does not match any configured client ID`)
   }
 
   return {
@@ -35,5 +52,6 @@ export async function verifyGoogleToken(
     email_verified: payload.email_verified ?? false,
     name: payload.name ?? null,
     picture: payload.picture ?? null,
+    client_type: clientType,
   }
 }

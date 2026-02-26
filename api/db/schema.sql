@@ -58,7 +58,7 @@ CREATE TABLE public.auth_events (
     user_agent character varying(512),
     metadata jsonb,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT auth_events_event_type_check CHECK (((event_type)::text = ANY ((ARRAY['signin'::character varying, 'refresh'::character varying, 'logout'::character varying, 'link_account'::character varying, 'token_reuse_detected'::character varying, 'account_deactivated'::character varying])::text[])))
+    CONSTRAINT auth_events_event_type_check CHECK (((event_type)::text = ANY ((ARRAY['signin'::character varying, 'refresh'::character varying, 'logout'::character varying, 'link_account'::character varying, 'provider_auto_linked'::character varying, 'token_reuse_detected'::character varying, 'account_deactivated'::character varying])::text[])))
 );
 
 
@@ -66,7 +66,7 @@ CREATE TABLE public.auth_events (
 -- Name: COLUMN auth_events.event_type; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.auth_events.event_type IS 'signin | refresh | logout | link_account | token_reuse_detected | account_deactivated';
+COMMENT ON COLUMN public.auth_events.event_type IS 'signin | refresh | logout | link_account | provider_auto_linked | token_reuse_detected | account_deactivated';
 
 
 --
@@ -81,7 +81,8 @@ CREATE TABLE public.oauth_accounts (
     email character varying(255),
     is_private_email boolean DEFAULT false NOT NULL,
     raw_profile jsonb,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT chk_oauth_accounts_provider CHECK (((provider)::text = ANY ((ARRAY['apple'::character varying, 'google'::character varying])::text[])))
 );
 
 
@@ -96,8 +97,20 @@ CREATE TABLE public.refresh_tokens (
     device_info character varying(255),
     expires_at timestamp with time zone NOT NULL,
     revoked_at timestamp with time zone,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    client_type text DEFAULT 'web'::text NOT NULL,
+    CONSTRAINT refresh_tokens_client_type_check CHECK ((client_type = ANY (ARRAY['native'::text, 'web'::text])))
 );
+
+
+--
+-- Name: COLUMN refresh_tokens.client_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.refresh_tokens.client_type IS 'Identifies the client platform that created this token. Derived from the
+   verified provider id_token audience claim (bundleId/iosClientId = native,
+   servicesId/webClientId = web). Used to determine refresh token delivery
+   (body for native, httpOnly cookie for web). Cannot be spoofed by the client.';
 
 
 --
@@ -224,6 +237,13 @@ CREATE INDEX idx_refresh_tokens_active ON public.refresh_tokens USING btree (exp
 
 
 --
+-- Name: idx_refresh_tokens_user_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_refresh_tokens_user_active ON public.refresh_tokens USING btree (user_id) WHERE (revoked_at IS NULL);
+
+
+--
 -- Name: idx_refresh_tokens_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -284,4 +304,8 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('002'),
     ('003'),
     ('004'),
-    ('005');
+    ('005'),
+    ('006'),
+    ('007'),
+    ('008'),
+    ('009');

@@ -1,4 +1,4 @@
-import type { FastifyRequest, FastifyReply } from 'fastify'
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import type { Secret } from '@fastify/jwt'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
@@ -6,9 +6,10 @@ import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
 import rateLimit from '@fastify/rate-limit'
 import { config } from './config.js'
-import { getPrivateKeyPem, getPublicKeyPem, getCurrentKid } from './auth/key-store.js'
+import { getPublicKeyPem, getCurrentKid, initKeyStore } from './auth/key-store.js'
 import { jwksRoute } from './auth/jwks.js'
 import { authRoutes } from './auth/routes.js'
+import { HttpError } from './auth/errors.js'
 
 // ─── Fastify type augmentation ─────────────────────────────────────────────
 
@@ -21,13 +22,26 @@ declare module 'fastify' {
   }
 }
 
+// Augment @fastify/jwt to type request.user as { sub: string } project-wide,
+// avoiding unsafe casts in route handlers.
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    payload: { sub: string }
+    user: { sub: string }
+  }
+}
+
 /**
  * Build and configure the Fastify server with all plugins, middleware, and routes.
  */
-export async function buildServer() {
+export async function buildServer(): Promise<FastifyInstance> {
+  // Initialize the key store before anything that needs JWT keys.
+  // This must happen before route registration so getCurrentKid() is available.
+  await initKeyStore()
+
   const fastify = Fastify({
     logger: {
-      level: process.env.LOG_LEVEL ?? 'info',
+      level: config.logLevel,
     },
     trustProxy: config.trustProxy,
   })
@@ -41,7 +55,9 @@ export async function buildServer() {
 
   // ─── Cookies (for refresh token httpOnly cookies) ──────────────────────
 
-  await fastify.register(cookie)
+  await fastify.register(cookie, {
+    secret: config.cookieSecret,
+  })
 
   // ─── Rate Limiting ─────────────────────────────────────────────────────
 
@@ -51,18 +67,39 @@ export async function buildServer() {
 
   // ─── JWT ───────────────────────────────────────────────────────────────
 
+  /**
+   * Type guard for JWT token header objects. Returns true if the value is a
+   * non-null object, which is guaranteed to carry the header fields we need.
+   *
+   * @param v - The value to test
+   */
+  function isTokenHeader(v: unknown): v is { kid?: string } {
+    return typeof v === 'object' && v !== null
+  }
+
+  // Workaround: @fastify/jwt's Secret type does not declare the async
+  // (request, token) => string two-argument overload. The Fastify JWT runtime
+  // accepts this shape and calls it correctly at verification time. This cast
+  // is the minimal suppression until @fastify/jwt exports the overload upstream.
+  // Track upstream: https://github.com/fastify/fastify-jwt/issues
+  // eslint-disable-next-line @typescript-eslint/require-await -- must match Secret async signature
+  const publicKeyResolver = (async (_request: FastifyRequest, token: Record<string, unknown>) => {
+    if (!isTokenHeader(token.header)) {
+      throw new Error('Token missing header')
+    }
+    const kid = typeof token.header.kid === 'string' ? token.header.kid : undefined
+    if (!kid) throw new Error('Token missing kid header')
+    const pem = getPublicKeyPem(kid)
+    if (!pem) throw new Error(`Unknown key id: ${kid}`)
+    return pem
+  // Cast required: @fastify/jwt lacks a two-argument async Secret overload. Runtime accepts
+  // this shape correctly. Track upstream: https://github.com/fastify/fastify-jwt/issues
+  }) as Secret
+
   await fastify.register(jwt, {
     secret: {
-      private: getPrivateKeyPem(),
-      // eslint-disable-next-line @typescript-eslint/require-await -- must match Secret async signature
-      public: (async (_request: FastifyRequest, token: Record<string, unknown>) => {
-        const header = (token.header ?? token) as Record<string, unknown>
-        const kid = header.kid as string | undefined
-        if (!kid) throw new Error('Token missing kid header')
-        const pem = getPublicKeyPem(kid)
-        if (!pem) throw new Error(`Unknown key id: ${kid}`)
-        return pem
-      }) as Secret,
+      private: config.jwt.privateKey,
+      public: publicKeyResolver,
     },
     sign: {
       algorithm: 'ES256',
@@ -76,6 +113,32 @@ export async function buildServer() {
       allowedAud: [config.jwt.audience],
     },
     decode: { complete: true },
+  })
+
+  // ─── Global error handler ─────────────────────────────────────────────────
+  // Registered before route plugins so it applies to all routes, including
+  // those registered inside plugins. Redacts internal error messages in
+  // non-development environments so that unhandled errors (e.g. unexpected
+  // DB failures) never leak stack traces or internal implementation details.
+
+  fastify.setErrorHandler((err, request, reply) => {
+    if (err instanceof HttpError) {
+      return reply.code(err.statusCode).send(err.body)
+    }
+    request.log.error({ err }, 'Unhandled route error')
+    const isDev = config.nodeEnv === 'development'
+    const msg = err instanceof Error ? err.message : undefined
+    const rawCode =
+      typeof err === 'object' &&
+      err !== null &&
+      'statusCode' in err &&
+      // typeof guard on the preceding line confirms statusCode is a number
+      typeof (err as Record<string, unknown>).statusCode === 'number'
+        ? ((err as Record<string, unknown>).statusCode as number) // safe: typeof guard above confirmed number
+        : 500
+    const statusCode = rawCode >= 400 && rawCode <= 599 ? rawCode : 500
+    const message: string = isDev && typeof msg === 'string' ? msg : 'Internal Server Error'
+    return reply.code(statusCode).send({ error: message })
   })
 
   // ─── Auth decorator ────────────────────────────────────────────────────
@@ -92,27 +155,35 @@ export async function buildServer() {
     },
   )
 
-  // ─── Content-Type enforcement ─────────────────────────────────────────
-  // Reject non-JSON POST requests to auth endpoints. Blocks CSRF via form
-  // submission (application/x-www-form-urlencoded or multipart/form-data).
-
-  fastify.addHook('preValidation', async (request, reply) => {
-    const contentType = request.headers['content-type'] ?? ''
-    if (request.method === 'POST' && request.url.startsWith('/auth/') && !contentType.startsWith('application/json')) {
-      return reply.code(415).send({ error: 'Content-Type must be application/json' })
-    }
-  })
-
   // ─── Health check ──────────────────────────────────────────────────────
 
-  // eslint-disable-next-line @typescript-eslint/require-await -- Fastify requires async handlers
-  fastify.get('/health', async () => ({ status: 'ok' }))
+  fastify.get(
+    '/health',
+    {
+      schema: {
+        response: {
+          200: {
+            type: 'object',
+            properties: { status: { type: 'string' } },
+            required: ['status'],
+            additionalProperties: false,
+          },
+        },
+      },
+      config: { rateLimit: { max: 100, timeWindow: '1 minute' } },
+    },
+    // eslint-disable-next-line @typescript-eslint/require-await -- Fastify requires async handlers
+    async () => ({ status: 'ok' }),
+  )
 
   // ─── JWKS endpoint ─────────────────────────────────────────────────────
 
   await fastify.register(jwksRoute)
 
   // ─── Auth routes ───────────────────────────────────────────────────────
+  // The Content-Type enforcement hook is registered inside authRoutes so it
+  // only applies to the /auth/* routes within that plugin scope, avoiding
+  // brittle URL-prefix string matching on the root instance.
 
   await fastify.register(authRoutes, { prefix: '/auth' })
 

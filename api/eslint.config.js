@@ -23,6 +23,35 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      '@typescript-eslint/consistent-type-assertions': ['error', {
+        assertionStyle: 'as',
+        objectLiteralTypeAssertions: 'never',
+      }],
+
+      // Prevent void on non-Promise return values (e.g. void reply.setCookie())
+      'no-void': ['error', { allowAsStatement: false }],
+
+      // Database safety — explicit column lists required
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Literal[value=/SELECT \\*/]',
+          message: 'Use explicit column lists instead of SELECT *. This prevents future columns from leaking into typed structs.',
+        },
+        {
+          selector: 'Literal[value=/RETURNING \\*/]',
+          message: 'Use explicit column lists instead of RETURNING *. This prevents future columns from leaking into typed structs.',
+        },
+        {
+          selector: 'TemplateLiteral:has(TemplateElement[value.raw=/SELECT \\*/])',
+          message: 'Use explicit column lists instead of SELECT *.',
+        },
+        {
+          selector: 'TemplateLiteral:has(TemplateElement[value.raw=/RETURNING \\*/])',
+          message: 'Use explicit column lists instead of RETURNING *.',
+        },
+      ],
 
       // JSDoc — require on exported functions, not on everything
       'jsdoc/require-jsdoc': ['warn', {
@@ -52,6 +81,9 @@ export default tseslint.config(
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/no-unnecessary-type-assertion': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/consistent-type-assertions': 'off',
+      'no-void': 'off',
+      'no-restricted-syntax': 'off',
       'jsdoc/require-jsdoc': 'off',
       'jsdoc/require-description': 'off',
     },

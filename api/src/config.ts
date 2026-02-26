@@ -12,14 +12,61 @@ function requiredPem(name: string): string {
   return required(name).replace(/\\n/g, '\n')
 }
 
+function requiredMinLength(name: string, minLength: number): string {
+  const value = required(name)
+  if (value.length < minLength) {
+    throw new Error(`Environment variable ${name} must be at least ${minLength} characters`)
+  }
+  return value
+}
+
 function optional(name: string, fallback: string): string {
   const value = process.env[name]
   return value !== undefined && value !== '' ? value : fallback
 }
 
+/**
+ * Read an optional environment variable, returning `undefined` when unset.
+ * NOTE: empty-string values (e.g. `APPLE_BUNDLE_ID=`) are treated as unset
+ * and return `undefined`. This is intentional — an empty string is not a valid
+ * value for any of the optional provider config fields.
+ *
+ * @param name - Environment variable name
+ */
 function optionalOrUndefined(name: string): string | undefined {
   const value = process.env[name]
   return value !== undefined && value !== '' ? value : undefined
+}
+
+/**
+ * Read an optional PEM-encoded environment variable, replacing literal `\n`
+ * escape sequences with actual newlines (matching the behaviour of
+ * {@link requiredPem}). Returns `undefined` when unset or empty.
+ *
+ * @param name - Environment variable name
+ */
+function optionalPem(name: string): string | undefined {
+  const value = optionalOrUndefined(name)
+  return value !== undefined ? value.replace(/\\n/g, '\n') : undefined
+}
+
+type NodeEnv = 'development' | 'test' | 'staging' | 'production'
+const VALID_NODE_ENVS: readonly NodeEnv[] = ['development', 'test', 'staging', 'production']
+
+function nodeEnv(): NodeEnv {
+  const value = optional('NODE_ENV', 'development')
+  // Cast is safe: TypeScript cannot narrow string to NodeEnv for Array<NodeEnv>.includes(); the check itself is the validation guard
+  if (!VALID_NODE_ENVS.includes(value as NodeEnv)) {
+    throw new Error(`Invalid NODE_ENV: "${value}". Must be one of: ${VALID_NODE_ENVS.join(', ')}`)
+  }
+  // Safe: VALID_NODE_ENVS.includes() check above guarantees the value is a valid NodeEnv
+  return value as NodeEnv
+}
+
+function optionalBool(name: string, fallback: boolean): boolean {
+  const value = process.env[name]
+  if (value === undefined || value === '') return fallback
+  return value === 'true'
 }
 
 function loadCorsOrigin(): string {
@@ -30,13 +77,39 @@ function loadCorsOrigin(): string {
   return origin
 }
 
+/**
+ * Access token lifetime. Keep short — access tokens are not revocable.
+ * See also REFRESH_TOKEN_EXPIRY_DAYS in src/auth/tokens.ts for the refresh token lifetime.
+ */
+const ACCESS_TOKEN_EXPIRY = '15m' as const
+
+/** Application configuration loaded from environment variables. */
+const rawPort = optional('PORT', '3000')
+const parsedPort = parseInt(rawPort, 10)
+if (isNaN(parsedPort) || parsedPort < 1 || parsedPort > 65535) {
+  throw new Error(`PORT must be a valid port number (1–65535), got: ${rawPort}`)
+}
+
 export const config = {
-  port: parseInt(optional('PORT', '3000'), 10),
+  port: parsedPort,
+  nodeEnv: nodeEnv(),
+  logLevel: optional('LOG_LEVEL', 'info'),
   corsOrigin: loadCorsOrigin(),
-  trustProxy: optional('TRUST_PROXY', 'false') === 'true',
+  trustProxy: optionalBool('TRUST_PROXY', false),
+  // SECURE_COOKIES env var overrides the NODE_ENV default, so staging envs can
+  // set NODE_ENV=staging and still opt in via SECURE_COOKIES=true.
+  secureCookies: optionalBool('SECURE_COOKIES', process.env.NODE_ENV === 'production'),
+  cookieSecret: requiredMinLength('COOKIE_SECRET', 32),
 
   database: {
     url: required('DATABASE_URL'),
+    sslCa: optionalPem('DATABASE_SSL_CA'),
+    poolMax: (() => {
+      const raw = optional('DB_POOL_MAX', '20')
+      const n = parseInt(raw, 10)
+      if (isNaN(n) || n < 1 || n > 1000) throw new Error(`DB_POOL_MAX must be a number between 1 and 1000, got: ${raw}`)
+      return n
+    })(),
   },
 
   jwt: {
@@ -44,14 +117,14 @@ export const config = {
     publicKey: requiredPem('JWT_PUBLIC_KEY'),
     keyId: required('JWT_KEY_ID'),
     issuer: optional('JWT_ISSUER', 'track-em-toys'),
-    audience: 'track-em-toys-api',
-    accessTokenExpiry: '15m',
+    audience: optional('JWT_AUDIENCE', 'track-em-toys-api'),
+    accessTokenExpiry: ACCESS_TOKEN_EXPIRY,
   },
 
   apple: {
-    teamId: optionalOrUndefined('APPLE_TEAM_ID'),
-    keyId: optionalOrUndefined('APPLE_KEY_ID'),
-    privateKey: optionalOrUndefined('APPLE_PRIVATE_KEY'),
+    teamId: optionalOrUndefined('APPLE_TEAM_ID'), // Reserved for future server-side Apple API calls
+    keyId: optionalOrUndefined('APPLE_KEY_ID'), // Reserved for future server-side Apple API calls
+    privateKey: optionalOrUndefined('APPLE_PRIVATE_KEY'), // Reserved for future server-side Apple API calls
     bundleId: optionalOrUndefined('APPLE_BUNDLE_ID'),
     servicesId: optionalOrUndefined('APPLE_SERVICES_ID'),
   },

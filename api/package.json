@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
-    "test": "vitest run",
+    "test": "vitest run && eslint src/ --max-warnings 0",
     "test:watch": "vitest"
   },
   "dependencies": {
@@ -30,6 +30,7 @@
     "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
     "@types/pg": "^8.11.0",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^10.0.1",
     "eslint-plugin-jsdoc": "^62.7.0",
     "tsx": "^4.21.0",

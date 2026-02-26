@@ -100,8 +100,39 @@ Monorepo. Four active components: ios/, packages/TrackEmToysDataKit/, api/, web/
 - Minimum deployment: iOS 17, macOS 14
 
 ## API
-- [Node.js/FastAPI — fill in once decided]
-- All DB changes via migration files in api/db/migrations/, never direct schema edits
+Stack: Node.js 22 LTS, Fastify 5, TypeScript strict mode, PostgreSQL 17, vitest.
+
+### Fastify Conventions
+- Plugin functions MUST be `async (fastify: FastifyInstance, _opts: object): Promise<void>`
+- ALL response schemas MUST have `additionalProperties: false` and `required: [...]`
+- Array item schemas also need `additionalProperties: false` and `required`
+- NEVER use `void` before a synchronous method call — it suppresses errors silently
+
+### Database Conventions
+- NEVER use `SELECT *` or `RETURNING *` — always list explicit columns matching the TypeScript interface
+- Column lists must stay in sync with the corresponding TypeScript type in `src/types/index.ts`
+- ALL DB changes via migration files in `api/db/migrations/`, never direct schema edits
+
+### Cookie Handling
+- Cookies are signed via `@fastify/cookie` with `signed: true`
+- ALWAYS read signed cookies with `request.unsignCookie(request.cookies[NAME])`
+- NEVER read `request.cookies[NAME]` directly — returns raw `s:value.hmac` wire format
+- Check `.valid === true` before using the value; `.valid === false` means tampered → 401
+
+### OAuth / JWT Security
+- Provider `aud` claims MUST be normalized before comparison:
+  `const audList = Array.isArray(aud) ? aud : [aud]`
+- `client_type` ('native' | 'web') is derived from the verified `aud` claim at signin, stored
+  in `refresh_tokens`, and inherited on rotation — NEVER trust client-supplied headers for this
+- Access tokens: ES256 asymmetric signing; refresh tokens: SHA-256 hashed before DB storage
+- `/signin` calls `withTransaction` without `userId` (user may not exist yet) — auth tables
+  must permit unauthenticated access (`app.user_id = ''`) during signin
+
+### Type Safety
+- NEVER use `as T` without a preceding runtime check or type guard function
+- NEVER use `as unknown as T` — write a proper type guard instead
+- Response schema nullability must match the actual return type (e.g. `string | null`, not `string`)
+- Provider claim types that may be `string | string[]` must be handled for both shapes
 
 ## Commit Standards
 - Write clear, descriptive commit messages

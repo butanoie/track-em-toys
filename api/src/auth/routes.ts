@@ -1,4 +1,3 @@
-import type { FastifyInstance, FastifyRequest } from 'fastify'
 import { withTransaction } from '../db/pool.js'
 import * as queries from '../db/queries.js'
 import { verifyAppleToken, isPrivateRelayEmail } from './apple.js'
@@ -6,7 +5,10 @@ import { verifyGoogleToken } from './google.js'
 import { hashToken, createAndStoreRefreshToken, rotateRefreshToken } from './tokens.js'
 import { signinSchema, refreshSchema, logoutSchema, linkAccountSchema } from './schemas.js'
 import { REFRESH_TOKEN_COOKIE, setRefreshTokenCookie, clearRefreshTokenCookie } from './cookies.js'
+import { isNetworkError, ProviderVerificationError, HttpError } from './errors.js'
+import type { FastifyInstance, FastifyRequest, FastifyBaseLogger } from 'fastify'
 import type {
+  User,
   SigninRequest,
   RefreshRequest,
   LogoutRequest,
@@ -15,26 +17,97 @@ import type {
   OAuthProvider,
 } from '../types/index.js'
 
-/** Structured error thrown inside transactions to trigger ROLLBACK + HTTP response. */
-export class HttpError extends Error {
-  /**
-   * Create an HttpError that will be caught outside the transaction.
-   *
-   * @param statusCode - HTTP status code to return
-   * @param body - JSON response body
-   */
-  constructor(
-    public readonly statusCode: number,
-    public readonly body: Record<string, unknown>,
-  ) {
-    super(JSON.stringify(body))
-    this.name = 'HttpError'
-  }
+/** Maximum length for device_info / user-agent stored in refresh_tokens.device_info VARCHAR(255). */
+const MAX_DEVICE_INFO_LENGTH = 255
+/** Maximum length for user-agent stored in auth_events.user_agent VARCHAR(512). */
+const MAX_AUDIT_USER_AGENT_LENGTH = 512
+/** Maximum length for display_name stored in users.display_name VARCHAR(255). */
+const MAX_DISPLAY_NAME_LENGTH = 255
+/**
+ * Maximum allowed avatar URL length. The DB column is TEXT (unbounded); this
+ * application-level limit is the sole width constraint. If the column is ever
+ * changed to VARCHAR, this constant must match.
+ */
+const MAX_AVATAR_URL_LENGTH = 2048
+
+/**
+ * UUID v4 regular expression for sub claim validation.
+ * Case-insensitive: node-postgres always returns lowercase UUIDs, but we accept
+ * uppercase input and normalise. The /i flag allows clients to pass UUIDs in any
+ * case without rejecting valid tokens.
+ */
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * Validate a string is a well-formed UUID. Returns true if valid.
+ *
+ * @param value - The string to test
+ */
+function isValidUuid(value: string): boolean {
+  return UUID_REGEX.test(value)
 }
 
+/**
+ * Type guard for a JWT payload object that contains a string `sub` claim.
+ *
+ * @param user - The value to test
+ */
+function isUserPayload(user: unknown): user is { sub: string } {
+  return (
+    typeof user === 'object' &&
+    user !== null &&
+    'sub' in user &&
+    // TS cannot narrow property types from 'in' checks; cast to access .sub safely after shape guard
+    typeof (user as Record<string, unknown>).sub === 'string'
+  )
+}
+
+/**
+ * Return the sanitized User-Agent string truncated to the device_info column width
+ * (refresh_tokens.device_info VARCHAR(255)). Used when storing the agent string as
+ * device_info on a refresh token row. For the wider audit log column
+ * (auth_events.user_agent VARCHAR(512)) use getRawUserAgent instead — a UA between
+ * 256–511 chars will be silently truncated here but stored in full by getRawUserAgent.
+ *
+ * @param request - Fastify request object
+ */
 function getUserAgent(request: FastifyRequest): string | null {
   const ua = request.headers['user-agent']
-  return typeof ua === 'string' ? ua.slice(0, 512) : null
+  if (typeof ua !== 'string') return null
+  // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
+  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_DEVICE_INFO_LENGTH) || null
+}
+
+/**
+ * Return the sanitized User-Agent string truncated to the audit log column width
+ * (auth_events.user_agent VARCHAR(512)). This is wider than the device_info column
+ * (refresh_tokens.device_info VARCHAR(255)) so a UA between 256–511 chars is stored
+ * in full in the audit log rather than silently truncated.
+ *
+ * @param request - Fastify request object
+ */
+function getRawUserAgent(request: FastifyRequest): string | null {
+  const ua = request.headers['user-agent']
+  if (typeof ua !== 'string') return null
+  // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
+  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_AUDIT_USER_AGENT_LENGTH) || null
+}
+
+/**
+ * Read and verify a signed cookie atomically. Returns the unsign result when
+ * the cookie is present, or null when the cookie is absent entirely.
+ * Callers must check `.valid === true` before using `.value`.
+ *
+ * @param request - Fastify request object
+ * @param name - Cookie name to read
+ */
+function readSignedCookie(
+  request: FastifyRequest,
+  name: string,
+): ReturnType<FastifyRequest['unsignCookie']> | null {
+  // wire-format value (s:value.hmac) — must ONLY be passed to unsignCookie(), never used directly
+  const wireFormatCookie = request.cookies[name]
+  return wireFormatCookie !== undefined ? request.unsignCookie(wireFormatCookie) : null
 }
 
 async function verifyProviderToken(
@@ -43,7 +116,7 @@ async function verifyProviderToken(
   nonce?: string,
 ): Promise<ProviderClaims> {
   if (provider === 'apple') {
-    if (!nonce) throw new Error('Nonce is required for Apple Sign-In')
+    if (!nonce) throw new ProviderVerificationError('Nonce is required for Apple Sign-In')
     return verifyAppleToken(idToken, nonce)
   }
   return verifyGoogleToken(idToken)
@@ -51,6 +124,11 @@ async function verifyProviderToken(
 
 /**
  * Whitelist only non-sensitive fields for raw_profile storage.
+ *
+ * `raw_profile` is stored as an immutable audit snapshot of what the provider
+ * asserted at the time of account creation or linking. Callers should use the
+ * dedicated columns (`oauth_accounts.provider_user_id`, `users.email_verified`)
+ * as the authoritative source for provider data rather than reading from `raw_profile`.
  *
  * @param claims - Provider claims to extract safe fields from
  */
@@ -63,12 +141,36 @@ function sanitizeRawProfile(claims: ProviderClaims): Record<string, unknown> {
 
 /**
  * Strip control characters and trim whitespace from user-supplied names.
+ * Returns null when the result is empty after stripping (e.g. whitespace-only or
+ * control-char-only input), so callers receive null rather than an empty string.
  *
  * @param name - Raw user-supplied display name
  */
-function sanitizeDisplayName(name: string): string {
+function sanitizeDisplayName(name: string): string | null {
   // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
-  return name.replace(/[\x00-\x1F\x7F]/g, '').trim()
+  const stripped = name.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_DISPLAY_NAME_LENGTH)
+  return stripped.length > 0 ? stripped : null
+}
+
+/**
+ * Validate and sanitize an avatar URL. Only `https://` URLs that are
+ * well-formed and within the length limit are accepted. Any other scheme
+ * (e.g. javascript:, data:), malformed URL, or URL exceeding the maximum
+ * length is rejected and null returned.
+ *
+ * @param url - Raw avatar URL from provider claims
+ */
+function sanitizeAvatarUrl(url: string | null | undefined): string | null {
+  if (!url || url.length > MAX_AVATAR_URL_LENGTH) return null
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol !== 'https:') return null
+    // Reject URLs containing credentials (userinfo) to prevent storing them in the DB
+    if (parsed.username !== '' || parsed.password !== '') return null
+    return parsed.href
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -77,7 +179,7 @@ function sanitizeDisplayName(name: string): string {
  *
  * @param user - User record loaded from a concurrent-insert re-fetch
  */
-function assertNotDeactivated(user: { deactivated_at: string | null }): void {
+function assertNotDeactivated(user: Pick<User, 'deactivated_at'>): void {
   if (user.deactivated_at) {
     throw new HttpError(403, { error: 'Account deactivated' })
   }
@@ -88,6 +190,9 @@ function assertNotDeactivated(user: { deactivated_at: string | null }): void {
  * (ON CONFLICT DO NOTHING), re-fetch the existing oauth_account and its user.
  * Validates the re-fetched user is not deactivated.
  *
+ * @param client - Database client (inside transaction)
+ * @param provider - OAuth provider name
+ * @param providerUserId - Provider-specific user identifier
  * @returns The re-fetched user, or null if the oauth_account was not found (should not happen)
  */
 async function handleOAuthConflict(
@@ -105,12 +210,236 @@ async function handleOAuthConflict(
   return { user, oauthAccount }
 }
 
+/** Result from resolveOrCreateUser. */
+interface ResolvedUser {
+  user: queries.UserRow
+  oauthAccount: queries.OAuthAccountRow
+}
+
+/**
+ * Core signin logic: given verified provider claims, find or create the user
+ * and OAuth account row. Handles:
+ *  - Existing oauth_account → load user
+ *  - Verified email match → link new provider to existing user
+ *  - Brand-new user → insert user first, then oauth_account
+ *  - Concurrent first-login race → re-fetch after ON CONFLICT
+ *
+ * @param client - Database client (inside transaction)
+ * @param provider - OAuth provider name
+ * @param claims - Verified claims from the provider's ID token
+ * @param safeName - Sanitized display name from user_info (Apple first-login)
+ * @param ip - Client IP address for audit log
+ * @param ua - User-agent string truncated to 255 chars for device_info storage
+ * @param rawUa - User-agent string truncated to 512 chars for audit log storage
+ * @param log - Fastify logger for non-fatal audit log warnings
+ */
+async function resolveOrCreateUser(
+  client: queries.QueriesClient,
+  provider: OAuthProvider,
+  claims: ProviderClaims,
+  safeName: string | null,
+  ip: string,
+  ua: string | null,
+  rawUa: string | null,
+  log: FastifyBaseLogger,
+): Promise<ResolvedUser> {
+  // ── Branch A: existing oauth_account ──────────────────────────────────────
+  // Use a single JOIN query to fetch both the oauth_account and user in one
+  // round-trip — this is the most frequent code path (returning user signin).
+  const existingWithUser = await queries.findOAuthAccountWithUser(client, provider, claims.sub)
+
+  if (existingWithUser) {
+    const { oauthAccount: existingOAuthAccount } = existingWithUser
+    let existingUser = existingWithUser.user
+    assertNotDeactivated(existingUser)
+
+    // Upgrade email_verified if the provider now asserts it is true but stored value is false
+    if (claims.email_verified && !existingUser.email_verified) {
+      await queries.setUserEmailVerified(client, existingUser.id)
+      // Reflect the upgrade in the returned user object without a second DB round-trip
+      existingUser = { ...existingUser, email_verified: true }
+    }
+
+    // Update display_name if missing and provided
+    if (safeName && !existingUser.display_name) {
+      await queries.updateUserDisplayName(client, existingUser.id, safeName)
+      return { user: { ...existingUser, display_name: safeName }, oauthAccount: existingOAuthAccount }
+    }
+
+    return { user: existingUser, oauthAccount: existingOAuthAccount }
+  }
+
+  // ── Branch B: verified-email account linking ───────────────────────────────
+  // Security tradeoff: this path automatically links a new OAuth provider to an
+  // existing account when the provider asserts email_verified = true and the email
+  // matches an existing user. This is a deliberate, widely-adopted pattern (used by
+  // Google, GitHub, etc.) that trades a small residual risk (a compromised or
+  // attacker-controlled provider could silently take over the account) for a smooth
+  // user experience (no extra consent step required for verified emails).
+  //
+  // The safeguard is that ONLY providers whose email_verified claim is true reach
+  // this branch. All auto-link events are recorded as 'provider_auto_linked' (distinct
+  // from user-initiated 'link_account') so security teams can monitor and alert on
+  // this path independently.
+  if (claims.email && claims.email_verified) {
+    const existingUser = await queries.findUserByEmail(client, claims.email)
+
+    if (existingUser) {
+      assertNotDeactivated(existingUser)
+
+      const oauthAccount = await queries.createOAuthAccount(client, {
+        user_id: existingUser.id,
+        provider,
+        provider_user_id: claims.sub,
+        email: claims.email,
+        is_private_email: isPrivateRelayEmail(claims.email),
+        raw_profile: sanitizeRawProfile(claims),
+      })
+
+      // Handle concurrent insert race — if insert returned null, re-fetch
+      if (!oauthAccount) {
+        const resolved = await handleOAuthConflict(client, provider, claims.sub)
+        if (!resolved) {
+          throw new Error('Concurrent request conflict, please retry')
+        }
+        return resolved
+      }
+
+      try {
+        await queries.logAuthEvent(client, {
+          user_id: existingUser.id,
+          event_type: 'provider_auto_linked',
+          ip_address: ip,
+          user_agent: rawUa,
+          metadata: { provider, auto_linked: true },
+        })
+      } catch (auditErr) {
+        log.error({ err: auditErr }, 'audit log failed — business transaction committed')
+      }
+
+      return { user: existingUser, oauthAccount }
+    }
+  }
+
+  // ── Branch C: new user — insert user first, then oauth_account ────────────
+  // Inserting users first prevents the placeholder user_id FK violation.
+  // The race-condition protection is the (provider, provider_user_id) UNIQUE
+  // index on oauth_accounts, not the user row.
+  const newUser = await queries.createUser(client, {
+    email: claims.email,
+    email_verified: claims.email_verified,
+    display_name: safeName ?? (claims.name ? sanitizeDisplayName(claims.name) : null),
+    avatar_url: sanitizeAvatarUrl(claims.picture),
+  })
+
+  const oauthAccount = await queries.createOAuthAccount(client, {
+    user_id: newUser.id,
+    provider,
+    provider_user_id: claims.sub,
+    email: claims.email,
+    is_private_email: claims.email ? isPrivateRelayEmail(claims.email) : false,
+    raw_profile: sanitizeRawProfile(claims),
+  })
+
+  // ON CONFLICT means another concurrent request created the oauth_account first.
+  // Re-fetch to get the winner's user.
+  if (!oauthAccount) {
+    const resolved = await handleOAuthConflict(client, provider, claims.sub)
+    if (!resolved) {
+      throw new Error('Concurrent request conflict, please retry')
+    }
+    // The user row we created above is now an orphan (no linked oauth_account).
+    // TODO(#42): add a scheduled cleanup job for any orphans missed by inline cleanup.
+    // Attempt inline cleanup — if it fails, warn and continue (transaction still commits).
+    try {
+      await queries.deleteOrphanUser(client, newUser.id)
+      // Cleanup succeeded: log at debug level since the orphan was resolved inline.
+      log.debug(
+        { orphanUserId: newUser.id, provider, providerUserId: claims.sub },
+        'orphan user row created during concurrent signup race — cleaned up inline',
+      )
+    } catch (cleanupErr) {
+      // Cleanup failed: log at warn level so the background job can pick this up.
+      log.warn(
+        { err: cleanupErr, orphanUserId: newUser.id, provider, providerUserId: claims.sub },
+        'orphan user cleanup failed — will be caught by background job',
+      )
+    }
+    return resolved
+  }
+
+  return { user: newUser, oauthAccount }
+}
+
+/**
+ * Extract the refresh token from a request — checking both the signed httpOnly
+ * cookie and the request body. Returns `{ token }` on success or
+ * `{ statusCode, error }` when the token is missing or the cookie HMAC is invalid.
+ *
+ * @param request - Fastify request object
+ */
+function extractRefreshToken(
+  request: FastifyRequest,
+): { token: string } | { statusCode: number; error: string } {
+  // request.body is typed as unknown on the base FastifyRequest; the generic
+  // Body type is only available inside the typed route handler. The defensive
+  // check here is intentional: this helper is shared across /refresh and /logout
+  // (both have a Body type) but also called in logout which passes FastifyRequest
+  // without a Body generic, so we must guard before casting.
+  const body = request.body
+  // Verify both key existence AND that the value is a string to prevent
+  // a client sending { "refresh_token": 42 } from passing a non-string into hashToken.
+  const rawBodyToken =
+    typeof body === 'object' &&
+    body !== null &&
+    'refresh_token' in body &&
+    // body typed as unknown on base FastifyRequest; typeof guard above confirms both object shape and string type
+    typeof (body as Record<string, unknown>).refresh_token === 'string'
+      ? (body as Record<string, unknown>).refresh_token as string // safe: typeof guard above confirmed string
+      : null
+  // readSignedCookie atomically reads and verifies the HMAC of the signed cookie.
+  // Cookies are stored in `s:value.hmac` wire format by @fastify/cookie when
+  // signed:true is set; unsignCookie() strips the prefix and verifies the HMAC.
+  const unsigned = readSignedCookie(request, REFRESH_TOKEN_COOKIE)
+  if (unsigned !== null && !unsigned.valid) {
+    // Cookie present but HMAC invalid — treat as tampered
+    return { statusCode: 401, error: 'Invalid refresh token' }
+  }
+  const cookieToken = unsigned?.value ?? null
+  const token = rawBodyToken ?? cookieToken
+  if (!token) return { statusCode: 401, error: 'Missing refresh token' }
+  return { token }
+}
+
 /**
  * Register all authentication routes under the /auth prefix.
  *
  * @param fastify - Fastify instance to register routes on
+ * @param _opts - Fastify plugin options (unused)
  */
-export function authRoutes(fastify: FastifyInstance): void {
+// eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async even when no await is used
+export async function authRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
+  // ─── Content-Type enforcement ─────────────────────────────────────────
+  // Reject non-JSON POST requests to any route in this plugin scope.
+  // Registered here (inside the plugin) rather than on the root instance so
+  // the check is scoped exactly to /auth/* routes without brittle URL-prefix
+  // string matching. Blocks CSRF via form submission (application/x-www-form-
+  // urlencoded or multipart/form-data).
+
+  fastify.addHook('preValidation', async (request, reply) => {
+    if (request.method !== 'POST') return
+    const contentType = request.headers['content-type']
+    // Allow requests with no Content-Type header (zero-body POSTs).
+    // A client sending a body-less POST correctly omits Content-Type entirely.
+    if (contentType === undefined) return
+    // Split on ';' to strip parameters (e.g. charset=utf-8) and compare only the MIME type.
+    // startsWith() would incorrectly accept 'application/jsonp' or 'application/json-evil'.
+    const baseType = (contentType.split(';')[0] ?? '').trim()
+    if (baseType !== 'application/json') {
+      return reply.code(415).send({ error: 'Content-Type must be application/json' })
+    }
+  })
+
   // ─── POST /signin ─────────────────────────────────────────────────────────
 
   fastify.post<{ Body: SigninRequest }>(
@@ -122,163 +451,85 @@ export function authRoutes(fastify: FastifyInstance): void {
     async (request, reply) => {
       const { provider, id_token, nonce, user_info } = request.body
 
-      const claims = await verifyProviderToken(provider, id_token, nonce)
       const ip = request.ip
       const ua = getUserAgent(request)
+      const rawUa = getRawUserAgent(request)
       const safeName = user_info?.name ? sanitizeDisplayName(user_info.name) : null
 
+      let claims: ProviderClaims
       try {
-        // Transaction handles all DB work; JWT signing happens after COMMIT
-        const txResult = await withTransaction(async (client) => {
-          // Step 3: Look up existing oauth_account
-          let oauthAccount = await queries.findOAuthAccount(client, provider, claims.sub)
+        claims = await verifyProviderToken(provider, id_token, nonce)
+      } catch (err) {
+        if (err instanceof ProviderVerificationError) {
+          return reply.code(401).send({ error: 'Invalid provider token' })
+        }
+        if (isNetworkError(err)) {
+          fastify.log.error({ err }, 'Provider token verification infrastructure error')
+          return reply.code(503).send({ error: 'Authentication service unavailable' })
+        }
+        // Unknown error (e.g. TypeError inside the provider SDK) — re-throw so the
+        // global setErrorHandler returns 500 rather than masking it as 503.
+        throw err
+      }
 
-          let user
+      const clientType = claims.client_type
 
-          if (oauthAccount) {
-            // Step 4: Existing account — load user
-            user = await queries.findUserById(client, oauthAccount.user_id)
-            if (!user) throw new Error('User not found for oauth account')
-            assertNotDeactivated(user)
+      // userId is intentionally omitted — the user may not exist yet (new signup).
+      // Auth tables must permit unauthenticated access (app.user_id = '') during signin.
+      // Transaction handles all DB work; JWT signing happens after COMMIT
+      const txResult = await withTransaction(async (client) => {
+        const { user } = await resolveOrCreateUser(client, provider, claims, safeName, ip, ua, rawUa, fastify.log)
 
-            // Update display_name if missing and provided
-            if (safeName && !user.display_name) {
-              await queries.updateUserDisplayName(client, user.id, safeName)
-              user.display_name = safeName
-            }
-          } else if (claims.email && claims.email_verified) {
-            // Step 5: Try account linking by verified email
-            const existingUser = await queries.findUserByEmail(client, claims.email)
+        // Generate refresh token (DB-bound); JWT signing deferred to after COMMIT
+        const refreshToken = await createAndStoreRefreshToken(client, user.id, ua, clientType)
 
-            if (existingUser) {
-              assertNotDeactivated(existingUser)
-              user = existingUser
-
-              // Create the oauth_account link
-              oauthAccount = await queries.createOAuthAccount(client, {
-                user_id: user.id,
-                provider,
-                provider_user_id: claims.sub,
-                email: claims.email,
-                is_private_email: isPrivateRelayEmail(claims.email),
-                raw_profile: sanitizeRawProfile(claims),
-              })
-
-              // Handle concurrent insert race — if insert returned null, re-fetch
-              if (!oauthAccount) {
-                const resolved = await handleOAuthConflict(client, provider, claims.sub)
-                if (resolved) {
-                  user = resolved.user
-                  oauthAccount = resolved.oauthAccount
-                }
-              }
-
-              await queries.logAuthEvent(client, {
-                user_id: user.id,
-                event_type: 'link_account',
-                ip_address: ip,
-                user_agent: ua,
-                metadata: { provider, auto_linked: true },
-              })
-            } else {
-              // Step 6: New user — insert oauth_account first to avoid orphans
-              oauthAccount = await queries.createOAuthAccount(client, {
-                user_id: '', // placeholder — will be updated after user creation
-                provider,
-                provider_user_id: claims.sub,
-                email: claims.email,
-                is_private_email: isPrivateRelayEmail(claims.email),
-                raw_profile: sanitizeRawProfile(claims),
-              })
-
-              // ON CONFLICT means another request already created this oauth_account
-              if (!oauthAccount) {
-                const resolved = await handleOAuthConflict(client, provider, claims.sub)
-                if (resolved) {
-                  user = resolved.user
-                  oauthAccount = resolved.oauthAccount
-                }
-              } else {
-                // We won the race — create user and link the oauth_account
-                user = await queries.createUser(client, {
-                  email: claims.email,
-                  email_verified: claims.email_verified,
-                  display_name: safeName ?? claims.name ?? null,
-                  avatar_url: claims.picture ?? null,
-                })
-
-                await queries.updateOAuthAccountUserId(client, oauthAccount.id, user.id)
-                oauthAccount.user_id = user.id
-              }
-            }
-          } else {
-            // Step 6 (no email or unverified): New user without email linking
-            // Insert oauth_account first to avoid orphan users on race condition
-            oauthAccount = await queries.createOAuthAccount(client, {
-              user_id: '', // placeholder — will be updated after user creation
-              provider,
-              provider_user_id: claims.sub,
-              email: claims.email,
-              is_private_email: claims.email ? isPrivateRelayEmail(claims.email) : false,
-              raw_profile: sanitizeRawProfile(claims),
-            })
-
-            if (!oauthAccount) {
-              const resolved = await handleOAuthConflict(client, provider, claims.sub)
-              if (resolved) {
-                user = resolved.user
-                oauthAccount = resolved.oauthAccount
-              }
-            } else {
-              user = await queries.createUser(client, {
-                email: claims.email,
-                email_verified: claims.email_verified,
-                display_name: safeName ?? claims.name ?? null,
-                avatar_url: claims.picture ?? null,
-              })
-
-              await queries.updateOAuthAccountUserId(client, oauthAccount.id, user.id)
-              oauthAccount.user_id = user.id
-            }
-          }
-
-          if (!user) throw new Error('Failed to resolve user during signin')
-
-          // Step 8: Generate refresh token (DB-bound); JWT signing deferred to after COMMIT
-          const refreshToken = await createAndStoreRefreshToken(client, user.id, ua)
-
-          // Step 9: Log signin event
+        // Log signin event — non-fatal: audit log failure must not roll back the business transaction
+        try {
           await queries.logAuthEvent(client, {
             user_id: user.id,
             event_type: 'signin',
             ip_address: ip,
-            user_agent: ua,
+            user_agent: rawUa,
             metadata: { provider },
           })
+        } catch (auditErr) {
+          fastify.log.warn({ err: auditErr }, 'audit log failed — business transaction committed')
+        }
 
-          return {
-            userId: user.id,
-            refreshToken,
-            user: queries.toUserResponse(user),
-          }
-        })
+        return {
+          userId: user.id,
+          refreshToken,
+          user: queries.toUserResponse(user),
+        }
+      })
 
-        // JWT signing happens after transaction COMMIT — decoupled from DB lifecycle
-        const accessToken = await reply.jwtSign({ sub: txResult.userId })
+      // JWT signing happens after transaction COMMIT — decoupled from DB lifecycle.
+      // Throw a plain Error (not HttpError) so the global error handler can redact the
+      // message in production. HttpError bypasses the isDev redaction check and is
+      // semantically for inside-transaction use only.
+      let accessToken: string
+      try {
+        accessToken = await reply.jwtSign({ sub: txResult.userId })
+      } catch (signErr) {
+        fastify.log.error({ err: signErr }, 'JWT signing failed after successful signin')
+        throw new Error('Token signing failed', { cause: signErr })
+      }
 
-        // Set refresh token as httpOnly cookie for web clients
-        setRefreshTokenCookie(reply, txResult.refreshToken)
-
+      if (clientType === 'native') {
+        // Native clients (iOS/Android): token in body, no cookie
         return {
           access_token: accessToken,
           refresh_token: txResult.refreshToken,
           user: txResult.user,
         }
-      } catch (err) {
-        if (err instanceof HttpError) {
-          return reply.code(err.statusCode).send(err.body)
-        }
-        throw err
+      }
+
+      // Web clients: token in httpOnly cookie, null in body
+      setRefreshTokenCookie(reply, txResult.refreshToken)
+      return {
+        access_token: accessToken,
+        refresh_token: null,
+        user: txResult.user,
       }
     },
   )
@@ -289,99 +540,143 @@ export function authRoutes(fastify: FastifyInstance): void {
     '/refresh',
     {
       schema: refreshSchema,
-      config: {
-        rateLimit: {
-          max: 5,
-          timeWindow: '1 minute',
-          keyGenerator: (request: FastifyRequest) => {
-            // Rate-limit by token hash (not just IP) to prevent bypass via IP rotation
-            const body = request.body as RefreshRequest | undefined
-            if (body?.refresh_token) return hashToken(body.refresh_token)
-            return request.ip
-          },
-        },
-      },
+      // Rate-limit by IP only. keyGenerator runs at onRequest time (before body
+      // parsing), so request.body is always null there; a custom token-hash key
+      // would silently always fall through to IP anyway.
+      config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
     },
     async (request, reply) => {
-      // Accept refresh token from body or httpOnly cookie
-      const bodyToken = request.body.refresh_token
-      const cookieToken = request.cookies[REFRESH_TOKEN_COOKIE]
-      const refresh_token = bodyToken || cookieToken
-
-      if (!refresh_token) {
-        return reply.code(400).send({ error: 'Missing refresh token' })
+      const extracted = extractRefreshToken(request)
+      if ('statusCode' in extracted) {
+        return reply.code(extracted.statusCode).send({ error: extracted.error })
       }
+      const { token: refreshToken } = extracted
 
-      const tokenHash = hashToken(refresh_token)
+      const tokenHash = hashToken(refreshToken)
       const ip = request.ip
       const ua = getUserAgent(request)
+      const rawUa = getRawUserAgent(request)
 
-      try {
-        // Transaction handles all DB work; JWT signing deferred to after COMMIT
-        const txResult = await withTransaction(async (client) => {
-          // Check if token exists at all (for reuse detection)
-          const existingToken = await queries.findRefreshTokenByHash(client, tokenHash)
+      // Transaction handles all DB work; JWT signing deferred to after COMMIT.
+      // refresh_tokens has NO RLS policies (confirmed in migrations 003–008) so
+      // withTransaction is called without a userId — the unauthenticated context
+      // (app.user_id = '') is intentional here; token lookup is by hash, not by user.
+      //
+      // Returns a tagged union: { type: 'reuse_detected', userId } when a revoked token
+      // is presented (reuse detected, revocation committed), or { type: 'rotated', ... }
+      // for the normal rotation result. Using a tagged return rather than throwing HttpError
+      // inside the callback ensures the revocation transaction COMMITS before the 401 is
+      // sent — HttpError thrown inside withTransaction triggers ROLLBACK.
+      const txResult = await withTransaction(async (client) => {
+        // Acquire a row lock (FOR UPDATE) to close the TOCTOU gap between
+        // reuse detection and revocation — a single locked read replaces the
+        // previous two-query pattern. The SQL also filters expired tokens via
+        // AND expires_at > NOW() to avoid a separate JS date comparison.
+        const token = await queries.findRefreshTokenForRotation(client, tokenHash)
 
-          if (existingToken && existingToken.revoked_at) {
-            // Token reuse detected — revoke all tokens for this user
-            await queries.revokeAllUserRefreshTokens(client, existingToken.user_id)
+        if (!token) {
+          // Token not found or expired (SQL filters both with AND expires_at > NOW())
+          throw new HttpError(401, { error: 'Invalid refresh token' })
+        }
+
+        // Token exists but is already revoked — reuse detected.
+        // Revoke the entire token family for this user inside the current transaction.
+        // Fail-closed: if revokeAllUserRefreshTokens throws, the transaction rolls back
+        // and the caller receives a 500. This is intentional — we must not allow a
+        // rotation to proceed when we know all tokens for this user should be revoked.
+        // A 500 is safer than silently proceeding with potentially compromised tokens.
+        //
+        // IMPORTANT: Do NOT throw HttpError here. HttpError inside withTransaction triggers
+        // ROLLBACK, which would undo the revocation. Instead, return a tagged union value so the
+        // caller can send the 401 AFTER this transaction commits.
+        if (token.revoked_at) {
+          await queries.revokeAllUserRefreshTokens(client, token.user_id)
+          // Audit log is best-effort: a failure must not roll back the security-critical
+          // revocation. Log at error level — failing to record a security event is serious.
+          try {
             await queries.logAuthEvent(client, {
-              user_id: existingToken.user_id,
+              user_id: token.user_id,
               event_type: 'token_reuse_detected',
               ip_address: ip,
-              user_agent: ua,
+              user_agent: rawUa,
             })
-            throw new HttpError(401, { error: 'Token reuse detected' })
+          } catch (auditErr) {
+            fastify.log.error({ err: auditErr }, 'audit log failed for token_reuse_detected — security revocation committed')
           }
+          // Return tagged union value — revocation is committed when withTransaction resolves normally
+          return { type: 'reuse_detected' as const, userId: token.user_id }
+        }
 
-          // Find active (non-revoked, non-expired) token
-          const activeToken = await queries.findActiveRefreshToken(client, tokenHash)
-          if (!activeToken) {
-            throw new HttpError(401, { error: 'Invalid refresh token' })
-          }
+        // NOTE: getUserStatus has no row lock. This is safe only if account deactivation
+        // atomically revokes all refresh tokens. If that invariant is ever broken, a narrow
+        // race exists between token lock acquisition and this deactivation check.
+        // Check user is not deactivated
+        const userStatus = await queries.getUserStatus(client, token.user_id)
+        // Both 'not_found' and 'deactivated' return the same message to prevent user enumeration
+        if (userStatus === 'not_found' || userStatus === 'deactivated') {
+          throw new HttpError(403, { error: 'Account deactivated' })
+        }
 
-          // Check user is not deactivated
-          const userStatus = await queries.getUserStatus(client, activeToken.user_id)
-          if (userStatus === 'not_found' || userStatus === 'deactivated') {
-            throw new HttpError(403, { error: 'Account deactivated' })
-          }
+        // Rotate: revoke old, create new (carry over the stored client_type)
+        const newRefreshToken = await rotateRefreshToken(
+          client,
+          tokenHash,
+          token.user_id,
+          ua,
+          token.client_type,
+        )
 
-          // Rotate: revoke old, create new
-          const newRefreshToken = await rotateRefreshToken(
-            client,
-            tokenHash,
-            activeToken.user_id,
-            ua,
-          )
-
+        // Non-fatal: audit log failure must not roll back the token rotation
+        try {
           await queries.logAuthEvent(client, {
-            user_id: activeToken.user_id,
+            user_id: token.user_id,
             event_type: 'refresh',
             ip_address: ip,
-            user_agent: ua,
+            user_agent: rawUa,
           })
+        } catch (auditErr) {
+          fastify.log.warn({ err: auditErr }, 'audit log failed — business transaction committed')
+        }
 
-          return {
-            userId: activeToken.user_id,
-            refreshToken: newRefreshToken,
-          }
-        })
+        return {
+          type: 'rotated' as const,
+          userId: token.user_id,
+          refreshToken: newRefreshToken,
+          clientType: token.client_type,
+        }
+      })
 
-        // JWT signing happens after transaction COMMIT
-        const accessToken = await reply.jwtSign({ sub: txResult.userId })
+      // Revocation committed above (transaction returned normally). Send 401 now,
+      // outside the transaction, so the DB write is guaranteed to have persisted.
+      if (txResult.type === 'reuse_detected') {
+        return reply.code(401).send({ error: 'Token reuse detected' })
+      }
 
-        // Set rotated refresh token as httpOnly cookie for web clients
-        setRefreshTokenCookie(reply, txResult.refreshToken)
+      // JWT signing happens after transaction COMMIT.
+      // Throw a plain Error (not HttpError) so the global error handler can redact the
+      // message in production. HttpError bypasses the isDev redaction check and is
+      // semantically for inside-transaction use only.
+      let accessToken: string
+      try {
+        accessToken = await reply.jwtSign({ sub: txResult.userId })
+      } catch (signErr) {
+        fastify.log.error({ err: signErr }, 'JWT signing failed after successful refresh')
+        throw new Error('Token signing failed', { cause: signErr })
+      }
 
+      if (txResult.clientType === 'native') {
+        // Native clients: token in body, no cookie
         return {
           access_token: accessToken,
           refresh_token: txResult.refreshToken,
         }
-      } catch (err) {
-        if (err instanceof HttpError) {
-          return reply.code(err.statusCode).send(err.body)
-        }
-        throw err
+      }
+
+      // Web clients: token in httpOnly cookie, null in body
+      setRefreshTokenCookie(reply, txResult.refreshToken)
+      return {
+        access_token: accessToken,
+        refresh_token: null,
       }
     },
   )
@@ -393,39 +688,64 @@ export function authRoutes(fastify: FastifyInstance): void {
     {
       schema: logoutSchema,
       preHandler: [fastify.authenticate],
+      config: { rateLimit: { max: 20, timeWindow: '1 minute' } },
     },
     async (request, reply) => {
-      // Accept refresh token from body or httpOnly cookie
-      const bodyToken = request.body.refresh_token
-      const cookieToken = request.cookies[REFRESH_TOKEN_COOKIE]
-      const refresh_token = bodyToken || cookieToken
+      const extracted = extractRefreshToken(request)
+      if ('statusCode' in extracted) {
+        return reply.code(extracted.statusCode).send({ error: extracted.error })
+      }
+      const { token: refreshToken } = extracted
 
-      if (!refresh_token) {
-        return reply.code(400).send({ error: 'Missing refresh token' })
+      if (!isUserPayload(request.user)) {
+        return reply.code(401).send({ error: 'Unauthorized' })
+      }
+      const user = request.user
+
+      // Validate sub is a well-formed UUID before doing any DB work (matches layout of /link-account)
+      if (!isValidUuid(user.sub)) {
+        return reply.code(401).send({ error: 'Unauthorized' })
       }
 
-      const tokenHash = hashToken(refresh_token)
-      const user = request.user as { sub: string }
+      const tokenHash = hashToken(refreshToken)
       const ip = request.ip
-      const ua = getUserAgent(request)
+      const rawUa = getRawUserAgent(request)
 
       await withTransaction(async (client) => {
-        // Verify token belongs to the authenticated user before revoking
+        // Intentionally uses findRefreshTokenByHash (no expiry filter) so users can
+        // revoke sessions even after the refresh token has expired. This ensures a
+        // clean logout regardless of token state.
         const token = await queries.findRefreshTokenByHash(client, tokenHash)
-        if (token && token.user_id !== user.sub) {
+
+        if (!token) {
+          // Token not found — log a warning for observability; do NOT clear cookie
+          // since the token was never actually revoked.
+          request.log.warn({ tokenHashPrefix: tokenHash.slice(0, 8), userId: user.sub }, 'Logout: refresh token not found in database')
+          throw new HttpError(401, { error: 'Invalid refresh token' })
+        }
+
+        if (token.user_id !== user.sub) {
           throw new HttpError(403, { error: 'Token does not belong to this user' })
         }
 
         await queries.revokeRefreshToken(client, tokenHash)
-        await queries.logAuthEvent(client, {
-          user_id: user.sub,
-          event_type: 'logout',
-          ip_address: ip,
-          user_agent: ua,
-        })
+
+        // Non-fatal: audit log failure must not roll back the token revocation
+        try {
+          await queries.logAuthEvent(client, {
+            user_id: user.sub,
+            event_type: 'logout',
+            ip_address: ip,
+            user_agent: rawUa,
+          })
+        } catch (auditErr) {
+          fastify.log.warn({ err: auditErr }, 'audit log failed — business transaction committed')
+        }
       }, user.sub)
 
-      // Clear the httpOnly cookie
+      // Clear the httpOnly cookie only after the transaction has committed successfully.
+      // Keeping this outside the callback ensures the HTTP response is only mutated
+      // once the DB state is confirmed, and keeps side-effects out of the DB callback.
       clearRefreshTokenCookie(reply)
 
       return reply.code(204).send()
@@ -439,82 +759,110 @@ export function authRoutes(fastify: FastifyInstance): void {
     {
       schema: linkAccountSchema,
       preHandler: [fastify.authenticate],
-      config: {
-        rateLimit: {
-          max: 5,
-          timeWindow: '1 minute',
-          keyGenerator: (request: FastifyRequest) => {
-            return (request.user as { sub: string }).sub
-          },
-        },
-      },
+      // Rate-limit by IP only. keyGenerator runs at onRequest time (before JWT
+      // preHandler), so request.user is not yet populated; accessing it there
+      // would throw a 500.
+      config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
     },
     async (request, reply) => {
       const { provider, id_token, nonce } = request.body
-      const user = request.user as { sub: string }
+
+      if (!isUserPayload(request.user)) {
+        return reply.code(401).send({ error: 'Unauthorized' })
+      }
+      const user = request.user
       const ip = request.ip
-      const ua = getUserAgent(request)
+      const rawUa = getRawUserAgent(request)
 
-      const claims = await verifyProviderToken(provider, id_token, nonce)
+      // Validate sub is a well-formed UUID before using it in DB queries
+      if (!isValidUuid(user.sub)) {
+        return reply.code(401).send({ error: 'Unauthorized' })
+      }
 
+      let claims: ProviderClaims
       try {
-        const result = await withTransaction(async (client) => {
-          // Check if provider account already linked to another user
-          const existing = await queries.findOAuthAccount(client, provider, claims.sub)
-          if (existing && existing.user_id !== user.sub) {
-            throw new HttpError(409, {
-              error: 'This provider account is already linked to a different user',
-            })
-          }
+        claims = await verifyProviderToken(provider, id_token, nonce)
+      } catch (err) {
+        if (err instanceof ProviderVerificationError) {
+          return reply.code(401).send({ error: 'Invalid provider token' })
+        }
+        if (isNetworkError(err)) {
+          fastify.log.error({ err }, 'Provider token verification infrastructure error')
+          return reply.code(503).send({ error: 'Authentication service unavailable' })
+        }
+        // Unknown error (e.g. TypeError inside the provider SDK) — re-throw so the
+        // global setErrorHandler returns 500 rather than masking it as 503.
+        throw err
+      }
 
-          // Check if current user already has this provider
-          const hasProvider = await queries.userHasProvider(client, user.sub, provider)
-          if (hasProvider) {
-            throw new HttpError(409, {
-              error: 'You already have an account linked with this provider',
-            })
-          }
+      const result = await withTransaction(async (client) => {
+        // TOCTOU note: the findOAuthAccount + userHasProvider pre-checks below run without
+        // a FOR UPDATE lock, so a concurrent request could link the same account between
+        // these reads and the createOAuthAccount write. This is intentional: the
+        // ON CONFLICT DO NOTHING clause in createOAuthAccount is the authoritative safety
+        // guard. The pre-checks are best-effort only — they exist to return user-friendly
+        // error messages rather than to enforce uniqueness. The TOCTOU window is acceptable
+        // because the worst outcome is a generic "Account already linked" 409 from the
+        // ON CONFLICT path rather than a tailored message from the pre-check path.
 
-          // Create the link
-          await queries.createOAuthAccount(client, {
-            user_id: user.sub,
-            provider,
-            provider_user_id: claims.sub,
-            email: claims.email,
-            is_private_email: claims.email ? isPrivateRelayEmail(claims.email) : false,
-            raw_profile: sanitizeRawProfile(claims),
+        // Check if provider account already linked to another user
+        const existing = await queries.findOAuthAccount(client, provider, claims.sub)
+        if (existing && existing.user_id !== user.sub) {
+          throw new HttpError(409, {
+            error: 'This provider account is already linked to a different user',
           })
+        }
 
+        // Check if current user already has this provider
+        const hasProvider = await queries.userHasProvider(client, user.sub, provider)
+        if (hasProvider) {
+          throw new HttpError(409, {
+            error: 'You already have an account linked with this provider',
+          })
+        }
+
+        // Create the link
+        const linked = await queries.createOAuthAccount(client, {
+          user_id: user.sub,
+          provider,
+          provider_user_id: claims.sub,
+          email: claims.email,
+          is_private_email: claims.email ? isPrivateRelayEmail(claims.email) : false,
+          raw_profile: sanitizeRawProfile(claims),
+        })
+
+        // ON CONFLICT DO NOTHING returned null — a concurrent request already linked this account
+        if (!linked) {
+          throw new HttpError(409, { error: 'Account already linked' })
+        }
+
+        // Non-fatal: audit log failure must not roll back the account link
+        try {
           await queries.logAuthEvent(client, {
             user_id: user.sub,
             event_type: 'link_account',
             ip_address: ip,
-            user_agent: ua,
+            user_agent: rawUa,
             metadata: { provider },
           })
-
-          // Return updated user with linked accounts
-          const updatedUser = await queries.findUserById(client, user.sub)
-          const accounts = await queries.findOAuthAccountsByUserId(client, user.sub)
-
-          if (!updatedUser) throw new Error('User not found after link')
-
-          return {
-            ...queries.toUserResponse(updatedUser),
-            linked_accounts: accounts.map((a) => ({
-              provider: a.provider,
-              email: a.email,
-            })),
-          }
-        }, user.sub)
-
-        return result
-      } catch (err) {
-        if (err instanceof HttpError) {
-          return reply.code(err.statusCode).send(err.body)
+        } catch (auditErr) {
+          fastify.log.warn({ err: auditErr }, 'audit log failed — business transaction committed')
         }
-        throw err
-      }
+
+        // Return updated user with linked accounts in a single JOIN query
+        const userWithAccounts = await queries.findUserWithAccounts(client, user.sub)
+        if (!userWithAccounts) throw new HttpError(500, { error: 'Failed to fetch user after account link' })
+
+        return {
+          ...queries.toUserResponse(userWithAccounts.user),
+          linked_accounts: userWithAccounts.accounts.map((a) => ({
+            provider: a.provider,
+            email: a.email,
+          })),
+        }
+      }, user.sub)
+
+      return result
     },
   )
 }

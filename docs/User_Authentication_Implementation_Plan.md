@@ -396,57 +396,410 @@ The `raw_profile` JSONB column stores only whitelisted fields (`sub`, `email_ver
 
 ## Phase 3: Web SPA Authentication
 
-**Goal:** Login page, token management, protected routes in the React 19 + Vite app.
+**Goal:** Scaffold the React 19 + Vite web app and implement login page, in-memory token management, silent refresh, protected routes, and OAuth sign-in flows.
+
+**Status:** Not started. The `web/` directory is currently empty; this phase includes project scaffolding.
+
+**Depends on:** Phase 2 (API auth endpoints) — complete as of commit `8e7f52b`.
+
+> **Note:** Phase 3 and Phase 4 can run in parallel (both depend only on Phase 2).
+
+### Prerequisite: Project Scaffolding
+
+The `web/` directory does not yet exist. Before any auth work, scaffold the project:
+
+```bash
+cd web
+npm create vite@latest . -- --template react-ts
+npm install react@19 react-dom@19
+npm install -D @types/react@19 @types/react-dom@19
+npm install @tanstack/react-query @tanstack/react-router zod
+npm install -D tailwindcss @tailwindcss/vite
+npx shadcn@latest init
+```
+
+Create `web/.env.example`:
+```env
+VITE_API_URL=http://localhost:3000
+VITE_GOOGLE_CLIENT_ID=<Google OAuth Web Client ID>
+VITE_APPLE_SERVICES_ID=<Apple Services ID for web>
+VITE_APPLE_REDIRECT_URI=http://localhost:5173/auth/apple-callback
+```
+
+> **NEVER** commit `web/.env` to git. Only `.env.example` is committed.
 
 ### Key Libraries
 
 ```
-@react-oauth/google ^0.12   react-router ^7   @tanstack/react-query ^5
+@tanstack/react-query ^5    — Server state, auth query caching
+@tanstack/react-router ^1   — File-based routing with auth guards
+@react-oauth/google ^0.12   — Google Sign-In button + credential flow
+zod ^3                       — Runtime validation of API responses
 ```
 
-Apple Sign-In on web: Apple JS SDK via script tag (no React wrapper exists).
+Apple Sign-In on web: Apple JS SDK loaded via `<script>` tag (no maintained React wrapper exists). The SDK is loaded dynamically in `apple-auth.ts` to avoid blocking initial page load.
 
 ### Directory Structure
 
 ```
 web/src/
+  lib/
+    api-client.ts              — Fetch wrapper: base URL, credentials, Content-Type, 401 interceptor
+    auth-store.ts              — In-memory access token singleton (module-scoped, not React state)
+    zod-schemas.ts             — Zod schemas for all auth API response types
   auth/
-    AuthProvider.tsx         — React context: user state, login/logout
-    useAuth.ts               — Hook to access auth context
-    LoginPage.tsx            — Apple + Google sign-in buttons
-    AuthCallback.tsx         — Apple web redirect handler (form_post)
-    ProtectedRoute.tsx       — Redirect to login if unauthenticated
-    token-storage.ts         — Access token in memory, refresh token in httpOnly cookie
-  api/
-    client.ts                — Fetch wrapper with auto-refresh on 401
+    AuthProvider.tsx            — React context: user state, isAuthenticated, isLoading
+    useAuth.ts                  — Hook: exposes login, logout, user, isAuthenticated
+    LoginPage.tsx               — Apple + Google sign-in buttons (public route)
+    AppleCallback.tsx           — Apple web redirect handler (form_post → POST /auth/signin)
+    ProtectedRoute.tsx          — Auth guard component for TanStack Router
+    google-auth.ts              — Google credential extraction helper
+    apple-auth.ts               — Apple JS SDK loader + nonce generation + redirect trigger
+  routes/
+    __root.tsx                  — Root layout with AuthProvider + QueryClientProvider
+    _authenticated.tsx          — Authenticated layout (wraps ProtectedRoute)
+    _authenticated/
+      index.tsx                 — Dashboard (placeholder)
+    login.tsx                   — LoginPage route
+    auth/
+      apple-callback.tsx        — AppleCallback route
 ```
+
+### API Client (`api-client.ts`)
+
+A thin wrapper around `fetch` that handles authentication concerns.
+
+**Critical implementation details from the API:**
+
+1. **`credentials: 'include'`** — Required on ALL requests to `VITE_API_URL`. The refresh token cookie has `SameSite=Strict; Path=/auth`, so the browser only sends it on requests to `/auth/*` paths. But `credentials: 'include'` must be set globally because the API's CORS is configured with `credentials: true` and the browser will reject responses without the matching request credential mode.
+
+2. **`Content-Type: application/json`** — Required on all POST requests. The API enforces this via a `preValidation` hook and returns 415 if missing. This also serves as CSRF defense-in-depth (browsers cannot send `application/json` via form submission).
+
+3. **`Authorization: Bearer <access_token>`** — Attached from the in-memory token store on all requests except `/auth/signin` and `/auth/refresh`.
+
+4. **Do NOT send `X-Client-Type` header** — The API checks for `X-Client-Type: native` to distinguish iOS/Android clients. Web clients must NOT send this header. Its absence tells the API to use cookie-based refresh token delivery (the API returns `refresh_token: null` in the JSON body for web clients and sets the token as an httpOnly cookie instead).
+
+5. **Do NOT send `refresh_token` in request bodies** — Web clients rely entirely on the httpOnly cookie for refresh token delivery. The `/auth/refresh` and `/auth/logout` endpoints read the cookie automatically. Sending the token in the body would require JavaScript access to it, which defeats the purpose of httpOnly cookies.
+
+**401 interceptor with refresh queue:**
+
+```typescript
+// Pseudocode — actual implementation in api-client.ts
+
+let refreshPromise: Promise<boolean> | null = null
+
+async function fetchWithAuth(url: string, options?: RequestInit): Promise<Response> {
+  const response = await baseFetch(url, withAuthHeaders(options))
+
+  if (response.status === 401 && !url.includes('/auth/refresh')) {
+    // Deduplicate concurrent refresh attempts with a shared promise
+    if (!refreshPromise) {
+      refreshPromise = attemptRefresh().finally(() => { refreshPromise = null })
+    }
+
+    const refreshed = await refreshPromise
+    if (refreshed) {
+      // Retry the original request with the new access token
+      return baseFetch(url, withAuthHeaders(options))
+    }
+
+    // Refresh failed — clear auth state, redirect to login
+    authStore.clear()
+    window.location.href = '/login'
+  }
+
+  return response
+}
+```
+
+The shared `refreshPromise` acts as a mutex: if three requests all get 401 simultaneously, only one `/auth/refresh` call is made. The other two wait on the same promise and then retry with the new access token.
 
 ### Token Storage Strategy
 
-**httpOnly cookies for refresh token (recommended):**
-- API sets `refresh_token` as `httpOnly; Secure; SameSite=Strict` cookie
-- Access token stored in memory only (AuthProvider state variable)
-- On page refresh: call `POST /auth/refresh` (cookie sent automatically) to get fresh access token
-- XSS-proof: refresh token invisible to JavaScript
+**Refresh token: httpOnly cookie (managed entirely by the API)**
+- The API sets the cookie on `/auth/signin` and `/auth/refresh` responses
+- The API clears the cookie on `/auth/logout` responses
+- JavaScript has zero access to the refresh token — this is the design intent
+- Cookie attributes: `HttpOnly; Secure; SameSite=Strict; Path=/auth; Max-Age=2592000` (30 days)
+- The cookie's `Path=/auth` scope means it is only sent on requests to `/auth/*` endpoints
 
-**Auto-refresh pattern in `client.ts`:**
-- Intercept 401 responses → call `/auth/refresh` → retry original request
-- Request queue prevents concurrent refresh calls
-- If refresh fails → redirect to login
+**Access token: in-memory only (module-scoped variable, NOT React state)**
+- Stored in a module-scoped variable in `auth-store.ts`, not in React state or context
+- This prevents the token from appearing in React DevTools or component tree snapshots
+- The `AuthProvider` reads from this store but does not hold the token as state itself
+- On page refresh / new tab: the token is lost (by design) — a silent `/auth/refresh` call restores it
+- On tab close: the token is gone — the 30-day refresh cookie allows re-authentication
+- NEVER stored in `localStorage`, `sessionStorage`, or cookies — only in JavaScript memory
 
-### Apple Sign-In on Web
+```typescript
+// auth-store.ts — singleton module
+let accessToken: string | null = null
 
-Apple uses a redirect flow (not popup). User goes to Apple, authenticates, Apple POSTs `id_token` back to a callback URL. `AuthCallback.tsx` extracts the token and sends to `POST /auth/signin`.
+export const authStore = {
+  getToken: () => accessToken,
+  setToken: (token: string) => { accessToken = token },
+  clear: () => { accessToken = null },
+}
+```
+
+### Zod Schemas (`zod-schemas.ts`)
+
+Define schemas matching the exact API response shapes from `api/src/auth/schemas.ts` and `api/src/types/index.ts`:
+
+```typescript
+import { z } from 'zod'
+
+export const UserResponseSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email().nullable(),
+  display_name: z.string().nullable(),
+  avatar_url: z.string().url().nullable(),
+})
+
+// Web clients receive refresh_token: null (token is in httpOnly cookie)
+export const AuthResponseSchema = z.object({
+  access_token: z.string().min(1),
+  refresh_token: z.null(),
+  user: UserResponseSchema,
+})
+
+// Web clients receive refresh_token: null on refresh too
+export const TokenResponseSchema = z.object({
+  access_token: z.string().min(1),
+  refresh_token: z.null(),
+})
+
+export const LinkAccountResponseSchema = UserResponseSchema.extend({
+  linked_accounts: z.array(z.object({
+    provider: z.enum(['apple', 'google']),
+    email: z.string().nullable(),
+  })),
+})
+
+export const ApiErrorSchema = z.object({
+  error: z.string(),
+})
+
+export type UserResponse = z.infer<typeof UserResponseSchema>
+export type AuthResponse = z.infer<typeof AuthResponseSchema>
+export type TokenResponse = z.infer<typeof TokenResponseSchema>
+export type LinkAccountResponse = z.infer<typeof LinkAccountResponseSchema>
+```
+
+> **Why `refresh_token: z.null()`?** The API returns `refresh_token: null` in JSON for web clients. The actual refresh token is in the `Set-Cookie` header, invisible to JavaScript. The Zod schema enforces this expectation — if the API ever accidentally sends a non-null token to a web client, the parse will fail and the error will be caught immediately.
+
+### AuthProvider and useAuth Hook
+
+**AuthProvider.tsx** manages:
+- `user: UserResponse | null` — current authenticated user (React state)
+- `isLoading: boolean` — true during initial silent refresh on mount
+- `isAuthenticated: boolean` — derived from `user !== null`
+
+**Initialization flow (on app mount):**
+1. `AuthProvider` mounts with `isLoading = true`
+2. Calls `POST /auth/refresh` with `credentials: 'include'` (cookie sent automatically)
+3. If successful: parse response with `TokenResponseSchema`, store `access_token` in `authStore`, restore cached `UserResponse` from `sessionStorage`
+4. If refresh fails (401): user is not authenticated — set `isLoading = false`, `user = null`
+5. App renders login page or authenticated content based on state
+
+> **Design note:** The initial silent refresh is the ONLY way to restore auth state after a page refresh. There is no user data in `localStorage`. This is a security trade-off: slightly slower initial load (one extra HTTP round-trip) in exchange for zero persistent client-side tokens.
+
+**Problem: `/auth/refresh` does not return user data.** The API's refresh endpoint returns only `{ access_token, refresh_token }` — no user object. Solution:
+
+- **Cache the `UserResponse` in `sessionStorage`** (NOT the tokens — just the user profile: id, email, display_name, avatar_url). On page refresh, do the silent refresh to get a new access token, then use the cached user profile. Cache key: `trackem:user`. Clear on logout.
+- Future: a `GET /auth/me` endpoint can replace this pattern cleanly (Phase 5 candidate).
+
+**useAuth hook:**
+```typescript
+interface AuthContext {
+  user: UserResponse | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  signInWithGoogle: (credential: string) => Promise<void>
+  signInWithApple: (idToken: string, nonce: string, userName?: string) => Promise<void>
+  logout: () => Promise<void>
+}
+```
+
+### TanStack Query Integration
+
+Auth state is NOT managed via TanStack Query. The `AuthProvider` context owns the auth lifecycle (login, refresh, logout) because auth is a side-effect-heavy singleton concern, not a cacheable server query.
+
+TanStack Query IS used for all authenticated API calls after login:
+
+```typescript
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        // Do not retry auth failures — the 401 interceptor handles refresh
+        if (error instanceof ApiError && error.status === 401) return false
+        return failureCount < 3
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+})
+```
+
+On logout, call `queryClient.clear()` to purge all cached data.
 
 ### Google Sign-In on Web
 
-`@react-oauth/google` `GoogleLogin` component → on success, extract `credentialResponse.credential` (the `id_token`) → send to `POST /auth/signin`.
+Use `@react-oauth/google` with the One Tap / button flow (NOT the redirect flow):
+
+1. Wrap app with `<GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>`
+2. Render `<GoogleLogin onSuccess={handleGoogleSuccess} />` on the login page
+3. On success: `credentialResponse.credential` is the `id_token` (a JWT string)
+4. POST to `/auth/signin` with `{ provider: 'google', id_token: credential }` — no `X-Client-Type` header
+5. Parse response with `AuthResponseSchema`
+6. Store `access_token` in `authStore`, cache `user` in `sessionStorage`, set React state
+
+> **No nonce needed for Google** — Google's `id_token` verification validates `aud`, `iss`, and `exp`, which is sufficient.
+
+### Apple Sign-In on Web
+
+Apple Sign-In on web uses a **redirect flow** with `form_post` response mode.
+
+**Setup (`apple-auth.ts`):**
+
+1. Load Apple JS SDK dynamically (to avoid blocking initial page load)
+2. Generate nonce client-side:
+   ```typescript
+   async function generateNonce(): Promise<{ raw: string; hashed: string }> {
+     const bytes = crypto.getRandomValues(new Uint8Array(32))
+     const raw = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
+     const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw))
+     const hashed = Array.from(new Uint8Array(hashBuffer), b => b.toString(16).padStart(2, '0')).join('')
+     return { raw, hashed }
+   }
+   ```
+3. Store `rawNonce` and `state` in `sessionStorage` before redirect
+4. Initialize and trigger:
+   ```typescript
+   AppleID.auth.init({
+     clientId: import.meta.env.VITE_APPLE_SERVICES_ID,
+     scope: 'name email',
+     redirectURI: import.meta.env.VITE_APPLE_REDIRECT_URI,
+     state: crypto.randomUUID(),  // CSRF protection
+     nonce: hashedNonce,
+     usePopup: false,
+   })
+   AppleID.auth.signIn()
+   ```
+
+**Callback handling (`AppleCallback.tsx`):**
+
+Apple POSTs back to the redirect URI with `application/x-www-form-urlencoded` body containing `id_token`, `code`, `state`, and optionally `user` (JSON string, sent only on first authorization).
+
+Since a pure SPA cannot receive Apple's form_post directly, use an API relay approach:
+- The API accepts Apple's callback at `POST /auth/apple-callback`, extracts `id_token` and `user` fields, then redirects to `GET /auth/apple-callback?token=<id_token>&user=<encoded_user>` on the web app
+- The SPA route reads these query params, retrieves `rawNonce` and `state` from `sessionStorage`, validates state (CSRF check), then calls `POST /auth/signin`
+
+**Apple Name Persistence (web):**
+- Store `user.name` from Apple's first-time callback in `sessionStorage`
+- Only clear after receiving a successful `/auth/signin` response that includes a `display_name`
+- If signin fails, the name remains in `sessionStorage` for retry
+
+### Logout Flow
+
+1. Call `POST /auth/logout` with `credentials: 'include'` and `Authorization: Bearer <access_token>`
+   - Do NOT send refresh token in body — the API reads it from the httpOnly cookie
+   - The API clears the cookie in the response
+2. Clear `authStore` (in-memory access token)
+3. Clear `sessionStorage` (cached user profile)
+4. Call `queryClient.clear()` to purge all TanStack Query caches
+5. Navigate to `/login`
+
+If the logout API call fails (e.g., network error), still perform steps 2–5 client-side. The refresh token will expire naturally (30 days).
+
+### Route Protection
+
+Use TanStack Router's layout routes:
+
+```typescript
+// _authenticated.tsx — layout route
+function AuthenticatedLayout() {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) return <LoadingSpinner />
+  if (!isAuthenticated) throw redirect({ to: '/login' })
+
+  return <Outlet />
+}
+```
+
+All routes under `_authenticated/` are protected. `/login` and `/auth/apple-callback` are public.
+
+### Silent Refresh Scheduling
+
+In addition to the reactive 401 interceptor, implement a proactive timer:
+
+```typescript
+function scheduleRefresh(accessToken: string): void {
+  const payload = JSON.parse(atob(accessToken.split('.')[1]))
+  const expiresAt = payload.exp * 1000
+  const refreshAt = expiresAt - 60_000  // 60 seconds before expiry
+  const delay = Math.max(refreshAt - Date.now(), 0)
+
+  refreshTimerId = window.setTimeout(async () => {
+    await attemptRefresh()
+  }, delay)
+}
+```
+
+Cancel the timer on logout.
+
+### Error Handling
+
+```typescript
+class ApiError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly body: { error: string },
+  ) {
+    super(body.error)
+    this.name = 'ApiError'
+  }
+}
+```
+
+| Status | Meaning | Web Client Action |
+|--------|---------|-------------------|
+| 401 | Access token expired/invalid | Silent refresh via interceptor (automatic) |
+| 403 | Account deactivated | Show "account deactivated" message, clear auth state |
+| 409 | Conflict (link-account) | Show provider already linked message |
+| 415 | Content-Type missing | Bug — fix the fetch wrapper |
+| 429 | Rate limited | Show "too many attempts, try again later" |
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_API_URL` | Yes | API base URL (`http://localhost:3000` for dev) |
+| `VITE_GOOGLE_CLIENT_ID` | Yes | Google OAuth Web Client ID |
+| `VITE_APPLE_SERVICES_ID` | Yes | Apple Services ID (web) |
+| `VITE_APPLE_REDIRECT_URI` | Yes | Apple callback URL for form_post redirect |
+
+The `VITE_` prefix is required for Vite to expose these to client-side code. None of these are secrets.
+
+### Implementation Subtasks
+
+1. **Project scaffolding** — Vite + React 19 + TypeScript + Tailwind CSS 4 + Shadcn/ui + TanStack Query + TanStack Router + Zod. Verify `npm run dev` serves on port 5173.
+2. **Zod schemas and API client** — `zod-schemas.ts`, `auth-store.ts`, `api-client.ts` with 401 interceptor and refresh mutex. Unit tests.
+3. **AuthProvider and useAuth** — React context, silent refresh on mount, user caching in `sessionStorage`. Unit tests.
+4. **Google Sign-In** — `@react-oauth/google` integration, LoginPage with Google button, end-to-end flow to AuthProvider. Component tests.
+5. **Apple Sign-In** — Apple JS SDK loader, nonce generation, redirect trigger, `AppleCallback` route. Component tests.
+6. **Route protection** — TanStack Router layout routes, redirect logic. Component tests.
+7. **Logout flow** — Logout button, API call, state cleanup, cache purge. Component tests.
+8. **Silent refresh timer** — Proactive token refresh before expiry. Unit tests.
+9. **E2E tests** — Playwright: full Google and Apple flows, silent refresh on page reload, logout, 401 interceptor retry.
 
 ### Validation
 
-- Component tests with mocked API client
-- Test auto-refresh interceptor (mock 401 → refresh → retry)
-- Playwright E2E: login flow with mocked network layer
+- Unit tests: `auth-store`, `api-client` (interceptor/mutex), Zod schemas, nonce generation
+- Component tests (Vitest + Testing Library): `LoginPage`, `ProtectedRoute`, `AppleCallback`
+- Playwright E2E: login flows with mocked credentials, silent refresh on reload, logout
 
 ---
 

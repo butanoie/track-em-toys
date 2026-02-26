@@ -16,6 +16,9 @@ node_modules/
 # Build output
 api/dist/
 
+# Test coverage
+coverage/
+
 # Environment files — never commit secrets
 .env
 .env.local

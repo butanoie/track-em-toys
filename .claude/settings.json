@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_FILE_PATH\" in */api/src/*.ts) npx --prefix /Users/buta/Repos/track-em-toys/api eslint --no-warn-ignored --max-warnings 0 \"$CLAUDE_FILE_PATH\" 2>&1 | head -60 ;; esac"
+          }
+        ]
+      }
+    ]
+  }
+}

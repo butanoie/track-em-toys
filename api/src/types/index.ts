@@ -20,6 +20,8 @@ export interface OAuthAccount {
   created_at: string
 }
 
+export type ClientType = 'native' | 'web'
+
 export interface RefreshToken {
   id: string
   user_id: string
@@ -27,6 +29,7 @@ export interface RefreshToken {
   device_info: string | null
   expires_at: string
   revoked_at: string | null
+  client_type: ClientType
   created_at: string
 }
 
@@ -45,6 +48,7 @@ export type AuthEventType =
   | 'refresh'
   | 'logout'
   | 'link_account'
+  | 'provider_auto_linked'
   | 'token_reuse_detected'
   | 'account_deactivated'
 
@@ -81,15 +85,17 @@ export interface LinkAccountRequest {
   nonce?: string
 }
 
+/** Response type for sign-in. refresh_token is null for web clients (sent via cookie). */
 export interface AuthResponse {
   access_token: string
-  refresh_token: string
+  refresh_token: string | null
   user: UserResponse
 }
 
+/** Response type for token refresh. refresh_token is null for web clients (sent via cookie). */
 export interface TokenResponse {
   access_token: string
-  refresh_token: string
+  refresh_token: string | null
 }
 
 export interface UserResponse {
@@ -103,6 +109,7 @@ export interface ProviderClaims {
   sub: string
   email: string | null
   email_verified: boolean
-  name?: string | null
-  picture?: string | null
+  name: string | null
+  picture: string | null
+  client_type: ClientType
 }
