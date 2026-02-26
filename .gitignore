@@ -14,7 +14,7 @@ ml/training-data/**/*.png
 node_modules/
 
 # Build output
-api/dist/
+dist/
 
 # Test coverage
 coverage/
@@ -23,6 +23,9 @@ coverage/
 .env
 .env.local
 api/.env
+api/.env.local
+web/.env
+web/.env.local
 
 # Private keys
 *.pem
