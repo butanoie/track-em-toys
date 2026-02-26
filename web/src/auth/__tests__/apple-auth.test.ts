@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi, afterEach, afterAll } from 'vitest'
 import { SESSION_KEYS } from '@/lib/auth-store'
 
 // We test only the nonce generation and session storage behaviour,
@@ -73,6 +73,34 @@ describe('Apple auth session storage', () => {
   })
 })
 
+describe('initiateAppleSignIn — env var guard', () => {
+  afterAll(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('throws when VITE_APPLE_SERVICES_ID is missing', async () => {
+    vi.resetModules()
+    vi.stubEnv('VITE_APPLE_SERVICES_ID', '')
+    vi.stubEnv('VITE_APPLE_REDIRECT_URI', 'https://example.com/callback')
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    await expect(initiateAppleSignIn()).rejects.toThrow(
+      'Apple Sign-In is not configured. Set VITE_APPLE_SERVICES_ID and VITE_APPLE_REDIRECT_URI.'
+    )
+  })
+
+  it('throws when VITE_APPLE_REDIRECT_URI is missing', async () => {
+    vi.resetModules()
+    vi.stubEnv('VITE_APPLE_SERVICES_ID', 'com.example.app')
+    vi.stubEnv('VITE_APPLE_REDIRECT_URI', '')
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    await expect(initiateAppleSignIn()).rejects.toThrow(
+      'Apple Sign-In is not configured. Set VITE_APPLE_SERVICES_ID and VITE_APPLE_REDIRECT_URI.'
+    )
+  })
+})
+
 describe('initiateAppleSignIn', () => {
   it('throws an error when Apple SDK is not loaded', async () => {
     // Ensure AppleID is not on window
@@ -91,5 +119,78 @@ describe('initiateAppleSignIn', () => {
 
     // AppleID will still be undefined after "loading", so it should throw
     await expect(initiateAppleSignIn()).rejects.toThrow('Apple JS SDK not loaded')
+  })
+})
+
+describe('loadAppleSDK deduplication', () => {
+  it('appends only one script element when called concurrently while the SDK is loading', async () => {
+    // Reset the module so sdkLoadPromise starts as null
+    vi.resetModules()
+
+    const windowWithApple = window as Window & { AppleID?: unknown }
+    delete windowWithApple.AppleID
+
+    const appendChildSpy = vi.spyOn(document.head, 'appendChild')
+
+    // Resolve script load only once, after a short delay
+    const scriptResolvers: Array<() => void> = []
+    appendChildSpy.mockImplementation((node) => {
+      const script = node as HTMLScriptElement
+      // Capture resolve so we can trigger it after both calls are in-flight
+      scriptResolvers.push(() => script.onload?.(new Event('load')))
+      return node
+    })
+
+    // Import a fresh module instance after vi.resetModules()
+    const { initiateAppleSignIn } = await import('../apple-auth')
+
+    // Fire two concurrent calls — only one should append a <script>
+    const p1 = initiateAppleSignIn().catch(() => { /* expected: Apple SDK not loaded */ })
+    const p2 = initiateAppleSignIn().catch(() => { /* expected: Apple SDK not loaded */ })
+
+    // Resolve the in-flight script load (only first entry — deduplication means only one was appended)
+    scriptResolvers[0]?.()
+
+    await Promise.allSettled([p1, p2])
+
+    // Only one script should have been appended despite two concurrent calls
+    expect(appendChildSpy.mock.calls.length).toBe(1)
+
+    appendChildSpy.mockRestore()
+  })
+
+  it('resets the in-flight promise on load failure to allow retry', async () => {
+    vi.resetModules()
+
+    const windowWithApple = window as Window & { AppleID?: unknown }
+    delete windowWithApple.AppleID
+
+    const appendChildSpy = vi.spyOn(document.head, 'appendChild')
+    let callCount = 0
+
+    appendChildSpy.mockImplementation((node) => {
+      callCount++
+      const script = node as HTMLScriptElement
+      // First call: simulate onerror; second call: simulate onload
+      if (callCount === 1) {
+        setTimeout(() => script.onerror?.(new Event('error')), 0)
+      } else {
+        setTimeout(() => script.onload?.(new Event('load')), 0)
+      }
+      return node
+    })
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+
+    // First attempt — script fails to load
+    await expect(initiateAppleSignIn()).rejects.toThrow('Failed to load Apple Sign-In SDK')
+    expect(callCount).toBe(1)
+
+    // After failure, sdkLoadPromise should be null, allowing a retry
+    // Second attempt — script loads, but AppleID is still not on window
+    await expect(initiateAppleSignIn()).rejects.toThrow('Apple JS SDK not loaded')
+    expect(callCount).toBe(2)
+
+    appendChildSpy.mockRestore()
   })
 })

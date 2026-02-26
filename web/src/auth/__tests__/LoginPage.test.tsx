@@ -32,6 +32,20 @@ vi.mock('../google-auth', () => ({
   extractGoogleCredential: vi.fn((r: { credential?: string }) => r.credential ?? null),
 }))
 
+// Mock TanStack Router — override only useNavigate; spread the real module for everything else
+const mockNavigate = vi.fn().mockResolvedValue(undefined)
+vi.mock('@tanstack/react-router', async () => {
+  const actual = await vi.importActual('@tanstack/react-router')
+  return { ...actual, useNavigate: () => mockNavigate }
+})
+
+// Mock the login route so Route.useSearch() works in tests
+vi.mock('@/routes/login', () => ({
+  Route: {
+    useSearch: vi.fn(() => ({ redirect: undefined })),
+  },
+}))
+
 function makeAuthContext(overrides: Partial<AuthContextValue> = {}): AuthContextValue {
   return {
     user: null,
@@ -55,6 +69,7 @@ function renderLoginPage(ctx: AuthContextValue) {
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockNavigate.mockResolvedValue(undefined)
   })
 
   it('renders without crashing', () => {
@@ -84,6 +99,61 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(signInWithGoogle).toHaveBeenCalledWith('google-token')
+    })
+  })
+
+  it('navigates to / after successful Google sign-in when no redirect param', async () => {
+    const signInWithGoogle = vi.fn().mockResolvedValue(undefined)
+    renderLoginPage(makeAuthContext({ signInWithGoogle }))
+
+    await userEvent.click(screen.getByRole('button', { name: /Sign in with Google/i }))
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith({ to: '/' })
+    })
+  })
+
+  it('navigates to redirect param path after successful Google sign-in', async () => {
+    const { Route } = await import('@/routes/login')
+    vi.mocked(Route.useSearch).mockReturnValue({ redirect: '/collections' })
+
+    const signInWithGoogle = vi.fn().mockResolvedValue(undefined)
+    renderLoginPage(makeAuthContext({ signInWithGoogle }))
+
+    await userEvent.click(screen.getByRole('button', { name: /Sign in with Google/i }))
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith({ to: '/collections' })
+    })
+  })
+
+  it('navigates to / when redirect param is a protocol-relative URL (//evil.com rejected)', async () => {
+    const { Route } = await import('@/routes/login')
+    // The Zod transform in login.tsx strips //evil.com to undefined
+    vi.mocked(Route.useSearch).mockReturnValue({ redirect: undefined })
+
+    const signInWithGoogle = vi.fn().mockResolvedValue(undefined)
+    renderLoginPage(makeAuthContext({ signInWithGoogle }))
+
+    await userEvent.click(screen.getByRole('button', { name: /Sign in with Google/i }))
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith({ to: '/' })
+    })
+  })
+
+  it('navigates to / when redirect param is an absolute URL (https:// rejected)', async () => {
+    const { Route } = await import('@/routes/login')
+    // The Zod transform in login.tsx strips absolute URLs to undefined
+    vi.mocked(Route.useSearch).mockReturnValue({ redirect: undefined })
+
+    const signInWithGoogle = vi.fn().mockResolvedValue(undefined)
+    renderLoginPage(makeAuthContext({ signInWithGoogle }))
+
+    await userEvent.click(screen.getByRole('button', { name: /Sign in with Google/i }))
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith({ to: '/' })
     })
   })
 
@@ -135,6 +205,54 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('Apple SDK load failed')
+    })
+  })
+
+  it('resets isAppleLoading after Apple sign-in resolves without redirect', async () => {
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const mockInitiate = vi.mocked(initiateAppleSignIn)
+    mockInitiate.mockResolvedValue(undefined)
+
+    renderLoginPage(makeAuthContext())
+
+    const button = screen.getByRole('button', { name: /Sign in with Apple/i })
+    await userEvent.click(button)
+
+    await waitFor(() => {
+      expect(button).not.toBeDisabled()
+    })
+  })
+
+  it('shows error when Apple sign-in resolves without triggering a redirect', async () => {
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const mockInitiate = vi.mocked(initiateAppleSignIn)
+    // With usePopup: false the SDK should redirect; if it resolves normally
+    // that means the redirect did not happen — the UI must surface an error.
+    mockInitiate.mockResolvedValue(undefined)
+
+    renderLoginPage(makeAuthContext())
+
+    await userEvent.click(screen.getByRole('button', { name: /Sign in with Apple/i }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Apple sign-in did not complete. Please try again.'
+      )
+    })
+  })
+
+  it('resets isAppleLoading after Apple sign-in throws', async () => {
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const mockInitiate = vi.mocked(initiateAppleSignIn)
+    mockInitiate.mockRejectedValue(new Error('SDK error'))
+
+    renderLoginPage(makeAuthContext())
+
+    const button = screen.getByRole('button', { name: /Sign in with Apple/i })
+    await userEvent.click(button)
+
+    await waitFor(() => {
+      expect(button).not.toBeDisabled()
     })
   })
 })

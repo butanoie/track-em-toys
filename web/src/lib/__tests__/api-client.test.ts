@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import { z } from 'zod'
 import { ApiError, apiFetch, apiFetchJson } from '../api-client'
 import { authStore } from '../auth-store'
 
@@ -38,11 +39,6 @@ describe('apiFetch', () => {
   beforeEach(() => {
     mockFetch.mockReset()
     authStore.clear()
-    // Reset window.location mock
-    Object.defineProperty(window, 'location', {
-      value: { href: '/' },
-      writable: true,
-    })
   })
 
   afterEach(() => {
@@ -111,20 +107,28 @@ describe('apiFetch', () => {
     expect(mockFetch).toHaveBeenCalledTimes(3)
   })
 
-  it('clears auth and redirects on failed refresh after 401', async () => {
+  it('dispatches auth:sessionexpired event and returns a pending promise on failed refresh after 401', async () => {
     authStore.setToken('expired-token')
-    sessionStorage.setItem('trackem:user', '{"id":"test"}')
 
     // First call returns 401
     mockFetch.mockResolvedValueOnce(makeResponse({ error: 'Unauthorized' }, 401))
     // Refresh call also fails
     mockFetch.mockResolvedValueOnce(makeResponse({ error: 'Unauthorized' }, 401))
 
-    await apiFetch('/api/protected')
+    const eventSpy = vi.fn()
+    window.addEventListener('auth:sessionexpired', eventSpy)
 
-    expect(authStore.getToken()).toBeNull()
-    expect(sessionStorage.getItem('trackem:user')).toBeNull()
-    expect(window.location.href).toBe('/login')
+    // apiFetch must not resolve — it returns a never-resolving promise
+    let resolved = false
+    void apiFetch('/api/protected').then(() => { resolved = true })
+
+    // Wait for both fetch calls to complete
+    await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2))
+
+    expect(eventSpy).toHaveBeenCalledTimes(1)
+    expect(resolved).toBe(false)
+
+    window.removeEventListener('auth:sessionexpired', eventSpy)
   })
 
   it('does NOT refresh on 401 from /auth/refresh (avoids infinite loop)', async () => {
@@ -146,25 +150,25 @@ describe('apiFetchJson', () => {
 
   it('returns parsed JSON on success', async () => {
     mockFetch.mockResolvedValueOnce(makeResponse({ name: 'Toy' }))
-    const result = await apiFetchJson<{ name: string }>('/api/toys/1')
+    const schema = z.object({ name: z.string() })
+    const result = await apiFetchJson('/api/toys/1', schema)
     expect(result).toEqual({ name: 'Toy' })
   })
 
   it('throws ApiError on non-2xx response', async () => {
     mockFetch.mockResolvedValueOnce(makeResponse({ error: 'Not Found' }, 404))
-    await expect(apiFetchJson('/api/toys/999')).rejects.toBeInstanceOf(ApiError)
+    await expect(apiFetchJson('/api/toys/999', z.unknown())).rejects.toBeInstanceOf(ApiError)
   })
 
   it('throws ApiError with correct status and body', async () => {
     mockFetch.mockResolvedValueOnce(makeResponse({ error: 'Forbidden' }, 403))
     try {
-      await apiFetchJson('/api/forbidden')
+      await apiFetchJson('/api/forbidden', z.unknown())
       expect.fail('Should have thrown')
     } catch (err) {
-      expect(err).toBeInstanceOf(ApiError)
-      const apiErr = err as ApiError
-      expect(apiErr.status).toBe(403)
-      expect(apiErr.body.error).toBe('Forbidden')
+      if (!(err instanceof ApiError)) throw err
+      expect(err.status).toBe(403)
+      expect(err.body.error).toBe('Forbidden')
     }
   })
 
@@ -173,13 +177,18 @@ describe('apiFetchJson', () => {
       new Response('Internal Server Error', { status: 500 })
     )
     try {
-      await apiFetchJson('/api/crash')
+      await apiFetchJson('/api/crash', z.unknown())
       expect.fail('Should have thrown')
     } catch (err) {
-      expect(err).toBeInstanceOf(ApiError)
-      const apiErr = err as ApiError
-      expect(apiErr.status).toBe(500)
-      expect(apiErr.body.error).toBe('HTTP 500')
+      if (!(err instanceof ApiError)) throw err
+      expect(err.status).toBe(500)
+      expect(err.body.error).toBe('HTTP 500')
     }
+  })
+
+  it('throws ZodError when response body does not match schema', async () => {
+    mockFetch.mockResolvedValueOnce(makeResponse({ unexpected: 'shape' }))
+    const schema = z.object({ name: z.string() })
+    await expect(apiFetchJson('/api/toys/1', schema)).rejects.toThrow()
   })
 })

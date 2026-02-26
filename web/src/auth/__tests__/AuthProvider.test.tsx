@@ -3,7 +3,20 @@ import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { AuthProvider, AuthContext } from '../AuthProvider'
-import { authStore, SESSION_KEYS } from '@/lib/auth-store'
+import { authStore, refreshTimer, SESSION_KEYS } from '@/lib/auth-store'
+
+// Mock TanStack Router hooks — AuthProvider uses useNavigate and useRouter
+const mockNavigate = vi.fn()
+const mockRouter = {
+  state: {
+    location: { href: '/current-path' },
+  },
+}
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => mockNavigate,
+  useRouter: () => mockRouter,
+}))
 
 // Mock fetch globally
 const mockFetch = vi.fn()
@@ -48,6 +61,8 @@ function TestConsumer() {
 describe('AuthProvider', () => {
   beforeEach(() => {
     mockFetch.mockReset()
+    mockNavigate.mockReset()
+    mockNavigate.mockResolvedValue(undefined)
     authStore.clear()
     sessionStorage.clear()
     // Do NOT use fake timers — they break Promise resolution in jsdom
@@ -253,5 +268,64 @@ describe('AuthProvider', () => {
     })
 
     expect(authStore.getToken()).toBe(jwt)
+  })
+
+  it('does not schedule a refresh timer when the token is already within the 60-second window', async () => {
+    sessionStorage.setItem(SESSION_KEYS.user, JSON.stringify(validUser))
+
+    // Token that expires in 30 seconds — already within the 60s refresh window
+    const nearlyExpiredJwt = makeFakeJwt(30_000)
+    mockFetch.mockResolvedValueOnce(
+      makeResponse({ access_token: nearlyExpiredJwt, refresh_token: null })
+    )
+
+    // Spy on refreshTimer.set to verify it is never called (scheduleRefresh returns early)
+    const timerSetSpy = vi.spyOn(refreshTimer, 'set')
+
+    render(
+      <AuthProvider>
+        <TestConsumer />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading')).toHaveTextContent('false')
+    })
+
+    // refreshTimer.set must NOT have been called — delay === 0, early return
+    expect(timerSetSpy).not.toHaveBeenCalled()
+
+    timerSetSpy.mockRestore()
+  })
+
+  it('clears auth state and navigates to login on auth:sessionexpired event', async () => {
+    sessionStorage.setItem(SESSION_KEYS.user, JSON.stringify(validUser))
+    authStore.setToken('some-token')
+
+    mockFetch.mockResolvedValueOnce(
+      makeResponse({ access_token: makeFakeJwt(), refresh_token: null })
+    )
+
+    render(
+      <AuthProvider>
+        <TestConsumer />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('authenticated')).toHaveTextContent('true')
+    })
+
+    await act(async () => {
+      window.dispatchEvent(new CustomEvent('auth:sessionexpired'))
+    })
+
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('false')
+    expect(authStore.getToken()).toBeNull()
+    expect(sessionStorage.getItem(SESSION_KEYS.user)).toBeNull()
+    expect(mockNavigate).toHaveBeenCalledWith({
+      to: '/login',
+      search: { redirect: '/current-path' },
+    })
   })
 })

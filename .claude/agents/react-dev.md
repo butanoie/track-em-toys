@@ -96,6 +96,131 @@ Every new component or hook must have a corresponding test file covering:
 - Key user interactions
 - Error and loading states
 
+### 8. No `sessionStorage.clear()` — use targeted key removal
+
+```bash
+grep -rn "sessionStorage\.clear()" web/src/ --include="*.ts" --include="*.tsx"
+```
+
+Must return zero results. `sessionStorage.clear()` nukes all keys including third-party SDK state.
+Always use `sessionStorage.removeItem(SESSION_KEYS.keyName)` to remove only owned keys.
+
+### 9. CSRF / security conditionals must fail-closed
+
+```bash
+grep -rn "returnedState && storedState\|nonce && stored" web/src/ --include="*.ts" --include="*.tsx"
+```
+
+Must return zero results. Security checks that gate on `if (a && b && a !== b)` are fail-open: they
+pass silently when either value is absent. Auth parameters (CSRF state, nonces) must use
+fail-closed logic: `if (!a || !b || a !== b) { reject }`.
+
+### Key Pattern
+```typescript
+// WRONG — fail-open: missing state skips the check entirely
+if (returnedState && storedState && returnedState !== storedState) {
+  setError('state mismatch'); return
+}
+
+// CORRECT — fail-closed: missing state is treated as a mismatch
+if (!returnedState || !storedState || returnedState !== storedState) {
+  setError('state mismatch'); return
+}
+```
+
+### 10. No duplicate auth refresh implementations
+
+```bash
+grep -rn "POST.*auth/refresh\|/auth/refresh" web/src/ --include="*.ts" --include="*.tsx" | grep -v "\.test\."
+```
+
+Must return exactly one non-test result (in `api-client.ts`). The token refresh logic — fetch,
+parse `TokenResponseSchema`, call `authStore.setToken()` — must live in a single shared function
+exported from `api-client.ts`. `AuthProvider` and any other consumer must import and call that
+function rather than re-implementing it. Duplicate implementations diverge silently and cannot
+share the refresh mutex, allowing concurrent token exchanges.
+
+### 11. Redirect params must be relative paths — no absolute or protocol-relative URLs
+
+```bash
+grep -rn "location\.href\b" web/src/ --include="*.ts" --include="*.tsx" | grep -v "window\.location\.reload\|\.href\s*="
+```
+
+Review every result. `location.href` is an absolute URL (`https://...`) — passing it as a `redirect`
+search param will fail any `startsWith('/')` validator. Always pass a **relative** path:
+`location.pathname + location.search`. Additionally, validators that use `startsWith('/')` must also
+reject `//` prefixes (protocol-relative open redirect); use `/^\/[^/]/` or URL-parsing instead.
+
+### Key Pattern
+```typescript
+// WRONG — absolute URL breaks redirect, latent open-redirect via //
+throw redirect({ to: '/login', search: { redirect: location.href } })
+
+// CORRECT — relative path only
+throw redirect({ to: '/login', search: { redirect: location.pathname + location.search } })
+
+// WRONG validator — // passes startsWith('/')
+z.string().refine(val => val?.startsWith('/'))
+
+// CORRECT validator — rejects protocol-relative URLs
+z.string().refine(val => /^\/[^/]/.test(val ?? ''))
+```
+
+### 12. Async security tokens must be cleared AFTER the guarded operation succeeds
+
+```bash
+grep -rn "sessionStorage\.removeItem.*nonce\|sessionStorage\.removeItem.*state\|sessionStorage\.removeItem.*apple" web/src/ --include="*.ts" --include="*.tsx"
+```
+
+Review every result. CSRF state and nonces must only be removed **after** the operation they protect
+succeeds. Removing them before the API call means a retry after a transient failure has no state to
+validate against, and a concurrent tab can race on an empty nonce.
+
+### Key Pattern
+```typescript
+// WRONG — cleared before the protected call; retry is impossible on failure
+sessionStorage.removeItem(SESSION_KEYS.appleNonce)
+sessionStorage.removeItem(SESSION_KEYS.appleState)
+await signInWithApple(idToken, rawNonce)   // if this throws, nonce is already gone
+
+// CORRECT — cleared inside try, only after the protected call succeeds
+try {
+  await signInWithApple(idToken, rawNonce)
+  sessionStorage.removeItem(SESSION_KEYS.appleNonce)
+  sessionStorage.removeItem(SESSION_KEYS.appleState)
+} catch (err) { ... }
+```
+
+### 13. Dynamic `<script>` injection must deduplicate via an in-flight promise, not a loaded-object check
+
+```bash
+grep -rn "appendChild.*script\|createElement.*script" web/src/ --include="*.ts" --include="*.tsx"
+```
+
+Every dynamic script injection must be guarded by an in-flight module-scope promise to prevent
+duplicate appends when called concurrently. Checking `window.SDKObject` only prevents re-injection
+**after** the script executes — a second call while the script is still loading will append a
+duplicate `<script>` element.
+
+### Key Pattern
+```typescript
+// WRONG — second call while script loads appends a duplicate
+function loadSDK() {
+  if (window.AppleID) return Promise.resolve()  // only safe after load
+  const script = document.createElement('script')
+  // ...
+}
+
+// CORRECT — share the in-flight promise
+let sdkLoadPromise: Promise<void> | null = null
+function loadSDK(): Promise<void> {
+  if (window.AppleID) return Promise.resolve()
+  if (sdkLoadPromise) return sdkLoadPromise       // deduplicate concurrent calls
+  sdkLoadPromise = new Promise((resolve, reject) => { /* append once */ })
+  return sdkLoadPromise
+}
+```
+
 ---
 
 ## Key Patterns

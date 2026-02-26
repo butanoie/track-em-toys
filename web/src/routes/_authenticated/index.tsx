@@ -9,10 +9,6 @@ export const Route = createFileRoute('/_authenticated/')({
 function Dashboard() {
   const { user, logout } = useAuth()
 
-  async function handleLogout() {
-    await logout()
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
@@ -24,7 +20,7 @@ function Dashboard() {
                 {user.display_name ?? user.email ?? 'Collector'}
               </span>
             )}
-            <Button variant="outline" size="sm" onClick={() => { void handleLogout() }}>
+            <Button variant="outline" size="sm" onClick={() => { void logout() }}>
               Sign out
             </Button>
           </div>

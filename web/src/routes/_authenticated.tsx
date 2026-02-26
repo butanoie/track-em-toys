@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
+import { createFileRoute, redirect, Outlet, useRouterState } from '@tanstack/react-router'
 import { useAuth } from '@/auth/useAuth'
 
 export const Route = createFileRoute('/_authenticated')({
@@ -23,11 +23,15 @@ function LoadingSpinner() {
 
 function AuthenticatedLayout() {
   const { isAuthenticated, isLoading } = useAuth()
+  const location = useRouterState({ select: s => s.location })
 
   if (isLoading) return <LoadingSpinner />
 
   if (!isAuthenticated) {
-    throw redirect({ to: '/login' })
+    throw redirect({
+      to: '/login',
+      search: { redirect: location.href },
+    })
   }
 
   return <Outlet />

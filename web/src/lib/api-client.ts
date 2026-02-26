@@ -1,7 +1,8 @@
+import { z } from 'zod'
 import { authStore } from './auth-store'
 import { ApiErrorSchema, TokenResponseSchema } from './zod-schemas'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+export const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
 export class ApiError extends Error {
   constructor(
@@ -16,7 +17,7 @@ export class ApiError extends Error {
 // Shared refresh mutex — prevents multiple simultaneous refresh calls
 let refreshPromise: Promise<boolean> | null = null
 
-async function attemptRefresh(): Promise<boolean> {
+export async function attemptRefresh(): Promise<boolean> {
   try {
     const response = await fetch(`${API_BASE}/auth/refresh`, {
       method: 'POST',
@@ -92,20 +93,21 @@ export async function apiFetch(url: string, init?: RequestInit): Promise<Respons
       return baseFetch(fullUrl, init)
     }
 
-    // Refresh failed — clear auth state and redirect to login
-    authStore.clear()
-    sessionStorage.clear()
-    window.location.href = '/login'
-    // Return the original 401 response (navigation will happen)
-    return response
+    // Refresh failed — notify AuthProvider via event so it can clear state and
+    // navigate via the SPA router. Return a never-resolving promise so callers
+    // are not handed the 401 response (the page will be replaced by navigation).
+    window.dispatchEvent(new CustomEvent('auth:sessionexpired'))
+    return new Promise<Response>(() => { /* intentionally pending */ })
   }
 
   return response
 }
 
-// Convenience method that throws ApiError on non-2xx responses
+// Convenience method that throws ApiError on non-2xx responses.
+// Requires a Zod schema to validate the response body before returning.
 export async function apiFetchJson<T>(
   url: string,
+  schema: z.ZodType<T>,
   init?: RequestInit,
 ): Promise<T> {
   const response = await apiFetch(url, init)
@@ -123,5 +125,5 @@ export async function apiFetchJson<T>(
   }
 
   const json: unknown = await response.json()
-  return json as T
+  return schema.parse(json)
 }

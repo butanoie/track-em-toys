@@ -1,12 +1,14 @@
 import React, { createContext, useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { authStore, refreshTimer, SESSION_KEYS } from '@/lib/auth-store'
-import { apiFetch, apiFetchJson, ApiError } from '@/lib/api-client'
+import { apiFetch, apiFetchJson, attemptRefresh, ApiError } from '@/lib/api-client'
 import {
+  ApiErrorSchema,
   AuthResponseSchema,
-  TokenResponseSchema,
   UserResponseSchema,
   type UserResponse,
 } from '@/lib/zod-schemas'
+import { z } from 'zod'
 
 export interface AuthContextValue {
   user: UserResponse | null
@@ -45,22 +47,32 @@ function scheduleRefresh(
     if (
       payload === null ||
       typeof payload !== 'object' ||
-      !('exp' in payload) ||
-      typeof (payload as Record<string, unknown>)['exp'] !== 'number'
+      !('exp' in payload)
     ) return
-    const exp = (payload as Record<string, unknown>)['exp'] as number
+    // Extract into a local variable so TypeScript's control-flow narrowing can
+    // confirm the type is `number` without a redundant cast.
+    const expRaw = (payload as Record<string, unknown>)['exp']
+    if (typeof expRaw !== 'number') return
+    const exp = expRaw
 
     const expiresAt = exp * 1000
     const refreshAt = expiresAt - 60_000 // 60 seconds before expiry
     const delay = Math.max(refreshAt - Date.now(), 0)
 
+    // Skip proactive scheduling when the token is already expired or within
+    // the refresh window — the reactive 401 interceptor handles these cases.
+    if (delay === 0) return
+
     const timerId = window.setTimeout(() => {
       void onRefresh()
-    }, delay) as unknown as number
+    }, delay)
 
     refreshTimer.set(timerId)
   } catch {
-    // Non-fatal: proactive refresh won't fire, reactive 401 interceptor will handle it
+    // Non-fatal: proactive refresh won't fire, reactive 401 interceptor will handle it.
+    if (import.meta.env.DEV) {
+      console.warn('[AuthProvider] scheduleRefresh: could not parse JWT exp claim — proactive refresh disabled')
+    }
   }
 }
 
@@ -74,49 +86,59 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
   const [isLoading, setIsLoading] = useState(true)
   const queryClientClearRef = useRef(queryClientClear)
   queryClientClearRef.current = queryClientClear
-
-  const doRefresh = useCallback(async (): Promise<boolean> => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL ?? 'http://localhost:3000'}/auth/refresh`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        },
-      )
-      if (!response.ok) return false
-
-      const json: unknown = await response.json()
-      const parsed = TokenResponseSchema.parse(json)
-      authStore.setToken(parsed.access_token)
-      return true
-    } catch {
-      return false
-    }
-  }, [])
+  const navigate = useNavigate()
+  const router = useRouter()
 
   const handleRefreshCycle = useCallback(async () => {
     refreshTimer.cancel()
-    const refreshed = await doRefresh()
+    const refreshed = await attemptRefresh()
     if (refreshed) {
       const token = authStore.getToken()
       if (token) {
         scheduleRefresh(token, handleRefreshCycle)
       }
+      // Re-read from sessionStorage so that in-memory React state stays in sync
+      // with the cache. A proper GET /auth/me call should replace this once that
+      // endpoint exists (Phase 5).
+      const cached = getCachedUser()
+      // Compare by id only — UUID is the stable identity key. Serialising the
+      // entire object on every refresh cycle would be wasteful.
+      setUser(prev => {
+        if (prev?.id === cached?.id) return prev
+        return cached
+      })
     } else {
       authStore.clear()
       sessionStorage.removeItem(SESSION_KEYS.user)
       setUser(null)
     }
-  }, [doRefresh])
+  }, [])
+
+  // Listen for session-expired events dispatched by the api-client 401 interceptor.
+  // Using a DOM event decouples api-client from AuthProvider and preserves the
+  // SPA router state (no hard navigation).
+  useEffect(() => {
+    function handleSessionExpired() {
+      refreshTimer.cancel()
+      authStore.clear()
+      sessionStorage.removeItem(SESSION_KEYS.user)
+      queryClientClearRef.current?.()
+      setUser(null)
+      void navigate({
+        to: '/login',
+        search: { redirect: router.state.location.href },
+      })
+    }
+    window.addEventListener('auth:sessionexpired', handleSessionExpired)
+    return () => window.removeEventListener('auth:sessionexpired', handleSessionExpired)
+  }, [navigate, router])
 
   // Silent refresh on mount
   useEffect(() => {
     let cancelled = false
 
     async function init() {
-      const refreshed = await doRefresh()
+      const refreshed = await attemptRefresh()
       if (cancelled) return
 
       if (refreshed) {
@@ -127,6 +149,12 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
           scheduleRefresh(token, handleRefreshCycle)
         }
       }
+      // Fail-closed: if the refresh failed (network error, expired cookie, etc.)
+      // we deliberately do NOT restore the cached user from sessionStorage.
+      // Showing cached user data without a valid live token would mislead the UI
+      // into rendering protected content with no authenticated session backing it.
+      // The 401 interceptor and the auth:sessionexpired event handle the case
+      // where a request is later made with an in-memory token that has expired.
       setIsLoading(false)
     }
 
@@ -134,8 +162,9 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
 
     return () => {
       cancelled = true
+      refreshTimer.cancel()
     }
-  }, [doRefresh, handleRefreshCycle])
+  }, [handleRefreshCycle])
 
   const signInWithGoogle = useCallback(async (credential: string): Promise<void> => {
     const response = await apiFetch('/auth/signin', {
@@ -144,9 +173,10 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
     })
 
     if (!response.ok) {
-      const json: unknown = await response.json()
-      const err = json as { error?: string }
-      throw new ApiError(response.status, { error: err.error ?? `HTTP ${response.status}` })
+      const raw: unknown = await response.json()
+      const errParsed = ApiErrorSchema.safeParse(raw)
+      const errorMsg = errParsed.success ? errParsed.data.error : `HTTP ${response.status}`
+      throw new ApiError(response.status, { error: errorMsg })
     }
 
     const json: unknown = await response.json()
@@ -180,9 +210,10 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
     })
 
     if (!response.ok) {
-      const json: unknown = await response.json()
-      const err = json as { error?: string }
-      throw new ApiError(response.status, { error: err.error ?? `HTTP ${response.status}` })
+      const raw: unknown = await response.json()
+      const errParsed = ApiErrorSchema.safeParse(raw)
+      const errorMsg = errParsed.success ? errParsed.data.error : `HTTP ${response.status}`
+      throw new ApiError(response.status, { error: errorMsg })
     }
 
     const json: unknown = await response.json()
@@ -200,13 +231,13 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
 
   const logout = useCallback(async (): Promise<void> => {
     try {
-      await apiFetchJson('/auth/logout', { method: 'POST' })
+      await apiFetchJson('/auth/logout', z.unknown(), { method: 'POST' })
     } catch {
       // Always clear client-side state even if API call fails
     } finally {
       refreshTimer.cancel()
       authStore.clear()
-      sessionStorage.clear()
+      sessionStorage.removeItem(SESSION_KEYS.user)
       queryClientClearRef.current?.()
       setUser(null)
     }
@@ -214,7 +245,11 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
 
   const value: AuthContextValue = {
     user,
-    isAuthenticated: user !== null,
+    // Also treat a live token as authenticated to avoid a brief flash where
+    // the token is valid but user state hasn't been hydrated into React yet.
+    // When isLoading is still true the protected route shows a spinner rather
+    // than redirecting, so this signal is only acted upon once loading is done.
+    isAuthenticated: user !== null || authStore.getToken() !== null,
     isLoading,
     signInWithGoogle,
     signInWithApple,

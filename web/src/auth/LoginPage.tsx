@@ -4,11 +4,15 @@ import { initiateAppleSignIn } from './apple-auth'
 import { useAuth } from './useAuth'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { Route } from '@/routes/login'
 
 export function LoginPage() {
   const { signInWithGoogle } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [isAppleLoading, setIsAppleLoading] = useState(false)
+  const navigate = useNavigate()
+  const { redirect: redirectTo } = Route.useSearch()
 
   async function handleGoogleSuccess(response: CredentialResponse) {
     setError(null)
@@ -19,6 +23,7 @@ export function LoginPage() {
     }
     try {
       await signInWithGoogle(credential)
+      await navigate({ to: redirectTo ?? '/' })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Google sign-in failed.'
       setError(message)
@@ -34,9 +39,15 @@ export function LoginPage() {
     setIsAppleLoading(true)
     try {
       await initiateAppleSignIn()
+      // With usePopup: false the SDK triggers a full-page redirect and this line
+      // is never reached under normal circumstances. If it is reached, the redirect
+      // did not happen — surface an error so the user is not left confused with a
+      // silently re-enabled button and no feedback.
+      setError('Apple sign-in did not complete. Please try again.')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Apple sign-in failed.'
       setError(message)
+    } finally {
       setIsAppleLoading(false)
     }
   }

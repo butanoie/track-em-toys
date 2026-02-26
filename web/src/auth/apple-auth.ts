@@ -23,17 +23,29 @@ interface AppleIDAuthConfig {
 
 const APPLE_SDK_URL = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js'
 
-async function loadAppleSDK(): Promise<void> {
-  if (window.AppleID) return
+// Tracks the in-flight SDK load so concurrent calls share the same promise
+// and only one <script> element is ever appended.
+let sdkLoadPromise: Promise<void> | null = null
 
-  return new Promise((resolve, reject) => {
+function loadAppleSDK(): Promise<void> {
+  if (window.AppleID) return Promise.resolve()
+  if (sdkLoadPromise) return sdkLoadPromise   // deduplicate concurrent calls
+  sdkLoadPromise = new Promise<void>((resolve, reject) => {
     const script = document.createElement('script')
     script.src = APPLE_SDK_URL
     script.async = true
+    // Apple does not publish versioned SRI hashes for their JS SDK, so a full
+    // `integrity` attribute is not possible. The recommended mitigation is a
+    // strict CSP: script-src 'self' https://appleid.cdn-apple.com
+    script.crossOrigin = 'anonymous'
     script.onload = () => resolve()
-    script.onerror = () => reject(new Error('Failed to load Apple JS SDK'))
+    script.onerror = () => {
+      sdkLoadPromise = null  // allow retry on load failure
+      reject(new Error('Failed to load Apple Sign-In SDK'))
+    }
     document.head.appendChild(script)
   })
+  return sdkLoadPromise
 }
 
 async function generateNonce(): Promise<{ raw: string; hashed: string }> {
@@ -51,6 +63,14 @@ async function generateNonce(): Promise<{ raw: string; hashed: string }> {
 }
 
 export async function initiateAppleSignIn(): Promise<void> {
+  const clientId = import.meta.env.VITE_APPLE_SERVICES_ID as string | undefined
+  const redirectURI = import.meta.env.VITE_APPLE_REDIRECT_URI as string | undefined
+  if (!clientId || !redirectURI) {
+    throw new Error(
+      'Apple Sign-In is not configured. Set VITE_APPLE_SERVICES_ID and VITE_APPLE_REDIRECT_URI.'
+    )
+  }
+
   await loadAppleSDK()
 
   const { raw, hashed } = await generateNonce()
@@ -60,21 +80,25 @@ export async function initiateAppleSignIn(): Promise<void> {
   sessionStorage.setItem(SESSION_KEYS.appleNonce, raw)
   sessionStorage.setItem(SESSION_KEYS.appleState, state)
 
-  const clientId = import.meta.env.VITE_APPLE_SERVICES_ID
-  const redirectURI = import.meta.env.VITE_APPLE_REDIRECT_URI
-
   if (!window.AppleID) {
     throw new Error('Apple JS SDK not loaded')
   }
 
   window.AppleID.auth.init({
-    clientId,
+    clientId: clientId,
     scope: 'name email',
-    redirectURI,
+    redirectURI: redirectURI,
     state,
     nonce: hashed,
     usePopup: false,
   })
 
-  await window.AppleID.auth.signIn()
+  try {
+    await window.AppleID.auth.signIn()
+  } catch (err) {
+    // Clean up stale nonce/state so they don't persist on error
+    sessionStorage.removeItem(SESSION_KEYS.appleNonce)
+    sessionStorage.removeItem(SESSION_KEYS.appleState)
+    throw err
+  }
 }
