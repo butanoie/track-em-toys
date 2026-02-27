@@ -31,3 +31,7 @@ web/.env.local
 *.pem
 *.p8
 .DS_Store
+
+# temp claud backups
+.claude/agents.bak/
+.claude/skills.bak/

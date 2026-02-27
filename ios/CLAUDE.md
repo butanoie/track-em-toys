@@ -1,34 +1,20 @@
----
-name: ios-dev
-description: Swift and SwiftUI implementation for the Track'em Toys iOS app
-model: sonnet
-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__xcodebuild__*
----
+# iOS — Domain-Specific Rules
 
-You are an expert iOS developer working on Track'em Toys.
-
-Tech stack: Swift 6, SwiftUI, SwiftData, CloudKit, Core ML, AVFoundation
-Architecture: MVVM with @Observable. Shared Swift Package: TrackEmToysDataKit.
-Project path: ios/track-em-toys/
-
-Rules:
-- Use async/await, never completion handlers or @escaping closures for new code
-- Use SwiftUI only — no UIKit/AppKit unless forced by a framework
-- Use SF Symbols for all icons
-- NEVER modify .pbxproj files directly — use folder references (blue folders)
-- New Swift files go in ios/track-em-toys/ — auto-detected by Xcode
-- Minimum deployment: iOS 17, macOS 14
-- Swift 6 strict concurrency: all @Observable classes that touch UI must be @MainActor
+> Supplements the root `CLAUDE.md`. Rules here are additive — the root file's iOS section still applies.
 
 ## Before Writing New Code
 
 Read the nearest existing file for patterns before writing anything new:
 - New view → read an existing view in the same feature area
 - New @Observable model → read an existing @Observable class
-- New SwiftData model → read packages/TrackEmToysDataKit/ for shared model structures
+- New SwiftData model → read `packages/TrackEmToysDataKit/` for shared model structures
 - New ML integration → read existing VNCoreMLRequest usage in the app
 
 Match existing patterns exactly. Do not introduce new conventions.
+
+## File Placement
+
+New Swift files go in `ios/track-em-toys/`. Xcode uses folder references (blue folders) which are auto-detected -- no `.pbxproj` edit needed.
 
 ---
 
@@ -55,7 +41,7 @@ All tests must pass. New functionality must have corresponding tests.
 ### 3. No UIKit imports
 
 ```bash
-grep -rn "import UIKit\|import AppKit" ios/track-em-toys/ --include="*.swift" | grep -v "Preview"
+grep -rn "import UIKit\|import AppKit" track-em-toys/ --include="*.swift" | grep -v "Preview"
 ```
 
 Must return zero results unless UIKit is explicitly required by a third-party framework.
@@ -63,7 +49,7 @@ Must return zero results unless UIKit is explicitly required by a third-party fr
 ### 4. No completion handlers in new code
 
 ```bash
-grep -rn "@escaping.*->.*Void\|completionHandler:" ios/track-em-toys/ --include="*.swift"
+grep -rn "@escaping.*->.*Void\|completionHandler:" track-em-toys/ --include="*.swift"
 ```
 
 Review every result. New code must use async/await. Existing code in untouched files is acceptable.
@@ -71,30 +57,21 @@ Review every result. New code must use async/await. Existing code in untouched f
 ### 5. No force unwraps on user-facing data
 
 ```bash
-grep -n "!\." ios/track-em-toys/ --include="*.swift" -r
+grep -n "!\." track-em-toys/ --include="*.swift" -r
 ```
 
 Review every result. Force unwraps on optionals from user data, network responses, or SwiftData
 queries are not acceptable. Use `guard let`, `if let`, or `??` instead.
 
-### 6. No .pbxproj modifications
+### 6. @MainActor on Observable classes
 
 ```bash
-git diff --name-only | grep "\.pbxproj"
+grep -n "@Observable" track-em-toys/ --include="*.swift" -r -A 1
 ```
 
-Must return zero results. Never modify .pbxproj files directly.
+Every `@Observable` class that reads or writes state used by SwiftUI views must be `@MainActor`.
 
-### 7. @MainActor on Observable classes
-
-```bash
-grep -n "@Observable" ios/track-em-toys/ --include="*.swift" -r -A 1
-```
-
-Every `@Observable` class that reads or writes `@Published`-equivalent state used by SwiftUI
-views must be `@MainActor`. Verify each result has `@MainActor` on the class declaration.
-
-### 8. New views have preview providers
+### 7. New views have preview providers
 
 Every new SwiftUI view must include a `#Preview` block so it renders in Xcode canvas.
 
