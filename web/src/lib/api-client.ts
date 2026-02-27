@@ -22,9 +22,13 @@ export async function attemptRefresh(): Promise<boolean> {
     const response = await fetch(`${API_BASE}/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
+      // Empty body: the refresh token comes from the httpOnly cookie.
+      // An explicit {} body + Content-Type is required so Fastify's AJV schema
+      // validation (type: 'object') passes. A truly body-less POST results in
+      // request.body = undefined, which fails AJV validation with 400 before
+      // the route handler can read the cookie.
+      body: '{}',
     })
 
     if (!response.ok) {

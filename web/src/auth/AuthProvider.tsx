@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
-import { authStore, refreshTimer, SESSION_KEYS } from '@/lib/auth-store'
+import { authStore, refreshTimer, sessionFlag, SESSION_KEYS } from '@/lib/auth-store'
 import { apiFetch, apiFetchJson, attemptRefresh, ApiError } from '@/lib/api-client'
 import {
   ApiErrorSchema,
@@ -108,6 +108,7 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
         return cached
       })
     } else {
+      sessionFlag.clear()
       authStore.clear()
       sessionStorage.removeItem(SESSION_KEYS.user)
       setUser(null)
@@ -120,6 +121,7 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
   useEffect(() => {
     function handleSessionExpired() {
       refreshTimer.cancel()
+      sessionFlag.clear()
       authStore.clear()
       sessionStorage.removeItem(SESSION_KEYS.user)
       queryClientClearRef.current?.()
@@ -138,6 +140,15 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
     let cancelled = false
 
     async function init() {
+      // JavaScript cannot read httpOnly cookies, so we use a localStorage flag
+      // to avoid an unconditional POST /auth/refresh on every page load. If the
+      // flag is absent the user has never signed in (or explicitly logged out) —
+      // skip the round-trip and render the login page immediately.
+      if (!sessionFlag.check()) {
+        setIsLoading(false)
+        return
+      }
+
       const refreshed = await attemptRefresh()
       if (cancelled) return
 
@@ -148,6 +159,10 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
         if (token) {
           scheduleRefresh(token, handleRefreshCycle)
         }
+      } else {
+        // Refresh failed — session expired or revoked. Clear the flag so the
+        // next page load skips the round-trip and shows the login page immediately.
+        sessionFlag.clear()
       }
       // Fail-closed: if the refresh failed (network error, expired cookie, etc.)
       // we deliberately do NOT restore the cached user from sessionStorage.
@@ -184,6 +199,7 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
 
     authStore.setToken(parsed.access_token)
     cacheUser(parsed.user)
+    sessionFlag.set()
     setUser(parsed.user)
 
     refreshTimer.cancel()
@@ -223,6 +239,7 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
     cacheUser(parsed.user)
     // Clear Apple-specific session storage now that we have user data
     sessionStorage.removeItem(SESSION_KEYS.appleUserName)
+    sessionFlag.set()
     setUser(parsed.user)
 
     refreshTimer.cancel()
@@ -236,6 +253,7 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
       // Always clear client-side state even if API call fails
     } finally {
       refreshTimer.cancel()
+      sessionFlag.clear()
       authStore.clear()
       sessionStorage.removeItem(SESSION_KEYS.user)
       queryClientClearRef.current?.()

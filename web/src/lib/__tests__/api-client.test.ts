@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { z } from 'zod'
-import { ApiError, apiFetch, apiFetchJson } from '../api-client'
+import { ApiError, apiFetch, apiFetchJson, attemptRefresh } from '../api-client'
 import { authStore } from '../auth-store'
 
 // Mock fetch globally
@@ -32,6 +32,56 @@ describe('ApiError', () => {
     const err = new ApiError(403, { error: 'Forbidden' })
     expect(err).toBeInstanceOf(Error)
     expect(err).toBeInstanceOf(ApiError)
+  })
+})
+
+describe('attemptRefresh', () => {
+  beforeEach(() => {
+    mockFetch.mockReset()
+    authStore.clear()
+  })
+
+  it('returns true and sets token on successful refresh', async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeResponse({ access_token: 'new-token', refresh_token: null }),
+    )
+    const result = await attemptRefresh()
+    expect(result).toBe(true)
+    expect(authStore.getToken()).toBe('new-token')
+  })
+
+  it('returns false on non-2xx response', async () => {
+    mockFetch.mockResolvedValueOnce(makeResponse({ error: 'Missing refresh token' }, 401))
+    const result = await attemptRefresh()
+    expect(result).toBe(false)
+  })
+
+  it('returns false on network error', async () => {
+    mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    const result = await attemptRefresh()
+    expect(result).toBe(false)
+  })
+
+  it('sends Content-Type: application/json and empty body so AJV schema validation passes', async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeResponse({ access_token: 'tok', refresh_token: null }),
+    )
+    await attemptRefresh()
+    const callArgs = mockFetch.mock.calls[0] as [string, RequestInit | undefined]
+    const init = callArgs[1]
+    // Must include Content-Type: application/json so Fastify's AJV body validation
+    // accepts the request (type: 'object' fails for undefined body)
+    expect(init?.headers).toMatchObject({ 'Content-Type': 'application/json' })
+    expect(init?.body).toBe('{}')
+  })
+
+  it('sends credentials: include', async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeResponse({ access_token: 'tok', refresh_token: null }),
+    )
+    await attemptRefresh()
+    const callArgs = mockFetch.mock.calls[0] as [string, RequestInit | undefined]
+    expect(callArgs[1]).toMatchObject({ credentials: 'include' })
   })
 })
 
