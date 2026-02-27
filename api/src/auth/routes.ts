@@ -4,9 +4,9 @@ import { verifyAppleToken, isPrivateRelayEmail } from './apple.js'
 import { verifyGoogleToken } from './google.js'
 import { hashToken, createAndStoreRefreshToken, rotateRefreshToken } from './tokens.js'
 import { signinSchema, refreshSchema, logoutSchema, linkAccountSchema } from './schemas.js'
-import { REFRESH_TOKEN_COOKIE, setRefreshTokenCookie, clearRefreshTokenCookie } from './cookies.js'
+import { REFRESH_TOKEN_COOKIE, setRefreshTokenCookie, clearRefreshTokenCookie, readSignedCookie } from './cookies.js'
 import { isNetworkError, ProviderVerificationError, HttpError } from './errors.js'
-import type { FastifyInstance, FastifyRequest, FastifyBaseLogger } from 'fastify'
+import type { FastifyInstance, FastifyRequest, FastifyReply, FastifyBaseLogger } from 'fastify'
 import type {
   User,
   SigninRequest,
@@ -63,51 +63,35 @@ function isUserPayload(user: unknown): user is { sub: string } {
 }
 
 /**
- * Return the sanitized User-Agent string truncated to the device_info column width
- * (refresh_tokens.device_info VARCHAR(255)). Used when storing the agent string as
- * device_info on a refresh token row. For the wider audit log column
- * (auth_events.user_agent VARCHAR(512)) use getRawUserAgent instead — a UA between
- * 256–511 chars will be silently truncated here but stored in full by getRawUserAgent.
+ * Strip control characters, trim whitespace, and truncate a User-Agent string
+ * to `maxLength`. Returns null when the header is absent or empty after sanitization.
+ *
+ * @param request - Fastify request object
+ * @param maxLength - Column width to truncate to
+ */
+function sanitizeUserAgent(request: FastifyRequest, maxLength: number): string | null {
+  const ua = request.headers['user-agent']
+  if (typeof ua !== 'string') return null
+  // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
+  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, maxLength) || null
+}
+
+/**
+ * Return the sanitized User-Agent truncated to refresh_tokens.device_info VARCHAR(255).
  *
  * @param request - Fastify request object
  */
 function getUserAgent(request: FastifyRequest): string | null {
-  const ua = request.headers['user-agent']
-  if (typeof ua !== 'string') return null
-  // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
-  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_DEVICE_INFO_LENGTH) || null
+  return sanitizeUserAgent(request, MAX_DEVICE_INFO_LENGTH)
 }
 
 /**
- * Return the sanitized User-Agent string truncated to the audit log column width
- * (auth_events.user_agent VARCHAR(512)). This is wider than the device_info column
- * (refresh_tokens.device_info VARCHAR(255)) so a UA between 256–511 chars is stored
- * in full in the audit log rather than silently truncated.
+ * Return the sanitized User-Agent truncated to auth_events.user_agent VARCHAR(512).
  *
  * @param request - Fastify request object
  */
 function getRawUserAgent(request: FastifyRequest): string | null {
-  const ua = request.headers['user-agent']
-  if (typeof ua !== 'string') return null
-  // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
-  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_AUDIT_USER_AGENT_LENGTH) || null
-}
-
-/**
- * Read and verify a signed cookie atomically. Returns the unsign result when
- * the cookie is present, or null when the cookie is absent entirely.
- * Callers must check `.valid === true` before using `.value`.
- *
- * @param request - Fastify request object
- * @param name - Cookie name to read
- */
-function readSignedCookie(
-  request: FastifyRequest,
-  name: string,
-): ReturnType<FastifyRequest['unsignCookie']> | null {
-  // wire-format value (s:value.hmac) — must ONLY be passed to unsignCookie(), never used directly
-  const wireFormatCookie = request.cookies[name]
-  return wireFormatCookie !== undefined ? request.unsignCookie(wireFormatCookie) : null
+  return sanitizeUserAgent(request, MAX_AUDIT_USER_AGENT_LENGTH)
 }
 
 async function verifyProviderToken(
@@ -120,6 +104,40 @@ async function verifyProviderToken(
     return verifyAppleToken(idToken, nonce)
   }
   return verifyGoogleToken(idToken)
+}
+
+/**
+ * Verify a provider token, returning the claims on success or sending an
+ * error reply (401 / 503) and returning null on expected failure. Re-throws
+ * unknown errors so the global error handler returns 500.
+ *
+ * @param provider - OAuth provider name
+ * @param idToken - The provider's id_token
+ * @param nonce - Optional nonce (required for Apple)
+ * @param log - Fastify logger for infrastructure errors
+ * @param reply - Fastify reply to send error responses on
+ */
+async function verifyProviderTokenOrReply(
+  provider: OAuthProvider,
+  idToken: string,
+  nonce: string | undefined,
+  log: FastifyBaseLogger,
+  reply: FastifyReply,
+): Promise<ProviderClaims | null> {
+  try {
+    return await verifyProviderToken(provider, idToken, nonce)
+  } catch (err) {
+    if (err instanceof ProviderVerificationError) {
+      reply.code(401).send({ error: 'Invalid provider token' })
+      return null // reply already sent; callers check `if (!claims) return`
+    }
+    if (isNetworkError(err)) {
+      log.error({ err }, 'Provider token verification infrastructure error')
+      reply.code(503).send({ error: 'Authentication service unavailable' })
+      return null // reply already sent; callers check `if (!claims) return`
+    }
+    throw err
+  }
 }
 
 /**
@@ -381,22 +399,18 @@ async function resolveOrCreateUser(
 function extractRefreshToken(
   request: FastifyRequest,
 ): { token: string } | { statusCode: number; error: string } {
-  // request.body is typed as unknown on the base FastifyRequest; the generic
-  // Body type is only available inside the typed route handler. The defensive
-  // check here is intentional: this helper is shared across /refresh and /logout
-  // (both have a Body type) but also called in logout which passes FastifyRequest
-  // without a Body generic, so we must guard before casting.
+  // Extract refresh_token from the request body with defensive guards.
+  // request.body is typed as unknown on the base FastifyRequest; this helper is
+  // shared across /refresh and /logout so we must guard before accessing properties.
   const body = request.body
-  // Verify both key existence AND that the value is a string to prevent
-  // a client sending { "refresh_token": 42 } from passing a non-string into hashToken.
-  const rawBodyToken =
-    typeof body === 'object' &&
-    body !== null &&
-    'refresh_token' in body &&
-    // body typed as unknown on base FastifyRequest; typeof guard above confirms both object shape and string type
-    typeof (body as Record<string, unknown>).refresh_token === 'string'
-      ? (body as Record<string, unknown>).refresh_token as string // safe: typeof guard above confirmed string
-      : null
+  let rawBodyToken: string | null = null
+  if (typeof body === 'object' && body !== null && 'refresh_token' in body) {
+    // body typed as unknown on base FastifyRequest; typeof guard above confirms object shape
+    const candidate = (body as Record<string, unknown>).refresh_token
+    if (typeof candidate === 'string') {
+      rawBodyToken = candidate
+    }
+  }
   // readSignedCookie atomically reads and verifies the HMAC of the signed cookie.
   // Cookies are stored in `s:value.hmac` wire format by @fastify/cookie when
   // signed:true is set; unsignCookie() strips the prefix and verifies the HMAC.
@@ -409,6 +423,30 @@ function extractRefreshToken(
   const token = rawBodyToken ?? cookieToken
   if (!token) return { statusCode: 401, error: 'Missing refresh token' }
   return { token }
+}
+
+/**
+ * Sign a JWT access token after a successful transaction. Throws a plain Error
+ * (not HttpError) on failure so the global error handler can redact the message
+ * in production.
+ *
+ * @param reply - Fastify reply (carries the jwtSign method)
+ * @param userId - The user's UUID to embed as `sub`
+ * @param log - Logger for recording signing failures
+ * @param operation - Human-readable label for the log message (e.g. "signin", "refresh")
+ */
+async function signAccessToken(
+  reply: FastifyReply,
+  userId: string,
+  log: FastifyBaseLogger,
+  operation: string,
+): Promise<string> {
+  try {
+    return await reply.jwtSign({ sub: userId })
+  } catch (signErr) {
+    log.error({ err: signErr }, `JWT signing failed after successful ${operation}`)
+    throw new Error('Token signing failed', { cause: signErr })
+  }
 }
 
 /**
@@ -456,21 +494,8 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
       const rawUa = getRawUserAgent(request)
       const safeName = user_info?.name ? sanitizeDisplayName(user_info.name) : null
 
-      let claims: ProviderClaims
-      try {
-        claims = await verifyProviderToken(provider, id_token, nonce)
-      } catch (err) {
-        if (err instanceof ProviderVerificationError) {
-          return reply.code(401).send({ error: 'Invalid provider token' })
-        }
-        if (isNetworkError(err)) {
-          fastify.log.error({ err }, 'Provider token verification infrastructure error')
-          return reply.code(503).send({ error: 'Authentication service unavailable' })
-        }
-        // Unknown error (e.g. TypeError inside the provider SDK) — re-throw so the
-        // global setErrorHandler returns 500 rather than masking it as 503.
-        throw err
-      }
+      const claims = await verifyProviderTokenOrReply(provider, id_token, nonce, fastify.log, reply)
+      if (!claims) return
 
       const clientType = claims.client_type
 
@@ -503,17 +528,8 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
         }
       })
 
-      // JWT signing happens after transaction COMMIT — decoupled from DB lifecycle.
-      // Throw a plain Error (not HttpError) so the global error handler can redact the
-      // message in production. HttpError bypasses the isDev redaction check and is
-      // semantically for inside-transaction use only.
-      let accessToken: string
-      try {
-        accessToken = await reply.jwtSign({ sub: txResult.userId })
-      } catch (signErr) {
-        fastify.log.error({ err: signErr }, 'JWT signing failed after successful signin')
-        throw new Error('Token signing failed', { cause: signErr })
-      }
+      // JWT signing happens after transaction COMMIT — decoupled from DB lifecycle
+      const accessToken = await signAccessToken(reply, txResult.userId, fastify.log, 'signin')
 
       if (clientType === 'native') {
         // Native clients (iOS/Android): token in body, no cookie
@@ -652,17 +668,8 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
         return reply.code(401).send({ error: 'Token reuse detected' })
       }
 
-      // JWT signing happens after transaction COMMIT.
-      // Throw a plain Error (not HttpError) so the global error handler can redact the
-      // message in production. HttpError bypasses the isDev redaction check and is
-      // semantically for inside-transaction use only.
-      let accessToken: string
-      try {
-        accessToken = await reply.jwtSign({ sub: txResult.userId })
-      } catch (signErr) {
-        fastify.log.error({ err: signErr }, 'JWT signing failed after successful refresh')
-        throw new Error('Token signing failed', { cause: signErr })
-      }
+      // JWT signing happens after transaction COMMIT — decoupled from DB lifecycle
+      const accessToken = await signAccessToken(reply, txResult.userId, fastify.log, 'refresh')
 
       if (txResult.clientType === 'native') {
         // Native clients: token in body, no cookie
@@ -783,21 +790,8 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
         return reply.code(401).send({ error: 'Unauthorized' })
       }
 
-      let claims: ProviderClaims
-      try {
-        claims = await verifyProviderToken(provider, id_token, nonce)
-      } catch (err) {
-        if (err instanceof ProviderVerificationError) {
-          return reply.code(401).send({ error: 'Invalid provider token' })
-        }
-        if (isNetworkError(err)) {
-          fastify.log.error({ err }, 'Provider token verification infrastructure error')
-          return reply.code(503).send({ error: 'Authentication service unavailable' })
-        }
-        // Unknown error (e.g. TypeError inside the provider SDK) — re-throw so the
-        // global setErrorHandler returns 500 rather than masking it as 503.
-        throw err
-      }
+      const claims = await verifyProviderTokenOrReply(provider, id_token, nonce, fastify.log, reply)
+      if (!claims) return
 
       const result = await withTransaction(async (client) => {
         // TOCTOU note: the findOAuthAccount + userHasProvider pre-checks below run without

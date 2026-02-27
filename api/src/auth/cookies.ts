@@ -1,4 +1,4 @@
-import type { FastifyReply } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { config } from '../config.js'
 import { REFRESH_TOKEN_EXPIRY_DAYS } from './tokens.js'
 
@@ -41,4 +41,21 @@ export function clearRefreshTokenCookie(reply: CookieReply): void {
     path: '/auth',
     signed: true,
   })
+}
+
+/**
+ * Read and verify a signed cookie atomically. Returns the unsign result when
+ * the cookie is present, or null when the cookie is absent entirely.
+ * Callers must check `.valid === true` before using `.value`.
+ *
+ * @param request - Fastify request object
+ * @param name - Cookie name to read
+ */
+export function readSignedCookie(
+  request: FastifyRequest,
+  name: string,
+): ReturnType<FastifyRequest['unsignCookie']> | null {
+  // wire-format value (s:value.hmac) — must ONLY be passed to unsignCookie(), never used directly
+  const wireFormatCookie = request.cookies[name]
+  return wireFormatCookie !== undefined ? request.unsignCookie(wireFormatCookie) : null
 }

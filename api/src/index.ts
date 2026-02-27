@@ -7,7 +7,7 @@ import { pool } from './db/pool.js'
  * Build the Fastify server, register graceful-shutdown signal handlers, and
  * begin listening on the configured port. Throws if buildServer() fails.
  */
-export async function main() {
+export async function main(): Promise<void> {
   const server = await buildServer()
 
   if (config.nodeEnv !== 'development' && config.nodeEnv !== 'test' && !config.secureCookies) {
@@ -58,7 +58,7 @@ export async function main() {
  *
  * Exported so it can be tested directly without triggering the entry-point guard.
  */
-export async function startup() {
+export async function startup(): Promise<void> {
   try {
     await main()
   } catch (err) {

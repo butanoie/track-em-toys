@@ -69,6 +69,15 @@ function optionalBool(name: string, fallback: boolean): boolean {
   return value === 'true'
 }
 
+function optionalInt(name: string, fallback: number, min: number, max: number): number {
+  const raw = optional(name, String(fallback))
+  const n = parseInt(raw, 10)
+  if (isNaN(n) || n < min || n > max) {
+    throw new Error(`${name} must be a number between ${min} and ${max}, got: ${raw}`)
+  }
+  return n
+}
+
 function loadCorsOrigin(): string {
   const origin = optional('CORS_ORIGIN', 'http://localhost:5173')
   if (origin === '*') {
@@ -84,11 +93,7 @@ function loadCorsOrigin(): string {
 const ACCESS_TOKEN_EXPIRY = '15m' as const
 
 /** Application configuration loaded from environment variables. */
-const rawPort = optional('PORT', '3000')
-const parsedPort = parseInt(rawPort, 10)
-if (isNaN(parsedPort) || parsedPort < 1 || parsedPort > 65535) {
-  throw new Error(`PORT must be a valid port number (1–65535), got: ${rawPort}`)
-}
+const parsedPort = optionalInt('PORT', 3000, 1, 65535)
 
 export const config = {
   port: parsedPort,
@@ -104,12 +109,7 @@ export const config = {
   database: {
     url: required('DATABASE_URL'),
     sslCa: optionalPem('DATABASE_SSL_CA'),
-    poolMax: (() => {
-      const raw = optional('DB_POOL_MAX', '20')
-      const n = parseInt(raw, 10)
-      if (isNaN(n) || n < 1 || n > 1000) throw new Error(`DB_POOL_MAX must be a number between 1 and 1000, got: ${raw}`)
-      return n
-    })(),
+    poolMax: optionalInt('DB_POOL_MAX', 20, 1, 1000),
   },
 
   jwt: {

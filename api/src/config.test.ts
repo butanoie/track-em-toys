@@ -173,21 +173,21 @@ describe('config', () => {
     it('throws when PORT=abc is not a valid port number', async () => {
       vi.stubEnv('PORT', 'abc')
       await expect(import('./config.js')).rejects.toThrow(
-        'PORT must be a valid port number (1–65535), got: abc',
+        'PORT must be a number between 1 and 65535, got: abc',
       )
     })
 
     it('throws when PORT=0 is out of range', async () => {
       vi.stubEnv('PORT', '0')
       await expect(import('./config.js')).rejects.toThrow(
-        'PORT must be a valid port number (1–65535), got: 0',
+        'PORT must be a number between 1 and 65535, got: 0',
       )
     })
 
     it('throws when PORT=65536 exceeds max', async () => {
       vi.stubEnv('PORT', '65536')
       await expect(import('./config.js')).rejects.toThrow(
-        'PORT must be a valid port number (1–65535), got: 65536',
+        'PORT must be a number between 1 and 65535, got: 65536',
       )
     })
 
