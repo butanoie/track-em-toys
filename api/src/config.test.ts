@@ -8,6 +8,13 @@ const BASE_ENV: Record<string, string> = {
   JWT_PUBLIC_KEY: '-----BEGIN PUBLIC KEY-----\ntest\n-----END PUBLIC KEY-----',
   JWT_KEY_ID: 'test-key-id',
   COOKIE_SECRET: 'a'.repeat(32), // exactly 32 characters — minimum valid length
+  APPLE_TEAM_ID: 'ABCDE12345',
+  APPLE_KEY_ID: 'FGHIJ67890',
+  APPLE_PRIVATE_KEY: '-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----',
+  APPLE_BUNDLE_ID: 'com.example.trackemtoys',
+  APPLE_SERVICES_ID: 'com.example.trackemtoys.web',
+  GOOGLE_WEB_CLIENT_ID: 'test-web.apps.googleusercontent.com',
+  GOOGLE_IOS_CLIENT_ID: 'test-ios.apps.googleusercontent.com',
 }
 
 describe('config', () => {
@@ -264,6 +271,59 @@ describe('config', () => {
       vi.stubEnv('DB_POOL_MAX', '1000')
       const { config } = await import('./config.js')
       expect(config.database.poolMax).toBe(1000)
+    })
+  })
+
+  describe('Apple Sign-In required variables', () => {
+    it.each([
+      'APPLE_TEAM_ID',
+      'APPLE_KEY_ID',
+      'APPLE_PRIVATE_KEY',
+      'APPLE_BUNDLE_ID',
+      'APPLE_SERVICES_ID',
+    ])('throws when %s is missing', async (varName) => {
+      vi.stubEnv(varName, '')
+      await expect(import('./config.js')).rejects.toThrow(
+        `Missing required environment variable: ${varName}`,
+      )
+    })
+
+    it('replaces literal \\n sequences in APPLE_PRIVATE_KEY with real newlines', async () => {
+      const pemWithLiteralNewlines =
+        '-----BEGIN PRIVATE KEY-----\\nABCDEFG\\n-----END PRIVATE KEY-----'
+      vi.stubEnv('APPLE_PRIVATE_KEY', pemWithLiteralNewlines)
+      const { config } = await import('./config.js')
+      expect(config.apple.privateKey).toContain('\n')
+      expect(config.apple.privateKey).not.toContain('\\n')
+      expect(config.apple.privateKey).toBe(
+        '-----BEGIN PRIVATE KEY-----\nABCDEFG\n-----END PRIVATE KEY-----',
+      )
+    })
+
+    it('resolves all Apple config values when present', async () => {
+      const { config } = await import('./config.js')
+      expect(config.apple.teamId).toBe('ABCDE12345')
+      expect(config.apple.keyId).toBe('FGHIJ67890')
+      expect(config.apple.bundleId).toBe('com.example.trackemtoys')
+      expect(config.apple.servicesId).toBe('com.example.trackemtoys.web')
+    })
+  })
+
+  describe('Google Sign-In required variables', () => {
+    it.each([
+      'GOOGLE_WEB_CLIENT_ID',
+      'GOOGLE_IOS_CLIENT_ID',
+    ])('throws when %s is missing', async (varName) => {
+      vi.stubEnv(varName, '')
+      await expect(import('./config.js')).rejects.toThrow(
+        `Missing required environment variable: ${varName}`,
+      )
+    })
+
+    it('resolves all Google config values when present', async () => {
+      const { config } = await import('./config.js')
+      expect(config.google.webClientId).toBe('test-web.apps.googleusercontent.com')
+      expect(config.google.iosClientId).toBe('test-ios.apps.googleusercontent.com')
     })
   })
 })

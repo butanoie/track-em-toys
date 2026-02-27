@@ -24,18 +24,18 @@ These rules are ABSOLUTE:
 ## Project Overview
 Toy collection catalog & pricing app for serious collectors.
 Monorepo with four components: ios/, api/, web/, ml/
-Plus shared Swift Package: packages/TrackEmToysDataKit/
+Plus shared Swift Package: packages/TrackEmToysDataKit/ (not yet created)
 
 ## IDE Setup
 - VS Code: Primary IDE for api/, web/, docs/, ml/ (workspace: track-em-toys.code-workspace)
-- Xcode: iOS-only (ios/ and packages/TrackEmToysDataKit/)
+- Xcode: iOS-only (ios/ and packages/TrackEmToysDataKit/ when created)
 - Claude Code: Runs in VS Code integrated terminal or standalone
 
 ## Architecture
 - iOS/macOS: Swift 6, SwiftUI, SwiftData + CloudKit sync, MVVM w/ @Observable
 - Web: React 19 + TypeScript, Shadcn/ui, Tailwind CSS 4, TanStack Query
 - Backend: Node.js 22 LTS, Fastify 5, TypeScript, PostgreSQL 17, ES256 JWT
-- ML: Core ML + Create ML, transfer learning image classification (~7 MB models)
+- ML: Core ML + Create ML, transfer learning image classification (≤ 10 MB models)
 
 ## Data Architecture
 - PostgreSQL: Shared catalog (no user_id) + private collections (user_id + RLS)
@@ -52,7 +52,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - All: conventional commits with scope (ios, web, api, ml, shared, infra)
 
 ## Build Commands
-- iOS: xcodebuild -scheme track-em-toys -destination 'platform=iOS Simulator,name=iPhone 16'
+- iOS: xcodebuild -scheme track-em-toys -destination 'platform=iOS Simulator,name=iPhone 16' build
 - Build (API): cd api && npm run build
 - API: cd api && npm run dev
 - Web: cd web && npm run dev

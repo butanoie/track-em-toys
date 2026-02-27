@@ -4,7 +4,7 @@
 
 ## Rules
 
-- Target model size: ≤ 10 MB (~7 MB with transfer learning). Monitor with `du -sh models/*.mlmodel`.
+- Target model size: ≤ 10 MB (typically ~7 MB with transfer learning). Monitor with `du -sh models/*.mlmodel`.
 - All inference runs on-device via Core ML — no server-side ML calls
 - Training scripts must be idempotent and reproducible
 - Training data lives in `training-data/` (labeled folders), model output in `models/`
@@ -13,7 +13,7 @@
 
 Read existing files for patterns before writing anything new:
 - New training script → read `TRAINING.md` for pipeline conventions
-- New iOS ML integration → read existing VNCoreMLRequest usage in `ios/track-em-toys/`
+- New iOS ML integration → read existing VNCoreMLRequest usage in `ios/track-em-toys/` (when iOS app is created)
 - Model evaluation → check `models/` for existing evaluation outputs
 
 ---
@@ -87,7 +87,11 @@ func classifyToy(image: CVPixelBuffer) async throws -> String {
             continuation.resume(returning: result.identifier)
         }
         let handler = VNImageRequestHandler(cvPixelBuffer: image)
-        try? handler.perform([request])
+        do {
+            try handler.perform([request])
+        } catch {
+            continuation.resume(throwing: error)
+        }
     }
 }
 ```

@@ -122,15 +122,15 @@ export const config = {
   },
 
   apple: {
-    teamId: optionalOrUndefined('APPLE_TEAM_ID'), // Reserved for future server-side Apple API calls
-    keyId: optionalOrUndefined('APPLE_KEY_ID'), // Reserved for future server-side Apple API calls
-    privateKey: optionalOrUndefined('APPLE_PRIVATE_KEY'), // Reserved for future server-side Apple API calls
-    bundleId: optionalOrUndefined('APPLE_BUNDLE_ID'),
-    servicesId: optionalOrUndefined('APPLE_SERVICES_ID'),
+    teamId: required('APPLE_TEAM_ID'),
+    keyId: required('APPLE_KEY_ID'),
+    privateKey: requiredPem('APPLE_PRIVATE_KEY'),
+    bundleId: required('APPLE_BUNDLE_ID'),
+    servicesId: required('APPLE_SERVICES_ID'),
   },
 
   google: {
-    webClientId: optionalOrUndefined('GOOGLE_WEB_CLIENT_ID'),
-    iosClientId: optionalOrUndefined('GOOGLE_IOS_CLIENT_ID'),
+    webClientId: required('GOOGLE_WEB_CLIENT_ID'),
+    iosClientId: required('GOOGLE_IOS_CLIENT_ID'),
   },
 } as const

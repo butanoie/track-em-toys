@@ -7,7 +7,7 @@
 Read the nearest existing file for patterns before writing anything new:
 - New view → read an existing view in the same feature area
 - New @Observable model → read an existing @Observable class
-- New SwiftData model → read `packages/TrackEmToysDataKit/` for shared model structures
+- New SwiftData model → read `packages/TrackEmToysDataKit/` for shared model structures (when created)
 - New ML integration → read existing VNCoreMLRequest usage in the app
 
 Match existing patterns exactly. Do not introduce new conventions.
@@ -118,4 +118,20 @@ func fetchToy(id: UUID, completion: @escaping (Toy?) -> Void) {
 @Query(sort: \Toy.name) var toys: [Toy]
 
 // WRONG — raw ModelContext.fetch in a view body
+```
+
+### CloudKit + SwiftData constraints
+- All SwiftData model attributes must be optional when using CloudKit sync (CloudKit requirement)
+- `ModelConfiguration` must specify the CloudKit container identifier
+- CloudKit container ID is configured in the app's entitlements — do not modify entitlements manually
+- Unique constraints are not supported with CloudKit sync — use application-level deduplication
+
+### SF Symbols for icons
+```swift
+// CORRECT — use SF Symbols
+Image(systemName: "star.fill")
+Label("Favorites", systemImage: "heart.fill")
+
+// WRONG — custom image assets for standard icons
+Image("custom-star-icon")
 ```
