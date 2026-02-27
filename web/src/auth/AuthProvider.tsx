@@ -88,6 +88,12 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
   queryClientClearRef.current = queryClientClear
   const navigate = useNavigate()
   const router = useRouter()
+  // Refs keep the session-expired handler stable (registered once) while
+  // always reading the latest navigate/router values at call time.
+  const navigateRef = useRef(navigate)
+  navigateRef.current = navigate
+  const routerRef = useRef(router)
+  routerRef.current = router
 
   const handleRefreshCycle = useCallback(async () => {
     refreshTimer.cancel()
@@ -126,14 +132,14 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
       sessionStorage.removeItem(SESSION_KEYS.user)
       queryClientClearRef.current?.()
       setUser(null)
-      void navigate({
+      void navigateRef.current({
         to: '/login',
-        search: { redirect: router.state.location.href },
+        search: { redirect: routerRef.current.state.location.href },
       })
     }
     window.addEventListener('auth:sessionexpired', handleSessionExpired)
     return () => window.removeEventListener('auth:sessionexpired', handleSessionExpired)
-  }, [navigate, router])
+  }, []) // stable: registered once, refs provide current values
 
   // Silent refresh on mount
   useEffect(() => {

@@ -63,8 +63,8 @@ async function generateNonce(): Promise<{ raw: string; hashed: string }> {
 }
 
 export async function initiateAppleSignIn(): Promise<void> {
-  const clientId = import.meta.env.VITE_APPLE_SERVICES_ID as string | undefined
-  const redirectURI = import.meta.env.VITE_APPLE_REDIRECT_URI as string | undefined
+  const clientId: string | undefined = import.meta.env.VITE_APPLE_SERVICES_ID || undefined
+  const redirectURI: string | undefined = import.meta.env.VITE_APPLE_REDIRECT_URI || undefined
   if (!clientId || !redirectURI) {
     throw new Error(
       'Apple Sign-In is not configured. Set VITE_APPLE_SERVICES_ID and VITE_APPLE_REDIRECT_URI.'

@@ -58,8 +58,12 @@ export function AppleCallback() {
         return
       }
 
-      // Retrieve raw nonce stored before redirect
-      const rawNonce = sessionStorage.getItem(SESSION_KEYS.appleNonce) ?? ''
+      // Retrieve raw nonce stored before redirect — fail-closed like state above
+      const rawNonce = sessionStorage.getItem(SESSION_KEYS.appleNonce)
+      if (!rawNonce) {
+        setErrorMessage('Sign-in session expired. Please try again.')
+        return
+      }
 
       // Parse optional user name (only provided on first Apple sign-in)
       let userName: string | undefined

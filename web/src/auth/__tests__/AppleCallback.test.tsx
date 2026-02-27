@@ -58,6 +58,7 @@ describe('AppleCallback', () => {
     mockSearchData['token'] = 'test-id-token'
     mockSearchData['state'] = state
     sessionStorage.setItem(SESSION_KEYS.appleState, state)
+    sessionStorage.setItem(SESSION_KEYS.appleNonce, 'test-nonce')
 
     // Make signInWithApple hang indefinitely
     const signInWithApple = vi.fn(() => new Promise<void>(() => {}))
@@ -170,6 +171,24 @@ describe('AppleCallback', () => {
     })
   })
 
+  it('shows session expired error when nonce is missing (fail-closed)', async () => {
+    const state = 'test-state'
+    mockSearchData['token'] = 'apple-id-token'
+    mockSearchData['state'] = state
+    sessionStorage.setItem(SESSION_KEYS.appleState, state)
+    // No nonce in sessionStorage
+
+    const ctx = makeAuthContext()
+
+    await act(async () => {
+      renderAppleCallback(ctx)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Sign-in session expired. Please try again.')
+    })
+  })
+
   it('calls signInWithApple with token and raw nonce when state matches', async () => {
     const rawNonce = 'raw-nonce-value'
     const state = 'test-state'
@@ -195,6 +214,7 @@ describe('AppleCallback', () => {
     mockSearchData['token'] = 'apple-id-token'
     mockSearchData['state'] = state
     sessionStorage.setItem(SESSION_KEYS.appleState, state)
+    sessionStorage.setItem(SESSION_KEYS.appleNonce, 'test-nonce')
 
     const signInWithApple = vi.fn().mockResolvedValue(undefined)
     const ctx = makeAuthContext({ signInWithApple })
@@ -213,6 +233,7 @@ describe('AppleCallback', () => {
     mockSearchData['token'] = 'apple-id-token'
     mockSearchData['state'] = state
     sessionStorage.setItem(SESSION_KEYS.appleState, state)
+    sessionStorage.setItem(SESSION_KEYS.appleNonce, 'test-nonce')
     const signInWithApple = vi.fn().mockRejectedValue(new Error('Auth failed'))
     const ctx = makeAuthContext({ signInWithApple })
 

@@ -7,7 +7,7 @@
 Read existing files for patterns before writing anything new:
 - New component → read an existing component in the same feature area
 - New API call → read existing TanStack Query hooks in the nearest `hooks/` directory
-- New form → read an existing React Hook Form + Zod form component
+- New form → read an existing Zod-validated form component (React Hook Form is not yet installed)
 - New route → read the router configuration file first
 
 Match existing patterns exactly. Do not introduce new conventions.
@@ -145,7 +145,9 @@ function ToyList() {
 }
 ```
 
-### Form with React Hook Form + Zod
+### Form with React Hook Form + Zod (planned — not yet installed)
+> `react-hook-form` and `@hookform/resolvers` are NOT in `package.json` yet.
+> Install them before using this pattern: `npm install react-hook-form @hookform/resolvers`
 ```tsx
 const schema = z.object({ name: z.string().min(1), year: z.number().int() })
 type FormData = z.infer<typeof schema>
