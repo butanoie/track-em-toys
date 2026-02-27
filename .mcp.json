@@ -12,9 +12,9 @@
       "command": "npx",
       "args": ["-y", "xcodebuildmcp@latest", "mcp"]
     },
-    "xcode": {
-      "command": "xcrun",
-      "args": ["mcpbridge"]
+    "deepl": {
+      "command": "./scripts/mcp-launcher.sh",
+      "args": ["deepl"]
     }
   }
 }
