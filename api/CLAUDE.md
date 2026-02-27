@@ -64,10 +64,12 @@ Must return zero results. Always use explicit column lists matching the TypeScri
 ### 6. Signed cookie reads
 
 ```bash
-grep -n "request\.cookies\[" src/auth/routes.ts
+grep -n "request\.cookies\[" src/auth/routes.ts | grep -v "wireFormatCookie"
 ```
 
-Must return zero results. Always read via `request.unsignCookie()`.
+Must return zero results. The only `request.cookies[` read must be inside the
+`readSignedCookie` helper (which wraps `request.unsignCookie()`). All route handlers
+must use the helper, never read cookies directly.
 
 ### 7. Type assertions in production code
 
@@ -75,8 +77,10 @@ Must return zero results. Always read via `request.unsignCookie()`.
 grep -rn " as [A-Z]" src/ --include="*.ts" | grep -v "\.test\.ts" | grep -v "eslint-disable"
 ```
 
-Every result is a cast without the required `eslint-disable-next-line` comment explaining why.
-`as const` and `satisfies` are fine.
+Every result must have either a preceding runtime type guard (`typeof`, `instanceof`,
+`.includes()`) or an `eslint-disable-next-line` comment explaining why the cast is safe.
+`as const` and `satisfies` are fine. `as Record<string, unknown>` after a `typeof === 'object'`
+check is the approved narrowing pattern.
 
 ```bash
 grep -rn "as unknown as\|as never" src/ --include="*.ts"
@@ -133,7 +137,7 @@ When adding a union value, verify the DB constraint includes it.
 ### 13. User-supplied string sanitization
 
 ```bash
-grep -rn "\.replace.*\\\\x00.*\.slice" src/ --include="*.ts"
+grep -rEn "\.replace\(/\[.*x00" src/ --include="*.ts" | grep -v "\.test\.ts"
 ```
 
 Every result must follow: `.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, maxLen) || null`.
@@ -147,9 +151,10 @@ Functions storing user-controlled data must apply this chain internally, not rel
 grep -rn "\.slice(0," src/ --include="*.ts" | grep -v "\.test\.ts"
 ```
 
-Every `.slice(0, N)` on user-supplied data must use a named constant referencing the column
-(e.g. `MAX_DEVICE_INFO_LENGTH = 255` for `refresh_tokens.device_info VARCHAR(255)`).
-Verify `N` matches the DB column width in `db/schema.sql`.
+Every `.slice(0, N)` on user-supplied data stored to a DB column must use a named constant
+referencing the column (e.g. `MAX_DEVICE_INFO_LENGTH = 255` for `refresh_tokens.device_info
+VARCHAR(255)`). Verify `N` matches the DB column width in `db/schema.sql`.
+Log-prefix extractions like `tokenHash.slice(0, 8)` are exempt (not column truncation).
 
 Same source value stored in two columns must be truncated per-destination.
 
@@ -189,7 +194,7 @@ Related duration constants must be derived from a single source constant.
 ### 19. Route response schemas — bidirectional accuracy
 
 ```bash
-grep -oP "code\(\d+\)|HttpError\(\d+" src/auth/routes.ts | grep -oP "\d+" | sort -u
+grep -oE "code\([0-9]+\)|HttpError\([0-9]+" src/auth/routes.ts | grep -oE "[0-9]+" | sort -u
 ```
 
 Every status code the handler produces must have a schema entry, and vice versa.
@@ -199,7 +204,7 @@ Every status code the handler produces must have a schema entry, and vice versa.
 Every new route handler must have `fastify.inject()` tests covering:
 - Happy path, auth failure (401/403), validation failure (400), key error paths
 - Each distinct conditional branch (e.g. new user vs. existing user)
-- Non-fatal audit log failure (mock `logAuthEvent` to throw, assert success + `log.warn`/`log.error`)
+- Non-fatal audit log failure (mock `logAuthEvent` to throw, assert success + `log.error`)
 - Network error 503 for every `isNetworkError` check
 
 ### 21. Security-critical audit logging
@@ -208,8 +213,9 @@ Every new route handler must have `fastify.inject()` tests covering:
 grep -n "log\.warn.*audit\|log\.warn.*logAuthEvent\|log\.warn.*reuse\|log\.warn.*takeover" src/auth/routes.ts
 ```
 
-Must return zero results for security events. Security events (`token_reuse_detected`,
-`account_deactivated`) must use `log.error`, not `log.warn`.
+Must return zero results. All auth-event audit log failures use `log.error`, not `log.warn`.
+This covers every `logAuthEvent` catch block: `signin`, `refresh`, `logout`, `link_account`,
+`provider_auto_linked`, `token_reuse_detected`. No auth audit catch block should use `log.warn`.
 
 ### 22. URL sanitization for storage
 
@@ -233,10 +239,11 @@ not `string`. Validate at startup.
 ### 24. Rate limiting on all routes
 
 ```bash
-grep -rn "fastify\.\(get\|post\|put\|delete\|patch\)" src/ --include="*.ts" | grep -v "config.*rateLimit"
+grep -rEn "fastify\.(get|post|put|delete|patch)" src/ --include="*.ts"
 ```
 
-Every route must have `config: { rateLimit: { max: N, timeWindow: '1 minute' } }`.
+Every route listed must have `config: { rateLimit: { max: N, timeWindow: '1 minute' } }` in
+its options object (may be on a different line — verify manually for each result).
 Auth routes: 5-20 req/min. Public reads: up to 100 req/min.
 
 ### 25. email_verified upgrade path
@@ -251,7 +258,7 @@ confirms the email.
 ### 26. Test non-null assertions must have a preceding expect
 
 ```bash
-grep -rn "\w\+!\." src/ --include="*.test.ts"
+grep -rEn "\w+!\." src/ --include="*.test.ts"
 ```
 
 Every `x!.field` must be preceded by `expect(x).toBeDefined()` or equivalent.
@@ -262,19 +269,21 @@ Every `x!.field` must be preceded by `expect(x).toBeDefined()` or equivalent.
 for f in src/**/*.ts; do [[ "$f" == *.test.ts ]] && continue; t="${f%.ts}.test.ts"; [[ ! -f "$t" ]] && echo "MISSING TEST: $t"; done
 ```
 
+Type-only files (`src/types/index.ts`) and schema-only files (`src/auth/schemas.ts`) are exempt —
+types have no runtime behavior to test, and schemas are exercised through route handler tests.
+
 ---
 
 ## Key Patterns
 
 ### Signed cookie reads
 ```typescript
-// CORRECT
-const raw = request.cookies[COOKIE_NAME]
-const unsigned = raw ? request.unsignCookie(raw) : null
+// CORRECT — use the readSignedCookie helper in route handlers
+const unsigned = readSignedCookie(request, COOKIE_NAME)
 if (unsigned !== null && !unsigned.valid) return reply.code(401).send({ error: 'Invalid token' })
 const value = unsigned?.value ?? null
 
-// WRONG — returns raw s:value.hmac wire format
+// WRONG — bypasses the helper and reads the raw s:value.hmac wire format
 const value = request.cookies[COOKIE_NAME]
 ```
 
@@ -350,11 +359,14 @@ return input.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, maxLen) || null
 
 ### Audit / logging — severity levels
 ```typescript
-// Security event → log.error
-fastify.log.error({ err, user_id }, 'Failed to record token reuse')
+// All auth audit log failures → log.error with event_type in message (security events)
+// Message includes event_type for fast identification and uses "will commit" (still inside transaction)
+fastify.log.error({ err: auditErr }, 'audit log failed for signin — signin will commit')
+fastify.log.error({ err: auditErr }, 'audit log failed for refresh — token rotation will commit')
+fastify.log.error({ err: auditErr }, 'audit log failed for logout — token revocation will commit')
 
-// Operational event → log.warn
-request.log.warn({ err }, 'Failed to log signin event')
+// Operational diagnostic (not an audit catch block) → log.warn
+request.log.warn({ tokenHashPrefix, userId }, 'Logout: refresh token not found in database')
 ```
 
 ### Test mocks — no double cast

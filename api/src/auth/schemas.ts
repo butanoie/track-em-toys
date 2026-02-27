@@ -176,8 +176,6 @@ export const linkAccountSchema = {
     400: errorResponse,
     // 401: JWT missing/invalid, or invalid provider token
     401: errorResponse,
-    // 403: token does not belong to the authenticated user
-    403: errorResponse,
     // 409: provider account already linked to this or another user
     409: errorResponse,
     // 415: wrong Content-Type

@@ -651,7 +651,7 @@ describe('auth routes', () => {
         expect(errorSpy).toHaveBeenCalledWith(
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
           expect.objectContaining({ err: expect.any(Error) }),
-          expect.stringContaining('audit log failed'),
+          expect.stringContaining('audit log failed for provider_auto_linked'),
         )
 
         errorSpy.mockRestore()
@@ -940,7 +940,8 @@ describe('auth routes', () => {
     })
 
     // [M-1] Audit log failure is non-fatal — main operation still returns 200
-    it('should return 200 and warn when logAuthEvent rejects during signin', async () => {
+    // signin is a security event, so the catch block uses log.error (not log.warn)
+    it('should return 200 and log.error when logAuthEvent rejects during signin', async () => {
       vi.mocked(verifyGoogleToken).mockResolvedValue(googleClaims)
       mockTx()
       vi.mocked(queries.findOAuthAccountWithUser).mockResolvedValue({
@@ -949,7 +950,7 @@ describe('auth routes', () => {
       })
       vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('audit db down'))
 
-      const warnSpy = vi.spyOn(server.log, 'warn')
+      const errorSpy = vi.spyOn(server.log, 'error')
 
       const response = await server.inject({
         method: 'POST',
@@ -960,13 +961,13 @@ describe('auth routes', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(warnSpy).toHaveBeenCalledWith(
+      expect(errorSpy).toHaveBeenCalledWith(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
         expect.objectContaining({ err: expect.any(Error) }),
-        expect.stringContaining('audit log failed'),
+        expect.stringContaining('audit log failed for signin'),
       )
 
-      warnSpy.mockRestore()
+      errorSpy.mockRestore()
     })
 
     // [T1] Apple provider missing nonce field → should return 401
@@ -1505,7 +1506,9 @@ describe('auth routes', () => {
     })
 
     // [M-1] Audit log failure is non-fatal — refresh still returns 200
-    it('should return 200 and warn when logAuthEvent rejects during refresh', async () => {
+    // refresh is a security-relevant event — audit log failure uses log.error (not log.warn)
+    // to ensure it surfaces in security monitoring (consistent with signin audit treatment)
+    it('should return 200 and log.error when logAuthEvent rejects during refresh', async () => {
       const rawToken = crypto.randomBytes(32).toString('hex')
       mockTx()
       vi.mocked(queries.findRefreshTokenForRotation).mockResolvedValue({
@@ -1519,7 +1522,7 @@ describe('auth routes', () => {
       vi.mocked(queries.createRefreshToken).mockResolvedValue(mockRefreshToken)
       vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('audit db down'))
 
-      const warnSpy = vi.spyOn(server.log, 'warn')
+      const errorSpy = vi.spyOn(server.log, 'error')
 
       const response = await server.inject({
         method: 'POST',
@@ -1530,13 +1533,13 @@ describe('auth routes', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(warnSpy).toHaveBeenCalledWith(
+      expect(errorSpy).toHaveBeenCalledWith(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
         expect.objectContaining({ err: expect.any(Error) }),
-        expect.stringContaining('audit log failed'),
+        expect.stringContaining('audit log failed for refresh'),
       )
 
-      warnSpy.mockRestore()
+      errorSpy.mockRestore()
     })
 
     // [M-3] Fail-closed: revokeAllUserRefreshTokens throws during token-reuse detection → 500
@@ -1771,6 +1774,34 @@ describe('auth routes', () => {
       expect(response.json<{ error: string }>().error).toBe('Token does not belong to this user')
     })
 
+    it('should return 401 when refresh token is already revoked', async () => {
+      const accessToken = getValidAccessToken()
+      const rawToken = crypto.randomBytes(32).toString('hex')
+
+      mockTx()
+      vi.mocked(queries.findRefreshTokenByHash).mockResolvedValue({
+        ...mockRefreshToken,
+        revoked_at: '2026-01-15T00:00:00.000Z',
+      })
+
+      const response = await server.inject({
+        method: 'POST',
+        url: '/auth/logout',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ refresh_token: rawToken }),
+      })
+
+      expect(response.statusCode).toBe(401)
+      expect(response.json<{ error: string }>().error).toBe('Refresh token already revoked')
+      // Must NOT re-revoke — no spurious DB write
+      expect(queries.revokeRefreshToken).not.toHaveBeenCalled()
+      // Must NOT log a spurious audit event
+      expect(queries.logAuthEvent).not.toHaveBeenCalled()
+    })
+
     it('should return 401 when refresh token is not found', async () => {
       const accessToken = getValidAccessToken()
       const rawToken = crypto.randomBytes(32).toString('hex')
@@ -1834,7 +1865,8 @@ describe('auth routes', () => {
     })
 
     // [M-1] Audit log failure is non-fatal — logout still returns 204
-    it('should return 204 and warn when logAuthEvent rejects during logout', async () => {
+    // logout is a security event (session revocation), so the catch block uses log.error
+    it('should return 204 and log.error when logAuthEvent rejects during logout', async () => {
       const accessToken = getValidAccessToken()
       const rawToken = crypto.randomBytes(32).toString('hex')
       const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex')
@@ -1848,7 +1880,7 @@ describe('auth routes', () => {
       vi.mocked(queries.revokeRefreshToken).mockResolvedValue(undefined)
       vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('audit db down'))
 
-      const warnSpy = vi.spyOn(server.log, 'warn')
+      const errorSpy = vi.spyOn(server.log, 'error')
 
       const response = await server.inject({
         method: 'POST',
@@ -1862,13 +1894,13 @@ describe('auth routes', () => {
       })
 
       expect(response.statusCode).toBe(204)
-      expect(warnSpy).toHaveBeenCalledWith(
+      expect(errorSpy).toHaveBeenCalledWith(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
         expect.objectContaining({ err: expect.any(Error) }),
-        expect.stringContaining('audit log failed'),
+        expect.stringContaining('audit log failed for logout'),
       )
 
-      warnSpy.mockRestore()
+      errorSpy.mockRestore()
     })
 
     it('should NOT clear the cookie when the transaction throws (withTransaction rejects)', async () => {
@@ -2283,6 +2315,7 @@ describe('auth routes', () => {
     })
 
     // [TC-B4] link-account audit log failure is non-fatal — business transaction still returns 200
+    // link_account is a security event (identity linking), so the catch block uses log.error
     it('should still return 200 for link-account when logAuthEvent throws (non-fatal audit log)', async () => {
       const accessToken = server.jwt.sign({ sub: mockUser.id })
       const appleOAuthAccount: OAuthAccount = {
@@ -2296,14 +2329,14 @@ describe('auth routes', () => {
       vi.mocked(queries.findOAuthAccount).mockResolvedValue(null)
       vi.mocked(queries.userHasProvider).mockResolvedValue(false)
       vi.mocked(queries.createOAuthAccount).mockResolvedValue(appleOAuthAccount)
-      // logAuthEvent throws — should be caught and warned, not propagated
+      // logAuthEvent throws — should be caught with log.error (security event), not propagated
       vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('audit db down'))
       vi.mocked(queries.findUserWithAccounts).mockResolvedValue({
         user: mockUser,
         accounts: [appleOAuthAccount],
       })
 
-      const warnSpy = vi.spyOn(server.log, 'warn')
+      const errorSpy = vi.spyOn(server.log, 'error')
 
       const response = await server.inject({
         method: 'POST',
@@ -2320,15 +2353,15 @@ describe('auth routes', () => {
         }),
       })
 
-      // Business transaction committed despite audit log failure
+      // Business transaction will commit despite audit log failure
       expect(response.statusCode).toBe(200)
-      expect(warnSpy).toHaveBeenCalledWith(
+      expect(errorSpy).toHaveBeenCalledWith(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
         expect.objectContaining({ err: expect.any(Error) }),
-        expect.stringContaining('audit log failed'),
+        expect.stringContaining('audit log failed for link_account'),
       )
 
-      warnSpy.mockRestore()
+      errorSpy.mockRestore()
     })
   })
 

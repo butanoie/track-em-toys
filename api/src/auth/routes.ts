@@ -314,7 +314,7 @@ async function resolveOrCreateUser(
           metadata: { provider, auto_linked: true },
         })
       } catch (auditErr) {
-        log.error({ err: auditErr }, 'audit log failed — business transaction committed')
+        log.error({ err: auditErr }, 'audit log failed for provider_auto_linked — signin will commit')
       }
 
       return { user: existingUser, oauthAccount }
@@ -493,7 +493,7 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
             metadata: { provider },
           })
         } catch (auditErr) {
-          fastify.log.warn({ err: auditErr }, 'audit log failed — business transaction committed')
+          fastify.log.error({ err: auditErr }, 'audit log failed for signin — signin will commit')
         }
 
         return {
@@ -601,7 +601,7 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
               user_agent: rawUa,
             })
           } catch (auditErr) {
-            fastify.log.error({ err: auditErr }, 'audit log failed for token_reuse_detected — security revocation committed')
+            fastify.log.error({ err: auditErr }, 'audit log failed for token_reuse_detected — security revocation will commit')
           }
           // Return tagged union value — revocation is committed when withTransaction resolves normally
           return { type: 'reuse_detected' as const, userId: token.user_id }
@@ -635,7 +635,7 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
             user_agent: rawUa,
           })
         } catch (auditErr) {
-          fastify.log.warn({ err: auditErr }, 'audit log failed — business transaction committed')
+          fastify.log.error({ err: auditErr }, 'audit log failed for refresh — token rotation will commit')
         }
 
         return {
@@ -728,6 +728,10 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
           throw new HttpError(403, { error: 'Token does not belong to this user' })
         }
 
+        if (token.revoked_at !== null) {
+          throw new HttpError(401, { error: 'Refresh token already revoked' })
+        }
+
         await queries.revokeRefreshToken(client, tokenHash)
 
         // Non-fatal: audit log failure must not roll back the token revocation
@@ -739,7 +743,7 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
             user_agent: rawUa,
           })
         } catch (auditErr) {
-          fastify.log.warn({ err: auditErr }, 'audit log failed — business transaction committed')
+          fastify.log.error({ err: auditErr }, 'audit log failed for logout — token revocation will commit')
         }
       }, user.sub)
 
@@ -846,7 +850,7 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
             metadata: { provider },
           })
         } catch (auditErr) {
-          fastify.log.warn({ err: auditErr }, 'audit log failed — business transaction committed')
+          fastify.log.error({ err: auditErr }, 'audit log failed for link_account — account link will commit')
         }
 
         // Return updated user with linked accounts in a single JOIN query
