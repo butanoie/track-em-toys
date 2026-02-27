@@ -8,7 +8,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { Route } from '@/routes/login'
 
 export function LoginPage() {
-  const { signInWithGoogle } = useAuth()
+  const { signInWithGoogle, signInWithApple } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [isAppleLoading, setIsAppleLoading] = useState(false)
   const navigate = useNavigate()
@@ -38,12 +38,9 @@ export function LoginPage() {
     setError(null)
     setIsAppleLoading(true)
     try {
-      await initiateAppleSignIn()
-      // With usePopup: false the SDK triggers a full-page redirect and this line
-      // is never reached under normal circumstances. If it is reached, the redirect
-      // did not happen — surface an error so the user is not left confused with a
-      // silently re-enabled button and no feedback.
-      setError('Apple sign-in did not complete. Please try again.')
+      const result = await initiateAppleSignIn()
+      await signInWithApple(result.idToken, result.rawNonce, result.userName)
+      await navigate({ to: redirectTo ?? '/' })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Apple sign-in failed.'
       setError(message)
@@ -92,7 +89,7 @@ export function LoginPage() {
             disabled={isAppleLoading}
             aria-label="Sign in with Apple"
           >
-            {isAppleLoading ? 'Redirecting to Apple...' : 'Sign in with Apple'}
+            {isAppleLoading ? 'Signing in with Apple...' : 'Sign in with Apple'}
           </Button>
         </div>
       </div>

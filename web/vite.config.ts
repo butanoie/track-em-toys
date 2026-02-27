@@ -1,3 +1,4 @@
+import fs from 'fs'
 import path from 'path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -16,6 +17,11 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
-  },
+      host: 'dev.track-em-toys.com',
+      port: 5173,
+      https: {
+        key: fs.readFileSync('../.certs/key.pem'),
+        cert: fs.readFileSync('../.certs/cert.pem'),
+      },
+    },
 })

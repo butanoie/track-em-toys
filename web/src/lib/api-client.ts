@@ -59,8 +59,7 @@ function buildHeaders(url: string, init?: RequestInit): Headers {
   // Attach access token to all requests except auth endpoints
   const isAuthEndpoint =
     url.includes('/auth/signin') ||
-    url.includes('/auth/refresh') ||
-    url.includes('/auth/apple-callback')
+    url.includes('/auth/refresh')
 
   if (!isAuthEndpoint) {
     const token = authStore.getToken()

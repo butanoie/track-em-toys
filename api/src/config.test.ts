@@ -309,6 +309,40 @@ describe('config', () => {
     })
   })
 
+  describe('TLS config', () => {
+    it('leaves tls fields undefined when neither var is set', async () => {
+      vi.stubEnv('TLS_CERT_FILE', '')
+      vi.stubEnv('TLS_KEY_FILE', '')
+      const { config } = await import('./config.js')
+      expect(config.tls.certFile).toBeUndefined()
+      expect(config.tls.keyFile).toBeUndefined()
+    })
+
+    it('reads both TLS paths when both are set', async () => {
+      vi.stubEnv('TLS_CERT_FILE', '/path/to/cert.pem')
+      vi.stubEnv('TLS_KEY_FILE', '/path/to/key.pem')
+      const { config } = await import('./config.js')
+      expect(config.tls.certFile).toBe('/path/to/cert.pem')
+      expect(config.tls.keyFile).toBe('/path/to/key.pem')
+    })
+
+    it('throws when TLS_CERT_FILE is set but TLS_KEY_FILE is not', async () => {
+      vi.stubEnv('TLS_CERT_FILE', '/path/to/cert.pem')
+      vi.stubEnv('TLS_KEY_FILE', '')
+      await expect(import('./config.js')).rejects.toThrow(
+        'TLS_CERT_FILE and TLS_KEY_FILE must both be set or both be unset',
+      )
+    })
+
+    it('throws when TLS_KEY_FILE is set but TLS_CERT_FILE is not', async () => {
+      vi.stubEnv('TLS_KEY_FILE', '/path/to/key.pem')
+      vi.stubEnv('TLS_CERT_FILE', '')
+      await expect(import('./config.js')).rejects.toThrow(
+        'TLS_CERT_FILE and TLS_KEY_FILE must both be set or both be unset',
+      )
+    })
+  })
+
   describe('Google Sign-In required variables', () => {
     it.each([
       'GOOGLE_WEB_CLIENT_ID',

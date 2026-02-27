@@ -32,6 +32,9 @@ web/.env.local
 *.p8
 .DS_Store
 
+# Certs
+.certs/
+
 # temp claud backups
 .claude/agents.bak/
 .claude/skills.bak/

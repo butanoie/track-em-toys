@@ -30,8 +30,6 @@ export const refreshTimer = {
 // sessionStorage keys
 export const SESSION_KEYS = {
   user: 'trackem:user',
-  appleNonce: 'trackem:apple:nonce',
-  appleState: 'trackem:apple:state',
   appleUserName: 'trackem:apple:user_name',
 } as const
 

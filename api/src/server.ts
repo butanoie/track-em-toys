@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import type { Secret } from '@fastify/jwt'
 import Fastify from 'fastify'
@@ -39,11 +40,16 @@ export async function buildServer(): Promise<FastifyInstance> {
   // This must happen before route registration so getCurrentKid() is available.
   await initKeyStore()
 
+  const httpsOptions = config.tls?.certFile && config.tls.keyFile
+    ? { cert: readFileSync(config.tls.certFile), key: readFileSync(config.tls.keyFile) }
+    : undefined
+
   const fastify = Fastify({
     logger: {
       level: config.logLevel,
     },
     trustProxy: config.trustProxy,
+    ...(httpsOptions && { https: httpsOptions }),
   })
 
   // ─── CORS ──────────────────────────────────────────────────────────────

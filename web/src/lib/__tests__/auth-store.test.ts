@@ -61,8 +61,6 @@ describe('refreshTimer', () => {
 describe('SESSION_KEYS', () => {
   it('exposes expected keys', () => {
     expect(SESSION_KEYS.user).toBe('trackem:user')
-    expect(SESSION_KEYS.appleNonce).toBe('trackem:apple:nonce')
-    expect(SESSION_KEYS.appleState).toBe('trackem:apple:state')
     expect(SESSION_KEYS.appleUserName).toBe('trackem:apple:user_name')
   })
 })

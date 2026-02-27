@@ -1,12 +1,32 @@
 import { SESSION_KEYS } from '@/lib/auth-store'
 
 // Apple JS SDK type declarations (loaded dynamically via <script> tag)
+
+interface AppleSignInAuthorization {
+  code: string
+  id_token: string
+  state: string
+}
+
+interface AppleSignInUser {
+  email: string
+  name: {
+    firstName: string
+    lastName: string
+  }
+}
+
+interface AppleSignInResponse {
+  authorization: AppleSignInAuthorization
+  user?: AppleSignInUser
+}
+
 declare global {
   interface Window {
     AppleID?: {
       auth: {
         init: (config: AppleIDAuthConfig) => void
-        signIn: () => Promise<void>
+        signIn: () => Promise<AppleSignInResponse>
       }
     }
   }
@@ -19,6 +39,12 @@ interface AppleIDAuthConfig {
   state: string
   nonce: string
   usePopup: boolean
+}
+
+export interface AppleSignInResult {
+  idToken: string
+  rawNonce: string
+  userName?: string
 }
 
 const APPLE_SDK_URL = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js'
@@ -48,21 +74,20 @@ function loadAppleSDK(): Promise<void> {
   return sdkLoadPromise
 }
 
-async function generateNonce(): Promise<{ raw: string; hashed: string }> {
+function generateNonce(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(32))
-  const raw = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
-  const hashBuffer = await crypto.subtle.digest(
-    'SHA-256',
-    new TextEncoder().encode(raw),
-  )
-  const hashed = Array.from(
-    new Uint8Array(hashBuffer),
-    b => b.toString(16).padStart(2, '0'),
-  ).join('')
-  return { raw, hashed }
+  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
 }
 
-export async function initiateAppleSignIn(): Promise<void> {
+/**
+ * Opens the Apple Sign-In popup and returns the id_token, raw nonce, and
+ * optional user name on success.
+ *
+ * Uses `usePopup: true` so the entire flow happens within a popup window —
+ * no full-page redirect, no form POST callback, and nonce/state stay in
+ * local variables (no sessionStorage needed for CSRF tokens).
+ */
+export async function initiateAppleSignIn(): Promise<AppleSignInResult> {
   const clientId: string | undefined = import.meta.env.VITE_APPLE_SERVICES_ID || undefined
   const redirectURI: string | undefined = import.meta.env.VITE_APPLE_REDIRECT_URI || undefined
   if (!clientId || !redirectURI) {
@@ -73,32 +98,52 @@ export async function initiateAppleSignIn(): Promise<void> {
 
   await loadAppleSDK()
 
-  const { raw, hashed } = await generateNonce()
+  const raw = generateNonce()
   const state = crypto.randomUUID()
-
-  // Store raw nonce and state for CSRF validation in callback
-  sessionStorage.setItem(SESSION_KEYS.appleNonce, raw)
-  sessionStorage.setItem(SESSION_KEYS.appleState, state)
 
   if (!window.AppleID) {
     throw new Error('Apple JS SDK not loaded')
   }
 
+  // Pass the raw nonce — Apple's JS SDK hashes it (SHA-256) before embedding
+  // in the JWT. The API's apple-signin-auth library also hashes the nonce it
+  // receives before comparing, so both sides end up comparing SHA-256(raw).
   window.AppleID.auth.init({
     clientId: clientId,
     scope: 'name email',
     redirectURI: redirectURI,
     state,
-    nonce: hashed,
-    usePopup: false,
+    nonce: raw,
+    usePopup: true,
   })
 
-  try {
-    await window.AppleID.auth.signIn()
-  } catch (err) {
-    // Clean up stale nonce/state so they don't persist on error
-    sessionStorage.removeItem(SESSION_KEYS.appleNonce)
-    sessionStorage.removeItem(SESSION_KEYS.appleState)
-    throw err
+  const response = await window.AppleID.auth.signIn()
+
+  // CSRF state validation — fail-closed: reject when either value is absent or mismatched
+  if (!response.authorization.state || response.authorization.state !== state) {
+    throw new Error('Security check failed: state mismatch.')
+  }
+
+  // Extract user name (Apple only provides this on the first authorization)
+  let userName: string | undefined
+  if (response.user?.name) {
+    const { firstName, lastName } = response.user.name
+    const parts = [firstName, lastName].filter(Boolean)
+    if (parts.length > 0) {
+      userName = parts.join(' ')
+      // Cache for retry — Apple won't send the name again on subsequent sign-ins
+      sessionStorage.setItem(SESSION_KEYS.appleUserName, userName)
+    }
+  }
+
+  // Fall back to previously cached name if Apple didn't provide it this time
+  if (!userName) {
+    userName = sessionStorage.getItem(SESSION_KEYS.appleUserName) ?? undefined
+  }
+
+  return {
+    idToken: response.authorization.id_token,
+    rawNonce: raw,
+    userName,
   }
 }

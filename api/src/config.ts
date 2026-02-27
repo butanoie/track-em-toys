@@ -133,4 +133,14 @@ export const config = {
     webClientId: required('GOOGLE_WEB_CLIENT_ID'),
     iosClientId: required('GOOGLE_IOS_CLIENT_ID'),
   },
+
+  tls: {
+    certFile: optionalOrUndefined('TLS_CERT_FILE'),
+    keyFile: optionalOrUndefined('TLS_KEY_FILE'),
+  },
 } as const
+
+// Startup validation: TLS requires both cert and key, or neither.
+if ((config.tls.certFile != null) !== (config.tls.keyFile != null)) {
+  throw new Error('TLS_CERT_FILE and TLS_KEY_FILE must both be set or both be unset')
+}

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach, afterAll } from 'vitest'
-import { SESSION_KEYS } from '@/lib/auth-store'
 
-// We test only the nonce generation and session storage behaviour,
-// since the Apple SDK is loaded dynamically and not available in jsdom.
+// We test nonce generation, env var guards, SDK deduplication, and popup
+// response handling. The Apple SDK itself is loaded dynamically and not
+// available in jsdom.
 
 describe('Apple auth nonce generation', () => {
   beforeEach(() => {
@@ -17,59 +17,12 @@ describe('Apple auth nonce generation', () => {
     expect(raw).toMatch(/^[0-9a-f]{64}$/)
   })
 
-  it('generateNonce produces a 64-char hex SHA-256 hash', async () => {
-    const raw = 'a'.repeat(64)
-    const hashBuffer = await crypto.subtle.digest(
-      'SHA-256',
-      new TextEncoder().encode(raw),
-    )
-    const hashed = Array.from(
-      new Uint8Array(hashBuffer),
-      b => b.toString(16).padStart(2, '0'),
-    ).join('')
-    expect(hashed).toHaveLength(64)
-    expect(hashed).toMatch(/^[0-9a-f]{64}$/)
-  })
-
-  it('different nonces produce different hashes', async () => {
-    async function hashString(s: string): Promise<string> {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))
-      return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('')
-    }
-    const h1 = await hashString('nonce1')
-    const h2 = await hashString('nonce2')
-    expect(h1).not.toBe(h2)
-  })
-})
-
-describe('Apple auth session storage', () => {
-  beforeEach(() => {
-    sessionStorage.clear()
-  })
-
-  afterEach(() => {
-    sessionStorage.clear()
-  })
-
-  it('stores nonce and state in sessionStorage before redirect', () => {
-    const rawNonce = 'test-raw-nonce'
-    const state = 'test-state-uuid'
-    sessionStorage.setItem(SESSION_KEYS.appleNonce, rawNonce)
-    sessionStorage.setItem(SESSION_KEYS.appleState, state)
-
-    expect(sessionStorage.getItem(SESSION_KEYS.appleNonce)).toBe(rawNonce)
-    expect(sessionStorage.getItem(SESSION_KEYS.appleState)).toBe(state)
-  })
-
-  it('clears nonce and state after callback processing', () => {
-    sessionStorage.setItem(SESSION_KEYS.appleNonce, 'nonce')
-    sessionStorage.setItem(SESSION_KEYS.appleState, 'state')
-
-    sessionStorage.removeItem(SESSION_KEYS.appleNonce)
-    sessionStorage.removeItem(SESSION_KEYS.appleState)
-
-    expect(sessionStorage.getItem(SESSION_KEYS.appleNonce)).toBeNull()
-    expect(sessionStorage.getItem(SESSION_KEYS.appleState)).toBeNull()
+  it('consecutive nonces are unique', () => {
+    const nonces = Array.from({ length: 10 }, () => {
+      const bytes = crypto.getRandomValues(new Uint8Array(32))
+      return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
+    })
+    expect(new Set(nonces).size).toBe(10)
   })
 })
 
@@ -119,6 +72,189 @@ describe('initiateAppleSignIn', () => {
 
     // AppleID will still be undefined after "loading", so it should throw
     await expect(initiateAppleSignIn()).rejects.toThrow('Apple JS SDK not loaded')
+  })
+})
+
+describe('initiateAppleSignIn — popup response handling', () => {
+  let mockSignIn: ReturnType<typeof vi.fn>
+  let mockInit: ReturnType<typeof vi.fn>
+
+  beforeEach(() => {
+    vi.resetModules()
+    sessionStorage.clear()
+
+    mockInit = vi.fn()
+    mockSignIn = vi.fn()
+
+    // Provide a mock Apple SDK on window
+    Object.defineProperty(window, 'AppleID', {
+      value: { auth: { init: mockInit, signIn: mockSignIn } },
+      writable: true,
+      configurable: true,
+    })
+
+    vi.stubEnv('VITE_APPLE_SERVICES_ID', 'com.example.app')
+    vi.stubEnv('VITE_APPLE_REDIRECT_URI', 'https://example.com/callback')
+  })
+
+  afterEach(() => {
+    const windowWithApple = window as Window & { AppleID?: unknown }
+    delete windowWithApple.AppleID
+    vi.unstubAllEnvs()
+    sessionStorage.clear()
+  })
+
+  it('returns idToken and rawNonce from popup response', async () => {
+    // Mock signIn to capture the state from init and return it
+    mockInit.mockImplementation((config: { state: string }) => {
+      mockSignIn.mockResolvedValue({
+        authorization: {
+          id_token: 'apple-id-token-123',
+          code: 'auth-code',
+          state: config.state,
+        },
+      })
+    })
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const result = await initiateAppleSignIn()
+
+    expect(result.idToken).toBe('apple-id-token-123')
+    expect(result.rawNonce).toMatch(/^[0-9a-f]{64}$/)
+  })
+
+  it('throws on state mismatch (CSRF protection)', async () => {
+    mockInit.mockImplementation(() => {
+      mockSignIn.mockResolvedValue({
+        authorization: {
+          id_token: 'apple-id-token',
+          code: 'auth-code',
+          state: 'wrong-state',
+        },
+      })
+    })
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    await expect(initiateAppleSignIn()).rejects.toThrow('state mismatch')
+  })
+
+  it('extracts user name from first-time Apple authorization', async () => {
+    mockInit.mockImplementation((config: { state: string }) => {
+      mockSignIn.mockResolvedValue({
+        authorization: {
+          id_token: 'apple-id-token',
+          code: 'auth-code',
+          state: config.state,
+        },
+        user: {
+          email: 'test@example.com',
+          name: { firstName: 'John', lastName: 'Doe' },
+        },
+      })
+    })
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const result = await initiateAppleSignIn()
+
+    expect(result.userName).toBe('John Doe')
+  })
+
+  it('caches user name in sessionStorage for subsequent sign-ins', async () => {
+    mockInit.mockImplementation((config: { state: string }) => {
+      mockSignIn.mockResolvedValue({
+        authorization: {
+          id_token: 'apple-id-token',
+          code: 'auth-code',
+          state: config.state,
+        },
+        user: {
+          email: 'test@example.com',
+          name: { firstName: 'Jane', lastName: 'Smith' },
+        },
+      })
+    })
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    await initiateAppleSignIn()
+
+    expect(sessionStorage.getItem('trackem:apple:user_name')).toBe('Jane Smith')
+  })
+
+  it('falls back to cached user name when Apple does not provide it', async () => {
+    sessionStorage.setItem('trackem:apple:user_name', 'Cached Name')
+
+    mockInit.mockImplementation((config: { state: string }) => {
+      mockSignIn.mockResolvedValue({
+        authorization: {
+          id_token: 'apple-id-token',
+          code: 'auth-code',
+          state: config.state,
+        },
+        // No user object — subsequent sign-in
+      })
+    })
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const result = await initiateAppleSignIn()
+
+    expect(result.userName).toBe('Cached Name')
+  })
+
+  it('returns undefined userName when no user data and no cache', async () => {
+    mockInit.mockImplementation((config: { state: string }) => {
+      mockSignIn.mockResolvedValue({
+        authorization: {
+          id_token: 'apple-id-token',
+          code: 'auth-code',
+          state: config.state,
+        },
+      })
+    })
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const result = await initiateAppleSignIn()
+
+    expect(result.userName).toBeUndefined()
+  })
+
+  it('passes the raw nonce (not a hash) to Apple SDK init', async () => {
+    mockInit.mockImplementation((config: { state: string; nonce: string }) => {
+      mockSignIn.mockResolvedValue({
+        authorization: {
+          id_token: 'apple-id-token',
+          code: 'auth-code',
+          state: config.state,
+        },
+      })
+    })
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const result = await initiateAppleSignIn()
+
+    // The nonce passed to Apple SDK must be the same rawNonce returned to the caller.
+    // Apple's JS SDK hashes it internally; our API's apple-signin-auth does the same,
+    // so both sides compare SHA-256(raw).
+    const initNonce = (mockInit.mock.calls[0] as [{ nonce: string }])[0].nonce
+    expect(initNonce).toBe(result.rawNonce)
+  })
+
+  it('passes usePopup: true to Apple SDK init', async () => {
+    mockInit.mockImplementation((config: { state: string }) => {
+      mockSignIn.mockResolvedValue({
+        authorization: {
+          id_token: 'apple-id-token',
+          code: 'auth-code',
+          state: config.state,
+        },
+      })
+    })
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    await initiateAppleSignIn()
+
+    expect(mockInit).toHaveBeenCalledWith(
+      expect.objectContaining({ usePopup: true })
+    )
   })
 })
 

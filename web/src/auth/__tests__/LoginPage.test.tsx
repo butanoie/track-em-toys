@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { LoginPage } from '../LoginPage'
 import { AuthContext, type AuthContextValue } from '../AuthProvider'
+import type { AppleSignInResult } from '../apple-auth'
 
 // Mock @react-oauth/google
 vi.mock('@react-oauth/google', () => ({
@@ -52,7 +53,7 @@ function makeAuthContext(overrides: Partial<AuthContextValue> = {}): AuthContext
     isAuthenticated: false,
     isLoading: false,
     signInWithGoogle: vi.fn(),
-    signInWithApple: vi.fn(),
+    signInWithApple: vi.fn().mockResolvedValue(undefined),
     logout: vi.fn(),
     ...overrides,
   }
@@ -180,21 +181,67 @@ describe('LoginPage', () => {
     })
   })
 
-  it('calls initiateAppleSignIn when Apple button is clicked', async () => {
+  it('calls initiateAppleSignIn and signInWithApple on Apple button click', async () => {
     const { initiateAppleSignIn } = await import('../apple-auth')
     const mockInitiate = vi.mocked(initiateAppleSignIn)
-    mockInitiate.mockResolvedValue(undefined)
+    const appleResult: AppleSignInResult = {
+      idToken: 'apple-id-token',
+      rawNonce: 'raw-nonce-value',
+      userName: 'John Doe',
+    }
+    mockInitiate.mockResolvedValue(appleResult)
 
-    renderLoginPage(makeAuthContext())
+    const signInWithApple = vi.fn().mockResolvedValue(undefined)
+    renderLoginPage(makeAuthContext({ signInWithApple }))
 
     await userEvent.click(screen.getByRole('button', { name: /Sign in with Apple/i }))
 
     await waitFor(() => {
       expect(mockInitiate).toHaveBeenCalledOnce()
+      expect(signInWithApple).toHaveBeenCalledWith('apple-id-token', 'raw-nonce-value', 'John Doe')
     })
   })
 
-  it('shows error when Apple sign-in throws', async () => {
+  it('navigates to / after successful Apple sign-in', async () => {
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const mockInitiate = vi.mocked(initiateAppleSignIn)
+    mockInitiate.mockResolvedValue({
+      idToken: 'apple-id-token',
+      rawNonce: 'raw-nonce',
+    })
+
+    const signInWithApple = vi.fn().mockResolvedValue(undefined)
+    renderLoginPage(makeAuthContext({ signInWithApple }))
+
+    await userEvent.click(screen.getByRole('button', { name: /Sign in with Apple/i }))
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith({ to: '/' })
+    })
+  })
+
+  it('navigates to redirect param after successful Apple sign-in', async () => {
+    const { Route } = await import('@/routes/login')
+    vi.mocked(Route.useSearch).mockReturnValue({ redirect: '/collections' })
+
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const mockInitiate = vi.mocked(initiateAppleSignIn)
+    mockInitiate.mockResolvedValue({
+      idToken: 'apple-id-token',
+      rawNonce: 'raw-nonce',
+    })
+
+    const signInWithApple = vi.fn().mockResolvedValue(undefined)
+    renderLoginPage(makeAuthContext({ signInWithApple }))
+
+    await userEvent.click(screen.getByRole('button', { name: /Sign in with Apple/i }))
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith({ to: '/collections' })
+    })
+  })
+
+  it('shows error when initiateAppleSignIn throws', async () => {
     const { initiateAppleSignIn } = await import('../apple-auth')
     const mockInitiate = vi.mocked(initiateAppleSignIn)
     mockInitiate.mockRejectedValue(new Error('Apple SDK load failed'))
@@ -208,10 +255,31 @@ describe('LoginPage', () => {
     })
   })
 
-  it('resets isAppleLoading after Apple sign-in resolves without redirect', async () => {
+  it('shows error when signInWithApple throws after popup succeeds', async () => {
     const { initiateAppleSignIn } = await import('../apple-auth')
     const mockInitiate = vi.mocked(initiateAppleSignIn)
-    mockInitiate.mockResolvedValue(undefined)
+    mockInitiate.mockResolvedValue({
+      idToken: 'apple-id-token',
+      rawNonce: 'raw-nonce',
+    })
+
+    const signInWithApple = vi.fn().mockRejectedValue(new Error('Auth server error'))
+    renderLoginPage(makeAuthContext({ signInWithApple }))
+
+    await userEvent.click(screen.getByRole('button', { name: /Sign in with Apple/i }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Auth server error')
+    })
+  })
+
+  it('resets isAppleLoading after Apple sign-in succeeds', async () => {
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const mockInitiate = vi.mocked(initiateAppleSignIn)
+    mockInitiate.mockResolvedValue({
+      idToken: 'apple-id-token',
+      rawNonce: 'raw-nonce',
+    })
 
     renderLoginPage(makeAuthContext())
 
@@ -220,24 +288,6 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(button).not.toBeDisabled()
-    })
-  })
-
-  it('shows error when Apple sign-in resolves without triggering a redirect', async () => {
-    const { initiateAppleSignIn } = await import('../apple-auth')
-    const mockInitiate = vi.mocked(initiateAppleSignIn)
-    // With usePopup: false the SDK should redirect; if it resolves normally
-    // that means the redirect did not happen — the UI must surface an error.
-    mockInitiate.mockResolvedValue(undefined)
-
-    renderLoginPage(makeAuthContext())
-
-    await userEvent.click(screen.getByRole('button', { name: /Sign in with Apple/i }))
-
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent(
-        'Apple sign-in did not complete. Please try again.'
-      )
     })
   })
 
@@ -253,6 +303,25 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(button).not.toBeDisabled()
+    })
+  })
+
+  it('passes userName as undefined when Apple does not provide user data', async () => {
+    const { initiateAppleSignIn } = await import('../apple-auth')
+    const mockInitiate = vi.mocked(initiateAppleSignIn)
+    mockInitiate.mockResolvedValue({
+      idToken: 'apple-id-token',
+      rawNonce: 'raw-nonce',
+      // No userName
+    })
+
+    const signInWithApple = vi.fn().mockResolvedValue(undefined)
+    renderLoginPage(makeAuthContext({ signInWithApple }))
+
+    await userEvent.click(screen.getByRole('button', { name: /Sign in with Apple/i }))
+
+    await waitFor(() => {
+      expect(signInWithApple).toHaveBeenCalledWith('apple-id-token', 'raw-nonce', undefined)
     })
   })
 })
