@@ -20,7 +20,7 @@ export default tseslint.config(
       parserOptions: {
         projectService: {
           // Allow root-level config files not included in tsconfig.app.json
-          allowDefaultProject: ['*.config.js', 'vitest.config.ts'],
+          allowDefaultProject: ['*.config.js', 'vitest.config.ts', 'playwright.config.ts'],
         },
         tsconfigRootDir: import.meta.dirname,
       },
@@ -97,8 +97,26 @@ export default tseslint.config(
     },
   },
   {
-    // Relaxed rules for test files
+    // Relaxed rules for test files (vitest unit/integration tests)
     files: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/consistent-type-assertions': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+    },
+  },
+  {
+    // Relaxed rules for Playwright E2E tests (same relaxations as vitest tests)
+    files: ['e2e/**/*.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',

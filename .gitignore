@@ -35,6 +35,10 @@ web/.env.local
 # Certs
 .certs/
 
+# Playwright
+playwright-report/
+test-results/
+
 # temp claud backups
 .claude/agents.bak/
 .claude/skills.bak/

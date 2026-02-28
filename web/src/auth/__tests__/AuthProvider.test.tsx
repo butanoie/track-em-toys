@@ -342,6 +342,57 @@ describe('AuthProvider', () => {
     timerSetSpy.mockRestore()
   })
 
+  it('failed refresh does NOT restore cached user from sessionStorage (fail-closed)', async () => {
+    sessionFlag.set()
+    // Cache a user in sessionStorage — this should NOT be restored after failed refresh
+    sessionStorage.setItem(SESSION_KEYS.user, JSON.stringify(validUser))
+
+    // Refresh fails with 401
+    mockFetch.mockResolvedValueOnce(makeResponse({ error: 'Unauthorized' }, 401))
+
+    render(
+      <AuthProvider>
+        <TestConsumer />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading')).toHaveTextContent('false')
+    })
+
+    // User must NOT be restored — fail-closed means no cached user without a live token
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('false')
+    expect(screen.getByTestId('user')).toHaveTextContent('null')
+  })
+
+  it('auth:sessionexpired event clears queryClient', async () => {
+    sessionFlag.set()
+    sessionStorage.setItem(SESSION_KEYS.user, JSON.stringify(validUser))
+    authStore.setToken('some-token')
+
+    mockFetch.mockResolvedValueOnce(
+      makeResponse({ access_token: makeFakeJwt(), refresh_token: null })
+    )
+
+    const mockClear = vi.fn()
+
+    render(
+      <AuthProvider queryClientClear={mockClear}>
+        <TestConsumer />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('authenticated')).toHaveTextContent('true')
+    })
+
+    await act(async () => {
+      window.dispatchEvent(new CustomEvent('auth:sessionexpired'))
+    })
+
+    expect(mockClear).toHaveBeenCalledOnce()
+  })
+
   it('clears session flag and navigates to login on auth:sessionexpired event', async () => {
     sessionFlag.set()
     sessionStorage.setItem(SESSION_KEYS.user, JSON.stringify(validUser))
