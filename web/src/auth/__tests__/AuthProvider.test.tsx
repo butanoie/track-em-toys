@@ -4,79 +4,30 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { AuthProvider, AuthContext } from '../AuthProvider'
 import { authStore, refreshTimer, sessionFlag, SESSION_KEYS } from '@/lib/auth-store'
+import {
+  validUser,
+  makeFakeJwt,
+  makeResponse,
+  TestConsumer,
+  stubLocalStorage,
+  resetAuthTestState,
+} from './auth-test-helpers'
 
 // Mock TanStack Router hooks — AuthProvider uses useNavigate and useRouter
 const mockNavigate = vi.fn()
-const mockRouter = {
-  state: {
-    location: { href: '/current-path' },
-  },
-}
-
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => mockNavigate,
-  useRouter: () => mockRouter,
+  useRouter: () => ({ state: { location: { href: '/current-path' } } }),
 }))
 
 // Mock fetch globally
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
-
-// localStorage is not available in this jsdom configuration — provide a real
-// in-memory implementation so sessionFlag works correctly in tests.
-const localStore: Record<string, string> = {}
-vi.stubGlobal('localStorage', {
-  getItem: (key: string): string | null => localStore[key] ?? null,
-  setItem: (key: string, value: string): void => { localStore[key] = value },
-  removeItem: (key: string): void => { delete localStore[key] },
-})
-
-function makeResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  })
-}
-
-const validUser = {
-  id: '550e8400-e29b-41d4-a716-446655440000',
-  email: 'test@example.com',
-  display_name: 'Test User',
-  avatar_url: null,
-}
-
-// JWT with exp 1 hour from now
-function makeFakeJwt(expOffsetMs = 3600_000): string {
-  const header = btoa(JSON.stringify({ alg: 'ES256' }))
-  const payload = btoa(
-    JSON.stringify({ sub: validUser.id, exp: Math.floor((Date.now() + expOffsetMs) / 1000) })
-  )
-  return `${header}.${payload}.fakesig`
-}
-
-function TestConsumer() {
-  const ctx = React.useContext(AuthContext)
-  if (!ctx) return <div>no context</div>
-  return (
-    <div>
-      <div data-testid="loading">{String(ctx.isLoading)}</div>
-      <div data-testid="authenticated">{String(ctx.isAuthenticated)}</div>
-      <div data-testid="user">{ctx.user?.display_name ?? 'null'}</div>
-      <button onClick={() => void ctx.logout()}>Logout</button>
-    </div>
-  )
-}
+stubLocalStorage()
 
 describe('AuthProvider', () => {
   beforeEach(() => {
-    mockFetch.mockReset()
-    mockNavigate.mockReset()
-    mockNavigate.mockResolvedValue(undefined)
-    authStore.clear()
-    sessionStorage.clear()
-    // Clear the localStorage stub store between tests
-    Object.keys(localStore).forEach(k => { delete localStore[k] })
-    // Do NOT use fake timers — they break Promise resolution in jsdom
+    resetAuthTestState(mockFetch, mockNavigate)
   })
 
   afterEach(() => {

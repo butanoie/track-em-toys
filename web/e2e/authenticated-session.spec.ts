@@ -10,18 +10,7 @@ test.describe('Authenticated session', () => {
     await expect(page.getByText(validUser.display_name!)).toBeVisible()
   })
 
-  test('clicking Sign out redirects to /login', async ({ page }) => {
-    await setupAuthenticated(page)
-    await page.goto('/')
-
-    await expect(page.getByRole('heading', { name: /your collection/i })).toBeVisible()
-
-    await page.getByRole('button', { name: /sign out/i }).click()
-
-    await expect(page).toHaveURL(/\/login/)
-  })
-
-  test('logout clears localStorage session flag', async ({ page }) => {
+  test('sign out redirects to /login and clears session flag', async ({ page }) => {
     await setupAuthenticated(page)
     await page.goto('/')
 

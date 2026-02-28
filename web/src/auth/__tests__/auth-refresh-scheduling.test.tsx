@@ -1,71 +1,31 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
-import { AuthProvider, AuthContext } from '../AuthProvider'
-import { authStore, refreshTimer, sessionFlag, SESSION_KEYS } from '@/lib/auth-store'
+import { AuthProvider } from '../AuthProvider'
+import { refreshTimer, sessionFlag, SESSION_KEYS } from '@/lib/auth-store'
+import {
+  validUser,
+  makeFakeJwt,
+  makeResponse,
+  TestConsumer,
+  stubLocalStorage,
+  resetAuthTestState,
+} from './auth-test-helpers'
 
 // Mock TanStack Router hooks
 const mockNavigate = vi.fn()
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => mockNavigate,
-  useRouter: () => ({
-    state: { location: { href: '/dashboard' } },
-  }),
+  useRouter: () => ({ state: { location: { href: '/dashboard' } } }),
 }))
 
 // Mock fetch globally
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
-
-// localStorage stub
-const localStore: Record<string, string> = {}
-vi.stubGlobal('localStorage', {
-  getItem: (key: string): string | null => localStore[key] ?? null,
-  setItem: (key: string, value: string): void => { localStore[key] = value },
-  removeItem: (key: string): void => { delete localStore[key] },
-})
-
-const validUser = {
-  id: '550e8400-e29b-41d4-a716-446655440000',
-  email: 'test@example.com',
-  display_name: 'Test User',
-  avatar_url: null,
-}
-
-function makeFakeJwt(expOffsetMs = 3600_000): string {
-  const header = btoa(JSON.stringify({ alg: 'ES256' }))
-  const payload = btoa(
-    JSON.stringify({ sub: validUser.id, exp: Math.floor((Date.now() + expOffsetMs) / 1000) })
-  )
-  return `${header}.${payload}.fakesig`
-}
-
-function makeResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  })
-}
-
-function TestConsumer() {
-  const ctx = React.useContext(AuthContext)
-  if (!ctx) return <div>no context</div>
-  return (
-    <div>
-      <div data-testid="loading">{String(ctx.isLoading)}</div>
-      <div data-testid="authenticated">{String(ctx.isAuthenticated)}</div>
-    </div>
-  )
-}
+stubLocalStorage()
 
 describe('Auth refresh scheduling', () => {
   beforeEach(() => {
-    mockFetch.mockReset()
-    mockNavigate.mockReset()
-    mockNavigate.mockResolvedValue(undefined)
-    authStore.clear()
-    sessionStorage.clear()
-    Object.keys(localStore).forEach(k => { delete localStore[k] })
+    resetAuthTestState(mockFetch, mockNavigate)
   })
 
   afterEach(() => {

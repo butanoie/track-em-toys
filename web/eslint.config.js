@@ -5,12 +5,30 @@ import tseslint from 'typescript-eslint'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
+// Shared rule relaxations for all test files (vitest unit tests + Playwright E2E)
+const testRuleOverrides = /** @type {const} */ ({
+  '@typescript-eslint/no-explicit-any': 'off',
+  '@typescript-eslint/no-unsafe-assignment': 'off',
+  '@typescript-eslint/no-unsafe-member-access': 'off',
+  '@typescript-eslint/no-unsafe-call': 'off',
+  '@typescript-eslint/no-unsafe-return': 'off',
+  '@typescript-eslint/no-unsafe-argument': 'off',
+  '@typescript-eslint/no-floating-promises': 'off',
+  '@typescript-eslint/require-await': 'off',
+  '@typescript-eslint/unbound-method': 'off',
+  '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+  '@typescript-eslint/consistent-type-assertions': 'off',
+  '@typescript-eslint/no-misused-promises': 'off',
+})
+
 export default tseslint.config(
   {
     ignores: [
       'dist/**',
       'node_modules/**',
       'src/routeTree.gen.ts',
+      'playwright-report/**',
+      'test-results/**',
     ],
   },
   eslint.configs.recommended,
@@ -97,39 +115,18 @@ export default tseslint.config(
     },
   },
   {
-    // Relaxed rules for test files (vitest unit/integration tests)
-    files: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    // Relaxed rules for all test files and test helpers
+    // (vitest unit/integration, shared test helpers, Playwright E2E)
+    files: [
+      'src/**/*.test.ts',
+      'src/**/*.test.tsx',
+      'src/**/__tests__/*-helpers.ts',
+      'src/**/__tests__/*-helpers.tsx',
+      'e2e/**/*.ts',
+    ],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/unbound-method': 'off',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-      '@typescript-eslint/consistent-type-assertions': 'off',
-      '@typescript-eslint/no-misused-promises': 'off',
-    },
-  },
-  {
-    // Relaxed rules for Playwright E2E tests (same relaxations as vitest tests)
-    files: ['e2e/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/unbound-method': 'off',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-      '@typescript-eslint/consistent-type-assertions': 'off',
-      '@typescript-eslint/no-misused-promises': 'off',
+      ...testRuleOverrides,
+      'react-refresh/only-export-components': 'off',
     },
   },
 )

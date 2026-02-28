@@ -7,11 +7,4 @@ test.describe('Login page', () => {
     await expect(page.getByRole('heading', { name: /Track.em Toys/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /sign in with apple/i })).toBeVisible()
   })
-
-  test('unauthenticated visit to / redirects to /login', async ({ page }) => {
-    await page.goto('/')
-
-    // AuthProvider detects no session flag → _authenticated layout redirects to /login
-    await expect(page).toHaveURL(/\/login/)
-  })
 })

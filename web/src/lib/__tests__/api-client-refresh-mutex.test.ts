@@ -6,14 +6,10 @@ import { authStore } from '../auth-store'
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
 
-function makeResponse(
-  body: unknown,
-  status = 200,
-  headers: Record<string, string> = {},
-): Response {
+function makeResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json', ...headers },
+    headers: { 'Content-Type': 'application/json' },
   })
 }
 
