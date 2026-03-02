@@ -503,7 +503,7 @@ authorization.
     10,000 items.
 
 2.  On-device ML classification should complete within 1 second per
-    image on iPhone 12 or later.
+    image on iPhone 15 Pro or later.
 
 3.  Photo upload and thumbnail generation should complete within 3
     seconds per image on a standard broadband connection.
@@ -576,13 +576,13 @@ accuracy, model size, and integration with the iOS ecosystem.
   Model Size            \~7 MB (transfer learning) vs. \~65 MB (full
                         network)
 
-  Inference Speed       Real-time on Neural Engine (iPhone 12+)
+  Inference Speed       Real-time on Neural Engine (iPhone 15 Pro+)
 
   Network Required      No --- fully on-device inference
 
   Output                Top-N labels with confidence scores
 
-  iOS Minimum           iOS 14+
+  iOS Minimum           iOS 26.2+
   --------------------- -------------------------------------------------
 
 6.2 Pre-Filter with Vision Framework

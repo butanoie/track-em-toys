@@ -94,7 +94,7 @@ When documenting configuration and setup:
 - Swift 6, strict concurrency
 - SwiftUI only (no UIKit/AppKit unless forced by a framework)
 - SwiftData for persistence, async/await throughout, SF Symbols for icons
-- Minimum deployment: iOS 17, macOS 14
+- Minimum deployment: iOS 26.2, macOS 26.2
 
 ## API
 Stack: Node.js 22 LTS, Fastify 5, TypeScript strict mode, PostgreSQL 17, vitest.

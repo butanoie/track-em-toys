@@ -95,6 +95,59 @@ Both values come from [Google Cloud Console → APIs & Credentials](https://cons
 
 For the web client, add `http://localhost:5173` as an authorized JavaScript origin. You also need an OAuth consent screen configured on the project.
 
+### TLS (Local HTTPS)
+
+Both the API and web dev servers share a single TLS certificate stored in `.certs/` at the repo root. This is required for Apple Sign-In (which mandates HTTPS callbacks) and for the iOS/macOS native client.
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `TLS_CERT_FILE` | No | Path to PEM certificate file (default: unset — HTTP only) |
+| `TLS_KEY_FILE` | No | Path to PEM private key file (default: unset — HTTP only) |
+
+Both must be set together, or both left unset. For local dev, point them at the shared mkcert certs:
+
+```
+TLS_CERT_FILE=../.certs/cert.pem
+TLS_KEY_FILE=../.certs/key.pem
+```
+
+#### Generating certs with mkcert
+
+Install [mkcert](https://github.com/FiloSottile/mkcert) and run the CA setup once:
+
+```bash
+mkcert -install
+```
+
+Then generate the shared certificate from the repo root:
+
+```bash
+mkdir -p .certs
+cd .certs
+mkcert -cert-file cert.pem -key-file key.pem localhost 127.0.0.1 dev.track-em-toys.com
+```
+
+This creates a certificate valid for:
+- **`localhost`** — web dev server (`https://localhost:5173`)
+- **`127.0.0.1`** — iOS/macOS native client (avoids IPv6 loopback issues with `localhost`)
+- **`dev.track-em-toys.com`** — optional custom domain for cookie scoping
+
+The web Vite dev server (`web/vite.config.ts`) and the API server both reference `../.certs/cert.pem` and `../.certs/key.pem`, so a single `mkcert` invocation covers all local HTTPS services.
+
+#### Trusting the CA in iOS Simulator
+
+`mkcert -install` only adds the root CA to the macOS System keychain. The iOS Simulator has its own isolated trust store and will reject the certificate with `NSURLErrorDomain -1202`. Inject the root CA into the booted simulator:
+
+```bash
+xcrun simctl keychain booted add-root-cert "$(mkcert -CAROOT)/rootCA.pem"
+```
+
+Repeat after erasing a simulator or when using a new simulator instance for the first time.
+
+#### Regenerating certs
+
+If you need to add a new hostname (e.g. for a new service), re-run the `mkcert` command with all desired names. The `-cert-file` and `-key-file` flags overwrite the existing files in place. Restart both the API and web dev servers after regenerating.
+
 ### Server
 
 | Variable | Required | Description |
@@ -169,7 +222,7 @@ curl -X POST http://localhost:3000/auth/signin \
   }'
 ```
 
-For Apple sign-in, include `nonce` (raw nonce string) and optionally `user_info.name` on first sign-in:
+For Apple sign-in, include `nonce` (the SHA-256 hex hash of the raw nonce — this must match the hashed nonce embedded in Apple's ID token) and optionally `user_info.name` on first sign-in:
 
 ```bash
 curl -X POST http://localhost:3000/auth/signin \
@@ -177,7 +230,7 @@ curl -X POST http://localhost:3000/auth/signin \
   -d '{
     "provider": "apple",
     "id_token": "<id_token_from_apple>",
-    "nonce": "<raw_nonce>",
+    "nonce": "<sha256_hex_of_raw_nonce>",
     "user_info": { "name": "Jane Doe" }
   }'
 ```

@@ -4,6 +4,10 @@ ios/*.xcworkspace/xcuserdata/
 ios/**/*.xcuserstate
 *.moved-aside
 
+# iOS developer-specific config (contains OAuth client IDs)
+ios/track-em-toys/Info.plist
+ios/track-em-toys/*.apps.googleusercontent.com.plist
+
 # ML training data is large — consider Git LFS or exclude raw photos
 ml/training-data/**/*.jpg
 ml/training-data/**/*.png
