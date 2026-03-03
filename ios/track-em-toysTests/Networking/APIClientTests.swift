@@ -17,8 +17,22 @@ final class MockURLProtocol: URLProtocol, @unchecked Sendable {
             return
         }
 
+        // URLSession moves httpBody to httpBodyStream; reconstruct it for test assertions
+        var mutableRequest = request
+        if mutableRequest.httpBody == nil, let stream = mutableRequest.httpBodyStream {
+            stream.open()
+            var data = Data()
+            let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
+            defer { buffer.deallocate(); stream.close() }
+            while stream.hasBytesAvailable {
+                let read = stream.read(buffer, maxLength: 1024)
+                if read > 0 { data.append(buffer, count: read) } else { break }
+            }
+            mutableRequest.httpBody = data
+        }
+
         do {
-            let (response, data) = try handler(request)
+            let (response, data) = try handler(mutableRequest)
             client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
             client?.urlProtocol(self, didLoad: data)
             client?.urlProtocolDidFinishLoading(self)
@@ -55,6 +69,7 @@ private func mockResponse(
 
 // MARK: - Tests
 
+@Suite(.serialized)
 struct APIClientTests {
 
     // MARK: - Token Management

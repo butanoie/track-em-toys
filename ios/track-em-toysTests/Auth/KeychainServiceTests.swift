@@ -3,6 +3,7 @@ import Testing
 
 @testable import track_em_toys
 
+@Suite(.serialized)
 struct KeychainServiceTests {
 
     // Clean up before each test to avoid cross-contamination
