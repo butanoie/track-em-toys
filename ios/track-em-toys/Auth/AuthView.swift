@@ -142,6 +142,8 @@ struct AuthView: View {
         do {
             let idToken = try await googleCoordinator.signIn(presenting: rootVC)
             try await authManager.signInWithGoogle(idToken)
+        } catch let error as AuthError where error == .providerSignInCancelled {
+            // User cancelled — don't show an error
         } catch {
             showSignInError(error.localizedDescription)
         }
