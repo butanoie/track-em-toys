@@ -16,6 +16,10 @@ These rules are ABSOLUTE:
 - NEVER modify ios/**/*.pbxproj
 - NEVER modify ios/**/*.xcworkspace
 
+### NEVER Force-Add Gitignored Files
+- NEVER use `git add -f` or `--force` to commit files that are in `.gitignore`
+- If a gitignored file needs to be tracked, ask the user to update `.gitignore` first
+
 ### NEVER App Store and DB migrations
 - NEVER Submit to App Store (requires human)
 - NEVER Modify provisioning profiles or entitlements GUIs
