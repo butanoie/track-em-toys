@@ -14,8 +14,11 @@ struct GoogleDesktopCredentials: Sendable {
         clientID.split(separator: ".").reversed().joined(separator: ".")
     }
 
+    /// Lazily reads credentials from Info.plist once and caches them for the process lifetime.
+    static let shared: GoogleDesktopCredentials = fromInfoPlist()
+
     /// Reads `GIDDesktopClientID` and `GIDDesktopClientSecret` from the main bundle's Info.plist.
-    static func fromInfoPlist() -> GoogleDesktopCredentials {
+    private static func fromInfoPlist() -> GoogleDesktopCredentials {
         guard let id = Bundle.main.infoDictionary?["GIDDesktopClientID"] as? String,
             !id.isEmpty
         else {
@@ -51,7 +54,7 @@ final class GoogleSignInMacCoordinator: Sendable {
 
     // MARK: - Init
 
-    init(credentials: GoogleDesktopCredentials = .fromInfoPlist()) {
+    init(credentials: GoogleDesktopCredentials = .shared) {
         self.credentials = credentials
     }
 
@@ -74,6 +77,22 @@ final class GoogleSignInMacCoordinator: Sendable {
 
     // MARK: - Sign In
 
+    /// Runs the full PKCE OAuth flow: generate verifier → build URL → authenticate → exchange code.
+    /// The `authenticate` closure handles the platform-specific step of presenting the auth URL
+    /// and returning the callback URL.
+    private func performOAuthFlow(
+        redirectURI: String,
+        authenticate: (URL) async throws -> URL
+    ) async throws -> String {
+        let codeVerifier = Self.generateCodeVerifier()
+        let challenge = Self.codeChallenge(for: codeVerifier)
+        let authURL = buildAuthorizationURL(codeChallenge: challenge, redirectURI: redirectURI)
+        let callbackURL = try await authenticate(authURL)
+        let code = try Self.extractAuthCode(from: callbackURL)
+        return try await exchangeCodeForIDToken(
+            code: code, codeVerifier: codeVerifier, redirectURI: redirectURI)
+    }
+
     #if os(macOS)
     /// Presents the Google Sign-In flow via loopback OAuth and returns the ID token.
     ///
@@ -81,45 +100,29 @@ final class GoogleSignInMacCoordinator: Sendable {
     /// This method starts a one-shot local HTTP server, opens the auth URL in the
     /// system browser, captures the callback, and exchanges the code for an ID token.
     func signIn(in window: NSWindow) async throws -> String {
-        let codeVerifier = Self.generateCodeVerifier()
-        let challenge = Self.codeChallenge(for: codeVerifier)
-
         let server = try LoopbackAuthServer()
-        let redirectURI = server.redirectURI
-
-        let authURL = buildAuthorizationURL(codeChallenge: challenge, redirectURI: redirectURI)
-        NSWorkspace.shared.open(authURL)
-
-        let callbackURL = try await server.waitForCallback()
-        let code = try Self.extractAuthCode(from: callbackURL)
-        return try await exchangeCodeForIDToken(
-            code: code, codeVerifier: codeVerifier, redirectURI: redirectURI)
+        return try await performOAuthFlow(redirectURI: server.redirectURI) { authURL in
+            NSWorkspace.shared.open(authURL)
+            return try await server.waitForCallback()
+        }
     }
     #endif
 
     /// Internal entry point that accepts a `WebAuthSessionProviding` for testability.
     func signIn(using sessionProvider: WebAuthSessionProviding) async throws -> String {
-        let codeVerifier = Self.generateCodeVerifier()
-        let challenge = Self.codeChallenge(for: codeVerifier)
         let redirectURI = "\(credentials.callbackURLScheme):/oauth2callback"
-
-        let authURL = buildAuthorizationURL(codeChallenge: challenge, redirectURI: redirectURI)
-
-        let callbackURL: URL
-        do {
-            callbackURL = try await sessionProvider.authenticate(
-                url: authURL,
-                callbackURLScheme: credentials.callbackURLScheme
-            )
-        } catch let error as ASWebAuthenticationSessionError
-            where error.code == .canceledLogin
-        {
-            throw AuthError.providerSignInCancelled
+        return try await performOAuthFlow(redirectURI: redirectURI) { authURL in
+            do {
+                return try await sessionProvider.authenticate(
+                    url: authURL,
+                    callbackURLScheme: credentials.callbackURLScheme
+                )
+            } catch let error as ASWebAuthenticationSessionError
+                where error.code == .canceledLogin
+            {
+                throw AuthError.providerSignInCancelled
+            }
         }
-
-        let code = try Self.extractAuthCode(from: callbackURL)
-        return try await exchangeCodeForIDToken(
-            code: code, codeVerifier: codeVerifier, redirectURI: redirectURI)
     }
 
     // MARK: - URL Building

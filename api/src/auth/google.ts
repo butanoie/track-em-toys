@@ -38,10 +38,10 @@ export async function verifyGoogleToken(
 
   const audList = Array.isArray(payload.aud) ? payload.aud : [payload.aud]
   let clientType: ProviderClaims['client_type']
-  if (audList.includes(config.google.iosClientId)
+  if ((config.google.iosClientId && audList.includes(config.google.iosClientId))
     || (config.google.desktopClientId && audList.includes(config.google.desktopClientId))) {
     clientType = 'native'
-  } else if (audList.includes(config.google.webClientId)) {
+  } else if (config.google.webClientId && audList.includes(config.google.webClientId)) {
     clientType = 'web'
   } else {
     throw new ProviderVerificationError(`Google id_token audience "${audList.join(', ')}" does not match any configured client ID`)
