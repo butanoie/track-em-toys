@@ -99,7 +99,7 @@ export default tseslint.config(
   {
     // AuthProvider exports both context and component (intentional design)
     // Shadcn/ui button.tsx exports both cva variants and Button component
-    files: ['src/auth/AuthProvider.tsx', 'src/components/ui/button.tsx'],
+    files: ['src/auth/AuthProvider.tsx', 'src/components/ui/button.tsx', 'src/components/ui/badge.tsx'],
     rules: {
       'react-refresh/only-export-components': 'off',
     },

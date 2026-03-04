@@ -72,6 +72,25 @@ nonisolated struct UserResponse: Codable, Equatable, Sendable {
     let avatarUrl: String?
 }
 
+nonisolated struct LinkedAccount: Codable, Equatable, Sendable {
+    let provider: String
+    let email: String?
+}
+
+nonisolated struct MeResponse: Decodable, Sendable {
+    let id: String
+    let email: String?
+    let displayName: String?
+    let avatarUrl: String?
+    let linkedAccounts: [LinkedAccount]
+}
+
+nonisolated struct LinkAccountRequestBody: Encodable, Sendable {
+    let provider: String
+    let idToken: String
+    let nonce: String?
+}
+
 nonisolated struct APIErrorResponse: Decodable, Sendable {
     let error: String
 }

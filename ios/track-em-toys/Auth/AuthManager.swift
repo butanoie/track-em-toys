@@ -102,6 +102,49 @@ final class AuthManager {
         await completeSignIn(with: response)
     }
 
+    // MARK: - Account Info & Linking
+
+    /// Fetches the current user profile with linked accounts from the server.
+    func fetchMe() async throws -> MeResponse {
+        try await AuthEndpoints.me(using: apiClient)
+    }
+
+    /// Links an Apple account to the current user via the provided sign-in result.
+    func linkAppleAccount(_ result: AppleSignInResult) async throws -> MeResponse {
+        let response = try await AuthEndpoints.linkAccount(
+            provider: .apple,
+            idToken: result.idToken,
+            nonce: AppleSignInCoordinator.sha256Hex(result.rawNonce),
+            using: apiClient
+        )
+        updateUserFromMe(response)
+        return response
+    }
+
+    /// Links a Google account to the current user via the provided ID token.
+    func linkGoogleAccount(_ idToken: String) async throws -> MeResponse {
+        let response = try await AuthEndpoints.linkAccount(
+            provider: .google,
+            idToken: idToken,
+            nonce: nil,
+            using: apiClient
+        )
+        updateUserFromMe(response)
+        return response
+    }
+
+    /// Updates the local user state from a MeResponse (keeps profile in sync after linking).
+    private func updateUserFromMe(_ me: MeResponse) {
+        let updated = UserResponse(
+            id: me.id,
+            email: me.email,
+            displayName: me.displayName,
+            avatarUrl: me.avatarUrl
+        )
+        currentUser = updated
+        try? KeychainService.saveUserProfile(updated)
+    }
+
     // MARK: - Token Refresh
 
     /// Attempts to refresh the access token. Returns true on success.

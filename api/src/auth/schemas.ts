@@ -146,6 +146,46 @@ export const logoutSchema = {
   },
 } as const
 
+/** Shared 200-response shape for endpoints returning a user with linked accounts. */
+const userWithAccountsResponse = {
+  type: 'object',
+  required: ['id', 'email', 'display_name', 'avatar_url', 'linked_accounts'],
+  additionalProperties: false,
+  properties: {
+    id: { type: 'string' },
+    email: { type: ['string', 'null'] },
+    display_name: { type: ['string', 'null'] },
+    avatar_url: { type: ['string', 'null'] },
+    linked_accounts: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['provider', 'email'],
+        properties: {
+          provider: { type: 'string' },
+          email: { type: ['string', 'null'] },
+        },
+      },
+    },
+  },
+} as const
+
+/** Fastify route schema for GET /auth/me. */
+export const meSchema = {
+  description: 'Return the authenticated user profile with linked OAuth accounts.',
+  tags: ['auth'],
+  summary: 'Get current user',
+  security: [{ bearerAuth: [] }],
+  response: {
+    200: userWithAccountsResponse,
+    // 401: JWT missing/invalid or user not found
+    401: errorResponse,
+    // 500: unexpected server error
+    500: errorResponse,
+  },
+} as const
+
 /** Fastify route schema for POST /auth/link-account. */
 export const linkAccountSchema = {
   description: 'Link an additional OAuth provider to the authenticated user account. Requires a valid access token.',
@@ -163,29 +203,7 @@ export const linkAccountSchema = {
     additionalProperties: false,
   },
   response: {
-    200: {
-      type: 'object',
-      required: ['id', 'email', 'display_name', 'avatar_url', 'linked_accounts'],
-      additionalProperties: false,
-      properties: {
-        id: { type: 'string' },
-        email: { type: ['string', 'null'] },
-        display_name: { type: ['string', 'null'] },
-        avatar_url: { type: ['string', 'null'] },
-        linked_accounts: {
-          type: 'array',
-          items: {
-            type: 'object',
-            additionalProperties: false,
-            required: ['provider', 'email'],
-            properties: {
-              provider: { type: 'string' },
-              email: { type: ['string', 'null'] },
-            },
-          },
-        },
-      },
-    },
+    200: userWithAccountsResponse,
     // 400: schema validation failure
     400: errorResponse,
     // 401: JWT missing/invalid, or invalid provider token

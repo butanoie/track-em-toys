@@ -340,7 +340,7 @@ type UserWithAccountsRow = User & {
   oa_email: string | null
   oa_is_private_email: boolean | null
   oa_raw_profile: Record<string, unknown> | null
-  oa_created_at: string | null
+  oa_created_at: Date | string | null
 }
 
 /**
@@ -356,7 +356,7 @@ function isCompleteOAuthRow(r: UserWithAccountsRow): r is UserWithAccountsRow & 
   oa_provider: OAuthProvider
   oa_provider_user_id: string
   oa_is_private_email: boolean
-  oa_created_at: string
+  oa_created_at: Date | string
 } {
   return (
     typeof r.oa_id === 'string' &&
@@ -364,7 +364,7 @@ function isCompleteOAuthRow(r: UserWithAccountsRow): r is UserWithAccountsRow & 
     (r.oa_provider === 'apple' || r.oa_provider === 'google') &&
     typeof r.oa_provider_user_id === 'string' &&
     typeof r.oa_is_private_email === 'boolean' &&
-    typeof r.oa_created_at === 'string'
+    r.oa_created_at != null
   )
 }
 

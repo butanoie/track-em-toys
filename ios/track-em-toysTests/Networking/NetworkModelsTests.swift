@@ -157,6 +157,99 @@ struct NetworkModelsTests {
         #expect(decoded == user)
     }
 
+    // MARK: - LinkedAccount Round-Trip
+
+    @Test func linkedAccountRoundTrip() throws {
+        let account = LinkedAccount(provider: "google", email: "test@gmail.com")
+        let data = try encoder.encode(account)
+        let decoded = try decoder.decode(LinkedAccount.self, from: data)
+
+        #expect(decoded == account)
+    }
+
+    @Test func linkedAccountRoundTripWithNullEmail() throws {
+        let account = LinkedAccount(provider: "apple", email: nil)
+        let data = try encoder.encode(account)
+        let decoded = try decoder.decode(LinkedAccount.self, from: data)
+
+        #expect(decoded == account)
+    }
+
+    // MARK: - MeResponse Decoding
+
+    @Test func meResponseDecodes() throws {
+        let json = """
+        {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "email": "test@example.com",
+            "display_name": "Test User",
+            "avatar_url": "https://example.com/avatar.jpg",
+            "linked_accounts": [
+                {"provider": "google", "email": "test@gmail.com"},
+                {"provider": "apple", "email": null}
+            ]
+        }
+        """.data(using: .utf8)!
+
+        let response = try decoder.decode(MeResponse.self, from: json)
+        #expect(response.id == "550e8400-e29b-41d4-a716-446655440000")
+        #expect(response.email == "test@example.com")
+        #expect(response.displayName == "Test User")
+        #expect(response.avatarUrl == "https://example.com/avatar.jpg")
+        #expect(response.linkedAccounts.count == 2)
+        #expect(response.linkedAccounts[0].provider == "google")
+        #expect(response.linkedAccounts[0].email == "test@gmail.com")
+        #expect(response.linkedAccounts[1].provider == "apple")
+        #expect(response.linkedAccounts[1].email == nil)
+    }
+
+    @Test func meResponseDecodesWithEmptyAccounts() throws {
+        let json = """
+        {
+            "id": "u1",
+            "email": null,
+            "display_name": null,
+            "avatar_url": null,
+            "linked_accounts": []
+        }
+        """.data(using: .utf8)!
+
+        let response = try decoder.decode(MeResponse.self, from: json)
+        #expect(response.email == nil)
+        #expect(response.displayName == nil)
+        #expect(response.linkedAccounts.isEmpty)
+    }
+
+    // MARK: - LinkAccountRequestBody Encoding
+
+    @Test func linkAccountRequestBodyEncodes() throws {
+        let body = LinkAccountRequestBody(
+            provider: "apple",
+            idToken: "apple-id-token",
+            nonce: "hashed-nonce"
+        )
+        let json = try encoder.encode(body)
+        let dict = try JSONSerialization.jsonObject(with: json) as! [String: Any]
+
+        #expect(dict["provider"] as? String == "apple")
+        #expect(dict["id_token"] as? String == "apple-id-token")
+        #expect(dict["nonce"] as? String == "hashed-nonce")
+    }
+
+    @Test func linkAccountRequestBodyEncodesWithNilNonce() throws {
+        let body = LinkAccountRequestBody(
+            provider: "google",
+            idToken: "google-id-token",
+            nonce: nil
+        )
+        let json = try encoder.encode(body)
+        let dict = try JSONSerialization.jsonObject(with: json) as! [String: Any]
+
+        #expect(dict["provider"] as? String == "google")
+        #expect(dict["id_token"] as? String == "google-id-token")
+        #expect(dict["nonce"] == nil)
+    }
+
     // MARK: - APIErrorResponse Decoding
 
     @Test func apiErrorResponseDecodes() throws {

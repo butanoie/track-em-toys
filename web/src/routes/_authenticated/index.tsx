@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useAuth } from '@/auth/useAuth'
 import { Button } from '@/components/ui/button'
 
@@ -20,6 +20,12 @@ function Dashboard() {
                 {user.display_name ?? user.email ?? 'Collector'}
               </span>
             )}
+            <Link
+              to="/settings"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Settings
+            </Link>
             <Button variant="outline" size="sm" onClick={() => { void logout() }}>
               Sign out
             </Button>
