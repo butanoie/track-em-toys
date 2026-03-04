@@ -86,14 +86,17 @@ Requires a paid Apple Developer account ($99/year).
 
 ### Google Sign-In
 
-Both values come from [Google Cloud Console → APIs & Credentials](https://console.cloud.google.com/apis/credentials).
+All values come from [Google Cloud Console → APIs & Credentials](https://console.cloud.google.com/apis/credentials).
 
 | Variable | Required | Where to find it |
 |----------|----------|------------------|
 | `GOOGLE_WEB_CLIENT_ID` | Yes | Create an OAuth 2.0 Client ID with type "Web application" |
 | `GOOGLE_IOS_CLIENT_ID` | Yes | Create an OAuth 2.0 Client ID with type "iOS" |
+| `GOOGLE_DESKTOP_CLIENT_ID` | No | Create an OAuth 2.0 Client ID with type "Desktop app" (for macOS native sign-in) |
 
 For the web client, add `http://localhost:5173` as an authorized JavaScript origin. You also need an OAuth consent screen configured on the project.
+
+The desktop client ID is used by the macOS app, which authenticates via `ASWebAuthenticationSession` + PKCE. Unlike iOS (which uses the Google Sign-In SDK as a public client), macOS uses the "Desktop app" client type which requires a `client_secret` in the token exchange. The secret is stored in the iOS app's `Info.plist` (gitignored, never in source code).
 
 ### TLS (Local HTTPS)
 

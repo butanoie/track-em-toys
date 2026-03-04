@@ -11,6 +11,8 @@ struct AuthView: View {
     private let appleCoordinator = AppleSignInCoordinator()
     #if os(iOS)
     private let googleCoordinator = GoogleSignInCoordinator()
+    #elseif os(macOS)
+    private let googleCoordinator = GoogleSignInMacCoordinator()
     #endif
 
     var body: some View {
@@ -62,8 +64,7 @@ struct AuthView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
 
-                // Google Sign-In — iOS only (SDK not available on macOS)
-                #if os(iOS)
+                // Google Sign-In — iOS uses native SDK, macOS uses ASWebAuthenticationSession
                 Button {
                     Task { await handleGoogleSignIn() }
                 } label: {
@@ -78,11 +79,10 @@ struct AuthView: View {
                     .foregroundStyle(.black)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color(.systemGray3), lineWidth: 1)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                     )
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
-                #endif
             }
             .disabled(isSigningIn)
             .opacity(isSigningIn ? 0.6 : 1.0)
@@ -108,47 +108,52 @@ struct AuthView: View {
 
     // MARK: - Sign-In Handlers
 
+    /// Wraps a provider sign-in action with loading state, cancellation handling, and error display.
+    @MainActor
+    private func performSignIn(_ action: @MainActor () async throws -> Void) async {
+        isSigningIn = true
+        defer { isSigningIn = false }
+
+        do {
+            try await action()
+        } catch let error as AuthError where error == .providerSignInCancelled {
+            // User cancelled — don't show an error
+        } catch {
+            showSignInError(error.localizedDescription)
+        }
+    }
+
     @MainActor
     private func handleAppleSignIn() async {
-        isSigningIn = true
-        defer { isSigningIn = false }
-
-        guard let window = platformKeyWindow else {
-            showSignInError("Unable to find the app window.")
-            return
-        }
-
-        do {
+        await performSignIn {
+            guard let window = platformKeyWindow else {
+                showSignInError("Unable to find the app window.")
+                return
+            }
             let result = try await appleCoordinator.performSignIn(in: window)
             try await authManager.signInWithApple(result)
-        } catch let error as AuthError where error == .providerSignInCancelled {
-            // User cancelled — don't show an error
-        } catch {
-            showSignInError(error.localizedDescription)
         }
     }
 
-    #if os(iOS)
     @MainActor
     private func handleGoogleSignIn() async {
-        isSigningIn = true
-        defer { isSigningIn = false }
-
-        guard let rootVC = platformKeyWindow?.rootViewController else {
-            showSignInError("Unable to find the root view controller.")
-            return
-        }
-
-        do {
+        await performSignIn {
+            #if os(iOS)
+            guard let rootVC = platformKeyWindow?.rootViewController else {
+                showSignInError("Unable to find the root view controller.")
+                return
+            }
             let idToken = try await googleCoordinator.signIn(presenting: rootVC)
+            #elseif os(macOS)
+            guard let window = platformKeyWindow else {
+                showSignInError("Unable to find the app window.")
+                return
+            }
+            let idToken = try await googleCoordinator.signIn(in: window)
+            #endif
             try await authManager.signInWithGoogle(idToken)
-        } catch let error as AuthError where error == .providerSignInCancelled {
-            // User cancelled — don't show an error
-        } catch {
-            showSignInError(error.localizedDescription)
         }
     }
-    #endif
 
     private func showSignInError(_ message: String) {
         errorMessage = message

@@ -360,4 +360,25 @@ describe('config', () => {
       expect(config.google.iosClientId).toBe('test-ios.apps.googleusercontent.com')
     })
   })
+
+  describe('Google Desktop Client ID (optional)', () => {
+    it('reads GOOGLE_DESKTOP_CLIENT_ID when set', async () => {
+      vi.stubEnv('GOOGLE_DESKTOP_CLIENT_ID', 'test-desktop.apps.googleusercontent.com')
+      const { config } = await import('./config.js')
+      expect(config.google.desktopClientId).toBe('test-desktop.apps.googleusercontent.com')
+    })
+
+    it('returns undefined when GOOGLE_DESKTOP_CLIENT_ID is not set', async () => {
+      vi.stubEnv('GOOGLE_DESKTOP_CLIENT_ID', '')
+      const { config } = await import('./config.js')
+      expect(config.google.desktopClientId).toBeUndefined()
+    })
+
+    it('does not break startup when GOOGLE_DESKTOP_CLIENT_ID is absent', async () => {
+      // Don't stub GOOGLE_DESKTOP_CLIENT_ID at all — should still load fine
+      const { config } = await import('./config.js')
+      expect(config.google.webClientId).toBe('test-web.apps.googleusercontent.com')
+      expect(config.google.iosClientId).toBe('test-ios.apps.googleusercontent.com')
+    })
+  })
 })

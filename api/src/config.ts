@@ -132,6 +132,7 @@ export const config = {
   google: {
     webClientId: required('GOOGLE_WEB_CLIENT_ID'),
     iosClientId: required('GOOGLE_IOS_CLIENT_ID'),
+    desktopClientId: optionalOrUndefined('GOOGLE_DESKTOP_CLIENT_ID'),
   },
 
   tls: {
