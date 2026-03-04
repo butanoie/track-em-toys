@@ -34,21 +34,18 @@ struct TrackEmToysApp: App {
 
 /// Placeholder for the authenticated main content.
 struct MainTabView: View {
-    @Environment(AuthManager.self) private var authManager
-
     var body: some View {
         TabView {
             Tab("Collection", systemImage: "cube.box.fill") {
                 NavigationStack {
                     Text("My Collection")
                         .navigationTitle("Collection")
-                        .toolbar {
-                            ToolbarItem(placement: .automatic) {
-                                Button("Sign Out", systemImage: "rectangle.portrait.and.arrow.right") {
-                                    Task { await authManager.signOut() }
-                                }
-                            }
-                        }
+                }
+            }
+
+            Tab("Account", systemImage: "person.crop.circle") {
+                NavigationStack {
+                    AccountSettingsView()
                 }
             }
         }

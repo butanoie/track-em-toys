@@ -3,7 +3,7 @@ import * as queries from '../db/queries.js'
 import { verifyAppleToken, isPrivateRelayEmail } from './apple.js'
 import { verifyGoogleToken } from './google.js'
 import { hashToken, createAndStoreRefreshToken, rotateRefreshToken } from './tokens.js'
-import { signinSchema, refreshSchema, logoutSchema, linkAccountSchema } from './schemas.js'
+import { signinSchema, refreshSchema, logoutSchema, meSchema, linkAccountSchema } from './schemas.js'
 import { REFRESH_TOKEN_COOKIE, setRefreshTokenCookie, clearRefreshTokenCookie, readSignedCookie } from './cookies.js'
 import { isNetworkError, ProviderVerificationError, HttpError } from './errors.js'
 import type { FastifyInstance, FastifyRequest, FastifyReply, FastifyBaseLogger } from 'fastify'
@@ -760,6 +760,44 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
       clearRefreshTokenCookie(reply)
 
       return reply.code(204).send()
+    },
+  )
+
+  // ─── GET /me ─────────────────────────────────────────────────────────────
+
+  fastify.get(
+    '/me',
+    {
+      schema: meSchema,
+      preHandler: [fastify.authenticate],
+      config: { rateLimit: { max: 20, timeWindow: '1 minute' } },
+    },
+    async (request, reply) => {
+      if (!isUserPayload(request.user)) {
+        return reply.code(401).send({ error: 'Unauthorized' })
+      }
+      const user = request.user
+
+      if (!isValidUuid(user.sub)) {
+        return reply.code(401).send({ error: 'Unauthorized' })
+      }
+
+      const result = await withTransaction(async (client) => {
+        const userWithAccounts = await queries.findUserWithAccounts(client, user.sub)
+        if (!userWithAccounts) {
+          throw new HttpError(401, { error: 'User not found' })
+        }
+
+        return {
+          ...queries.toUserResponse(userWithAccounts.user),
+          linked_accounts: userWithAccounts.accounts.map((a) => ({
+            provider: a.provider,
+            email: a.email,
+          })),
+        }
+      }, user.sub)
+
+      return result
     },
   )
 

@@ -152,6 +152,90 @@ struct AuthEndpointsTests {
         #expect(response.refreshToken == "new_rt")
     }
 
+    // MARK: - me
+
+    @Test func meSendsCorrectEndpoint() async throws {
+        let mock = MockAPIClient()
+        let meResponse = MeResponse(
+            id: "u1",
+            email: "e@t.com",
+            displayName: "Test",
+            avatarUrl: nil,
+            linkedAccounts: [LinkedAccount(provider: "google", email: "e@t.com")]
+        )
+        await mock.setResponseToReturn(meResponse)
+
+        let response = try await AuthEndpoints.me(using: mock)
+
+        let endpoint = await mock.lastEndpoint
+        #expect(endpoint?.path == "/auth/me")
+        #expect(endpoint?.method == .get)
+        #expect(endpoint?.requiresAuth == true)
+        #expect(endpoint?.body == nil)
+        #expect(response.linkedAccounts.count == 1)
+    }
+
+    // MARK: - linkAccount
+
+    @Test func linkAccountSendsCorrectEndpoint() async throws {
+        let mock = MockAPIClient()
+        let meResponse = MeResponse(
+            id: "u1",
+            email: "e@t.com",
+            displayName: "Test",
+            avatarUrl: nil,
+            linkedAccounts: [
+                LinkedAccount(provider: "google", email: "e@t.com"),
+                LinkedAccount(provider: "apple", email: "apple@example.com"),
+            ]
+        )
+        await mock.setResponseToReturn(meResponse)
+
+        let response = try await AuthEndpoints.linkAccount(
+            provider: .apple,
+            idToken: "apple-id-token",
+            nonce: "hashed-nonce",
+            using: mock
+        )
+
+        let endpoint = await mock.lastEndpoint
+        #expect(endpoint?.path == "/auth/link-account")
+        #expect(endpoint?.method == .post)
+        #expect(endpoint?.requiresAuth == true)
+
+        let bodyData = await mock.lastEncodedBody
+        let body = bodyData.flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
+        #expect(body?["provider"] as? String == "apple")
+        #expect(body?["id_token"] as? String == "apple-id-token")
+        #expect(body?["nonce"] as? String == "hashed-nonce")
+
+        #expect(response.linkedAccounts.count == 2)
+    }
+
+    @Test func linkAccountWithGoogleHasNoNonce() async throws {
+        let mock = MockAPIClient()
+        let meResponse = MeResponse(
+            id: "u1",
+            email: "e@t.com",
+            displayName: "Test",
+            avatarUrl: nil,
+            linkedAccounts: [LinkedAccount(provider: "google", email: "e@t.com")]
+        )
+        await mock.setResponseToReturn(meResponse)
+
+        _ = try await AuthEndpoints.linkAccount(
+            provider: .google,
+            idToken: "google-token",
+            nonce: nil,
+            using: mock
+        )
+
+        let bodyData = await mock.lastEncodedBody
+        let body = bodyData.flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
+        #expect(body?["provider"] as? String == "google")
+        #expect(body?["nonce"] == nil)
+    }
+
     // MARK: - logout
 
     @Test func logoutSendsCorrectEndpoint() async throws {

@@ -301,7 +301,7 @@ describe('queries', () => {
         oa_email: 'test@gmail.com',
         oa_is_private_email: false,
         oa_raw_profile: null,
-        oa_created_at: '2026-01-01T00:00:00Z',
+        oa_created_at: new Date('2026-01-01T00:00:00Z'),
         user_id: mockUser.id,
         user_email: mockUser.email,
         email_verified: mockUser.email_verified,
@@ -371,7 +371,7 @@ describe('queries', () => {
         oa_email: null,
         oa_is_private_email: true,
         oa_raw_profile: { sub: 'apple-sub-xyz' },
-        oa_created_at: '2026-02-01T00:00:00Z',
+        oa_created_at: new Date('2026-02-01T00:00:00Z'),
         user_id: mockUser.id,
         user_email: null,
         email_verified: false,
@@ -510,7 +510,7 @@ describe('queries', () => {
         oa_email: 'test@gmail.com',
         oa_is_private_email: false,
         oa_raw_profile: null,
-        oa_created_at: '2026-01-01T00:00:00Z',
+        oa_created_at: new Date('2026-01-01T00:00:00Z'),
       }
       // safe: mockResolvedValue is typed for the query's return shape
       vi.mocked(client.query).mockResolvedValue(mockQueryResult([joinRow], 1))
@@ -565,7 +565,7 @@ describe('queries', () => {
         oa_email: 'test@gmail.com',
         oa_is_private_email: false,
         oa_raw_profile: null,
-        oa_created_at: '2026-01-01T00:00:00Z',
+        oa_created_at: new Date('2026-01-01T00:00:00Z'),
       }
       const appleRow = {
         ...mockUser,

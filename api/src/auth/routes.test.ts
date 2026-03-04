@@ -1938,6 +1938,114 @@ describe('auth routes', () => {
     })
   })
 
+  // ─── GET /auth/me ─────────────────────────────────────────────────────────
+
+  describe('GET /auth/me', () => {
+    function getValidAccessToken(): string {
+      return server.jwt.sign({ sub: mockUser.id })
+    }
+
+    it('should return user profile with linked accounts', async () => {
+      const accessToken = getValidAccessToken()
+      mockTx()
+      vi.mocked(queries.findUserWithAccounts).mockResolvedValue({
+        user: mockUser,
+        accounts: [mockOAuthAccount],
+      })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/auth/me',
+        remoteAddress: '10.40.1.1',
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = response.json<{
+        id: string
+        email: string | null
+        display_name: string | null
+        linked_accounts: Array<{ provider: string; email: string | null }>
+      }>()
+      expect(body.id).toBe(mockUser.id)
+      expect(body.email).toBe(mockUser.email)
+      expect(body.display_name).toBe(mockUser.display_name)
+      expect(body.linked_accounts).toHaveLength(1)
+      expect(body.linked_accounts[0]).toBeDefined()
+      expect(body.linked_accounts[0]!.provider).toBe('google')
+      // RLS context: transaction must be scoped to the authenticated user
+      expect(lastTransactionUserId).toBe(mockUser.id)
+    })
+
+    it('should return user with empty linked_accounts when no OAuth accounts exist', async () => {
+      const accessToken = getValidAccessToken()
+      mockTx()
+      vi.mocked(queries.findUserWithAccounts).mockResolvedValue({
+        user: mockUser,
+        accounts: [],
+      })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/auth/me',
+        remoteAddress: '10.40.2.1',
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = response.json<{ linked_accounts: unknown[] }>()
+      expect(body.linked_accounts).toHaveLength(0)
+    })
+
+    it('should return 401 when no Bearer token is provided', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: '/auth/me',
+        remoteAddress: '10.40.3.1',
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should return 401 when user is not found', async () => {
+      const accessToken = getValidAccessToken()
+      mockTx()
+      vi.mocked(queries.findUserWithAccounts).mockResolvedValue(null)
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/auth/me',
+        remoteAddress: '10.40.4.1',
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(401)
+      expect(response.json<{ error: string }>().error).toBe('User not found')
+    })
+
+    it('should return 401 when JWT sub is not a valid UUID', async () => {
+      const badSubToken = server.jwt.sign({ sub: 'not-a-uuid' })
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/auth/me',
+        remoteAddress: '10.40.5.1',
+        headers: {
+          authorization: `Bearer ${badSubToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(401)
+      expect(response.json<{ error: string }>().error).toBe('Unauthorized')
+    })
+  })
+
   // ─── POST /auth/link-account ───────────────────────────────────────────────
 
   describe('POST /auth/link-account', () => {

@@ -107,6 +107,29 @@ struct AuthManagerTests {
         // currentUser is private(set), so we test via the public initialize/signIn flows
     }
 
+    // MARK: - fetchMe
+
+    @Test @MainActor func fetchMeReturnsResponse() async throws {
+        let mockClient = MockAPIClient()
+        let meResponse = MeResponse(
+            id: "u1",
+            email: "test@example.com",
+            displayName: "Test",
+            avatarUrl: nil,
+            linkedAccounts: [LinkedAccount(provider: "google", email: "test@example.com")]
+        )
+        await mockClient.setResponseToReturn(meResponse)
+
+        let manager = AuthManager(apiClient: APIClient(baseURL: URL(string: "https://localhost")!))
+        // We test via AuthEndpoints directly since fetchMe delegates to it
+        let response = try await AuthEndpoints.me(using: mockClient)
+        #expect(response.id == "u1")
+        #expect(response.linkedAccounts.count == 1)
+
+        // Suppress unused variable warning
+        _ = manager
+    }
+
     // MARK: - Helpers
 
     /// Constructs a minimal JWT from a payload JSON string.

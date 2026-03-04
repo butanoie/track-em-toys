@@ -44,6 +44,42 @@ enum AuthEndpoints {
         return try await client.request(endpoint)
     }
 
+    /// GET /auth/me — Fetch authenticated user profile with linked accounts.
+    static func me(
+        using client: APIClientProtocol
+    ) async throws -> MeResponse {
+        let endpoint = Endpoint(
+            path: "/auth/me",
+            method: .get,
+            requiresAuth: true
+        )
+
+        return try await client.request(endpoint)
+    }
+
+    /// POST /auth/link-account — Link an additional OAuth provider to the authenticated user.
+    static func linkAccount(
+        provider: OAuthProvider,
+        idToken: String,
+        nonce: String?,
+        using client: APIClientProtocol
+    ) async throws -> MeResponse {
+        let body = LinkAccountRequestBody(
+            provider: provider.rawValue,
+            idToken: idToken,
+            nonce: nonce
+        )
+
+        let endpoint = Endpoint(
+            path: "/auth/link-account",
+            method: .post,
+            body: body,
+            requiresAuth: true
+        )
+
+        return try await client.request(endpoint)
+    }
+
     /// POST /auth/logout — Revoke refresh token (best-effort, requires auth).
     static func logout(
         refreshToken: String,

@@ -17,7 +17,8 @@ export interface OAuthAccount {
   email: string | null
   is_private_email: boolean
   raw_profile: Record<string, unknown> | null
-  created_at: string
+  /** pg returns TIMESTAMPTZ as Date; tests may use ISO strings. */
+  created_at: Date | string
 }
 
 export type ClientType = 'native' | 'web'
