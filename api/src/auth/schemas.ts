@@ -8,6 +8,9 @@ const errorResponse = {
 
 /** Fastify route schema for POST /auth/signin. */
 export const signinSchema = {
+  description: 'Authenticate with an Apple or Google identity provider. Creates a new user on first sign-in.',
+  tags: ['auth'],
+  summary: 'Sign in',
   body: {
     type: 'object',
     required: ['provider', 'id_token'],
@@ -71,6 +74,9 @@ export const signinSchema = {
  * httpOnly cookie; native clients include it in the request body.
  */
 export const refreshSchema = {
+  description: 'Rotate a refresh token and receive a new access token. Web clients send the refresh token via httpOnly cookie; native clients send it in the request body.',
+  tags: ['auth'],
+  summary: 'Refresh tokens',
   body: {
     type: 'object',
     // NOTE: No `required` array — body fields are intentionally optional.
@@ -112,6 +118,10 @@ export const refreshSchema = {
  * httpOnly cookie; native clients include it in the request body.
  */
 export const logoutSchema = {
+  description: 'Revoke the current refresh token and clear the session. Requires a valid access token.',
+  tags: ['auth'],
+  summary: 'Log out',
+  security: [{ bearerAuth: [] }],
   body: {
     type: 'object',
     // refresh_token is optional in the request body: web clients send it via
@@ -138,6 +148,10 @@ export const logoutSchema = {
 
 /** Fastify route schema for POST /auth/link-account. */
 export const linkAccountSchema = {
+  description: 'Link an additional OAuth provider to the authenticated user account. Requires a valid access token.',
+  tags: ['auth'],
+  summary: 'Link account',
+  security: [{ bearerAuth: [] }],
   body: {
     type: 'object',
     required: ['provider', 'id_token'],

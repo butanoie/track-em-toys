@@ -11,6 +11,7 @@ import { getPublicKeyPem, getCurrentKid, initKeyStore } from './auth/key-store.j
 import { jwksRoute } from './auth/jwks.js'
 import { authRoutes } from './auth/routes.js'
 import { HttpError } from './auth/errors.js'
+import { docsPlugin } from './plugins/docs.js'
 
 // ─── Fastify type augmentation ─────────────────────────────────────────────
 
@@ -161,12 +162,21 @@ export async function buildServer(): Promise<FastifyInstance> {
     },
   )
 
+  // ─── API Documentation (non-production only) ────────────────────────────
+
+  if (config.nodeEnv !== 'production') {
+    await fastify.register(docsPlugin)
+  }
+
   // ─── Health check ──────────────────────────────────────────────────────
 
   fastify.get(
     '/health',
     {
       schema: {
+        description: 'Returns the current server health status.',
+        tags: ['system'],
+        summary: 'Health check',
         response: {
           200: {
             type: 'object',

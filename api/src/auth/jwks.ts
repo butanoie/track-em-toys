@@ -29,6 +29,9 @@ export async function jwksRoute(fastify: FastifyInstance, _opts: object): Promis
     '/.well-known/jwks.json',
     {
       schema: {
+        description: 'Returns the JSON Web Key Set used to verify access token signatures.',
+        tags: ['jwks'],
+        summary: 'Get JWKS',
         response: {
           200: {
             type: 'object',
