@@ -13,7 +13,7 @@ const client = new OAuth2Client()
 export async function verifyGoogleToken(
   idToken: string,
 ): Promise<ProviderClaims> {
-  const audience = [config.google.webClientId, config.google.iosClientId].filter(
+  const audience = [config.google.webClientId, config.google.iosClientId, config.google.desktopClientId].filter(
     (v): v is string => v !== undefined,
   )
   if (audience.length === 0) {
@@ -38,9 +38,10 @@ export async function verifyGoogleToken(
 
   const audList = Array.isArray(payload.aud) ? payload.aud : [payload.aud]
   let clientType: ProviderClaims['client_type']
-  if (config.google.iosClientId && audList.includes(config.google.iosClientId)) {
+  if (audList.includes(config.google.iosClientId)
+    || (config.google.desktopClientId && audList.includes(config.google.desktopClientId))) {
     clientType = 'native'
-  } else if (config.google.webClientId && audList.includes(config.google.webClientId)) {
+  } else if (audList.includes(config.google.webClientId)) {
     clientType = 'web'
   } else {
     throw new ProviderVerificationError(`Google id_token audience "${audList.join(', ')}" does not match any configured client ID`)

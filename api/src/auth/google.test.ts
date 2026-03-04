@@ -5,6 +5,7 @@ vi.mock('../config.js', () => ({
     google: {
       webClientId: 'web-client-id.apps.googleusercontent.com',
       iosClientId: 'ios-client-id.apps.googleusercontent.com',
+      desktopClientId: 'desktop-client-id.apps.googleusercontent.com',
     },
   },
 }))
@@ -105,6 +106,7 @@ describe('google auth', () => {
       audience: [
         'web-client-id.apps.googleusercontent.com',
         'ios-client-id.apps.googleusercontent.com',
+        'desktop-client-id.apps.googleusercontent.com',
       ],
     })
   })
@@ -161,6 +163,42 @@ describe('google auth', () => {
     mockVerifyIdToken.mockRejectedValue(dnsError)
 
     await expect(verifyGoogleToken('bad-token')).rejects.not.toBeInstanceOf(ProviderVerificationError)
+  })
+
+  it('should return clientType native when audience matches desktopClientId', async () => {
+    mockGetPayload.mockReturnValue({
+      sub: 'google-user-desktop',
+      email: 'user@gmail.com',
+      email_verified: true,
+      aud: 'desktop-client-id.apps.googleusercontent.com',
+    })
+
+    const claims = await verifyGoogleToken('fake-google-token')
+    expect(claims.client_type).toBe('native')
+  })
+
+  it('should return clientType native when aud is an array matching desktopClientId', async () => {
+    mockGetPayload.mockReturnValue({
+      sub: 'google-user-desktop-arr',
+      email: 'user@gmail.com',
+      email_verified: true,
+      aud: ['desktop-client-id.apps.googleusercontent.com'],
+    })
+
+    const claims = await verifyGoogleToken('fake-google-token')
+    expect(claims.client_type).toBe('native')
+  })
+
+  it('should prefer iosClientId over desktopClientId when both match in aud array', async () => {
+    mockGetPayload.mockReturnValue({
+      sub: 'google-user-both-native',
+      email: 'user@gmail.com',
+      email_verified: true,
+      aud: ['ios-client-id.apps.googleusercontent.com', 'desktop-client-id.apps.googleusercontent.com'],
+    })
+
+    const claims = await verifyGoogleToken('token')
+    expect(claims.client_type).toBe('native')
   })
 
   it('should handle email_verified being undefined', async () => {
@@ -301,13 +339,73 @@ describe('google auth — undefined clientId guard', () => {
     vi.resetModules()
   })
 
-  it('throws "Google Sign-In is not configured" when both iosClientId and webClientId are undefined', async () => {
+  it('falls through to throw when desktopClientId is undefined and audience matches the desktop client id string', async () => {
+    vi.resetModules()
+    vi.doMock('../config.js', () => ({
+      config: {
+        google: {
+          webClientId: 'web-client-id.apps.googleusercontent.com',
+          iosClientId: 'ios-client-id.apps.googleusercontent.com',
+          desktopClientId: undefined,
+        },
+      },
+    }))
+
+    const mod = await import('./google.js') as GoogleModule
+    const verifyWithPartialConfig = mod.verifyGoogleToken
+
+    mockGetPayload.mockReturnValue({
+      sub: 'google-user-desktop',
+      email: 'user@gmail.com',
+      email_verified: true,
+      aud: 'desktop-client-id.apps.googleusercontent.com',
+    })
+
+    await expect(verifyWithPartialConfig('fake-token')).rejects.toThrow(
+      'does not match any configured client ID',
+    )
+
+    vi.doUnmock('../config.js')
+    vi.resetModules()
+  })
+
+  it('returns clientType native for desktop audience when iosClientId is undefined', async () => {
+    vi.resetModules()
+    vi.doMock('../config.js', () => ({
+      config: {
+        google: {
+          webClientId: 'web-client-id.apps.googleusercontent.com',
+          iosClientId: undefined,
+          desktopClientId: 'desktop-client-id.apps.googleusercontent.com',
+        },
+      },
+    }))
+
+    const mod = await import('./google.js') as GoogleModule
+    const verifyWithPartialConfig = mod.verifyGoogleToken
+
+    mockGetPayload.mockReturnValue({
+      sub: 'google-user-desktop',
+      email: 'user@gmail.com',
+      email_verified: true,
+      aud: 'desktop-client-id.apps.googleusercontent.com',
+    })
+
+    const claims = await verifyWithPartialConfig('fake-token')
+    expect(claims).toHaveProperty('client_type', 'native')
+
+    vi.doUnmock('../config.js')
+    vi.resetModules()
+  })
+
+  it('throws "Google Sign-In is not configured" when all client IDs are undefined', async () => {
     vi.resetModules()
     vi.doMock('../config.js', () => ({
       config: {
         google: {
           webClientId: undefined,
           iosClientId: undefined,
+          desktopClientId: undefined,
         },
       },
     }))

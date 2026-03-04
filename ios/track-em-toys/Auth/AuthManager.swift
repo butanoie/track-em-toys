@@ -219,6 +219,14 @@ final class AuthManager {
         return expiresAt.timeIntervalSinceNow < 5
     }
 
+    /// Base64url-encodes data (no padding), per RFC 4648 §5.
+    nonisolated static func base64URLEncode(_ data: Data) -> String {
+        data.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+
     /// Decodes a base64url-encoded string (no padding required).
     nonisolated static func base64URLDecode(_ string: String) -> Data? {
         var base64 = string

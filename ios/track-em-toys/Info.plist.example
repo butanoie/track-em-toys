@@ -2,6 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Google Sign-In (iOS) — reversed client ID for URL scheme handling -->
+	<key>GIDClientID</key>
+	<string>YOUR_IOS_CLIENT_ID.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -11,9 +14,19 @@
 			<string>com.google.sign-in</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>REVERSED_CLIENT_ID_FROM_GOOGLE_OAUTH_PLIST</string>
+				<!-- Reversed iOS client ID for Google Sign-In SDK callback -->
+				<string>com.googleusercontent.apps.YOUR_IOS_CLIENT_ID</string>
+				<!-- Reversed Desktop client ID for macOS ASWebAuthenticationSession callback -->
+				<string>com.googleusercontent.apps.YOUR_DESKTOP_CLIENT_ID</string>
 			</array>
 		</dict>
 	</array>
+	<!-- Google Sign-In (macOS Desktop) — OAuth "Desktop app" client credentials -->
+	<!-- Create at: https://console.cloud.google.com/apis/credentials -->
+	<!-- Client type: "Desktop app" (NOT "Web application" or "iOS") -->
+	<key>GIDDesktopClientID</key>
+	<string>YOUR_DESKTOP_CLIENT_ID.apps.googleusercontent.com</string>
+	<key>GIDDesktopClientSecret</key>
+	<string>YOUR_DESKTOP_CLIENT_SECRET</string>
 </dict>
 </plist>
