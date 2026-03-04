@@ -42,6 +42,13 @@ protocol WebAuthSessionProviding: Sendable {
     ) async throws -> URL
 }
 
+/// Standard OAuth query parameter and response field names.
+private enum OAuthParam {
+    nonisolated(unsafe) static let code = "code"
+    nonisolated(unsafe) static let error = "error"
+    nonisolated(unsafe) static let idToken = "id_token"
+}
+
 @MainActor
 final class GoogleSignInMacCoordinator: Sendable {
 
@@ -49,8 +56,8 @@ final class GoogleSignInMacCoordinator: Sendable {
 
     let credentials: GoogleDesktopCredentials
 
-    nonisolated(unsafe) private static let authorizationEndpoint = URL(string: "https://accounts.google.com/o/oauth2/v2/auth")!
-    nonisolated(unsafe) private static let tokenEndpoint = URL(string: "https://oauth2.googleapis.com/token")!
+    private static let authorizationEndpoint = URL(string: "https://accounts.google.com/o/oauth2/v2/auth")!
+    private static let tokenEndpoint = URL(string: "https://oauth2.googleapis.com/token")!
 
     // MARK: - Init
 
@@ -63,16 +70,13 @@ final class GoogleSignInMacCoordinator: Sendable {
     /// Generates a cryptographically random code verifier (43-128 URL-safe characters).
     nonisolated static func generateCodeVerifier() -> String {
         // 32 random bytes → 43 base64url characters (without padding)
-        var bytes = [UInt8](repeating: 0, count: 32)
-        let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-        precondition(status == errSecSuccess, "Failed to generate random bytes")
-        return AuthManager.base64URLEncode(Data(bytes))
+        Data.cryptoRandom(count: 32).base64URLEncodedString()
     }
 
     /// Computes the S256 code challenge for a given code verifier.
     nonisolated static func codeChallenge(for verifier: String) -> String {
         let hash = SHA256.hash(data: Data(verifier.utf8))
-        return AuthManager.base64URLEncode(Data(hash))
+        return Data(hash).base64URLEncodedString()
     }
 
     // MARK: - Sign In
@@ -147,11 +151,11 @@ final class GoogleSignInMacCoordinator: Sendable {
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         let items = components?.queryItems ?? []
 
-        if let errorParam = items.first(where: { $0.name == "error" })?.value {
+        if let errorParam = items.first(where: { $0.name == OAuthParam.error })?.value {
             throw AuthError.providerSignInFailed("Google returned error: \(errorParam)")
         }
 
-        guard let code = items.first(where: { $0.name == "code" })?.value, !code.isEmpty else {
+        guard let code = items.first(where: { $0.name == OAuthParam.code })?.value, !code.isEmpty else {
             throw AuthError.providerSignInFailed("Missing authorization code in callback")
         }
 
@@ -197,7 +201,7 @@ final class GoogleSignInMacCoordinator: Sendable {
         }
 
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-            let idToken = json["id_token"] as? String, !idToken.isEmpty
+            let idToken = json[OAuthParam.idToken] as? String, !idToken.isEmpty
         else {
             throw AuthError.providerSignInFailed("Missing id_token in token exchange response")
         }

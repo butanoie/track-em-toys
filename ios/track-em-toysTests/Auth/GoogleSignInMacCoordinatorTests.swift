@@ -43,7 +43,7 @@ struct PKCEHelperTests {
 
         // Manually compute expected challenge
         let hash = SHA256.hash(data: Data(verifier.utf8))
-        let expected = AuthManager.base64URLEncode(Data(hash))
+        let expected = Data(hash).base64URLEncodedString()
 
         #expect(challenge == expected)
     }
@@ -57,7 +57,7 @@ struct PKCEHelperTests {
 
     @Test func base64URLEncodeProducesNoPadding() {
         let data = Data([0x00, 0x01, 0x02])
-        let encoded = AuthManager.base64URLEncode(data)
+        let encoded = data.base64URLEncodedString()
         #expect(!encoded.contains("="))
         #expect(!encoded.contains("+"))
         #expect(!encoded.contains("/"))
@@ -66,7 +66,7 @@ struct PKCEHelperTests {
     @Test func base64URLEncodeKnownValue() {
         // "Hello" → base64 "SGVsbG8=" → base64url "SGVsbG8"
         let data = Data("Hello".utf8)
-        let encoded = AuthManager.base64URLEncode(data)
+        let encoded = data.base64URLEncodedString()
         #expect(encoded == "SGVsbG8")
     }
 }

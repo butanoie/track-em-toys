@@ -219,26 +219,8 @@ final class AuthManager {
         return expiresAt.timeIntervalSinceNow < 5
     }
 
-    /// Base64url-encodes data (no padding), per RFC 4648 §5.
-    nonisolated static func base64URLEncode(_ data: Data) -> String {
-        data.base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-    }
-
-    /// Decodes a base64url-encoded string (no padding required).
+    /// Decodes a base64url-encoded JWT payload segment.
     nonisolated static func base64URLDecode(_ string: String) -> Data? {
-        var base64 = string
-            .replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-
-        // Pad to multiple of 4
-        let remainder = base64.count % 4
-        if remainder > 0 {
-            base64.append(contentsOf: String(repeating: "=", count: 4 - remainder))
-        }
-
-        return Data(base64Encoded: base64)
+        Data(base64URLEncoded: string)
     }
 }

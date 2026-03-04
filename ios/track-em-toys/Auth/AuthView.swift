@@ -108,19 +108,14 @@ struct AuthView: View {
 
     // MARK: - Sign-In Handlers
 
+    /// Wraps a provider sign-in action with loading state, cancellation handling, and error display.
     @MainActor
-    private func handleAppleSignIn() async {
+    private func performSignIn(_ action: @MainActor () async throws -> Void) async {
         isSigningIn = true
         defer { isSigningIn = false }
 
-        guard let window = platformKeyWindow else {
-            showSignInError("Unable to find the app window.")
-            return
-        }
-
         do {
-            let result = try await appleCoordinator.performSignIn(in: window)
-            try await authManager.signInWithApple(result)
+            try await action()
         } catch let error as AuthError where error == .providerSignInCancelled {
             // User cancelled — don't show an error
         } catch {
@@ -129,33 +124,34 @@ struct AuthView: View {
     }
 
     @MainActor
+    private func handleAppleSignIn() async {
+        await performSignIn {
+            guard let window = platformKeyWindow else {
+                showSignInError("Unable to find the app window.")
+                return
+            }
+            let result = try await appleCoordinator.performSignIn(in: window)
+            try await authManager.signInWithApple(result)
+        }
+    }
+
+    @MainActor
     private func handleGoogleSignIn() async {
-        isSigningIn = true
-        defer { isSigningIn = false }
-
-        #if os(iOS)
-        guard let rootVC = platformKeyWindow?.rootViewController else {
-            showSignInError("Unable to find the root view controller.")
-            return
-        }
-        #elseif os(macOS)
-        guard let window = platformKeyWindow else {
-            showSignInError("Unable to find the app window.")
-            return
-        }
-        #endif
-
-        do {
+        await performSignIn {
             #if os(iOS)
+            guard let rootVC = platformKeyWindow?.rootViewController else {
+                showSignInError("Unable to find the root view controller.")
+                return
+            }
             let idToken = try await googleCoordinator.signIn(presenting: rootVC)
             #elseif os(macOS)
+            guard let window = platformKeyWindow else {
+                showSignInError("Unable to find the app window.")
+                return
+            }
             let idToken = try await googleCoordinator.signIn(in: window)
             #endif
             try await authManager.signInWithGoogle(idToken)
-        } catch let error as AuthError where error == .providerSignInCancelled {
-            // User cancelled — don't show an error
-        } catch {
-            showSignInError(error.localizedDescription)
         }
     }
 

@@ -122,10 +122,7 @@ final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate,
 
     /// Generates a hex-encoded string from `byteCount` random bytes.
     nonisolated static func randomHexString(byteCount: Int) -> String {
-        var bytes = [UInt8](repeating: 0, count: byteCount)
-        let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-        precondition(status == errSecSuccess, "SecRandomCopyBytes failed with status \(status)")
-        return bytes.map { String(format: "%02x", $0) }.joined()
+        Data.cryptoRandom(count: byteCount).map { String(format: "%02x", $0) }.joined()
     }
 
     /// Returns the lowercase hex-encoded SHA-256 hash of the input string.
