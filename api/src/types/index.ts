@@ -52,6 +52,7 @@ export type AuthEventType =
   | 'provider_auto_linked'
   | 'token_reuse_detected'
   | 'account_deactivated'
+  | 'consent_revoked'
 
 export type OAuthProvider = 'apple' | 'google'
 

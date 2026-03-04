@@ -10,6 +10,7 @@ import { config } from './config.js'
 import { getPublicKeyPem, getCurrentKid, initKeyStore } from './auth/key-store.js'
 import { jwksRoute } from './auth/jwks.js'
 import { authRoutes } from './auth/routes.js'
+import { appleWebhookRoute } from './auth/webhooks.js'
 import { HttpError } from './auth/errors.js'
 import { docsPlugin } from './plugins/docs.js'
 
@@ -195,6 +196,13 @@ export async function buildServer(): Promise<FastifyInstance> {
   // ─── JWKS endpoint ─────────────────────────────────────────────────────
 
   await fastify.register(jwksRoute)
+
+  // ─── Apple webhook ───────────────────────────────────────────────────
+  // Registered before authRoutes at a separate prefix to avoid the
+  // Content-Type: application/json enforcement hook scoped to authRoutes.
+  // Apple sends raw JWT strings, not JSON.
+
+  await fastify.register(appleWebhookRoute, { prefix: '/auth/webhooks/apple' })
 
   // ─── Auth routes ───────────────────────────────────────────────────────
   // The Content-Type enforcement hook is registered inside authRoutes so it
