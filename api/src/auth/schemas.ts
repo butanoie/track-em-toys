@@ -225,14 +225,19 @@ export const appleWebhookSchema = {
   tags: ['webhooks'],
   summary: 'Apple webhook',
   response: {
-    // Always return 200 to Apple regardless of outcome (idempotent, Apple retries on non-2xx)
+    // Returns 200 for valid JWTs regardless of business-logic outcome
+    // (idempotent — Apple retries on non-2xx, so only reject clearly invalid requests)
     200: {
       type: 'object',
       required: ['ok'],
       additionalProperties: false,
       properties: { ok: { type: 'boolean' } },
     },
+    // 400: valid JWT but malformed/missing events claim structure
+    400: errorResponse,
     // 401: invalid JWT signature, expired, wrong issuer/audience
     401: errorResponse,
+    // 500: unexpected server error (e.g. DB failure in withTransaction)
+    500: errorResponse,
   },
 } as const

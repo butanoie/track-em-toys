@@ -38,6 +38,7 @@ import {
   deleteOrphanUser,
   revokeRefreshToken,
   revokeAllUserRefreshTokens,
+  deactivateUser,
   logAuthEvent,
   toUserResponse,
   type QueryOnlyClient,
@@ -285,6 +286,30 @@ describe('queries', () => {
 
       const result = await getUserStatus(client, 'nonexistent')
       expect(result).toBe('not_found')
+    })
+  })
+
+  describe('deactivateUser', () => {
+    it('should issue UPDATE with deactivated_at = NOW() and WHERE deactivated_at IS NULL', async () => {
+      // safe: mockResolvedValue is typed for the query's return shape
+      vi.mocked(client.query).mockResolvedValue(mockQueryResult<pg.QueryResultRow>([], 1))
+
+      await deactivateUser(client, 'user-1')
+
+      expect(client.query).toHaveBeenCalledOnce()
+      const [sql, params] = vi.mocked(client.query).mock.calls[0]!
+      expect(sql).toContain('UPDATE users SET deactivated_at = NOW()')
+      expect(sql).toContain('WHERE id = $1 AND deactivated_at IS NULL')
+      expect(params).toEqual(['user-1'])
+    })
+
+    it('should be a no-op for already deactivated users (no error thrown)', async () => {
+      // Zero rows affected — user already deactivated
+      // safe: mockResolvedValue is typed for the query's return shape
+      vi.mocked(client.query).mockResolvedValue(mockQueryResult<pg.QueryResultRow>([], 0))
+
+      await expect(deactivateUser(client, 'user-already-deactivated')).resolves.toBeUndefined()
+      expect(client.query).toHaveBeenCalledOnce()
     })
   })
 

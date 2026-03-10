@@ -101,7 +101,7 @@ export async function appleWebhookRoute(fastify: FastifyInstance, _opts: object)
       const eventsClaim = payload.events
       if (typeof eventsClaim !== 'string') {
         request.log.debug({ payload }, 'Apple webhook missing events claim')
-        return reply.code(401).send({ error: 'Missing events claim' })
+        return reply.code(400).send({ error: 'Missing events claim' })
       }
 
       let parsedEvent: unknown
@@ -109,12 +109,12 @@ export async function appleWebhookRoute(fastify: FastifyInstance, _opts: object)
         parsedEvent = JSON.parse(eventsClaim)
       } catch {
         request.log.debug({ eventsClaim }, 'Apple webhook malformed events JSON')
-        return reply.code(401).send({ error: 'Malformed events claim' })
+        return reply.code(400).send({ error: 'Malformed events claim' })
       }
 
       if (!isAppleEventPayload(parsedEvent)) {
         request.log.debug({ parsedEvent }, 'Apple webhook invalid events structure')
-        return reply.code(401).send({ error: 'Invalid events structure' })
+        return reply.code(400).send({ error: 'Invalid events structure' })
       }
 
       const { type: eventType, sub: providerUserId } = parsedEvent
@@ -141,7 +141,7 @@ export async function appleWebhookRoute(fastify: FastifyInstance, _opts: object)
               metadata: { provider: 'apple', apple_event_type: eventType },
             })
           } catch (auditErr) {
-            request.log.error({ err: auditErr }, 'audit log failed for consent_revoked — revocation will commit')
+            fastify.log.error({ err: auditErr }, 'audit log failed for consent_revoked — revocation will commit')
           }
         } else if (eventType === 'account-delete') {
           await queries.deactivateUser(client, userId)
@@ -155,7 +155,7 @@ export async function appleWebhookRoute(fastify: FastifyInstance, _opts: object)
               metadata: { provider: 'apple', apple_event_type: eventType },
             })
           } catch (auditErr) {
-            request.log.error({ err: auditErr }, 'audit log failed for account_deactivated — deactivation will commit')
+            fastify.log.error({ err: auditErr }, 'audit log failed for account_deactivated — deactivation will commit')
           }
         } else {
           request.log.debug({ eventType, providerUserId }, 'Apple webhook: unknown event type, ignoring')

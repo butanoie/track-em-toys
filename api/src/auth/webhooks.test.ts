@@ -49,7 +49,6 @@ vi.mock('../config.js', () => ({
     secureCookies: false,
     cookieSecret: 'test-cookie-secret-32-bytes-long!!',
     nodeEnv: 'test',
-    logLevel: 'silent',
     database: { url: 'postgresql://test:test@localhost:5432/testdb' },
     jwt: {
       privateKey: testPrivatePem,
@@ -407,7 +406,7 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
 
   // ── Malformed events claim ───────────────────────────────────────────────
 
-  it('should return 401 for malformed events JSON', async () => {
+  it('should return 400 for malformed events JSON', async () => {
     const jwt = await signTestJWT({
       events: 'not-valid-json{{{',
       iss: 'https://appleid.apple.com',
@@ -420,13 +419,13 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       payload: jwt,
     })
 
-    expect(response.statusCode).toBe(401)
+    expect(response.statusCode).toBe(400)
     expect(response.json<{ error: string }>().error).toBe('Malformed events claim')
   })
 
   // ── Missing events claim ─────────────────────────────────────────────────
 
-  it('should return 401 for missing events claim', async () => {
+  it('should return 400 for missing events claim', async () => {
     const key = testPrivateKey
     const jwt = await new SignJWT({})
       .setProtectedHeader({ alg: 'ES256' })
@@ -442,13 +441,13 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       payload: jwt,
     })
 
-    expect(response.statusCode).toBe(401)
+    expect(response.statusCode).toBe(400)
     expect(response.json<{ error: string }>().error).toBe('Missing events claim')
   })
 
   // ── Invalid events structure ─────────────────────────────────────────────
 
-  it('should return 401 for events missing type or sub', async () => {
+  it('should return 400 for events missing type or sub', async () => {
     const jwt = await signTestJWT({
       events: JSON.stringify({ type: 'consent-revoked' }), // missing sub
       iss: 'https://appleid.apple.com',
@@ -461,7 +460,7 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       payload: jwt,
     })
 
-    expect(response.statusCode).toBe(401)
+    expect(response.statusCode).toBe(400)
     expect(response.json<{ error: string }>().error).toBe('Invalid events structure')
   })
 
@@ -492,10 +491,12 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
 
   // ── Non-fatal audit log failure (consent-revoked) ────────────────────────
 
-  it('should return 200 even when audit log fails for consent-revoked', async () => {
+  it('should return 200 and log.error when audit log fails for consent-revoked', async () => {
     mockTx()
     vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount)
     vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('DB audit log write failed'))
+
+    const errorSpy = vi.spyOn(server.log, 'error')
 
     const jwt = await buildConsentRevokedJWT()
 
@@ -512,14 +513,24 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       expect.anything(),
       mockAppleOAuthAccount.user_id,
     )
+    // Security event must use log.error, not log.warn
+    expect(errorSpy).toHaveBeenCalledWith(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
+      expect.objectContaining({ err: expect.any(Error) }),
+      expect.stringContaining('audit log failed for consent_revoked'),
+    )
+
+    errorSpy.mockRestore()
   })
 
   // ── Non-fatal audit log failure (account-delete) ─────────────────────────
 
-  it('should return 200 even when audit log fails for account-delete', async () => {
+  it('should return 200 and log.error when audit log fails for account-delete', async () => {
     mockTx()
     vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount)
     vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('DB audit log write failed'))
+
+    const errorSpy = vi.spyOn(server.log, 'error')
 
     const jwt = await buildAccountDeleteJWT()
 
@@ -540,6 +551,14 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       expect.anything(),
       mockAppleOAuthAccount.user_id,
     )
+    // Security event must use log.error, not log.warn
+    expect(errorSpy).toHaveBeenCalledWith(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
+      expect.objectContaining({ err: expect.any(Error) }),
+      expect.stringContaining('audit log failed for account_deactivated'),
+    )
+
+    errorSpy.mockRestore()
   })
 
   // ── Empty payload ────────────────────────────────────────────────────────
