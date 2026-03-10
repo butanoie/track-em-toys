@@ -158,6 +158,23 @@ export async function getUserStatus(
   return row.deactivated_at !== null ? 'deactivated' : 'active'
 }
 
+/**
+ * Mark a user as deactivated by setting deactivated_at to NOW().
+ * No-op if the user is already deactivated (WHERE deactivated_at IS NULL).
+ *
+ * @param client - Database client
+ * @param userId - User UUID
+ */
+export async function deactivateUser(
+  client: QueryOnlyClient,
+  userId: string,
+): Promise<void> {
+  await client.query(
+    'UPDATE users SET deactivated_at = NOW(), updated_at = NOW() WHERE id = $1 AND deactivated_at IS NULL',
+    [userId],
+  )
+}
+
 // ─── OAuth Accounts ──────────────────────────────────────────────────────────
 
 /** Combined result from findOAuthAccountWithUser. */

@@ -58,7 +58,7 @@ CREATE TABLE public.auth_events (
     user_agent character varying(512),
     metadata jsonb,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT auth_events_event_type_check CHECK (((event_type)::text = ANY ((ARRAY['signin'::character varying, 'refresh'::character varying, 'logout'::character varying, 'link_account'::character varying, 'provider_auto_linked'::character varying, 'token_reuse_detected'::character varying, 'account_deactivated'::character varying])::text[])))
+    CONSTRAINT auth_events_event_type_check CHECK (((event_type)::text = ANY ((ARRAY['signin'::character varying, 'refresh'::character varying, 'logout'::character varying, 'link_account'::character varying, 'provider_auto_linked'::character varying, 'token_reuse_detected'::character varying, 'account_deactivated'::character varying, 'consent_revoked'::character varying])::text[])))
 );
 
 
@@ -66,7 +66,7 @@ CREATE TABLE public.auth_events (
 -- Name: COLUMN auth_events.event_type; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.auth_events.event_type IS 'signin | refresh | logout | link_account | provider_auto_linked | token_reuse_detected | account_deactivated';
+COMMENT ON COLUMN public.auth_events.event_type IS 'signin | refresh | logout | link_account | provider_auto_linked | token_reuse_detected | account_deactivated | consent_revoked';
 
 
 --
@@ -308,4 +308,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('006'),
     ('007'),
     ('008'),
-    ('009');
+    ('009'),
+    ('010');

@@ -218,3 +218,21 @@ export const linkAccountSchema = {
     503: errorResponse,
   },
 } as const
+
+/** Fastify route schema for POST /auth/webhooks/apple. */
+export const appleWebhookSchema = {
+  description: 'Receive Apple server-to-server notifications for consent revocation and account deletion.',
+  tags: ['webhooks'],
+  summary: 'Apple webhook',
+  response: {
+    // Always return 200 to Apple regardless of outcome (idempotent, Apple retries on non-2xx)
+    200: {
+      type: 'object',
+      required: ['ok'],
+      additionalProperties: false,
+      properties: { ok: { type: 'boolean' } },
+    },
+    // 401: invalid JWT signature, expired, wrong issuer/audience
+    401: errorResponse,
+  },
+} as const
