@@ -1,7 +1,7 @@
 # iOS Authentication Architecture Blueprint
 
 **Date:** 2026-02-27
-**Status:** Draft
+**Status:** Swift source files created, Xcode project configured — see iOS Xcode Project Setup Guide
 **Phase:** 4 — iOS Native Client Auth
 **Depends on:** Phase 1.2 (API Auth) ✅, Phase 1.3 (Web SPA Auth) ✅
 

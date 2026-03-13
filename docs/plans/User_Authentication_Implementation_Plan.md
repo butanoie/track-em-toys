@@ -1,7 +1,7 @@
 # User Authentication Implementation Plan
 
 **Date:** 2026-02-22
-**Status:** Draft
+**Status:** Phases 1.1–1.3 Complete, Phase 4 (iOS) In Progress
 **Phase:** 1 — Foundation
 **Depends on:** Architecture Research (complete), API Framework Decision (Node.js + Fastify)
 
@@ -991,7 +991,7 @@ Phases 3 and 4 can run in parallel since both depend only on the API (Phase 2).
 
 | File | Purpose |
 |------|---------|
-| `docs/Architecture_Research_for_Toy_Collection_Catalog_and_Pricing_App.md` | Auth schema, token strategy, RLS patterns, provider quirks |
-| `docs/Toy_Collection_Catalog_Requirements_v1_0.md` | Functional requirements, implementation phases |
-| `docs/Frontend_Framework_Recommendation_2026.md` | Web stack decisions (React 19, Shadcn/ui, TanStack Query) |
+| `docs/decisions/Architecture_Research_for_Toy_Collection_Catalog_and_Pricing_App.md` | Auth schema, token strategy, RLS patterns, provider quirks |
+| `docs/requirements/Toy_Collection_Catalog_Requirements_v1_0.md` | Functional requirements, implementation phases |
+| `docs/decisions/Frontend_Framework_Recommendation_2026.md` | Web stack decisions (React 19, Shadcn/ui, TanStack Query) |
 | `CLAUDE.md` | Project constraints (no pbxproj edits, Swift 6, migration conventions, .env rules) |

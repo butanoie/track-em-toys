@@ -1,3 +1,17 @@
+/**
+ * Interactive Database Schema Diagrams for Track'em Toys
+ *
+ * This is a standalone React component that renders interactive ER diagrams
+ * for the PostgreSQL schema (web architecture) and SwiftData models (iOS).
+ *
+ * How to view:
+ *   1. Paste into https://codesandbox.io or https://stackblitz.com (React template)
+ *   2. Or render locally: create a React app, import this component, and mount it
+ *   3. The component is self-contained — no external dependencies beyond React
+ *
+ * Exports a default component that renders both schema views with interactive
+ * table expansion, type-colored columns, and relationship indicators.
+ */
 import { useState } from "react";
 
 const COLORS = {
