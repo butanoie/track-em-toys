@@ -7,7 +7,7 @@
 Read the nearest existing file for patterns before writing anything new:
 - New view → read an existing view in the same feature area
 - New @Observable model → read an existing @Observable class
-- New SwiftData model → read `packages/TrackEmToysDataKit/` for shared model structures (when created)
+- New SwiftData model → read `packages/TrackEmToysDataKit/` for shared model structures
 - New ML integration → read existing VNCoreMLRequest usage in the app
 
 Match existing patterns exactly. Do not introduce new conventions.

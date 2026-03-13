@@ -28,7 +28,7 @@ These rules are ABSOLUTE:
 ## Project Overview
 Toy collection catalog & pricing app for serious collectors.
 Monorepo with four components: ios/, api/, web/, ml/
-Plus shared Swift Package: packages/TrackEmToysDataKit/ (not yet created)
+Plus shared Swift Package: packages/TrackEmToysDataKit/
 
 ## IDE Setup
 - VS Code: Primary IDE for api/, web/, docs/, ml/ (workspace: track-em-toys.code-workspace)
@@ -65,6 +65,10 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/ (not yet created)
 - Lint (Web): cd web && npm run lint
 - Lint fix (Web): cd web && npm run lint:fix
 - Typecheck (Web): cd web && npm run typecheck
+- Typecheck (API): cd api && npm run typecheck
+- Lint (API): cd api && npm run lint
+- Lint fix (API): cd api && npm run lint:fix
+- E2E Tests (Web): cd web && npm run test:e2e
 
 
 ## Security Guidelines for Documentation

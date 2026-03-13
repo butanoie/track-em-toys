@@ -127,6 +127,15 @@ Every authenticated layout guard route must have tests covering: loading spinner
 `isLoading`, outlet when authenticated, redirect to `/login` when unauthenticated,
 no redirect while still loading.
 
+### 15. E2E tests pass (if modified)
+
+```bash
+cd web && npm run test:e2e
+```
+
+If you modified user-facing flows (auth, navigation, forms), run Playwright e2e tests.
+Use `npm run test:e2e:ui` for interactive debugging.
+
 ---
 
 ## Key Patterns
