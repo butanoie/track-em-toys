@@ -48,6 +48,13 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - JWT: ES256 asymmetric signing, JWKS discovery, SHA-256 refresh token hashing
 - RLS policies: always use the (SELECT ...) wrapper, never bare function calls
 
+## Refactoring Safety
+**CRITICAL: Before removing or replacing any code during refactoring, check its git history to understand WHY it exists.** Code that looks redundant may be a deliberate bug fix.
+- Run `git log -p --follow <file>` or `git blame` before deleting non-trivial logic
+- **Check if the code was added as a bug fix** — look at commit messages for "fix:", "bugfix", or issue references
+- **If replacing logic, verify behavioral equivalence** — a replacement that handles the happy path but drops an edge-case guard introduces a regression
+- **Do not write comments claiming behavior that isn't implemented** — e.g., never claim state "resets automatically" unless the mechanism actually exists in the code
+- See module-specific CLAUDE.md files for framework-specific refactoring rules
 
 ## Code Conventions
 - Swift: async/await always, SwiftUI over UIKit, SF Symbols for icons
@@ -56,20 +63,8 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - All: conventional commits with scope (ios, web, api, ml, shared, infra)
 
 ## Build Commands
-- iOS: xcodebuild -scheme track-em-toys -destination 'platform=iOS Simulator,name=iPhone 16' build
-- Build (API): cd api && npm run build
-- API: cd api && npm run dev
-- Web: cd web && npm run dev
-- Tests (API): cd api && npm test
-- Tests (Web): cd web && npm run test
-- Lint (Web): cd web && npm run lint
-- Lint fix (Web): cd web && npm run lint:fix
-- Typecheck (Web): cd web && npm run typecheck
-- Typecheck (API): cd api && npm run typecheck
-- Lint (API): cd api && npm run lint
-- Lint fix (API): cd api && npm run lint:fix
-- E2E Tests (Web): cd web && npm run test:e2e
-
+See each module's CLAUDE.md for build, test, lint, and typecheck commands:
+`api/CLAUDE.md`, `web/CLAUDE.md`, `ios/CLAUDE.md`
 
 ## Security Guidelines for Documentation
 
@@ -88,89 +83,23 @@ When documenting configuration and setup:
 - Hardcoded credentials
 - Private authentication details
 
+## Shell Scripts
+- Always quote variables: `"$VAR"` not `$VAR` — unquoted variables cause word splitting and globbing bugs
+- Never use `chmod 777` or `chmod a+w` — use minimum permissions needed (e.g. `chmod 755` for executables)
+- Use `set -euo pipefail` at the top of scripts to fail fast on errors
+
+## Documentation Accuracy
+When editing `.md` files:
+- Verify file paths referenced actually exist in the repo
+- Verify code examples have correct syntax
+- Never include actual secrets — only references to `.env.example`
+
 ## Testing Requirements
 - ALWAYS write unit tests for any new or updated code
 - Tests are mandatory, not optional — no code change is complete without corresponding tests
 - For new code: write tests covering the primary functionality, edge cases, and error paths
 - For updated code: update existing tests to reflect changes AND add new tests for new behavior
-- Swift tests go in the Xcode test target using XCTest or Swift Testing framework
-- API tests use the project's configured test runner (e.g., vitest, jest)
-- Web tests use the project's configured test runner
 - Run tests after writing them to verify they pass before considering the task done
-
-## iOS / Swift
-- Swift 6, strict concurrency
-- SwiftUI only (no UIKit/AppKit unless forced by a framework)
-- SwiftData for persistence, async/await throughout, SF Symbols for icons
-- Minimum deployment: iOS 26.2, macOS 26.2
-
-## API
-Stack: Node.js 22 LTS, Fastify 5, TypeScript strict mode, PostgreSQL 17, vitest.
-
-### Fastify Conventions
-- Plugin functions MUST be `async (fastify: FastifyInstance, _opts: object): Promise<void>`
-- ALL response schemas MUST have `additionalProperties: false` and `required: [...]`
-- Array item schemas also need `additionalProperties: false` and `required`
-- NEVER use `void` before a synchronous method call — it suppresses errors silently
-
-### Database Conventions
-- NEVER use `SELECT *` or `RETURNING *` — always list explicit columns matching the TypeScript interface
-- Column lists must stay in sync with the corresponding TypeScript type in `src/types/index.ts`
-- ALL DB changes via migration files in `api/db/migrations/`, never direct schema edits
-
-### Cookie Handling
-- Cookies are signed via `@fastify/cookie` with `signed: true`
-- ALWAYS read signed cookies with `request.unsignCookie(request.cookies[NAME])`
-- NEVER read `request.cookies[NAME]` directly — returns raw `s:value.hmac` wire format
-- Check `.valid === true` before using the value; `.valid === false` means tampered → 401
-
-### OAuth / JWT Security
-- Provider `aud` claims MUST be normalized before comparison:
-  `const audList = Array.isArray(aud) ? aud : [aud]`
-- `client_type` ('native' | 'web') is derived from the verified `aud` claim at signin, stored
-  in `refresh_tokens`, and inherited on rotation — NEVER trust client-supplied headers for this
-- Access tokens: ES256 asymmetric signing; refresh tokens: SHA-256 hashed before DB storage
-- `/signin` calls `withTransaction` without `userId` (user may not exist yet) — auth tables
-  must permit unauthenticated access (`app.user_id = ''`) during signin
-
-### Type Safety
-- NEVER use `as T` without a preceding runtime check or type guard function
-- NEVER use `as unknown as T` — write a proper type guard instead
-- Response schema nullability must match the actual return type (e.g. `string | null`, not `string`)
-- Provider claim types that may be `string | string[]` must be handled for both shapes
-
-## Web
-Stack: React 19, TypeScript strict mode, Vite 6, TanStack Router + Query, Tailwind CSS 4, Shadcn/ui, vitest.
-
-### ESLint
-- Flat config at `web/eslint.config.js` using ESLint 9 + typescript-eslint 8
-- Type-checked linting via `recommendedTypeChecked` with `projectService: true`
-- `react-hooks` plugin enforces Rules of Hooks and exhaustive deps
-- `react-refresh` plugin ensures Vite HMR compatibility
-- `src/routeTree.gen.ts` is auto-generated by TanStack Router — excluded from linting
-- Route files (`src/routes/**/*.tsx`) have `only-throw-error` disabled (`throw redirect(...)` is a TanStack Router pattern) and `react-refresh/only-export-components` disabled (routes export both `Route` and component functions)
-- Build/tool config files (`*.config.js`, `*.config.ts`) have `no-unsafe-*` disabled — untyped third-party build plugins
-
-### TypeScript Typecheck
-- `npm run typecheck` runs `tsc -b` — checks all project references (`tsconfig.app.json` + `tsconfig.node.json`) without emitting files
-- `tsconfig.app.json` has `noEmit: true`, so `tsc -b` is purely a type check with no build output
-- Different from `build`: the `build` script runs `tsc -b && vite build` (type check + bundle); `typecheck` is type-only validation
-- Run before committing, in CI, and after adding new files or changing types
-- Catches type errors that ESLint type-checked rules may not cover (e.g., missing imports, incorrect generics, declaration emit errors)
-
-### Web Type Safety
-- `@typescript-eslint/no-explicit-any`: `error` — enforces project no-any policy
-- All `@typescript-eslint/no-unsafe-*` rules are enabled in production source code
-- Test files (`*.test.ts`, `*.test.tsx`) relax `no-unsafe-*`, `no-explicit-any`, `no-floating-promises`, `require-await`, `unbound-method`, `no-unnecessary-type-assertion`, `consistent-type-assertions`, and `no-misused-promises` for mocking flexibility
-- Async event handlers must be wrapped: `onClick={() => { void handleAsync() }}` (satisfies `no-misused-promises`)
-- NEVER use `as unknown as T` in non-test code — write a proper type guard instead
-
-### Web Project Conventions
-- Path alias `@/*` maps to `./src/*` — configured in both `tsconfig.app.json` and `vite.config.ts`
-- Auth: `@react-oauth/google` for Google Sign-In, custom Apple Sign-In JS SDK integration
-- Access tokens are held in a module-scoped variable (never persisted to storage); `localStorage` stores only a boolean session flag (`trackem:has_session`); `sessionStorage` stores user profile data
-- `vitest.config.ts` is separate from `vite.config.ts` — excludes TanStack Router Vite plugin and uses `jsdom` environment
-- `QueryClient` is instantiated inside `RootLayout` via `useState` (stable per render, not shared between test runs) — not a top-level singleton
 
 ## Commit Standards
 - NEVER commit unless the user explicitly says to commit — creating files, fixing bugs, or writing changelogs does NOT imply committing
@@ -179,6 +108,39 @@ Stack: React 19, TypeScript strict mode, Vite 6, TanStack Router + Query, Tailwi
 - Follow conventional commits format
 - Reference issue numbers when applicable
 - Keep commits atomic and focused
+
+## Feature Development Gates
+
+These gates apply to any non-trivial feature work, whether using `/feature-dev` or working ad-hoc. Trivial changes (bug fixes, config tweaks, small additions) do not require them.
+
+### Verification Gate
+
+**CRITICAL: Run `/run-checks` before considering any implementation complete.** Do NOT skip this step. Do NOT rely on "it looks right" — run the automated checks. This catches issues that manual review misses (type errors, lint violations, failing tests).
+
+- After implementation: run `/run-checks`
+- After review fixes: run `/run-checks` again
+- If checks fail, fix the issues and re-run — do not proceed with failures
+
+### Post-Architecture Documentation Gate
+
+**CRITICAL: After the architecture/plan is approved by the user, update documentation BEFORE writing implementation code.** Do NOT skip this step. Treat missing doc updates as a blocker.
+
+**Checklist:**
+- Update or create design docs in `docs/plans/` or `docs/decisions/` with confirmed decisions
+- Update `docs/guides/` if new patterns or conventions are introduced
+- Update `CLAUDE.md` if new conventions emerge that apply project-wide
+- Reference GitHub issue numbers in docs when applicable
+
+### Post-Review Documentation Gate
+
+**CRITICAL: After review issues have been fixed and checks pass, update documentation to reflect implementation reality BEFORE writing the summary.**
+
+**Checklist:**
+- Sync architecture docs with what was actually built (scope changes, deferred work)
+- Add new conventions discovered during implementation to appropriate `CLAUDE.md` (root or directory-scoped)
+- Check off completed items in any roadmap docs
+
+## Changelog
 
 Create a changelog entry for:
 - **Phase Completions** - When a major phase of work is completed
