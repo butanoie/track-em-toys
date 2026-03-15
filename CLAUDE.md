@@ -125,20 +125,13 @@ These gates apply to any non-trivial feature work, whether using `/feature-dev` 
 
 **CRITICAL: After the architecture/plan is approved by the user, update documentation BEFORE writing implementation code.** Do NOT skip this step. Treat missing doc updates as a blocker.
 
-**Checklist:**
-- Update or create design docs in `docs/plans/` or `docs/decisions/` with confirmed decisions
-- Update `docs/guides/` if new patterns or conventions are introduced
-- Update `CLAUDE.md` if new conventions emerge that apply project-wide
-- Reference GitHub issue numbers in docs when applicable
+See [`docs/guides/DOC_GATE_REFERENCE.md`](docs/guides/DOC_GATE_REFERENCE.md) for the full checklist and common mistakes.
 
 ### Post-Review Documentation Gate
 
 **CRITICAL: After review issues have been fixed and checks pass, update documentation to reflect implementation reality BEFORE writing the summary.**
 
-**Checklist:**
-- Sync architecture docs with what was actually built (scope changes, deferred work)
-- Add new conventions discovered during implementation to appropriate `CLAUDE.md` (root or directory-scoped)
-- Check off completed items in any roadmap docs
+See [`docs/guides/DOC_GATE_REFERENCE.md`](docs/guides/DOC_GATE_REFERENCE.md) for the full checklist and common mistakes.
 
 ## Changelog
 

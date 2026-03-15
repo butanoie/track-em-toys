@@ -2,6 +2,15 @@
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": "Read|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.pem$|\\.key$|\\.p12$|\\.pfx$|/secrets/|/credentials/'; then echo 'BLOCKED: Cannot access secrets files (.pem, .key, .p12, .pfx, secrets/, credentials/)' >&2; exit 1; fi"
+          }
+        ]
+      },
+      {
         "matcher": "Write|Edit",
         "hooks": [
           {

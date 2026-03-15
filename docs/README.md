@@ -14,7 +14,7 @@ Architecture decisions, requirements, and implementation plans for Track'em Toys
 |----------|------|----------|
 | [Architecture Research](decisions/Architecture_Research_for_Toy_Collection_Catalog_and_Pricing_App.md) | 2026-02-22 | PostgreSQL shared-catalog/private-collection model, OAuth2 auth, Railway deployment |
 | [Frontend Framework Recommendation](decisions/Frontend_Framework_Recommendation_2026.md) | 2026-02-22 | React 19 + Shadcn/ui + Tailwind CSS over Vue/Chakra/Material |
-| [Integration Testing Strategy](decisions/Integration_Testing_Strategy_2026.md) | 2026-02-26 | Plain Playwright over BDD/Gherkin for E2E testing |
+| [ADR: Integration Testing Strategy](decisions/ADR_Integration_Testing_Strategy.md) | 2026-02-26 | Plain Playwright over BDD/Gherkin for E2E testing |
 
 ## Implementation Plans
 
@@ -27,7 +27,18 @@ Architecture decisions, requirements, and implementation plans for Track'em Toys
 
 | Document | Description |
 |----------|-------------|
+| [Documentation Gate Reference](guides/DOC_GATE_REFERENCE.md) | Standalone checklists for post-architecture and post-review documentation gates |
+| [TSDoc Standards](guides/TSDOC_STANDARDS.md) | JSDoc/TSDoc templates and conventions for TypeScript code (API and Web) |
+| [Memory System](guides/MEMORY_SYSTEM.md) | How Claude's persistent memory works — categories, formats, what to save vs. not save |
+| [Scoped CLAUDE.md](guides/SCOPED_CLAUDE_MD.md) | When and how to create directory-scoped CLAUDE.md files |
+| [Testing Scenarios](guides/TESTING_SCENARIOS.md) | Scenario-driven testing philosophy — Gherkin specs as documentation, not tooling |
 | [iOS Xcode Project Setup Guide](guides/iOS_Xcode_Project_Setup_Guide.md) | Step-by-step Xcode project creation, signing, capabilities, and dependency setup |
+
+## Test Scenarios
+
+| Document | Description |
+|----------|-------------|
+| [Test Scenarios Index](test-scenarios/README.md) | Scenario-to-spec mapping table and creation guide |
 
 ## Diagrams
 
