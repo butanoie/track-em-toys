@@ -1,0 +1,155 @@
+# Schema Evolution: Slug Keys & Enriched Characters
+
+## What changed and why
+
+### 1. Slug keys everywhere
+
+Every shared catalog table now has a `slug TEXT NOT NULL UNIQUE` column — a URL-safe kebab-case identifier that serves as the **stable external key** for the entity. This is distinct from the `UUID` primary key, which remains the internal FK target. UUID PKs are used consistently across all tables (auth and catalog) to avoid mixed PK type systems.
+
+**Why slugs?**
+
+- **URL routing**: `/characters/optimus-prime` instead of `/characters/42`
+- **API stability**: slugs survive database re-imports, migrations across environments, and bulk data loads where auto-increment IDs would differ
+- **Human readability**: in JSON payloads, logs, and import files, `"character_slug": "optimus-prime"` is self-documenting
+- **Cross-system joins**: when importing from JSON seed files (like the FansToys catalog), slugs let you reference characters by name-derived keys rather than fragile numeric IDs
+
+**Slug convention:**
+
+```
+lowercase | hyphens-for-spaces | no-apostrophes | no-periods | no-special-chars
+```
+
+Examples:
+- `optimus-prime`, `megatron`, `spike-witwicky`
+- `dr-arkeville` (title included)
+- `alpha-trion` (no special handling needed)
+- `devastator` (combined forms get their own slug)
+- `slag` not `slug-slug` (use the canonical name, not the renamed version)
+
+**Tables with slugs:** `factions`, `sub_groups`, `characters`, `manufacturers`, `categories`, `toy_lines`, `items`
+
+---
+
+### 2. New reference tables: `factions` and `sub_groups`
+
+Instead of storing faction as a TEXT column or a CHECK constraint enum on `characters`, factions are normalized into their own table.
+
+**`factions`** — Autobot, Decepticon, Quintesson, Human, Junkion, Nebulan, Lithone, Neutral, etc.
+
+```
+id | name         | slug         | franchise
+1  | Autobot      | autobot      | Transformers
+2  | Decepticon   | decepticon   | Transformers
+3  | Human        | human        | NULL
+4  | Quintesson   | quintesson   | Transformers
+5  | Junkion      | junkion      | Transformers
+6  | Nebulan      | nebulan      | Transformers
+7  | Lithone      | lithone      | Transformers
+8  | Neutral      | neutral      | NULL
+9  | Cobra        | cobra        | G.I. Joe
+10 | G.I. Joe     | gi-joe       | G.I. Joe
+```
+
+**Why normalize?** Adding a new faction (say, for a Japanese series expansion or a G.I. Joe rollout) is an INSERT, not a schema migration. The `franchise` column on factions lets you scope faction dropdowns in the UI by franchise.
+
+**`sub_groups`** — Dinobots, Constructicons, Aerialbots, Insecticons, Cassettes, Female Autobots, etc.
+
+```
+id | name           | slug            | faction_id
+1  | Dinobots       | dinobots        | 1 (Autobot)
+2  | Constructicons | constructicons  | 2 (Decepticon)
+3  | Aerialbots     | aerialbots      | 1 (Autobot)
+4  | Stunticons     | stunticons      | 2 (Decepticon)
+5  | Insecticons    | insecticons     | 2 (Decepticon)
+6  | Cassettes      | cassettes       | NULL (both factions have cassettes)
+```
+
+The optional `faction_id` FK lets you associate a sub-group with a faction when it's unambiguous (Dinobots → Autobot) but leave it NULL when the group spans factions (Cassettes exist on both sides, Headmasters exist on both sides).
+
+---
+
+### 3. Enriched `characters` table
+
+The original characters table was:
+
+```sql
+-- BEFORE
+characters (id, name, franchise, created_at)
+```
+
+The new version adds the metadata needed for third-party figure mapping and collection management:
+
+```sql
+-- AFTER
+characters (
+    id, name, slug, franchise,
+    faction_id,         -- FK → factions
+    character_type,     -- 'Transformer', 'Human', 'Quintesson', 'Nebulan', etc.
+    sub_group_id,       -- FK → sub_groups
+    alt_mode,           -- 'semi-truck', 'F-15 jet', etc.
+    is_combined_form,   -- TRUE for Devastator, Superion, etc.
+    combined_form_id,   -- self-FK: component → gestalt
+    combiner_role,      -- 'torso', 'right arm', etc.
+    metadata,           -- JSONB for japanese_name, first_appearance, aliases, notes
+    created_at, updated_at
+)
+```
+
+**Combiner modeling uses a self-referential FK.** Instead of a separate join table, each component character has a `combined_form_id` pointing to the gestalt character entry. This means:
+
+- Devastator is a character entry with `is_combined_form = TRUE`
+- Scrapper is a character entry with `combined_form_id → Devastator.id` and `combiner_role = 'right leg'`
+- Query "all components of Devastator": `SELECT * FROM characters WHERE combined_form_id = <devastator_id>`
+- Query "what does Scrapper combine into": `SELECT c.name FROM characters c WHERE c.id = scrapper.combined_form_id`
+
+**Why `character_type` is TEXT, not an enum or FK?** The set of character types is small, stable, and unlikely to need relational metadata. A CHECK constraint could be added later if desired, but TEXT keeps the migration simple and the values self-documenting in JSON exports.
+
+**Why JSONB `metadata` instead of more columns?** Fields like `japanese_name`, `first_appearance`, `first_appearance_season`, and `aliases` are important for the character catalog but aren't needed for core collection queries (filtering, joining items to characters, combiner lookups). Putting them in JSONB keeps the table width manageable and makes it easy to add new fields (e.g., `voice_actor`, `continuity`) without migration.
+
+---
+
+### 4. Slugs on `items` table
+
+The items table now has a slug column for URL routing:
+
+```
+ft-03-quake-wave          (product_code + name)
+mp-44-optimus-prime       (product_code + name)
+rp-01-acoustic-wave       (product_code + name)
+```
+
+The item slug convention is `{product_code}-{name}` slugified. This ensures uniqueness even when multiple manufacturers produce figures with the same name.
+
+---
+
+### 5. Impact on existing FansToys JSON import
+
+The relational JSON from the FansToys catalog maps cleanly to this new schema:
+
+| JSON field | Target table.column |
+|---|---|
+| `character_name` | `characters.name` (lookup by slug) |
+| `faction` (from character data) | `characters.faction_id` → `factions.id` |
+| `product_code` | `items.product_code` |
+| `name` | `items.name` |
+| `manufacturer` | `items.manufacturer_id` → `manufacturers.id` (lookup by slug) |
+| `sub_brand` | `items.toy_line_id` → `toy_lines.id` (lookup by slug) |
+| `variant_type`, `status`, `scale` | `items.metadata` JSONB |
+
+The import script should:
+1. Seed `factions` and `sub_groups` first
+2. Seed `characters` with slugs and faction/sub_group FKs
+3. Seed `manufacturers` and `toy_lines`
+4. Seed `items` with FK lookups by slug
+
+---
+
+### 6. Migration number
+
+This is migration `011`, following the existing auth migrations (001–010). The file should be placed at:
+
+```
+api/db/migrations/011_shared_catalog_tables.sql
+```
+
+All tables are in the `public` schema. The `update_updated_at()` trigger function from migration 001 is reused for `characters` and `items`.

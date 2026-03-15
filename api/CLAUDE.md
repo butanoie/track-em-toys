@@ -31,6 +31,8 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - ALL DB changes via migration files in `api/db/migrations/`, never direct schema edits
 - Migrations must be additive (add columns/tables) by default — destructive changes (drop column, drop table) require explicit user instruction
 - Migration filenames follow `NNN_description.sql` sequential numbering with no gaps
+- Catalog tables use UUID PKs with a unique `slug` column (e.g. `"optimus-prime"`) for stable references and URL-friendly routes
+- Seed data in `api/db/seed/` uses slug-based FK references between entities — NEVER integer IDs (integer IDs are positional and break when data is reordered or regenerated)
 
 ### Cookie Handling
 - Cookies are signed via `@fastify/cookie` with `signed: true`
