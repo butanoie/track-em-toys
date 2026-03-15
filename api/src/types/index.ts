@@ -115,3 +115,127 @@ export interface ProviderClaims {
   picture: string | null
   client_type: ClientType
 }
+
+// ---------------------------------------------------------------------------
+// Shared Catalog — reference tables
+// ---------------------------------------------------------------------------
+
+export interface Faction {
+  id: string
+  name: string
+  slug: string
+  franchise: string | null
+  notes: string | null
+  created_at: string
+}
+
+export interface SubGroup {
+  id: string
+  name: string
+  slug: string
+  faction_id: string | null
+  franchise: string | null
+  notes: string | null
+  created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Shared Catalog — core entities
+// ---------------------------------------------------------------------------
+
+export interface Character {
+  id: string
+  name: string
+  slug: string
+  franchise: string
+  faction_id: string | null
+  character_type: string | null
+  sub_group_id: string | null
+  alt_mode: string | null
+  is_combined_form: boolean
+  combined_form_id: string | null
+  combiner_role: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface Manufacturer {
+  id: string
+  name: string
+  slug: string
+  is_official_licensee: boolean
+  country: string | null
+  website_url: string | null
+  aliases: string[]
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Category {
+  id: string
+  name: string
+  slug: string
+  parent_id: string | null
+  created_at: string
+}
+
+export interface ToyLine {
+  id: string
+  name: string
+  slug: string
+  franchise: string | null
+  manufacturer_id: string | null
+  scale: string | null
+  description: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type DataQuality = 'needs_review' | 'verified' | 'community_verified'
+
+export interface Item {
+  id: string
+  name: string
+  slug: string
+  manufacturer_id: string | null
+  character_id: string | null
+  toy_line_id: string | null
+  year_released: number | null
+  description: string | null
+  barcode: string | null
+  sku: string | null
+  product_code: string | null
+  is_third_party: boolean
+  created_by: string | null
+  data_quality: DataQuality
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface ItemPhoto {
+  id: string
+  item_id: string
+  url: string
+  caption: string | null
+  uploaded_by: string | null
+  is_primary: boolean
+  created_at: string
+}
+
+export type CatalogEditType = 'create' | 'update' | 'merge' | 'delete'
+export type CatalogEditStatus = 'pending' | 'approved' | 'rejected' | 'auto_approved'
+
+export interface CatalogEdit {
+  id: string
+  item_id: string | null
+  editor_id: string
+  edit_type: CatalogEditType
+  data_before: Record<string, unknown> | null
+  data_after: Record<string, unknown>
+  status: CatalogEditStatus
+  reviewed_by: string | null
+  created_at: string
+}

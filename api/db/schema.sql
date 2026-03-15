@@ -70,6 +70,217 @@ COMMENT ON COLUMN public.auth_events.event_type IS 'signin | refresh | logout | 
 
 
 --
+-- Name: catalog_edits; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.catalog_edits (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    item_id uuid,
+    editor_id uuid NOT NULL,
+    edit_type text NOT NULL,
+    data_before jsonb,
+    data_after jsonb NOT NULL,
+    status text DEFAULT 'pending'::text NOT NULL,
+    reviewed_by uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT catalog_edits_edit_type_check CHECK ((edit_type = ANY (ARRAY['create'::text, 'update'::text, 'merge'::text, 'delete'::text]))),
+    CONSTRAINT catalog_edits_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'auto_approved'::text])))
+);
+
+
+--
+-- Name: categories; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.categories (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    slug text NOT NULL,
+    parent_id uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: characters; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.characters (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    slug text NOT NULL,
+    franchise text DEFAULT 'Transformers'::text NOT NULL,
+    faction_id uuid,
+    character_type text,
+    sub_group_id uuid,
+    alt_mode text,
+    is_combined_form boolean DEFAULT false NOT NULL,
+    combined_form_id uuid,
+    combiner_role text,
+    metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE characters; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.characters IS 'Franchise characters (Optimus Prime, Snake Eyes, Spike Witwicky, etc.). Includes Transformers, humans, and other species.';
+
+
+--
+-- Name: COLUMN characters.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.characters.slug IS 'URL-safe kebab-case key (e.g., optimus-prime, spike-witwicky, devastator). Unique across all franchises.';
+
+
+--
+-- Name: COLUMN characters.character_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.characters.character_type IS 'Species/type classification. Not an enum to allow future expansion.';
+
+
+--
+-- Name: COLUMN characters.combined_form_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.characters.combined_form_id IS 'Self-referential FK: if this character is a combiner component, references the combined form character entry.';
+
+
+--
+-- Name: COLUMN characters.combiner_role; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.characters.combiner_role IS 'Role in combination: torso, right-arm, left-arm, right-leg, left-leg, head, component. NULL if not a combiner component.';
+
+
+--
+-- Name: COLUMN characters.metadata; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.characters.metadata IS 'Extensible JSONB for japanese_name, first_appearance, aliases, notes, etc.';
+
+
+--
+-- Name: factions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.factions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    slug text NOT NULL,
+    franchise text,
+    notes text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE factions; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.factions IS 'Canonical factions/allegiances (Autobot, Decepticon, etc.). Normalized to avoid enum migration overhead.';
+
+
+--
+-- Name: COLUMN factions.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.factions.slug IS 'URL-safe kebab-case key (e.g., autobot, decepticon, quintesson)';
+
+
+--
+-- Name: item_photos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.item_photos (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    item_id uuid NOT NULL,
+    url text NOT NULL,
+    caption text,
+    uploaded_by uuid,
+    is_primary boolean DEFAULT false NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.items (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    slug text NOT NULL,
+    manufacturer_id uuid,
+    character_id uuid,
+    toy_line_id uuid,
+    year_released integer,
+    description text,
+    barcode text,
+    sku text,
+    product_code text,
+    is_third_party boolean DEFAULT false NOT NULL,
+    created_by uuid,
+    data_quality text DEFAULT 'needs_review'::text NOT NULL,
+    metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT items_data_quality_check CHECK ((data_quality = ANY (ARRAY['needs_review'::text, 'verified'::text, 'community_verified'::text])))
+);
+
+
+--
+-- Name: COLUMN items.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.items.slug IS 'URL-safe kebab-case key (e.g., ft-44-thomas, mp-44-optimus-prime). Unique across all items.';
+
+
+--
+-- Name: COLUMN items.product_code; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.items.product_code IS 'Manufacturer product designation (e.g., MP-44, FT-44, CS-01)';
+
+
+--
+-- Name: COLUMN items.metadata; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.items.metadata IS 'Extensible JSONB: scale, variant_type, base_product_code, sub_brand, status, etc.';
+
+
+--
+-- Name: manufacturers; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.manufacturers (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    slug text NOT NULL,
+    is_official_licensee boolean DEFAULT false NOT NULL,
+    country text,
+    website_url character varying(500),
+    aliases text[] DEFAULT '{}'::text[],
+    notes text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: COLUMN manufacturers.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.manufacturers.slug IS 'URL-safe kebab-case key (e.g., fanstoys, hasbro, takara-tomy)';
+
+
+--
 -- Name: oauth_accounts; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -123,6 +334,52 @@ CREATE TABLE public.schema_migrations (
 
 
 --
+-- Name: sub_groups; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sub_groups (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    slug text NOT NULL,
+    faction_id uuid,
+    franchise text,
+    notes text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE sub_groups; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.sub_groups IS 'Named sub-teams within factions (Dinobots, Constructicons, Aerialbots, etc.)';
+
+
+--
+-- Name: COLUMN sub_groups.faction_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.sub_groups.faction_id IS 'Optional FK to factions. NULL for cross-faction or franchise-neutral groups.';
+
+
+--
+-- Name: toy_lines; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.toy_lines (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    slug text NOT NULL,
+    franchise text,
+    manufacturer_id uuid,
+    scale character varying(50),
+    description text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -144,6 +401,118 @@ CREATE TABLE public.users (
 
 ALTER TABLE ONLY public.auth_events
     ADD CONSTRAINT auth_events_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: catalog_edits catalog_edits_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.catalog_edits
+    ADD CONSTRAINT catalog_edits_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.categories
+    ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: categories categories_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.categories
+    ADD CONSTRAINT categories_slug_key UNIQUE (slug);
+
+
+--
+-- Name: characters characters_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.characters
+    ADD CONSTRAINT characters_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: characters characters_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.characters
+    ADD CONSTRAINT characters_slug_key UNIQUE (slug);
+
+
+--
+-- Name: factions factions_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT factions_name_key UNIQUE (name);
+
+
+--
+-- Name: factions factions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT factions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: factions factions_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT factions_slug_key UNIQUE (slug);
+
+
+--
+-- Name: item_photos item_photos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.item_photos
+    ADD CONSTRAINT item_photos_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: items items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: items items_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_slug_key UNIQUE (slug);
+
+
+--
+-- Name: manufacturers manufacturers_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.manufacturers
+    ADD CONSTRAINT manufacturers_name_key UNIQUE (name);
+
+
+--
+-- Name: manufacturers manufacturers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.manufacturers
+    ADD CONSTRAINT manufacturers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: manufacturers manufacturers_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.manufacturers
+    ADD CONSTRAINT manufacturers_slug_key UNIQUE (slug);
 
 
 --
@@ -176,6 +545,46 @@ ALTER TABLE ONLY public.refresh_tokens
 
 ALTER TABLE ONLY public.schema_migrations
     ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+
+
+--
+-- Name: sub_groups sub_groups_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sub_groups
+    ADD CONSTRAINT sub_groups_name_key UNIQUE (name);
+
+
+--
+-- Name: sub_groups sub_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sub_groups
+    ADD CONSTRAINT sub_groups_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sub_groups sub_groups_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sub_groups
+    ADD CONSTRAINT sub_groups_slug_key UNIQUE (slug);
+
+
+--
+-- Name: toy_lines toy_lines_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.toy_lines
+    ADD CONSTRAINT toy_lines_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: toy_lines toy_lines_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.toy_lines
+    ADD CONSTRAINT toy_lines_slug_key UNIQUE (slug);
 
 
 --
@@ -216,6 +625,97 @@ CREATE INDEX idx_auth_events_user_id ON public.auth_events USING btree (user_id)
 
 
 --
+-- Name: idx_catalog_edits_item; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_catalog_edits_item ON public.catalog_edits USING btree (item_id);
+
+
+--
+-- Name: idx_catalog_edits_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_catalog_edits_status ON public.catalog_edits USING btree (status) WHERE (status = 'pending'::text);
+
+
+--
+-- Name: idx_characters_combined_form; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_characters_combined_form ON public.characters USING btree (combined_form_id) WHERE (combined_form_id IS NOT NULL);
+
+
+--
+-- Name: idx_characters_faction; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_characters_faction ON public.characters USING btree (faction_id);
+
+
+--
+-- Name: idx_characters_name_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_characters_name_franchise ON public.characters USING btree (lower(name), lower(franchise));
+
+
+--
+-- Name: idx_characters_sub_group; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_characters_sub_group ON public.characters USING btree (sub_group_id);
+
+
+--
+-- Name: idx_characters_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_characters_type ON public.characters USING btree (character_type);
+
+
+--
+-- Name: idx_item_photos_item; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_item_photos_item ON public.item_photos USING btree (item_id);
+
+
+--
+-- Name: idx_items_character; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_character ON public.items USING btree (character_id);
+
+
+--
+-- Name: idx_items_data_quality; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_data_quality ON public.items USING btree (data_quality);
+
+
+--
+-- Name: idx_items_manufacturer; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_manufacturer ON public.items USING btree (manufacturer_id);
+
+
+--
+-- Name: idx_items_product_code; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_product_code ON public.items USING btree (product_code) WHERE (product_code IS NOT NULL);
+
+
+--
+-- Name: idx_items_toy_line; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_toy_line ON public.items USING btree (toy_line_id);
+
+
+--
 -- Name: idx_oauth_accounts_provider_email; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -251,10 +751,45 @@ CREATE INDEX idx_refresh_tokens_user_id ON public.refresh_tokens USING btree (us
 
 
 --
+-- Name: idx_toy_lines_manufacturer; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_toy_lines_manufacturer ON public.toy_lines USING btree (manufacturer_id);
+
+
+--
 -- Name: idx_users_email_lower; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX idx_users_email_lower ON public.users USING btree (lower((email)::text));
+
+
+--
+-- Name: characters characters_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER characters_updated_at BEFORE UPDATE ON public.characters FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: items items_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER items_updated_at BEFORE UPDATE ON public.items FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: manufacturers manufacturers_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER manufacturers_updated_at BEFORE UPDATE ON public.manufacturers FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: toy_lines toy_lines_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER toy_lines_updated_at BEFORE UPDATE ON public.toy_lines FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
 
 --
@@ -273,6 +808,110 @@ ALTER TABLE ONLY public.auth_events
 
 
 --
+-- Name: catalog_edits catalog_edits_editor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.catalog_edits
+    ADD CONSTRAINT catalog_edits_editor_id_fkey FOREIGN KEY (editor_id) REFERENCES public.users(id);
+
+
+--
+-- Name: catalog_edits catalog_edits_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.catalog_edits
+    ADD CONSTRAINT catalog_edits_item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id);
+
+
+--
+-- Name: catalog_edits catalog_edits_reviewed_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.catalog_edits
+    ADD CONSTRAINT catalog_edits_reviewed_by_fkey FOREIGN KEY (reviewed_by) REFERENCES public.users(id);
+
+
+--
+-- Name: categories categories_parent_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.categories
+    ADD CONSTRAINT categories_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.categories(id) ON DELETE SET NULL;
+
+
+--
+-- Name: characters characters_combined_form_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.characters
+    ADD CONSTRAINT characters_combined_form_id_fkey FOREIGN KEY (combined_form_id) REFERENCES public.characters(id) ON DELETE SET NULL;
+
+
+--
+-- Name: characters characters_faction_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.characters
+    ADD CONSTRAINT characters_faction_id_fkey FOREIGN KEY (faction_id) REFERENCES public.factions(id) ON DELETE SET NULL;
+
+
+--
+-- Name: characters characters_sub_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.characters
+    ADD CONSTRAINT characters_sub_group_id_fkey FOREIGN KEY (sub_group_id) REFERENCES public.sub_groups(id) ON DELETE SET NULL;
+
+
+--
+-- Name: item_photos item_photos_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.item_photos
+    ADD CONSTRAINT item_photos_item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id) ON DELETE CASCADE;
+
+
+--
+-- Name: item_photos item_photos_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.item_photos
+    ADD CONSTRAINT item_photos_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(id);
+
+
+--
+-- Name: items items_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_character_id_fkey FOREIGN KEY (character_id) REFERENCES public.characters(id);
+
+
+--
+-- Name: items items_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id);
+
+
+--
+-- Name: items items_manufacturer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_manufacturer_id_fkey FOREIGN KEY (manufacturer_id) REFERENCES public.manufacturers(id);
+
+
+--
+-- Name: items items_toy_line_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_toy_line_id_fkey FOREIGN KEY (toy_line_id) REFERENCES public.toy_lines(id);
+
+
+--
 -- Name: oauth_accounts oauth_accounts_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -286,6 +925,22 @@ ALTER TABLE ONLY public.oauth_accounts
 
 ALTER TABLE ONLY public.refresh_tokens
     ADD CONSTRAINT refresh_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: sub_groups sub_groups_faction_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sub_groups
+    ADD CONSTRAINT sub_groups_faction_id_fkey FOREIGN KEY (faction_id) REFERENCES public.factions(id) ON DELETE SET NULL;
+
+
+--
+-- Name: toy_lines toy_lines_manufacturer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.toy_lines
+    ADD CONSTRAINT toy_lines_manufacturer_id_fkey FOREIGN KEY (manufacturer_id) REFERENCES public.manufacturers(id);
 
 
 --
@@ -309,4 +964,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('007'),
     ('008'),
     ('009'),
-    ('010');
+    ('010'),
+    ('011');
