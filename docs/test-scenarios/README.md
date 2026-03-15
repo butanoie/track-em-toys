@@ -15,9 +15,9 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 
 | Scenario Document | Spec File | Status |
 |---|---|---|
-| _No scenarios yet_ | — | — |
-
-> **Existing tests:** The E2E specs in `web/e2e/` and API tests in `api/src/` were written before this convention was adopted. Scenario documents for those tests can be added retroactively if useful, but are not required.
+| [E2E_AUTHENTICATION.md](E2E_AUTHENTICATION.md) | `web/e2e/login-page.spec.ts` | ✅ Implemented |
+| [E2E_PROTECTED_ROUTES.md](E2E_PROTECTED_ROUTES.md) | `web/e2e/protected-routes.spec.ts` | ✅ Implemented |
+| [E2E_SESSION.md](E2E_SESSION.md) | `web/e2e/authenticated-session.spec.ts`, `web/e2e/session-persistence.spec.ts` | ✅ Implemented |
 
 ## Creating a New Scenario
 

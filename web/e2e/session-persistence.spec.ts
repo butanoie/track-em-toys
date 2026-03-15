@@ -2,7 +2,16 @@ import { test, expect } from '@playwright/test'
 import { setupAuthenticated, mockRefreshFailure } from './fixtures/auth'
 
 test.describe('Session persistence', () => {
-  test('session survives page reload (refresh called again, dashboard shows)', async ({ page }) => {
+  /**
+   * ```gherkin
+   * Scenario: Session persists across page reload
+   *   Given the user is on the dashboard
+   *   When they reload the page
+   *   Then the refresh token endpoint is called
+   *   And the dashboard is displayed again with "Your Collection" heading
+   * ```
+   */
+  test('Given user on dashboard, When page is reloaded, Then session persists and dashboard shows', async ({ page }) => {
     await setupAuthenticated(page)
     await page.goto('/')
 
@@ -14,7 +23,18 @@ test.describe('Session persistence', () => {
     await expect(page.getByRole('heading', { name: /your collection/i })).toBeVisible()
   })
 
-  test('session lost when refresh token expired (401 → redirected to login)', async ({ page }) => {
+  /**
+   * ```gherkin
+   * Scenario: Expired refresh token redirects to login
+   *   Given the user is on the dashboard
+   *   And the refresh token has expired (server returns 401)
+   *   When they reload the page
+   *   Then AuthProvider detects the failed refresh
+   *   And the user is redirected to /login
+   *   And the session flag is removed from localStorage
+   * ```
+   */
+  test('Given expired refresh token, When page is reloaded, Then redirected to /login and session cleared', async ({ page }) => {
     await setupAuthenticated(page)
     await page.goto('/')
 

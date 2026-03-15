@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import { setupAuthenticated, validUser } from './fixtures/auth'
 
 test.describe('Authenticated session', () => {
-  test('authenticated user sees dashboard with collection heading and user name', async ({ page }) => {
+  test('Given valid session, When navigating to /, Then dashboard shows collection heading and user name', async ({ page }) => {
     await setupAuthenticated(page)
     await page.goto('/')
 
@@ -10,7 +10,16 @@ test.describe('Authenticated session', () => {
     await expect(page.getByText(validUser.display_name!)).toBeVisible()
   })
 
-  test('sign out redirects to /login and clears session flag', async ({ page }) => {
+  /**
+   * ```gherkin
+   * Scenario: User signs out successfully
+   *   Given the user is on the dashboard
+   *   When they click the "Sign Out" button
+   *   Then they are redirected to /login
+   *   And the session flag is removed from localStorage
+   * ```
+   */
+  test('Given user on dashboard, When clicking sign out, Then redirected to /login and session cleared', async ({ page }) => {
     await setupAuthenticated(page)
     await page.goto('/')
 
