@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test'
 import { setupAuthenticated } from './fixtures/auth'
 
 test.describe('Protected routes', () => {
-  test('unauthenticated user redirected to /login', async ({ page }) => {
+  test('Given unauthenticated user, When navigating to /, Then redirected to /login', async ({ page }) => {
     await page.goto('/')
     await expect(page).toHaveURL(/\/login/)
   })
 
-  test('redirect param preserved in URL', async ({ page }) => {
+  test('Given unauthenticated user, When navigating to /, Then redirect param preserves original URL', async ({ page }) => {
     // Visit a protected path — should redirect to /login with redirect param
     await page.goto('/')
     await expect(page).toHaveURL(/\/login/)
@@ -15,7 +15,7 @@ test.describe('Protected routes', () => {
     await expect(page).toHaveURL(/redirect=/)
   })
 
-  test('authenticated user accesses dashboard directly', async ({ page }) => {
+  test('Given authenticated user, When navigating to /, Then dashboard is displayed', async ({ page }) => {
     await setupAuthenticated(page)
     await page.goto('/')
 
