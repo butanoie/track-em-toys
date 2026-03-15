@@ -47,6 +47,8 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - RLS uses (SELECT current_app_user_id()) subselect wrapper for initPlan caching
 - JWT: ES256 asymmetric signing, JWKS discovery, SHA-256 refresh token hashing
 - RLS policies: always use the (SELECT ...) wrapper, never bare function calls
+- Catalog tables use UUID primary keys with a unique `slug` column for stable cross-references and URL-friendly API routes
+- Seed data (`api/db/seed/`) uses slug-based FK references — never integer IDs — to avoid fragile positional coupling
 
 ## Refactoring Safety
 **CRITICAL: Before removing or replacing any code during refactoring, check its git history to understand WHY it exists.** Code that looks redundant may be a deliberate bug fix.
