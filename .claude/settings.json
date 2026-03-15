@@ -1,5 +1,34 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.pem$|\\.key$|\\.p12$|\\.pfx$|/secrets/|/credentials/'; then echo 'BLOCKED: Cannot access secrets files (.pem, .key, .p12, .pfx, secrets/, credentials/)' >&2; exit 1; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_FILE_PATH\" in *.env.example) ;; *.env|*.env.*) echo \"BLOCKED: .env files must never be edited by Claude — edit .env.example instead\" && exit 1 ;; esac"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_FILE_PATH\" in *.pbxproj|*.xcworkspace*) echo \"BLOCKED: Xcode project files (.pbxproj, .xcworkspace) must never be modified by Claude\" && exit 1 ;; esac"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
@@ -7,6 +36,15 @@
           {
             "type": "command",
             "command": "case \"$CLAUDE_FILE_PATH\" in */api/src/*.ts) npx --prefix /Users/buta/Repos/track-em-toys/api eslint --no-warn-ignored --max-warnings 0 \"$CLAUDE_FILE_PATH\" 2>&1 | head -60 ;; esac"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_FILE_PATH\" in */web/src/*.ts|*/web/src/*.tsx) npx --prefix /Users/buta/Repos/track-em-toys/web eslint --no-warn-ignored --max-warnings 0 \"$CLAUDE_FILE_PATH\" 2>&1 | head -60 ;; esac"
           }
         ]
       }

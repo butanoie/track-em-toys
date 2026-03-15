@@ -1,6 +1,57 @@
 # API — Domain-Specific Rules
 
-> Supplements the root `CLAUDE.md`. Rules here are additive — the root file's API section still applies.
+> Supplements the root `CLAUDE.md`. Rules here are additive.
+
+## Stack
+
+Node.js 22 LTS, Fastify 5, TypeScript strict mode, PostgreSQL 17, vitest.
+
+## Build Commands
+
+```bash
+cd api && npm run dev         # Start dev server (https://localhost:3010)
+cd api && npm run build       # TypeScript compile
+cd api && npm test            # Vitest + ESLint (combined)
+cd api && npm run typecheck   # tsc type-check only
+cd api && npm run lint        # ESLint only
+cd api && npm run lint:fix    # ESLint with auto-fix
+```
+
+## Conventions
+
+### Fastify
+- Plugin functions MUST be `async (fastify: FastifyInstance, _opts: object): Promise<void>`
+- ALL response schemas MUST have `additionalProperties: false` and `required: [...]`
+- Array item schemas also need `additionalProperties: false` and `required`
+- NEVER use `void` before a synchronous method call — it suppresses errors silently
+
+### Database
+- NEVER use `SELECT *` or `RETURNING *` — always list explicit columns matching the TypeScript interface
+- Column lists must stay in sync with the corresponding TypeScript type in `src/types/index.ts`
+- ALL DB changes via migration files in `api/db/migrations/`, never direct schema edits
+- Migrations must be additive (add columns/tables) by default — destructive changes (drop column, drop table) require explicit user instruction
+- Migration filenames follow `NNN_description.sql` sequential numbering with no gaps
+
+### Cookie Handling
+- Cookies are signed via `@fastify/cookie` with `signed: true`
+- ALWAYS read signed cookies with `request.unsignCookie(request.cookies[NAME])`
+- NEVER read `request.cookies[NAME]` directly — returns raw `s:value.hmac` wire format
+- Check `.valid === true` before using the value; `.valid === false` means tampered → 401
+
+### OAuth / JWT Security
+- Provider `aud` claims MUST be normalized before comparison:
+  `const audList = Array.isArray(aud) ? aud : [aud]`
+- `client_type` ('native' | 'web') is derived from the verified `aud` claim at signin, stored
+  in `refresh_tokens`, and inherited on rotation — NEVER trust client-supplied headers for this
+- Access tokens: ES256 asymmetric signing; refresh tokens: SHA-256 hashed before DB storage
+- `/signin` calls `withTransaction` without `userId` (user may not exist yet) — auth tables
+  must permit unauthenticated access (`app.user_id = ''`) during signin
+
+### Type Safety
+- NEVER use `as T` without a preceding runtime check or type guard function
+- NEVER use `as unknown as T` — write a proper type guard instead
+- Response schema nullability must match the actual return type (e.g. `string | null`, not `string`)
+- Provider claim types that may be `string | string[]` must be handled for both shapes
 
 ## Before Writing New Code
 
@@ -13,6 +64,13 @@ Read existing files for patterns before writing anything new:
 - New migration → read existing files in `db/migrations/` for naming and format
 
 Match existing patterns exactly. Do not introduce new conventions.
+
+## Refactoring Safety (API-Specific)
+
+In addition to the root CLAUDE.md refactoring rules:
+- **Never remove a Fastify hook (`preValidation`, `onRequest`, `onSend`) without understanding its purpose** — it may enforce content-type, auth, or rate limiting
+- **Never simplify `withTransaction` error handling** without verifying that security-critical writes still commit before error responses are sent
+- **Never remove or reorder cookie unsigning logic** — the `readSignedCookie` → `valid` check → use pattern is security-critical
 
 ---
 

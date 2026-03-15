@@ -5,7 +5,7 @@ Fastify 5 + TypeScript authentication API with Apple Sign-In, Google Sign-In, ES
 ## Prerequisites
 
 - **Node.js 22 LTS**
-- **PostgreSQL 15+**
+- **PostgreSQL 17+**
 - **OpenSSL** (for generating JWT keys)
 - **dbmate** (for running migrations) — [install instructions](https://github.com/amacneil/dbmate#installation)
 
@@ -204,6 +204,7 @@ The current migrations create:
 |--------|------|-------------|
 | `GET` | `/health` | Health check |
 | `GET` | `/.well-known/jwks.json` | Public JWKS for token verification |
+| `GET` | `/docs` | Interactive API documentation (Scalar) |
 | `POST` | `/auth/signin` | Sign in with Apple or Google (rate limit: 10/min per IP) |
 | `POST` | `/auth/refresh` | Rotate refresh token for a new access token (rate limit: 5/min per IP) |
 
@@ -211,8 +212,15 @@ The current migrations create:
 
 | Method | Path | Description |
 |--------|------|-------------|
+| `GET` | `/auth/me` | Get current user profile and linked providers |
 | `POST` | `/auth/logout` | Revoke a refresh token |
 | `POST` | `/auth/link-account` | Link an additional OAuth provider (rate limit: 5/min per user) |
+
+### Webhooks
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/auth/webhooks/apple` | Apple server-to-server notifications (consent revocation, account deletion) |
 
 ### Sign-In Request
 
@@ -270,10 +278,15 @@ api/
 │   │   ├── tokens.ts        # Refresh token generation and rotation
 │   │   ├── key-store.ts     # ES256 key management (kid → key mapping)
 │   │   ├── jwks.ts          # GET /.well-known/jwks.json route
+│   │   ├── webhooks.ts      # Apple server-to-server webhook handler
+│   │   ├── cookies.ts       # Signed cookie read/write helpers
+│   │   ├── errors.ts        # HttpError class for transaction rollbacks
 │   │   └── schemas.ts       # Fastify JSON Schema validation
 │   ├── db/
 │   │   ├── pool.ts          # PostgreSQL connection pool + transaction helper
 │   │   └── queries.ts       # Parameterized SQL queries
+│   ├── plugins/
+│   │   └── docs.ts              # Swagger + Scalar interactive API docs
 │   ├── hooks/
 │   │   └── set-user-context.ts  # Sets app.user_id for PostgreSQL RLS
 │   └── types/
@@ -314,3 +327,8 @@ Ensure `dbmate` is installed and `DATABASE_URL` is set. If running outside the `
 export DATABASE_URL=postgresql://...
 dbmate -d ./api/migrations up
 ```
+
+## Design Documents
+
+- [Architecture Research](../docs/decisions/Architecture_Research_for_Toy_Collection_Catalog_and_Pricing_App.md) — PostgreSQL data model, OAuth2 strategy
+- [User Authentication Implementation Plan](../docs/plans/User_Authentication_Implementation_Plan.md) — Full auth implementation sequence

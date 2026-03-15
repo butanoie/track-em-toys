@@ -1,16 +1,36 @@
 # iOS — Domain-Specific Rules
 
-> Supplements the root `CLAUDE.md`. Rules here are additive — the root file's iOS section still applies.
+> Supplements the root `CLAUDE.md`. Rules here are additive.
+
+## Stack
+
+Swift 6, strict concurrency, SwiftUI only (no UIKit/AppKit unless forced by a framework).
+SwiftData for persistence, async/await throughout, SF Symbols for icons.
+Minimum deployment: iOS 26.2, macOS 26.2.
+
+## Build Commands
+
+```bash
+xcodebuild -scheme track-em-toys -destination 'platform=iOS Simulator,name=iPhone 16' build
+xcodebuild -scheme track-em-toys -destination 'platform=iOS Simulator,name=iPhone 16' test
+```
 
 ## Before Writing New Code
 
 Read the nearest existing file for patterns before writing anything new:
 - New view → read an existing view in the same feature area
 - New @Observable model → read an existing @Observable class
-- New SwiftData model → read `packages/TrackEmToysDataKit/` for shared model structures (when created)
+- New SwiftData model → read `packages/TrackEmToysDataKit/` for shared model structures
 - New ML integration → read existing VNCoreMLRequest usage in the app
 
 Match existing patterns exactly. Do not introduce new conventions.
+
+## Refactoring Safety (iOS-Specific)
+
+In addition to the root CLAUDE.md refactoring rules:
+- **Never remove `@MainActor` from an `@Observable` class** without verifying no SwiftUI view reads its state — removing it causes data races under Swift 6 strict concurrency
+- **Never remove `async` from a function** that may need to call `ModelContext` or network APIs — re-adding it later forces cascading signature changes
+- **Never simplify CloudKit sync logic** without verifying optional attribute handling is preserved — CloudKit requires all synced attributes to be optional
 
 ## File Placement
 
