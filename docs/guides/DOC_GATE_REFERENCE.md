@@ -12,6 +12,7 @@ Standalone reference for the mandatory documentation gates in the feature develo
 ### Checklist
 
 - [ ] **Design docs** (`docs/plans/` or `docs/decisions/`) — Update or create with confirmed decisions, refined scope, and technical constraints
+- [ ] **Test scenarios** (`docs/test-scenarios/`) — Write Gherkin scenario documents covering happy path, error cases, and edge cases for the planned feature. Update the mapping table in `docs/test-scenarios/README.md`. See `docs/guides/TESTING_SCENARIOS.md` for format.
 - [ ] **Guides** (`docs/guides/`) — Update if new patterns or conventions are introduced
 - [ ] **CLAUDE.md** — Add new conventions that apply project-wide to root, or module-specific conventions to scoped CLAUDE.md files (`api/CLAUDE.md`, `web/CLAUDE.md`, `ios/CLAUDE.md`)
 - [ ] **GitHub issues** — Post a comment syncing the latest decisions and technical notes (if applicable)
@@ -24,6 +25,7 @@ Review each item explicitly. If an item is not applicable (e.g., no new conventi
 - Skipping this gate because "it's a small feature" — if the feature went through architecture review, it goes through the doc gate
 - Updating only the root CLAUDE.md when the convention is module-specific — use scoped files
 - Writing vague plan docs — include specific file paths, function signatures, and data flow descriptions
+- Skipping test scenarios — if the feature has user-facing flows or API routes, it needs scenario docs before implementation begins
 
 ---
 
@@ -35,6 +37,12 @@ Review each item explicitly. If an item is not applicable (e.g., no new conventi
 ### Checklist
 
 - [ ] **Sync architecture docs** — Update `docs/plans/` and `docs/decisions/` to reflect what was actually built, not what was planned. Note scope changes and deferred work.
+- [ ] **Sync test scenarios** — Update `docs/test-scenarios/` to reflect actual test coverage. Update the mapping table in `docs/test-scenarios/README.md` with spec file paths and status. Remove or amend scenarios that were descoped during implementation.
+- [ ] **Verify test coverage across layers** — Confirm tests exist at each required layer (see `CLAUDE.md` Testing Requirements):
+  - API routes → unit tests + integration tests (`fastify.inject()`)
+  - User-facing web flows → unit tests + E2E tests (Playwright)
+  - Pure logic/utilities → unit tests
+  - Flag any missing layers before completing the summary
 - [ ] **Capture learnings** — Record gotchas and conventions into the appropriate location:
   - New directory with its own conventions → create a scoped CLAUDE.md
   - Module-specific lesson → update `api/CLAUDE.md`, `web/CLAUDE.md`, or `ios/CLAUDE.md`
@@ -57,6 +65,8 @@ The post-review gate catches the gap between "what we planned" and "what we actu
 - Adding conventions to the wrong scope — a lesson about Fastify cookie handling belongs in `api/CLAUDE.md`, not root
 - Forgetting to update memory — if the user corrected your approach, that correction will be lost in the next conversation unless saved as a feedback memory
 - Leaving stale memory entries — if a feature changed phase status or test counts, update existing project memories rather than creating duplicates
+- Writing only unit tests for an API route — integration tests with `fastify.inject()` are also required
+- Writing only unit tests for a user-facing flow — E2E tests are also required when the feature changes what users see or interact with
 
 ---
 

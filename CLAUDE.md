@@ -95,11 +95,42 @@ When editing `.md` files:
 - Never include actual secrets — only references to `.env.example`
 
 ## Testing Requirements
-- ALWAYS write unit tests for any new or updated code
-- Tests are mandatory, not optional — no code change is complete without corresponding tests
-- For new code: write tests covering the primary functionality, edge cases, and error paths
-- For updated code: update existing tests to reflect changes AND add new tests for new behavior
+
+Tests are mandatory, not optional — no code change is complete without corresponding tests. Use the appropriate test layer for what you're testing:
+
+### Unit Tests (always required)
+- **What:** Pure functions, utilities, type guards, schema validation, business logic
+- **Where:** Co-located `*.test.ts` files (API: `src/**/*.test.ts`, Web: `src/**/*.test.ts`)
+- **Runner:** Vitest
+- Cover primary functionality, edge cases, and error paths
+- For updated code: update existing tests AND add new tests for new behavior
+
+### Integration Tests (required for API routes and DB queries)
+- **What:** API route handlers, database queries, middleware chains, multi-module interactions
+- **Where:** API: `src/**/*.test.ts` using `fastify.inject()`
+- **Runner:** Vitest
+- Cover happy path, auth failure (401/403), validation failure (400), and key error paths
+- See `api/CLAUDE.md` "Integration test coverage" checklist for required scenarios
+
+### E2E Tests (required for user-facing flows)
+- **What:** Full user flows through the web UI — login, navigation, forms, authenticated actions
+- **Where:** `web/e2e/*.spec.ts`
+- **Runner:** Playwright
+- Use accessibility-first locators (`getByRole`, `getByLabel`, `getByTestId`)
+- Use Given/When/Then format for test titles (see `docs/guides/TESTING_SCENARIOS.md`)
+- Only required when the feature adds or changes user-facing behavior
+
+### Test Scenarios (required for non-trivial features)
+- Write Gherkin scenario documents in `docs/test-scenarios/` during architecture (Phase 4)
+- Scenarios are written before test code and map 1:1 to test cases
+- Update `docs/test-scenarios/README.md` mapping table when adding new scenarios
+- See `docs/guides/TESTING_SCENARIOS.md` for format and conventions
+
+### General Rules
 - Run tests after writing them to verify they pass before considering the task done
+- A feature touching API routes needs both unit tests AND integration tests
+- A feature touching user-facing web flows needs unit tests AND E2E tests
+- Bug fixes need a regression test at the appropriate layer
 
 ## Commit Standards
 - NEVER commit unless the user explicitly says to commit — creating files, fixing bugs, or writing changelogs does NOT imply committing
