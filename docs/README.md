@@ -13,7 +13,7 @@ Architecture decisions, requirements, and implementation plans for Track'em Toys
 | Document | Date | Decision |
 |----------|------|----------|
 | [Architecture Research](decisions/Architecture_Research_for_Toy_Collection_Catalog_and_Pricing_App.md) | 2026-02-22 | PostgreSQL shared-catalog/private-collection model, OAuth2 auth, Railway deployment |
-| [Frontend Framework Recommendation](decisions/Frontend_Framework_Recommendation_2026.md) | 2026-02-22 | React 19 + Shadcn/ui + Tailwind CSS over Vue/Chakra/Material |
+| [ADR: Frontend Framework](decisions/ADR_Frontend_Framework.md) | 2026-02-22 | React 19 + Shadcn/ui + Tailwind CSS over Vue/Chakra/Material |
 | [ADR: Integration Testing Strategy](decisions/ADR_Integration_Testing_Strategy.md) | 2026-02-26 | Plain Playwright over BDD/Gherkin for E2E testing |
 
 ## Implementation Plans
