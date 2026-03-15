@@ -14,45 +14,58 @@ The shared item catalog stores the canonical definition of "what a figure is." N
 
 ```sql
 CREATE TABLE manufacturers (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL UNIQUE,
-    country TEXT, website TEXT,
-    created_at TIMESTAMPTZ DEFAULT now()
+    slug TEXT NOT NULL UNIQUE,  -- URL-safe kebab-case key
+    country TEXT, website_url VARCHAR(500),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE characters (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    franchise TEXT,
-    created_at TIMESTAMPTZ DEFAULT now()
+    slug TEXT NOT NULL UNIQUE,  -- URL-safe kebab-case key
+    franchise TEXT NOT NULL DEFAULT 'Transformers',
+    faction_id UUID REFERENCES factions(id) ON DELETE SET NULL,
+    character_type TEXT,  -- 'Transformer', 'Human', etc.
+    sub_group_id UUID REFERENCES sub_groups(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE categories (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    parent_id BIGINT REFERENCES categories(id),  -- hierarchical
+    slug TEXT NOT NULL UNIQUE,
+    parent_id UUID REFERENCES categories(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE items (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,  -- manufacturer's product name (e.g., "Phoenix" for a 3P Optimus Prime)
-    manufacturer_id BIGINT REFERENCES manufacturers(id),
-    character_id BIGINT REFERENCES characters(id),
+    slug TEXT NOT NULL UNIQUE,  -- URL-safe kebab-case key
+    manufacturer_id UUID REFERENCES manufacturers(id),
+    character_id UUID REFERENCES characters(id),
+    toy_line_id UUID REFERENCES toy_lines(id),
     year_released INTEGER,
     description TEXT, barcode TEXT, sku TEXT,
     product_code TEXT,  -- user-definable item ID (e.g., "MP-44", "FT-44")
-    created_by BIGINT REFERENCES users(id),
-    data_quality TEXT DEFAULT 'needs_review',
+    is_third_party BOOLEAN NOT NULL DEFAULT FALSE,
+    created_by UUID REFERENCES users(id),
+    data_quality TEXT NOT NULL DEFAULT 'needs_review'
+        CHECK (data_quality IN ('needs_review', 'verified', 'community_verified')),
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE item_photos (
-    id BIGSERIAL PRIMARY KEY,
-    item_id BIGINT NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    item_id UUID NOT NULL REFERENCES items(id) ON DELETE CASCADE,
     url TEXT NOT NULL, caption TEXT,
-    uploaded_by BIGINT REFERENCES users(id),
+    uploaded_by UUID REFERENCES users(id),
     is_primary BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -64,9 +77,9 @@ Each collector's personal data lives in tables keyed by `user_id`. The **`user_c
 
 ```sql
 CREATE TABLE user_collection_items (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    item_id BIGINT NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    item_id UUID NOT NULL REFERENCES items(id) ON DELETE CASCADE,
     condition TEXT CHECK (condition IN ('mint','near_mint','excellent','good','fair','poor')),
     acquisition_price NUMERIC(12,2),
     acquisition_source TEXT,
@@ -81,18 +94,18 @@ CREATE TABLE user_collection_items (
 );
 
 CREATE TABLE user_pricing_records (
-    id BIGSERIAL PRIMARY KEY,
-    user_collection_item_id BIGINT NOT NULL REFERENCES user_collection_items(id) ON DELETE CASCADE,
-    user_id BIGINT NOT NULL REFERENCES users(id),  -- denormalized for RLS
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_collection_item_id UUID NOT NULL REFERENCES user_collection_items(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id),  -- denormalized for RLS
     price NUMERIC(12,2) NOT NULL,
     source TEXT,
     recorded_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE user_wantlist (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    item_id BIGINT NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    item_id UUID NOT NULL REFERENCES items(id) ON DELETE CASCADE,
     priority INTEGER DEFAULT 0,
     max_price NUMERIC(12,2), notes TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),
@@ -113,9 +126,9 @@ ALTER TABLE user_pricing_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_wantlist ENABLE ROW LEVEL SECURITY;
 
 -- Session context function
-CREATE OR REPLACE FUNCTION current_app_user_id() RETURNS BIGINT AS $$
+CREATE OR REPLACE FUNCTION current_app_user_id() RETURNS UUID AS $$
 BEGIN
-    RETURN NULLIF(current_setting('app.user_id', true), '')::BIGINT;
+    RETURN NULLIF(current_setting('app.user_id', true), '')::UUID;
 END;
 $$ LANGUAGE plpgsql STABLE;
 
@@ -134,14 +147,14 @@ For the shared catalog, an **approval queue** pattern handles user contributions
 
 ```sql
 CREATE TABLE catalog_edits (
-    id BIGSERIAL PRIMARY KEY,
-    item_id BIGINT REFERENCES items(id),
-    editor_id BIGINT NOT NULL REFERENCES users(id),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    item_id UUID REFERENCES items(id),
+    editor_id UUID NOT NULL REFERENCES users(id),
     edit_type TEXT NOT NULL CHECK (edit_type IN ('create','update','merge','delete')),
     data_before JSONB,
     data_after JSONB NOT NULL,
     status TEXT DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected','auto_approved')),
-    reviewed_by BIGINT REFERENCES users(id),
+    reviewed_by UUID REFERENCES users(id),
     created_at TIMESTAMPTZ DEFAULT now()
 );
 ```
