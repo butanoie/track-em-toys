@@ -49,6 +49,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - RLS policies: always use the (SELECT ...) wrapper, never bare function calls
 - Catalog tables use UUID primary keys with a unique `slug` column for stable cross-references and URL-friendly API routes
 - Seed data (`api/db/seed/`) uses slug-based FK references — never integer IDs — to avoid fragile positional coupling
+- GDPR user deletion uses tombstone pattern: scrub PII (email, display_name, avatar_url), set `deleted_at`, keep the row so all FKs remain intact. NEVER use `ON DELETE CASCADE` or `ON DELETE SET NULL` on user FKs. App checks `deleted_at IS NOT NULL` to display "Deleted user".
 
 ## Refactoring Safety
 **CRITICAL: Before removing or replacing any code during refactoring, check its git history to understand WHY it exists.** Code that looks redundant may be a deliberate bug fix.
@@ -145,6 +146,8 @@ Tests are mandatory, not optional — no code change is complete without corresp
 ## Feature Development Gates
 
 These gates apply to any non-trivial feature work, whether using `/feature-dev` or working ad-hoc. Trivial changes (bug fixes, config tweaks, small additions) do not require them.
+
+**When using task tracking, gates MUST appear as explicit tasks** — not just behavioral reminders. Create gate tasks that block subsequent phases (e.g., Post-Architecture Gate blocks Implementation; Post-Review Gate blocks Summary).
 
 ### Verification Gate
 

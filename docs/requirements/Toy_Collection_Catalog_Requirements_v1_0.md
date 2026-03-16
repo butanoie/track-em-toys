@@ -522,6 +522,14 @@ authorization.
 7.  ML inference runs entirely on-device; photos are never sent to
     external classification services.
 
+7b. GDPR compliance: Users must be able to request full account deletion
+    (right to erasure, Article 17). Uses tombstone pattern: PII is scrubbed
+    (email, display_name, avatar_url) and deleted_at is set, but the users
+    row is preserved so all foreign key references remain intact. Auth data
+    (refresh tokens, OAuth accounts) is hard-deleted. Records previously
+    attributed to the deleted user display "Deleted user" in the UI — the
+    content is preserved, the identity is erased.
+
 5.3 Reliability & Data Integrity
 
 8.  Database should support point-in-time recovery. Daily automated

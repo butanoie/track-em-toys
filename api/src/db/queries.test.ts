@@ -55,6 +55,7 @@ const mockUser: User = {
   display_name: 'Test User',
   avatar_url: 'https://example.com/avatar.jpg',
   deactivated_at: null,
+  deleted_at: null,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 }

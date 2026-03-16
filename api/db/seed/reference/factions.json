@@ -1,0 +1,76 @@
+{
+  "_metadata": {
+    "table": "factions",
+    "description": "Seed data for the factions reference table",
+    "total": 11,
+    "import_order": 1
+  },
+  "data": [
+    {
+      "name": "Autobot",
+      "slug": "autobot",
+      "franchise": "Transformers",
+      "notes": "Heroic faction. Known as Cybertrons (サイバトロン) in Japan"
+    },
+    {
+      "name": "Decepticon",
+      "slug": "decepticon",
+      "franchise": "Transformers",
+      "notes": "Villainous faction. Known as Destrons (デストロン) in Japan"
+    },
+    {
+      "name": "Human",
+      "slug": "human",
+      "franchise": null,
+      "notes": "Earth humans allied with or opposing Transformers"
+    },
+    {
+      "name": "Quintesson",
+      "slug": "quintesson",
+      "franchise": "Transformers",
+      "notes": "Ancient alien race. Creators of the Transformers in G1 cartoon continuity"
+    },
+    {
+      "name": "Junkion",
+      "slug": "junkion",
+      "franchise": "Transformers",
+      "notes": "Scrap-metal robots from the planet Junkion. Allied with Autobots"
+    },
+    {
+      "name": "Nebulan",
+      "slug": "nebulan",
+      "franchise": "Transformers",
+      "notes": "Humanoid aliens from Nebulos. Partners to Headmasters and Targetmasters in NA continuity. Not used in Japanese continuity (Headmasters are Cybertronians from planet Master)"
+    },
+    {
+      "name": "Lithone",
+      "slug": "lithone",
+      "franchise": "Transformers",
+      "notes": "Inhabitants of the planet Lithone, destroyed by Unicron in the 1986 movie"
+    },
+    {
+      "name": "Neutral",
+      "slug": "neutral",
+      "franchise": null,
+      "notes": "Characters not aligned with any faction. Includes Doubledealer, some JP characters"
+    },
+    {
+      "name": "Other",
+      "slug": "other",
+      "franchise": null,
+      "notes": "Characters from other alien races or unclassified factions"
+    },
+    {
+      "name": "G.I. Joe",
+      "slug": "gi-joe",
+      "franchise": "G.I. Joe",
+      "notes": "Heroic military faction from G.I. Joe franchise"
+    },
+    {
+      "name": "Cobra",
+      "slug": "cobra",
+      "franchise": "G.I. Joe",
+      "notes": "Villainous faction from G.I. Joe franchise"
+    }
+  ]
+}

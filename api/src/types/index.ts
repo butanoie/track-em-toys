@@ -5,6 +5,7 @@ export interface User {
   display_name: string | null
   avatar_url: string | null
   deactivated_at: string | null
+  deleted_at: string | null
   created_at: string
   updated_at: string
 }
@@ -139,6 +140,16 @@ export interface SubGroup {
   created_at: string
 }
 
+export interface ContinuityFamily {
+  id: string
+  slug: string
+  name: string
+  franchise: string | null
+  sort_order: number | null
+  notes: string | null
+  created_at: string
+}
+
 // ---------------------------------------------------------------------------
 // Shared Catalog — core entities
 // ---------------------------------------------------------------------------
@@ -150,11 +161,31 @@ export interface Character {
   franchise: string
   faction_id: string | null
   character_type: string | null
-  sub_group_id: string | null
   alt_mode: string | null
   is_combined_form: boolean
   combined_form_id: string | null
   combiner_role: string | null
+  continuity_family_id: string
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface CharacterSubGroup {
+  character_id: string
+  sub_group_id: string
+}
+
+export interface CharacterAppearance {
+  id: string
+  slug: string
+  name: string
+  character_id: string
+  description: string | null
+  source_media: string | null
+  source_name: string | null
+  year_start: number | null
+  year_end: number | null
   metadata: Record<string, unknown>
   created_at: string
   updated_at: string
@@ -173,20 +204,12 @@ export interface Manufacturer {
   updated_at: string
 }
 
-export interface Category {
-  id: string
-  name: string
-  slug: string
-  parent_id: string | null
-  created_at: string
-}
-
 export interface ToyLine {
   id: string
   name: string
   slug: string
   franchise: string | null
-  manufacturer_id: string | null
+  manufacturer_id: string
   scale: string | null
   description: string | null
   created_at: string
@@ -200,8 +223,10 @@ export interface Item {
   name: string
   slug: string
   manufacturer_id: string | null
-  character_id: string | null
-  toy_line_id: string | null
+  character_id: string
+  toy_line_id: string
+  character_appearance_id: string | null
+  size_class: string | null
   year_released: number | null
   description: string | null
   barcode: string | null

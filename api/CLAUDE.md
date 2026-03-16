@@ -33,6 +33,16 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - Migration filenames follow `NNN_description.sql` sequential numbering with no gaps
 - Catalog tables use UUID PKs with a unique `slug` column (e.g. `"optimus-prime"`) for stable references and URL-friendly routes
 - Seed data in `api/db/seed/` uses slug-based FK references between entities — NEVER integer IDs (integer IDs are positional and break when data is reordered or regenerated)
+- Seed data organization: see `api/db/seed/README.md` for directory structure, import order, and column mapping
+- Seed `_metadata.total` must always equal the actual array length — recount after any addition or removal, never increment/decrement manually
+
+### GDPR / User Deletion (Tombstone Pattern)
+- User "deletion" = scrub PII (`email`, `display_name`, `avatar_url`) + set `deleted_at` — the `users` row is preserved as a tombstone so all FKs remain intact
+- NEVER use `ON DELETE CASCADE` or `ON DELETE SET NULL` on user FKs — the user row is never actually deleted from the database
+- User FKs keep their original nullability — `NOT NULL` FKs like `catalog_edits.editor_id` stay `NOT NULL` because the referenced user row always exists
+- App checks `u.deleted_at IS NOT NULL` on JOINs to display "Deleted user" instead of the scrubbed fields
+- Auth data (`refresh_tokens`, `oauth_accounts`) is hard-deleted during scrub — no need for tombstone on auth tables
+- When adding a new table with a user FK, no special ON DELETE clause is needed (default RESTRICT is correct)
 
 ### Cookie Handling
 - Cookies are signed via `@fastify/cookie` with `signed: true`
@@ -331,6 +341,17 @@ for f in src/**/*.ts; do [[ "$f" == *.test.ts ]] && continue; t="${f%.ts}.test.t
 
 Type-only files (`src/types/index.ts`) and schema-only files (`src/auth/schemas.ts`) are exempt —
 types have no runtime behavior to test, and schemas are exercised through route handler tests.
+
+### 28. Schema docs sync after migrations
+
+After creating a new migration, grep for affected column/table names across all docs:
+
+```bash
+grep -rn "column_name\|table_name" --include="*.md" --include="*.tsx" --include="*.jsx" docs/ api/src/types/
+```
+
+Files that commonly need updating: `api/src/types/index.ts`, `docs/diagrams/toy-catalog-database-diagrams.jsx`,
+`docs/decisions/Schema_Design_Rationale.md`, `docs/decisions/Architecture_Research_*.md`
 
 ---
 
