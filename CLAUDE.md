@@ -147,6 +147,8 @@ Tests are mandatory, not optional — no code change is complete without corresp
 
 These gates apply to any non-trivial feature work, whether using `/feature-dev` or working ad-hoc. Trivial changes (bug fixes, config tweaks, small additions) do not require them.
 
+**When using task tracking, gates MUST appear as explicit tasks** — not just behavioral reminders. Create gate tasks that block subsequent phases (e.g., Post-Architecture Gate blocks Implementation; Post-Review Gate blocks Summary).
+
 ### Verification Gate
 
 **CRITICAL: Run `/run-checks` before considering any implementation complete.** Do NOT skip this step. Do NOT rely on "it looks right" — run the automated checks. This catches issues that manual review misses (type errors, lint violations, failing tests).
