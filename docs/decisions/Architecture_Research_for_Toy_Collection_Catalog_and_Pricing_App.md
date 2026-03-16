@@ -1,5 +1,7 @@
 # Architecture research for the Toy Collection Catalog & Pricing App
 
+> **Note (2026-03-16):** This document represents the original architecture research. The project now follows an **ML-accelerated roadmap** that defers private collection tables (`user_collection_items`, `user_pricing_records`, `user_wantlist`) to Phase 1.6 (post-ML). The critical path focuses on shared catalog + catalog photos → ML training → iOS inference. Authentication is **OAuth-only** (no email/password). User roles (`user`/`curator`/`admin`) gate catalog write operations. See `docs/plans/Development_Roadmap_v1_0.md` and `docs/decisions/2026-03-16_roadmap_session_decisions.md` for current strategy.
+
 This report covers three additions to your requirements document: a shared-reference/private-instance PostgreSQL data model, OAuth2 authentication with Apple and Google, and Railway deployment. Each section provides implementation-ready detail — schema designs, library choices, configuration specifics, and cost estimates — so you can write precise, professional requirements sections directly from this research.
 
 ---

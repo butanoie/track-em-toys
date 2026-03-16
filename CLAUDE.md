@@ -42,14 +42,40 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - ML: Core ML + Create ML, transfer learning image classification (≤ 10 MB models)
 
 ## Data Architecture
-- PostgreSQL: Shared catalog (no user_id) + private collections (user_id + RLS)
+- PostgreSQL: Shared catalog (no user_id) + private collections (user_id + RLS, deferred to post-ML)
 - SwiftData: Local-first with CloudKit sync, single-user architecture
 - RLS uses (SELECT current_app_user_id()) subselect wrapper for initPlan caching
 - JWT: ES256 asymmetric signing, JWKS discovery, SHA-256 refresh token hashing
 - RLS policies: always use the (SELECT ...) wrapper, never bare function calls
 - Catalog tables use UUID primary keys with a unique `slug` column for stable cross-references and URL-friendly API routes
 - Seed data (`api/db/seed/`) uses slug-based FK references — never integer IDs — to avoid fragile positional coupling
-- GDPR user deletion uses tombstone pattern: scrub PII (email, display_name, avatar_url), set `deleted_at`, keep the row so all FKs remain intact. NEVER use `ON DELETE CASCADE` or `ON DELETE SET NULL` on user FKs. App checks `deleted_at IS NOT NULL` to display "Deleted user".
+- GDPR user deletion uses tombstone pattern: scrub PII (email, display_name, avatar_url), set `deleted_at`, keep the row so all FKs remain intact. NEVER use `ON DELETE CASCADE` or `ON DELETE SET NULL` on user FKs. App checks `deleted_at IS NOT NULL` to display "Deleted user". Phase 1.12 implements the deletion endpoint + UI.
+
+## Authentication
+- OAuth-only: Apple Sign-In + Google Sign-In (no email/password auth)
+- ES256 asymmetric JWT access tokens (15-min), SHA-256 hashed refresh tokens (7-day)
+- Role included in JWT claims — no DB lookup needed per request
+
+## User Roles
+- `users.role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'curator', 'admin'))`
+- **user** — Browse catalog, manage own collection (post-ML)
+- **curator** — All user powers + manage catalog items, characters, photos, review catalog_edits
+- **admin** — All curator powers + user management, role assignment, account operations
+- API: `requireRole(role)` Fastify preHandler middleware enforces role checks
+- Web: Admin routes under `/admin/*`, code-split via lazy import; role checks in TanStack Router `beforeLoad`
+- Catalog write operations (photo upload, item edits) require `curator` or `admin` role
+
+## Photo Domains
+Two distinct photo types with different privacy models:
+- **Catalog photos** (`item_photos` table): Centrally managed reference images (product shots, box art). Shared across all users, no RLS. Feed ML training directly. Upload requires `curator` role.
+- **User collection photos** (future table, post-ML): Private condition/shelf photos of a collector's own items. Will use RLS on `uploaded_by`. Deferred to Phase 1.6.
+- ML training uses only catalog photos — no consent mechanism needed (app-managed content, not user PII)
+
+## Development Strategy
+- ML-accelerated, web-first roadmap: 1.4 (Seed) → 1.5 (Catalog API) → 1.5b (Roles) → 1.9 (Photos) → 4.0 (ML) → 2.0 (iOS)
+- Collection features (private items, pricing, tags, CSV import, reporting) deferred until post-ML
+- See `docs/plans/Development_Roadmap_v1_0.md` for full roadmap
+- See `docs/decisions/2026-03-16_roadmap_session_decisions.md` for architectural decisions
 
 ## Refactoring Safety
 **CRITICAL: Before removing or replacing any code during refactoring, check its git history to understand WHY it exists.** Code that looks redundant may be a deliberate bug fix.

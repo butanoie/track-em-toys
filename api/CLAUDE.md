@@ -44,6 +44,23 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - Auth data (`refresh_tokens`, `oauth_accounts`) is hard-deleted during scrub — no need for tombstone on auth tables
 - When adding a new table with a user FK, no special ON DELETE clause is needed (default RESTRICT is correct)
 
+### User Roles & Authorization
+- `users.role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'curator', 'admin'))`
+- Role is included in JWT access token claims — no DB lookup needed per request
+- `requireRole(role)` Fastify preHandler middleware enforces role checks; returns 403 if insufficient
+- Catalog read routes: no role required (public)
+- Catalog write routes (photo upload, item edits): require `curator` or `admin`
+- Admin routes (user management, role assignment): require `admin`
+- When adding a new route with write operations on catalog data, always add `requireRole('curator')` preHandler
+- Admin routes live in `src/admin/routes.ts`, separate from catalog routes
+- First admin user bootstrapped via CLI command: `npx trackem set-role <email> admin`
+
+### Photo Domains
+Two distinct photo types:
+- **Catalog photos** (`item_photos`): Shared reference images, no RLS. `uploaded_by` tracks contributor for attribution. Feed ML training directly. Upload requires `curator` role.
+- **User collection photos** (future, post-ML): Private, RLS-protected. Separate table with `user_id` + RLS policy using `(SELECT current_app_user_id())`.
+- `item_photos` does NOT have RLS — this is intentional. Catalog photos are app-managed content visible to all users.
+
 ### Cookie Handling
 - Cookies are signed via `@fastify/cookie` with `signed: true`
 - ALWAYS read signed cookies with `request.unsignCookie(request.cookies[NAME])`

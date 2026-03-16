@@ -32,6 +32,20 @@ In addition to the root CLAUDE.md refactoring rules:
 - **Never remove `async` from a function** that may need to call `ModelContext` or network APIs — re-adding it later forces cascading signature changes
 - **Never simplify CloudKit sync logic** without verifying optional attribute handling is preserved — CloudKit requires all synced attributes to be optional
 
+## Development Roadmap Context
+- iOS app is Phase 2.0 in the ML-accelerated roadmap — built after ML models are trained (Phase 4.0)
+- ML inference is a **first-class feature from day one** — the app launches with Core ML classification
+- Collection management features (private items, pricing, tags) are deferred to post-ML
+- Only catalog data (shared) and catalog photos are available initially via the API
+- User roles: `user`, `curator`, `admin` — iOS app will support role-based UI gating
+
+### Phase 2.0 Capabilities (planned)
+- Camera + Core ML inference: capture photo, classify toy, display top-N predictions with confidence
+- Vision Framework pre-filter: confirm photo contains toy/robot before running custom model
+- Barcode scanning (AVFoundation): UPC-A, UPC-E, EAN-8, EAN-13
+- Offline data entry with sync-on-reconnect (SwiftData + CloudKit)
+- User feedback loop: confirm or correct classification → feeds back into training data
+
 ## File Placement
 
 New Swift files go in `ios/track-em-toys/`. Xcode uses folder references (blue folders) which are auto-detected -- no `.pbxproj` edit needed.

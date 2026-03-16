@@ -9,6 +9,19 @@
 - Training scripts must be idempotent and reproducible
 - Training data lives in `training-data/` (labeled folders), model output in `models/`
 
+## Training Data Source
+- ML training uses **catalog photos** from the `item_photos` table (shared, app-managed reference images)
+- Catalog photos are NOT user-private PII — no consent mechanism needed
+- Training data export: script pulls photos from API/storage, organizes into `ClassName/` folders matching Create ML format
+- User collection photos (private, RLS-protected) are NOT used for training
+
+## Phase 4.0 Pipeline (planned)
+- **4.0a Training Data Prep:** Export script, data augmentation (rotation, scale, brightness), class balance analysis
+- **4.0b Model Training:** Create ML Image Classification with transfer learning, ~7 MB target, ~80% accuracy with 80+ images/class
+- **4.0c Model Serving:** Metadata API (`GET /ml/models`), optional server-side inference (`POST /ml/classify`), or ONNX for web
+- **4.0d Retraining:** Documented workflow (export → train → evaluate → deploy), quality gates (minimum accuracy threshold)
+- Model versioning: naming convention includes training date, class count, accuracy metric
+
 ## Before Writing New Code
 
 Read existing files for patterns before writing anything new:
