@@ -28,18 +28,18 @@ CREATE TABLE characters (
     slug TEXT NOT NULL UNIQUE,  -- URL-safe kebab-case key
     franchise TEXT NOT NULL DEFAULT 'Transformers',
     faction_id UUID REFERENCES factions(id) ON DELETE SET NULL,
-    character_type TEXT,  -- 'Transformer', 'Human', etc.
-    sub_group_id UUID REFERENCES sub_groups(id) ON DELETE SET NULL,
+    character_type TEXT,  -- 'Transformer', 'Human', 'Pretender', 'Godmaster', etc.
+    series TEXT NOT NULL, -- 'The Transformers Season 1', 'Transformers: Victory', etc.
+    continuity TEXT NOT NULL, -- 'G1 North America', 'G1 Japan', 'G1 Toy-only'
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE categories (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL,
-    slug TEXT NOT NULL UNIQUE,
-    parent_id UUID REFERENCES categories(id) ON DELETE SET NULL,
-    created_at TIMESTAMPTZ DEFAULT now()
+-- Many-to-many: characters can belong to multiple sub-groups
+CREATE TABLE character_sub_groups (
+    character_id UUID NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+    sub_group_id UUID NOT NULL REFERENCES sub_groups(id) ON DELETE CASCADE,
+    PRIMARY KEY (character_id, sub_group_id)
 );
 
 CREATE TABLE items (
@@ -330,7 +330,7 @@ A lightweight deployment fits within the **$5 Hobby plan credit**. Most small-to
 
 For your three new sections, the key requirements to specify are:
 
-**Data model section**: Single shared schema with RLS on private tables; shared catalog tables (items, manufacturers, characters, categories, item_photos) with no user_id; private collection tables (user_collection_items, user_pricing_records, user_wantlist) with user_id foreign key; approval queue for catalog contributions with graduated trust levels; composite indexes on (user_id, item_id) for collection tables; `set_config` session context pattern for RLS.
+**Data model section**: Single shared schema with RLS on private tables; shared catalog tables (items, manufacturers, characters, character_sub_groups, item_photos) with no user_id; private collection tables (user_collection_items, user_pricing_records, user_wantlist) with user_id foreign key; approval queue for catalog contributions with graduated trust levels; composite indexes on (user_id, item_id) for collection tables; `set_config` session context pattern for RLS.
 
 **Authentication section**: OAuth2/OIDC with Apple and Google as launch providers; unified `/auth/signin` endpoint accepting provider id_tokens; separate client_id values per provider per platform (4 total); account linking by verified email with explicit linking UI for Apple private relay users; short-lived access JWTs (15 min) + database-backed refresh tokens (30 days); `oauth_accounts` table supporting multiple providers per user; Apple `.p8` key and all secrets stored as sealed Railway environment variables.
 

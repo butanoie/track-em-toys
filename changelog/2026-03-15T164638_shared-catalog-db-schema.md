@@ -17,15 +17,15 @@ Added 9 shared catalog tables to PostgreSQL via migration 011, establishing the 
 
 ### 1. Migration 011 - Shared Catalog Tables
 
-9 new tables created, all in the shared catalog layer (no `user_id`, no RLS):
+9 new tables created in migration 011 (shared catalog layer, no `user_id`, no RLS). Migration 012 subsequently dropped `categories`, added `character_sub_groups`, and enriched `characters` and `users`:
 
 | Table | Purpose | Slug | updated_at | Trigger |
 |---|---|---|---|---|
 | `factions` | Allegiances (Autobot, Decepticon) | Yes | No | No |
 | `sub_groups` | Sub-teams (Dinobots, Constructicons) | Yes | No | No |
 | `characters` | Franchise characters with combiner metadata | Yes | Yes | Yes |
+| `character_sub_groups` | Many-to-many: characters ↔ sub_groups | No | No | No |
 | `manufacturers` | Figure-producing companies | Yes | Yes | Yes |
-| `categories` | Hierarchical categorization | Yes | No | No |
 | `toy_lines` | Product lines (Masterpiece, Classified) | Yes | Yes | Yes |
 | `items` | Master catalog of figures | Yes | Yes | Yes |
 | `item_photos` | Reference photos for catalog items | No | No | No |
@@ -38,7 +38,7 @@ Added 9 shared catalog tables to PostgreSQL via migration 011, establishing the 
 
 9 interfaces and 3 union types added to match the migration schema exactly.
 
-**Interfaces:** `Faction`, `SubGroup`, `Character`, `Manufacturer`, `Category`, `ToyLine`, `Item`, `ItemPhoto`, `CatalogEdit`
+**Interfaces:** `Faction`, `SubGroup`, `Character`, `CharacterSubGroup`, `Manufacturer`, `ToyLine`, `Item`, `ItemPhoto`, `CatalogEdit`
 
 **Union types:** `DataQuality`, `CatalogEditType`, `CatalogEditStatus`
 

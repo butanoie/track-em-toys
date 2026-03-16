@@ -1,0 +1,141 @@
+{
+  "_metadata": {
+    "table": "toy_lines",
+    "description": "Seed data for the toy_lines table",
+    "total": 16,
+    "import_order": 4,
+    "references": [
+      "manufacturers (via manufacturer_slug)"
+    ]
+  },
+  "data": [
+    {
+      "name": "FansToys Mainline",
+      "slug": "fanstoys-mainline",
+      "franchise": "Transformers",
+      "scale": "Masterpiece",
+      "description": "Primary FT-numbered product line",
+      "manufacturer_slug": "fanstoys"
+    },
+    {
+      "name": "Robot Paradise",
+      "slug": "robot-paradise",
+      "franchise": "Transformers",
+      "scale": "Masterpiece",
+      "description": "FansToys sub-brand for Soundwave family characters",
+      "manufacturer_slug": "fanstoys"
+    },
+    {
+      "name": "Perfect Fusion",
+      "slug": "perfect-fusion",
+      "franchise": "Transformers",
+      "scale": "Masterpiece",
+      "description": "FansToys sub-brand for redesigned 2.0 versions",
+      "manufacturer_slug": "fanstoys"
+    },
+    {
+      "name": "Fantastic Model",
+      "slug": "fantastic-model",
+      "franchise": "Transformers",
+      "scale": "Masterpiece",
+      "description": "FansToys sub-brand for core Autobot characters",
+      "manufacturer_slug": "fanstoys"
+    },
+    {
+      "name": "Masterpiece",
+      "slug": "masterpiece",
+      "franchise": "Transformers",
+      "scale": "Masterpiece",
+      "description": "Hasbro's premium collector line targeting G1 accuracy",
+      "manufacturer_slug": "hasbro"
+    },
+    {
+      "name": "Generations",
+      "slug": "generations",
+      "franchise": "Transformers",
+      "scale": "Various",
+      "description": "Hasbro's main collector line spanning multiple size classes. Includes War for Cybertron, Kingdom, Legacy sub-lines",
+      "manufacturer_slug": "hasbro"
+    },
+    {
+      "name": "Studio Series",
+      "slug": "studio-series",
+      "franchise": "Transformers",
+      "scale": "Various",
+      "description": "Hasbro line focused on screen accuracy across all media (movies, cartoons, anime)",
+      "manufacturer_slug": "hasbro"
+    },
+    {
+      "name": "Masterpiece (Takara)",
+      "slug": "masterpiece-takara",
+      "franchise": "Transformers",
+      "scale": "Masterpiece",
+      "description": "Takara Tomy's premium Masterpiece line (MP-XX numbering)",
+      "manufacturer_slug": "takara-tomy"
+    },
+    {
+      "name": "The Transformers (G1)",
+      "slug": "the-transformers-g1",
+      "franchise": "Transformers",
+      "scale": "Various",
+      "description": "Original Hasbro G1 toyline (1984-1990). Includes all US-market sub-groups: Pretenders, Powermasters, Headmasters, Targetmasters, etc.",
+      "manufacturer_slug": "hasbro"
+    },
+    {
+      "name": "Fight! Super Robot Lifeform Transformers",
+      "slug": "fight-super-robot-lifeform-transformers",
+      "franchise": "Transformers",
+      "scale": "Various",
+      "description": "Takara's first JP Transformers toyline (1985-1987). Japanese version of US G1 Seasons 1-3 toys, plus JP exclusives",
+      "manufacturer_slug": "takara-tomy"
+    },
+    {
+      "name": "Transformers: The Headmasters",
+      "slug": "transformers-the-headmasters",
+      "franchise": "Transformers",
+      "scale": "Various",
+      "description": "Takara JP toyline (1987-1988). Headmasters, Targetmasters, Trainbots, Sixshot. Accompanied the Headmasters anime",
+      "manufacturer_slug": "takara-tomy"
+    },
+    {
+      "name": "Transformers: Super-God Masterforce",
+      "slug": "transformers-super-god-masterforce",
+      "franchise": "Transformers",
+      "scale": "Various",
+      "description": "Takara JP toyline (1988-1989). Pretenders, Godmasters, Headmaster Juniors, Overlord. Many molds shared with Hasbro 1988 line but different characters",
+      "manufacturer_slug": "takara-tomy"
+    },
+    {
+      "name": "Transformers: Victory",
+      "slug": "transformers-victory",
+      "franchise": "Transformers",
+      "scale": "Various",
+      "description": "Takara JP toyline (1989). Star Saber, Brainmasters, Multiforce, Breastforce, Dinoforce. Mostly JP-exclusive molds",
+      "manufacturer_slug": "takara-tomy"
+    },
+    {
+      "name": "Transformers: Zone",
+      "slug": "transformers-zone",
+      "franchise": "Transformers",
+      "scale": "Various",
+      "description": "Takara JP toyline (1990). Powered Masters (Dai Atlas, Sonic Bomber, Roadfire), Micromasters. Final G1-era JP line with animated support (single OVA)",
+      "manufacturer_slug": "takara-tomy"
+    },
+    {
+      "name": "Transformers: Return of Convoy",
+      "slug": "transformers-return-of-convoy",
+      "franchise": "Transformers",
+      "scale": "Various",
+      "description": "Takara JP toyline (1991). Star Convoy, Grandus, Sky Garry. Story told through manga/story pages only. No animated media",
+      "manufacturer_slug": "takara-tomy"
+    },
+    {
+      "name": "Transformers: Operation Combination",
+      "slug": "transformers-operation-combination",
+      "franchise": "Transformers",
+      "scale": "Various",
+      "description": "Takara JP toyline (1992). Guard City, Battle Gaia, Micromaster six-teams. Final JP G1 line. Extremely rare. No animated media",
+      "manufacturer_slug": "takara-tomy"
+    }
+  ]
+}

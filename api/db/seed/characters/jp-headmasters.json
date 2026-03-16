@@ -1,0 +1,456 @@
+{
+  "_metadata": {
+    "description": "Transformers: The Headmasters (Japanese anime, 1987-1988) — NEW characters only",
+    "generated": "2026-03-16T02:15:09.437633",
+    "total_characters": 21,
+    "scope": "Characters debuting in The Headmasters anime that do NOT already exist in the G1 North America files. Characters shared with Season 4 'The Rebirth' (Fortress Maximus, Scorponok, Chromedome, Sixshot, Headmasters, Targetmasters, Clones, Duocons, Horrorcons, Punch/Counterpunch) are NOT repeated here.",
+    "continuity_note": "The Headmasters replaces Season 4 'The Rebirth' in Japanese continuity. It picks up after Season 3 'The Return of Optimus Prime'. Characters from The Rebirth (Fortress Maximus, etc.) appear in both but with different origins.",
+    "schema_target": "characters table from migration 011_shared_catalog_tables.sql",
+    "counts": {
+      "autobot_transformers": 11,
+      "decepticon_transformers": 10,
+      "combined_forms": 2
+    },
+    "table": "characters",
+    "import_order": 5,
+    "references": [
+      "factions (via faction_slug)",
+      "sub_groups (via sub_group_slug)",
+      "characters (via combined_form_slug for combiners)"
+    ]
+  },
+  "characters": [
+    {
+      "name": "Shouki",
+      "character_type": "Transformer",
+      "alt_mode": "Tokaido Shinkansen 0 Series bullet train",
+      "is_combined_form": false,
+      "combiner_role": "torso",
+      "first_appearance": "Headmasters E01 Four Warriors from Outer Space",
+      "first_appearance_season": null,
+      "notes": "Trainbot leader. Elder brother of Yukikaze. Japanese name: Shōki (翔輝)",
+      "slug": "shouki",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": "raiden",
+      "sub_group_slugs": [
+        "trainbots"
+      ]
+    },
+    {
+      "name": "Getsuei",
+      "character_type": "Transformer",
+      "alt_mode": "EF65 electric locomotive",
+      "is_combined_form": false,
+      "combiner_role": "left leg",
+      "first_appearance": "Headmasters E01 Four Warriors from Outer Space",
+      "first_appearance_season": null,
+      "notes": "Trainbot. Japanese name: Getsuei (月影)",
+      "slug": "getsuei",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": "raiden",
+      "sub_group_slugs": [
+        "trainbots"
+      ]
+    },
+    {
+      "name": "Kaen",
+      "character_type": "Transformer",
+      "alt_mode": "DE10 diesel locomotive",
+      "is_combined_form": false,
+      "combiner_role": "lower torso",
+      "first_appearance": "Headmasters E01 Four Warriors from Outer Space",
+      "first_appearance_season": null,
+      "notes": "Trainbot. Japanese name: Kaen (火炎)",
+      "slug": "kaen",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": "raiden",
+      "sub_group_slugs": [
+        "trainbots"
+      ]
+    },
+    {
+      "name": "Seizan",
+      "character_type": "Transformer",
+      "alt_mode": "485 Series limited express train",
+      "is_combined_form": false,
+      "combiner_role": "right arm",
+      "first_appearance": "Headmasters E01 Four Warriors from Outer Space",
+      "first_appearance_season": null,
+      "notes": "Trainbot. Japanese name: Seizan (星山)",
+      "slug": "seizan",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": "raiden",
+      "sub_group_slugs": [
+        "trainbots"
+      ]
+    },
+    {
+      "name": "Suiken",
+      "character_type": "Transformer",
+      "alt_mode": "153 Series express train",
+      "is_combined_form": false,
+      "combiner_role": "left arm",
+      "first_appearance": "Headmasters E01 Four Warriors from Outer Space",
+      "first_appearance_season": null,
+      "notes": "Trainbot. Japanese name: Suiken (水拳)",
+      "slug": "suiken",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": "raiden",
+      "sub_group_slugs": [
+        "trainbots"
+      ]
+    },
+    {
+      "name": "Yukikaze",
+      "character_type": "Transformer",
+      "alt_mode": "Tohoku/Joetsu Shinkansen 200 Series bullet train",
+      "is_combined_form": false,
+      "combiner_role": "right leg",
+      "first_appearance": "Headmasters E01 Four Warriors from Outer Space",
+      "first_appearance_season": null,
+      "notes": "Trainbot. Younger brother of Shouki. Japanese name: Yukikaze (雪風)",
+      "slug": "yukikaze",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": "raiden",
+      "sub_group_slugs": [
+        "trainbots"
+      ]
+    },
+    {
+      "name": "Raiden",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": true,
+      "combiner_role": null,
+      "first_appearance": "Headmasters E07 The Four-Million-Year-Old Veil of Mystery",
+      "first_appearance_season": null,
+      "notes": "Combined form of the six Trainbots. Only G1 combiner with six components (instead of the usual five). Japanese name: Raiden (ライデン)",
+      "slug": "raiden",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": null,
+      "component_slugs": [
+        "shouki",
+        "getsuei",
+        "kaen",
+        "seizan",
+        "suiken",
+        "yukikaze"
+      ],
+      "sub_group_slugs": [
+        "trainbots"
+      ]
+    },
+    {
+      "name": "Twincast",
+      "character_type": "Transformer",
+      "alt_mode": "Boombox/radio cassette player",
+      "is_combined_form": false,
+      "combiner_role": null,
+      "first_appearance": "Headmasters E02 The Mystery of Planet Master",
+      "first_appearance_season": null,
+      "notes": "Blaster rebuilt after his fatal duel with Soundwave. Upgraded with dual cassette deck. Japanese name: Twincast (ツインキャスト)",
+      "slug": "twincast",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": null,
+      "sub_group_slugs": []
+    },
+    {
+      "name": "Soundblaster",
+      "character_type": "Transformer",
+      "alt_mode": "Microcassette recorder",
+      "is_combined_form": false,
+      "combiner_role": null,
+      "first_appearance": "Headmasters E02 The Mystery of Planet Master",
+      "first_appearance_season": null,
+      "notes": "Soundwave rebuilt by Scorponok after his fatal duel with Blaster. Black body. Japanese name: Soundblaster (サウンドブラスター)",
+      "slug": "soundblaster",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "decepticon",
+      "combined_form_slug": null,
+      "sub_group_slugs": []
+    },
+    {
+      "name": "Grotusque",
+      "character_type": "Transformer",
+      "alt_mode": "Winged sabertooth tiger monster",
+      "is_combined_form": false,
+      "combiner_role": null,
+      "first_appearance": "Headmasters E05 Rebellion on Planet Beast",
+      "first_appearance_season": null,
+      "notes": "Monsterbot. Breathes fire. Japanese name: Grotus (グロタス)",
+      "slug": "grotusque",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": null,
+      "sub_group_slugs": [
+        "monsterbots"
+      ]
+    },
+    {
+      "name": "Doublecross",
+      "character_type": "Transformer",
+      "alt_mode": "Two-headed dragon monster",
+      "is_combined_form": false,
+      "combiner_role": null,
+      "first_appearance": "Headmasters E05 Rebellion on Planet Beast",
+      "first_appearance_season": null,
+      "notes": "Monsterbot. Two heads argue with each other. Japanese name: Doublecross (ダブルクロス)",
+      "slug": "doublecross",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": null,
+      "sub_group_slugs": [
+        "monsterbots"
+      ]
+    },
+    {
+      "name": "Repugnus",
+      "character_type": "Transformer",
+      "alt_mode": "Bug/insect monster",
+      "is_combined_form": false,
+      "combiner_role": null,
+      "first_appearance": "Headmasters E05 Rebellion on Planet Beast",
+      "first_appearance_season": null,
+      "notes": "Monsterbot. Japanese name: Repug (リパッグ)",
+      "slug": "repugnus",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "autobot",
+      "combined_form_slug": null,
+      "sub_group_slugs": [
+        "monsterbots"
+      ]
+    },
+    {
+      "name": "Slugfest",
+      "character_type": "Transformer",
+      "alt_mode": "Microcassette tape",
+      "is_combined_form": false,
+      "combiner_role": null,
+      "first_appearance": "Headmasters E15 Explosion on Mars!! Scorponok Appears",
+      "first_appearance_season": null,
+      "notes": "Soundblaster's cassette minion. Stegosaurus mode. Japanese name: Slugfest (スラッグフェスト)",
+      "slug": "slugfest",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "decepticon",
+      "combined_form_slug": null,
+      "sub_group_slugs": [
+        "cassettes"
+      ]
+    },
+    {
+      "name": "Overkill",
+      "character_type": "Transformer",
+      "alt_mode": "Microcassette tape",
+      "is_combined_form": false,
+      "combiner_role": null,
+      "first_appearance": "Headmasters E15 Explosion on Mars!! Scorponok Appears",
+      "first_appearance_season": null,
+      "notes": "Soundblaster's cassette minion. Tyrannosaurus mode. Japanese name: Overkill (オーバーキル)",
+      "slug": "overkill",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "decepticon",
+      "combined_form_slug": null,
+      "sub_group_slugs": [
+        "cassettes"
+      ]
+    },
+    {
+      "name": "Snaptrap",
+      "character_type": "Transformer",
+      "alt_mode": "Turtle monster",
+      "is_combined_form": false,
+      "combiner_role": "torso",
+      "first_appearance": "Headmasters E35 The Final Showdown on Earth Part 2",
+      "first_appearance_season": null,
+      "notes": "Seacon leader. Japanese name: Turtler (タートラー). Seacons briefly appear in Headmasters finale",
+      "slug": "snaptrap",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "decepticon",
+      "combined_form_slug": "piranacon",
+      "sub_group_slugs": [
+        "seacons"
+      ]
+    },
+    {
+      "name": "Overbite",
+      "character_type": "Transformer",
+      "alt_mode": "Shark monster",
+      "is_combined_form": false,
+      "combiner_role": "left arm",
+      "first_appearance": "Headmasters E35 The Final Showdown on Earth Part 2",
+      "first_appearance_season": null,
+      "notes": "Seacon. Japanese name: Gulf (ガルフ)",
+      "slug": "overbite",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "decepticon",
+      "combined_form_slug": "piranacon",
+      "sub_group_slugs": [
+        "seacons"
+      ]
+    },
+    {
+      "name": "Seawing",
+      "character_type": "Transformer",
+      "alt_mode": "Manta ray monster",
+      "is_combined_form": false,
+      "combiner_role": "right leg",
+      "first_appearance": "Headmasters E35 The Final Showdown on Earth Part 2",
+      "first_appearance_season": null,
+      "notes": "Seacon. Japanese name: Seawing (シーウィング)",
+      "slug": "seawing",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "decepticon",
+      "combined_form_slug": "piranacon",
+      "sub_group_slugs": [
+        "seacons"
+      ]
+    },
+    {
+      "name": "Skalor",
+      "character_type": "Transformer",
+      "alt_mode": "Coelacanth monster",
+      "is_combined_form": false,
+      "combiner_role": "left leg",
+      "first_appearance": "Headmasters E35 The Final Showdown on Earth Part 2",
+      "first_appearance_season": null,
+      "notes": "Seacon. Japanese name: Skalor (スカラー)",
+      "slug": "skalor",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "decepticon",
+      "combined_form_slug": "piranacon",
+      "sub_group_slugs": [
+        "seacons"
+      ]
+    },
+    {
+      "name": "Tentakil",
+      "character_type": "Transformer",
+      "alt_mode": "Squid/octopus monster",
+      "is_combined_form": false,
+      "combiner_role": "right arm",
+      "first_appearance": "Headmasters E35 The Final Showdown on Earth Part 2",
+      "first_appearance_season": null,
+      "notes": "Seacon. Japanese name: Tentakil (テンタキル)",
+      "slug": "tentakil",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "decepticon",
+      "combined_form_slug": "piranacon",
+      "sub_group_slugs": [
+        "seacons"
+      ]
+    },
+    {
+      "name": "Nautilator",
+      "character_type": "Transformer",
+      "alt_mode": "Lobster monster",
+      "is_combined_form": false,
+      "combiner_role": "weapon",
+      "first_appearance": "Headmasters E35 The Final Showdown on Earth Part 2",
+      "first_appearance_season": null,
+      "notes": "Seacon. Transforms into Piranacon's weapon rather than a limb. Japanese name: Lobclaw (ロブクロー)",
+      "slug": "nautilator",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "decepticon",
+      "combined_form_slug": "piranacon",
+      "sub_group_slugs": [
+        "seacons"
+      ]
+    },
+    {
+      "name": "Piranacon",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": true,
+      "combiner_role": null,
+      "first_appearance": "Headmasters E35 The Final Showdown on Earth Part 2",
+      "first_appearance_season": null,
+      "notes": "Combined form of the Seacons. Six members (Nautilator becomes weapon). Japanese name: King Poseidon (キングポセイドン)",
+      "slug": "piranacon",
+      "franchise": "Transformers",
+      "series": "Transformers: The Headmasters",
+      "series_year": "1987-1988",
+      "continuity": "G1 Japan",
+      "faction_slug": "decepticon",
+      "combined_form_slug": null,
+      "component_slugs": [
+        "snaptrap",
+        "overbite",
+        "seawing",
+        "skalor",
+        "tentakil",
+        "nautilator"
+      ],
+      "sub_group_slugs": [
+        "seacons"
+      ]
+    }
+  ]
+}

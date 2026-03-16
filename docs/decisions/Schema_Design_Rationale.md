@@ -26,7 +26,7 @@ Examples:
 - `devastator` (combined forms get their own slug)
 - `slag` not `slug-slug` (use the canonical name, not the renamed version)
 
-**Tables with slugs:** `factions`, `sub_groups`, `characters`, `manufacturers`, `categories`, `toy_lines`, `items`
+**Tables with slugs:** `factions`, `sub_groups`, `characters`, `manufacturers`, `toy_lines`, `items`
 
 ---
 
@@ -66,6 +66,10 @@ id | name           | slug            | faction_id
 
 The optional `faction_id` FK lets you associate a sub-group with a faction when it's unambiguous (Dinobots → Autobot) but leave it NULL when the group spans factions (Cassettes exist on both sides, Headmasters exist on both sides).
 
+**`sub_groups.name` uniqueness** is scoped to `(name, franchise)` rather than globally unique, allowing the same sub-group name in different franchises. The `slug` column remains globally unique for URL routing.
+
+**Characters → sub_groups is many-to-many** via the `character_sub_groups` junction table (added in migration 012). A character can belong to multiple sub-groups (e.g., Apeface is both a Headmaster and a Horrorcon; the Coneheads are Seekers). The junction table uses `ON DELETE CASCADE` on both FKs — deleting a character or sub-group removes the associations.
+
 ---
 
 ### 3. Enriched `characters` table
@@ -84,12 +88,13 @@ The new version adds the metadata needed for third-party figure mapping and coll
 characters (
     id, name, slug, franchise,
     faction_id,         -- FK → factions
-    character_type,     -- 'Transformer', 'Human', 'Quintesson', 'Nebulan', etc.
-    sub_group_id,       -- FK → sub_groups
+    character_type,     -- 'Transformer', 'Human', 'Pretender', 'Godmaster', etc.
     alt_mode,           -- 'semi-truck', 'F-15 jet', etc.
     is_combined_form,   -- TRUE for Devastator, Superion, etc.
     combined_form_id,   -- self-FK: component → gestalt
-    combiner_role,      -- 'torso', 'right arm', etc.
+    combiner_role,      -- 'torso', 'right arm', 'upper body', 'weapon', etc.
+    series,             -- 'The Transformers Season 1', 'Transformers: Victory', etc.
+    continuity,         -- 'G1 North America', 'G1 Japan', 'G1 Toy-only'
     metadata,           -- JSONB for japanese_name, first_appearance, aliases, notes
     created_at, updated_at
 )
@@ -102,13 +107,49 @@ characters (
 - Query "all components of Devastator": `SELECT * FROM characters WHERE combined_form_id = <devastator_id>`
 - Query "what does Scrapper combine into": `SELECT c.name FROM characters c WHERE c.id = scrapper.combined_form_id`
 
-**Why `character_type` is TEXT, not an enum or FK?** The set of character types is small, stable, and unlikely to need relational metadata. A CHECK constraint could be added later if desired, but TEXT keeps the migration simple and the values self-documenting in JSON exports.
+**Why `character_type` is TEXT, not an enum or FK?** The set of character types includes both species (`Transformer`, `Human`, `Nebulan`) and gimmick types (`Pretender`, `Godmaster`, `Brainmaster`, `Micromaster`). TEXT keeps the migration simple — new gimmick types from future series are just new values, not schema changes.
 
-**Why JSONB `metadata` instead of more columns?** Fields like `japanese_name`, `first_appearance`, `first_appearance_season`, and `aliases` are important for the character catalog but aren't needed for core collection queries (filtering, joining items to characters, combiner lookups). Putting them in JSONB keeps the table width manageable and makes it easy to add new fields (e.g., `voice_actor`, `continuity`) without migration.
+**`series` and `continuity` are always populated** — no NULL-means-default convention. `continuity` groups characters into `G1 North America`, `G1 Japan`, or `G1 Toy-only`. `series` identifies the specific show or toyline (e.g., `The Transformers Season 2`, `Transformers: Victory`). These were added in migration 012.
+
+**Why JSONB `metadata` instead of more columns?** Fields like `japanese_name`, `first_appearance`, `first_appearance_season`, and `aliases` are important for the character catalog but aren't needed for core collection queries (filtering, joining items to characters, combiner lookups). Putting them in JSONB keeps the table width manageable and makes it easy to add new display-only fields without migration.
 
 ---
 
-### 4. Slugs on `items` table
+### 4. GDPR user deletion: tombstone pattern
+
+User "deletion" uses a tombstone pattern rather than actually deleting the `users` row.
+
+**Why tombstone instead of hard-delete + ON DELETE SET NULL?**
+
+- **Auditability** — With SET NULL, all deleted users' contributions become indistinguishable (every `created_by` is NULL). With tombstoning, each item still points to a distinct (scrubbed) user ID. You can answer "were these items all from the same deleted user?" without retaining PII.
+- **Zero cascading writes** — SET NULL requires PostgreSQL to UPDATE every referencing row across every table. Tombstoning only touches the `users` row itself.
+- **FK integrity preserved** — No nullable FK gymnastics. `catalog_edits.editor_id NOT NULL` stays `NOT NULL` because the user row always exists.
+- **JOINs stay simple** — INNER JOINs still work. No need for LEFT JOINs to handle nulled-out references.
+
+**How it works:**
+
+```sql
+-- "Delete" a user: scrub PII, keep the row
+UPDATE users SET
+    email = 'deleted-' || id,   -- unique placeholder (satisfies UNIQUE index)
+    display_name = NULL,
+    avatar_url = NULL,
+    email_verified = FALSE,
+    deleted_at = now()
+WHERE id = $1;
+
+-- Hard-delete auth data (no tombstone needed)
+DELETE FROM refresh_tokens WHERE user_id = $1;
+DELETE FROM oauth_accounts WHERE user_id = $1;
+```
+
+**UI rule:** When `u.deleted_at IS NOT NULL`, display "Deleted user" — never the scrubbed fields.
+
+**FK rule:** User FKs use the default ON DELETE behavior (RESTRICT/NO ACTION). The user row is never deleted, so no ON DELETE clause fires. NEVER add `ON DELETE CASCADE` or `ON DELETE SET NULL` on user FKs.
+
+---
+
+### 5. Slugs on `items` table
 
 The items table now has a slug column for URL routing:
 
@@ -122,7 +163,7 @@ The item slug convention is `{product_code}-{name}` slugified. This ensures uniq
 
 ---
 
-### 5. Impact on existing FansToys JSON import
+### 6. Impact on existing FansToys JSON import
 
 The relational JSON from the FansToys catalog maps cleanly to this new schema:
 
@@ -144,7 +185,7 @@ The import script should:
 
 ---
 
-### 6. Migration number
+### 7. Migration number
 
 This is migration `011`, following the existing auth migrations (001–010). The file should be placed at:
 
