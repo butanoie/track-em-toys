@@ -54,6 +54,25 @@ interface CharacterFile {
   characters: CharacterRecord[]
 }
 
+interface ItemRecord {
+  name: string
+  slug: string
+  product_code: string
+  character_slug: string
+  manufacturer_slug: string
+  toy_line_slug: string
+  is_third_party: boolean
+  year_released: number | null
+  size_class: string | null
+  metadata: Record<string, unknown>
+  [key: string]: unknown
+}
+
+interface ItemFile {
+  _metadata: { total_items: number; [key: string]: unknown }
+  items: ItemRecord[]
+}
+
 // ─── Loaders ─────────────────────────────────────────────────────────────────
 
 function loadRef<T extends ReferenceRecord>(relPath: string): ReferenceFile<T> {
@@ -62,6 +81,10 @@ function loadRef<T extends ReferenceRecord>(relPath: string): ReferenceFile<T> {
 
 function loadCharFile(relPath: string): CharacterFile {
   return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as CharacterFile
+}
+
+function loadItemFile(relPath: string): ItemFile {
+  return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as ItemFile
 }
 
 // ─── Load all seed data at module scope ──────────────────────────────────────
@@ -90,12 +113,22 @@ const charFiles = CHARACTER_FILES.map((f) => ({
   ...loadCharFile(f),
 }))
 
+const ITEM_FILES = [
+  'manufacturers/fanstoys/fanstoys.json',
+] as const
+
+const itemFiles = ITEM_FILES.map((f) => ({
+  file: f,
+  ...loadItemFile(f),
+}))
+
 // ─── Derived lookup sets ─────────────────────────────────────────────────────
 
 const continuityFamilySlugs = new Set(continuityFamilies.data.map((r) => r.slug))
 const factionSlugs = new Set(factions.data.map((r) => r.slug))
 const subGroupSlugs = new Set(subGroups.data.map((r) => r.slug))
 const manufacturerSlugs = new Set(manufacturers.data.map((r) => r.slug))
+const toyLineSlugs = new Set(toyLines.data.map((r) => r.slug))
 const allCharacters = charFiles.flatMap(({ characters }) => characters)
 const allCharacterSlugs = new Set(allCharacters.map((c) => c.slug))
 
@@ -392,5 +425,107 @@ describe('seed data validation', () => {
         }
       }
     })
+  })
+
+  // ── 8. Item seed files ─────────────────────────────────────────────────
+
+  describe('item seed files', () => {
+    it.each(itemFiles)(
+      '$file: _metadata.total_items matches items array length',
+      ({ file, _metadata, items }) => {
+        expect(
+          items.length,
+          `${file}: _metadata.total_items is ${_metadata.total_items} but has ${items.length} entries`,
+        ).toBe(_metadata.total_items)
+      },
+    )
+
+    it.each(itemFiles)(
+      '$file: all item slugs match kebab-case format',
+      ({ file, items }) => {
+        for (const item of items) {
+          expect(SLUG_RE.test(item.slug), `${file} > "${item.name}": invalid slug "${item.slug}"`).toBe(true)
+        }
+      },
+    )
+
+    it.each(itemFiles)(
+      '$file: no duplicate item slugs',
+      ({ file, items }) => {
+        const seen = new Set<string>()
+        for (const item of items) {
+          expect(seen.has(item.slug), `${file}: duplicate slug "${item.slug}"`).toBe(false)
+          seen.add(item.slug)
+        }
+      },
+    )
+
+    it.each(itemFiles)(
+      '$file: manufacturer_slug resolves to manufacturers',
+      ({ file, items }) => {
+        for (const item of items) {
+          expect(
+            manufacturerSlugs.has(item.manufacturer_slug),
+            `${file} > "${item.name}" (${item.slug}): unknown manufacturer_slug "${item.manufacturer_slug}"`,
+          ).toBe(true)
+        }
+      },
+    )
+
+    it.each(itemFiles)(
+      '$file: toy_line_slug resolves to toy_lines',
+      ({ file, items }) => {
+        for (const item of items) {
+          expect(
+            toyLineSlugs.has(item.toy_line_slug),
+            `${file} > "${item.name}" (${item.slug}): unknown toy_line_slug "${item.toy_line_slug}"`,
+          ).toBe(true)
+        }
+      },
+    )
+
+    it.each(itemFiles)(
+      '$file: character_slug resolves to characters',
+      ({ file, items }) => {
+        for (const item of items) {
+          expect(
+            allCharacterSlugs.has(item.character_slug),
+            `${file} > "${item.name}" (${item.slug}): unknown character_slug "${item.character_slug}"`,
+          ).toBe(true)
+        }
+      },
+    )
+
+    it.each(itemFiles)(
+      '$file: required item fields present',
+      ({ file, items }) => {
+        for (const item of items) {
+          for (const field of ['name', 'slug', 'product_code', 'character_slug', 'manufacturer_slug', 'toy_line_slug', 'is_third_party'] as const) {
+            expect(
+              field in item,
+              `${file} > "${item.slug}": missing required field "${field}"`,
+            ).toBe(true)
+          }
+          expect(
+            typeof item.metadata === 'object' && item.metadata !== null,
+            `${file} > "${item.slug}": metadata must be an object`,
+          ).toBe(true)
+        }
+      },
+    )
+
+    it.each(itemFiles)(
+      '$file: no integer ID fields (must use slugs)',
+      ({ file, items }) => {
+        for (const item of items) {
+          for (const field of ['manufacturer_id', 'toy_line_id', 'character_id', 'character_faction_id', 'character_sub_group_id'] as const) {
+            expect(
+              field in item,
+              `${file} > "${item.slug}": has legacy integer field "${field}" — use slug-based references`,
+            ).toBe(false)
+          }
+        }
+      },
+    )
   })
 })

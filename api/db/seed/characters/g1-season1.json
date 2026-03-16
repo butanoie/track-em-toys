@@ -2,7 +2,7 @@
   "_metadata": {
     "description": "G1 Transformers Season 1 character catalog — North American cartoon (1984, 16 episodes)",
     "generated": "2026-03-15T23:56:44.675246",
-    "total_characters": 59,
+    "total_characters": 60,
     "scope": "Every named on-screen character from The Transformers Season 1 (S1E01-S1E16)",
     "schema_target": "characters table from migration 011_shared_catalog_tables.sql",
     "slug_convention": "lowercase kebab-case, no apostrophes/periods/special chars",
@@ -12,7 +12,7 @@
       "decepticons": 28,
       "combined_forms": 1,
       "humans": 5,
-      "other": 1
+      "other": 2
     },
     "table": "characters",
     "import_order": 5,
@@ -1162,6 +1162,24 @@
       "sub_group_slugs": [
         "seekers"
       ],
+      "continuity_family_slug": "g1"
+    },
+    {
+      "name": "Guardian Robot",
+      "slug": "guardian-robot",
+      "franchise": "Transformers",
+      "character_type": "Transformer",
+      "alt_mode": "Rocket platform / cannon emplacement",
+      "is_combined_form": false,
+      "combiner_role": null,
+      "first_appearance": "S1E01 More Than Meets the Eye Part 1",
+      "first_appearance_season": 1,
+      "notes": "Giant non-sentient (or semi-sentient) Cybertronian defense robots. Multiple units seen guarding Cybertron. Shockwave commands them. One unit was reprogrammed by Omega Supreme. Called Guardian Robots or Guardians",
+      "faction_slug": "neutral",
+      "combined_form_slug": null,
+      "series": "The Transformers Season 1",
+      "continuity": "G1 North America",
+      "sub_group_slugs": [],
       "continuity_family_slug": "g1"
     }
   ]
