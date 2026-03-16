@@ -18,8 +18,9 @@
     "import_order": 5,
     "references": [
       "factions (via faction_slug)",
-      "sub_groups (via sub_group_slug)",
-      "characters (via combined_form_slug for combiners)"
+      "sub_groups (via sub_group_slugs)",
+      "characters (via combined_form_slug for combiners)",
+      "continuity_families (via continuity_family_slug)"
     ]
   },
   "characters": [
@@ -38,7 +39,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bumblebee",
@@ -57,7 +59,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Cliffjumper",
@@ -76,7 +79,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Jazz",
@@ -93,7 +97,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Prowl",
@@ -110,7 +115,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ratchet",
@@ -127,7 +133,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ironhide",
@@ -144,7 +151,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Wheeljack",
@@ -161,7 +169,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Mirage",
@@ -178,7 +187,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hound",
@@ -195,7 +205,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Trailbreaker",
@@ -212,7 +223,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sunstreaker",
@@ -229,7 +241,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sideswipe",
@@ -246,7 +259,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bluestreak",
@@ -263,7 +277,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Windcharger",
@@ -282,7 +297,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Brawn",
@@ -301,7 +317,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Huffer",
@@ -320,7 +337,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Gears",
@@ -339,7 +357,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hauler",
@@ -356,7 +375,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Skyfire",
@@ -373,7 +393,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Grimlock",
@@ -392,7 +413,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "dinobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Slag",
@@ -411,7 +433,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "dinobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sludge",
@@ -430,7 +453,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "dinobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Snarl",
@@ -449,7 +473,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "dinobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Swoop",
@@ -468,7 +493,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "dinobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Megatron",
@@ -485,7 +511,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Starscream",
@@ -504,7 +531,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Soundwave",
@@ -521,7 +549,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Thundercracker",
@@ -540,7 +569,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Skywarp",
@@ -559,7 +589,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Reflector",
@@ -576,7 +607,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Shockwave",
@@ -593,7 +625,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Laserbeak",
@@ -612,7 +645,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ravage",
@@ -631,7 +665,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Rumble",
@@ -650,7 +685,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Frenzy",
@@ -669,7 +705,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Scrapper",
@@ -688,7 +725,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "constructicons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hook",
@@ -707,7 +745,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "constructicons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bonecrusher",
@@ -726,7 +765,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "constructicons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Scavenger",
@@ -745,7 +785,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "constructicons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Long Haul",
@@ -764,7 +805,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "constructicons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Mixmaster",
@@ -783,7 +825,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "constructicons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Devastator",
@@ -810,7 +853,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "constructicons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bombshell",
@@ -829,7 +873,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "insecticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Shrapnel",
@@ -848,7 +893,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "insecticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Kickback",
@@ -867,7 +913,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "insecticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Teletraan I",
@@ -884,7 +931,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Spike Witwicky",
@@ -901,7 +949,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sparkplug Witwicky",
@@ -918,7 +967,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Chip Chase",
@@ -935,7 +985,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dr. Arkeville",
@@ -952,7 +1003,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dr. Alcazar",
@@ -969,7 +1021,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 1",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sunstorm",
@@ -988,7 +1041,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hotlink",
@@ -1007,7 +1061,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bitstream",
@@ -1026,7 +1081,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Nacelle",
@@ -1045,7 +1101,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Acid Storm",
@@ -1064,7 +1121,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Nova Storm",
@@ -1083,7 +1141,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ion Storm",
@@ -1102,7 +1161,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     }
   ]
 }

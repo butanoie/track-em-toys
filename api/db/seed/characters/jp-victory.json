@@ -22,8 +22,9 @@
     "import_order": 5,
     "references": [
       "factions (via faction_slug)",
-      "sub_groups (via sub_group_slug)",
-      "characters (via combined_form_slug for combiners)"
+      "sub_groups (via sub_group_slugs)",
+      "characters (via combined_form_slug for combiners)",
+      "continuity_families (via continuity_family_slug)"
     ]
   },
   "characters": [
@@ -45,7 +46,8 @@
       "combined_form_slug": "victory-saber",
       "sub_group_slugs": [
         "brainmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Victory Leo",
@@ -63,7 +65,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": "victory-saber",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Victory Saber",
@@ -85,7 +88,8 @@
         "star-saber",
         "victory-leo"
       ],
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Blacker",
@@ -105,7 +109,8 @@
       "combined_form_slug": "road-caesar",
       "sub_group_slugs": [
         "brainmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Braver",
@@ -125,7 +130,8 @@
       "combined_form_slug": "road-caesar",
       "sub_group_slugs": [
         "brainmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Laster",
@@ -145,7 +151,8 @@
       "combined_form_slug": "road-caesar",
       "sub_group_slugs": [
         "brainmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Road Caesar",
@@ -170,7 +177,8 @@
       ],
       "sub_group_slugs": [
         "brainmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Wing",
@@ -190,7 +198,8 @@
       "combined_form_slug": "landcross",
       "sub_group_slugs": [
         "multiforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Waver",
@@ -210,7 +219,8 @@
       "combined_form_slug": "landcross",
       "sub_group_slugs": [
         "multiforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dash",
@@ -230,7 +240,8 @@
       "combined_form_slug": "landcross",
       "sub_group_slugs": [
         "multiforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Tacker",
@@ -250,7 +261,8 @@
       "combined_form_slug": "landcross",
       "sub_group_slugs": [
         "multiforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Mach",
@@ -270,7 +282,8 @@
       "combined_form_slug": "landcross",
       "sub_group_slugs": [
         "multiforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Tackle",
@@ -290,7 +303,8 @@
       "combined_form_slug": "landcross",
       "sub_group_slugs": [
         "multiforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Landcross",
@@ -318,7 +332,8 @@
       ],
       "sub_group_slugs": [
         "multiforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Greatshot",
@@ -336,7 +351,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Galaxy Shuttle",
@@ -354,7 +370,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Holi",
@@ -374,7 +391,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "rescue-patrol"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Fire",
@@ -394,7 +412,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "rescue-patrol"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Boater",
@@ -414,7 +433,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "rescue-patrol"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Pipo",
@@ -434,7 +454,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "rescue-patrol"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Deathsaurus",
@@ -452,7 +473,8 @@
       "first_appearance_season": null,
       "faction_slug": "decepticon",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Leozack",
@@ -472,7 +494,8 @@
       "combined_form_slug": "liokaiser",
       "sub_group_slugs": [
         "breastforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Drillhorn",
@@ -492,7 +515,8 @@
       "combined_form_slug": "liokaiser",
       "sub_group_slugs": [
         "breastforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Killbison",
@@ -512,7 +536,8 @@
       "combined_form_slug": "liokaiser",
       "sub_group_slugs": [
         "breastforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hellbat",
@@ -532,7 +557,8 @@
       "combined_form_slug": "liokaiser",
       "sub_group_slugs": [
         "breastforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Gaihawk",
@@ -552,7 +578,8 @@
       "combined_form_slug": "liokaiser",
       "sub_group_slugs": [
         "breastforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Jaruga",
@@ -572,7 +599,8 @@
       "combined_form_slug": "liokaiser",
       "sub_group_slugs": [
         "breastforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Liokaiser",
@@ -600,7 +628,8 @@
       ],
       "sub_group_slugs": [
         "breastforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Goryu",
@@ -620,7 +649,8 @@
       "combined_form_slug": "dinoking",
       "sub_group_slugs": [
         "dinoforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Kakuryu",
@@ -640,7 +670,8 @@
       "combined_form_slug": "dinoking",
       "sub_group_slugs": [
         "dinoforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Rairyu",
@@ -660,7 +691,8 @@
       "combined_form_slug": "dinoking",
       "sub_group_slugs": [
         "dinoforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Doryu",
@@ -680,7 +712,8 @@
       "combined_form_slug": "dinoking",
       "sub_group_slugs": [
         "dinoforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Gairyu",
@@ -700,7 +733,8 @@
       "combined_form_slug": "dinoking",
       "sub_group_slugs": [
         "dinoforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Yokuryu",
@@ -720,7 +754,8 @@
       "combined_form_slug": "dinoking",
       "sub_group_slugs": [
         "dinoforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dinoking",
@@ -748,7 +783,8 @@
       ],
       "sub_group_slugs": [
         "dinoforce"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Jan Minakaze",
@@ -766,7 +802,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Illumina",
@@ -784,7 +821,8 @@
       "first_appearance_season": null,
       "faction_slug": "neutral",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Deathcobra",
@@ -802,7 +840,8 @@
       "first_appearance_season": null,
       "faction_slug": "decepticon",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     }
   ]
 }

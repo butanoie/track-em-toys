@@ -72,30 +72,21 @@ The optional `faction_id` FK lets you associate a sub-group with a faction when 
 
 ---
 
-### 3. Enriched `characters` table
+### 3. Enriched `characters` table (migrations 011, 012, 013)
 
-The original characters table was:
-
-```sql
--- BEFORE
-characters (id, name, franchise, created_at)
-```
-
-The new version adds the metadata needed for third-party figure mapping and collection management:
+The characters table after all three catalog migrations:
 
 ```sql
--- AFTER
 characters (
     id, name, slug, franchise,
-    faction_id,         -- FK → factions
-    character_type,     -- 'Transformer', 'Human', 'Pretender', 'Godmaster', etc.
-    alt_mode,           -- 'semi-truck', 'F-15 jet', etc.
-    is_combined_form,   -- TRUE for Devastator, Superion, etc.
-    combined_form_id,   -- self-FK: component → gestalt
-    combiner_role,      -- 'torso', 'right arm', 'upper body', 'weapon', etc.
-    series,             -- 'The Transformers Season 1', 'Transformers: Victory', etc.
-    continuity,         -- 'G1 North America', 'G1 Japan', 'G1 Toy-only'
-    metadata,           -- JSONB for japanese_name, first_appearance, aliases, notes
+    faction_id,             -- FK → factions (SET NULL)
+    character_type,         -- 'Transformer', 'Human', 'Pretender', 'Godmaster', etc.
+    alt_mode,               -- 'semi-truck', 'F-15 jet', etc.
+    is_combined_form,       -- TRUE for Devastator, Superion, etc.
+    combined_form_id,       -- self-FK: component → gestalt (SET NULL)
+    combiner_role,          -- 'torso', 'right arm', 'upper body', 'weapon', etc.
+    continuity_family_id,   -- FK → continuity_families (RESTRICT) NOT NULL
+    metadata,               -- JSONB for japanese_name, first_appearance, aliases, notes
     created_at, updated_at
 )
 ```
@@ -109,7 +100,57 @@ characters (
 
 **Why `character_type` is TEXT, not an enum or FK?** The set of character types includes both species (`Transformer`, `Human`, `Nebulan`) and gimmick types (`Pretender`, `Godmaster`, `Brainmaster`, `Micromaster`). TEXT keeps the migration simple — new gimmick types from future series are just new values, not schema changes.
 
-**`series` and `continuity` are always populated** — no NULL-means-default convention. `continuity` groups characters into `G1 North America`, `G1 Japan`, or `G1 Toy-only`. `series` identifies the specific show or toyline (e.g., `The Transformers Season 2`, `Transformers: Victory`). These were added in migration 012.
+**`continuity_family_id` replaces the free-text `series` and `continuity` columns** (removed in migration 013). A continuity family is the identity boundary for a character — G1 Megatron and Beast Wars Megatron are different characters in different families, but G1 cartoon Megatron and G1 Marvel comic Megatron are the same character within the G1 family. The unique index is `(lower(name), lower(franchise), continuity_family_id)`.
+
+**Why a FK instead of free-text?** The original `continuity` column had a small fixed set of values (`G1 North America`, `G1 Japan`, `G1 Toy-only`). Normalizing into a reference table:
+- Prevents typos and value drift across 400+ character records
+- Provides a slug for URL routing (`/continuity-families/g1`)
+- Supports `sort_order` for UI display ordering
+- Enables adding new families (Beast Era, Animated, etc.) via INSERT, not migration
+
+**Why `series` was removed:** The series level (e.g., `The Transformers Season 2`) was research organizational metadata, not a data modeling need. For a toy collection app, the app needs to know "this is the G1 version of Optimus Prime" — not which specific season they debuted in. Series-level detail is preserved as reference-only fields in the seed JSON files and can be tracked per-appearance in the `character_appearances` table.
+
+### 3a. Continuity families
+
+The `continuity_families` reference table follows the same pattern as `factions` — normalized reference data with slugs for stable external keys.
+
+```sql
+continuity_families (id, slug, name, franchise, sort_order, notes, created_at)
+```
+
+Current families (10): Generation 1, Beast Era, Robots in Disguise (2001), Unicron Trilogy, Live-Action Movies, Transformers Animated, Aligned/Prime, Cyberverse, EarthSpark, Transformers One.
+
+**G1 is the mega-family:** It absorbs G2, Beast Wars sub-continuity threads that share characters, all comic publishers (Marvel US/UK, Dreamwave, IDW Phase 1 & 2, Skybound/Energon Universe), Binaltech, Classics, and the Japanese series (Headmasters, Masterforce, Victory, Zone). The sub-continuity level (G1 cartoon vs G1 Marvel comics) is handled by `character_appearances`, not by separate families.
+
+**Beast Era is separate from G1** because Beast Wars reuses G1 character names for entirely different characters (Beast Wars Megatron is not G1 Megatron). The continuity family is the character identity boundary.
+
+### 3b. Character appearances
+
+The `character_appearances` table tracks how a character looks in a specific media source — the visual design layer between character identity and individual toy products.
+
+```sql
+character_appearances (
+    id, slug, name,
+    character_id,   -- FK → characters (CASCADE) NOT NULL
+    description,    -- e.g., 'Blocky G1 cartoon design, flat red/blue colors'
+    source_media,   -- TV, Comic, Movie, OVA, Toy-only, Video Game, Manga
+    source_name,    -- e.g., 'The Transformers Season 1', 'IDW Phase 1'
+    year_start, year_end,
+    metadata,       -- JSONB for reference images, notes
+    created_at, updated_at
+)
+```
+
+**Three-layer model:**
+1. **Character** (continuity family level) — "Optimus Prime (G1)" — the canonical identity
+2. **Appearance** (media depiction) — "G1 cartoon Optimus Prime" vs "IDW Optimus Prime"
+3. **Item** (specific toy product) — "MP-10 Optimus Prime" links to character + optionally to an appearance
+
+Items link to appearances via the optional `character_appearance_id` FK (SET NULL). Items without an appearance link are "generic depiction of this character." This supports queries like "show me all toys depicting the G1 cartoon version of Optimus Prime."
+
+### 3c. Size class on items
+
+Migration 013 adds `size_class TEXT` (nullable) to the `items` table. Standard Transformers size classes include Core, Deluxe, Voyager, Leader, Commander, Titan, but third-party manufacturers use non-standard sizing. TEXT (not enum) avoids migration churn as size classes evolve.
 
 **Why JSONB `metadata` instead of more columns?** Fields like `japanese_name`, `first_appearance`, `first_appearance_season`, and `aliases` are important for the character catalog but aren't needed for core collection queries (filtering, joining items to characters, combiner lookups). Putting them in JSONB keeps the table width manageable and makes it easy to add new display-only fields without migration.
 
@@ -178,19 +219,15 @@ The relational JSON from the FansToys catalog maps cleanly to this new schema:
 | `variant_type`, `status`, `scale` | `items.metadata` JSONB |
 
 The import script should:
-1. Seed `factions` and `sub_groups` first
-2. Seed `characters` with slugs and faction/sub_group FKs
+1. Seed `continuity_families`, `factions`, and `sub_groups` first
+2. Seed `characters` with slugs and faction/sub_group/continuity_family FKs
 3. Seed `manufacturers` and `toy_lines`
-4. Seed `items` with FK lookups by slug
+4. Seed `items` with FK lookups by slug (including optional `character_appearance_id`)
 
 ---
 
-### 7. Migration number
+### 7. Migration numbers
 
-This is migration `011`, following the existing auth migrations (001–010). The file should be placed at:
+Core catalog tables were created in migration `011_shared_catalog_tables.sql`. Schema enrichment (series, continuity, combiners, GDPR tombstone) happened in `012_enrich_characters_table.sql`. Continuity families, character appearances, and size class were added in `013_continuity_families_and_appearances.sql`.
 
-```
-api/db/migrations/011_shared_catalog_tables.sql
-```
-
-All tables are in the `public` schema. The `update_updated_at()` trigger function from migration 001 is reused for `characters` and `items`.
+All tables are in the `public` schema. The `update_updated_at()` trigger function from migration 001 is reused for `characters`, `items`, and `character_appearances`.

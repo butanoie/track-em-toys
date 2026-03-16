@@ -217,6 +217,7 @@ export async function findOAuthAccountWithUser(
     display_name: string | null
     avatar_url: string | null
     deactivated_at: string | null
+    deleted_at: string | null
     user_created_at: string
     updated_at: string
   }>(
@@ -235,6 +236,7 @@ export async function findOAuthAccountWithUser(
        u.display_name,
        u.avatar_url,
        u.deactivated_at,
+       u.deleted_at,
        u.created_at          AS user_created_at,
        u.updated_at
      FROM oauth_accounts oa
@@ -264,6 +266,7 @@ export async function findOAuthAccountWithUser(
     display_name: row.display_name,
     avatar_url: row.avatar_url,
     deactivated_at: row.deactivated_at,
+    deleted_at: row.deleted_at,
     created_at: row.user_created_at,
     updated_at: row.updated_at,
   }
@@ -401,7 +404,7 @@ export async function findUserWithAccounts(
   // with the user columns (both tables have id, email, created_at, etc.).
   const { rows } = await client.query<UserWithAccountsRow>(
     `SELECT
-       u.id, u.email, u.email_verified, u.display_name, u.avatar_url, u.deactivated_at, u.created_at, u.updated_at,
+       u.id, u.email, u.email_verified, u.display_name, u.avatar_url, u.deactivated_at, u.deleted_at, u.created_at, u.updated_at,
        oa.id                 AS oa_id,
        oa.user_id            AS oa_user_id,
        oa.provider           AS oa_provider,
@@ -425,6 +428,7 @@ export async function findUserWithAccounts(
     display_name: firstRow.display_name,
     avatar_url: firstRow.avatar_url,
     deactivated_at: firstRow.deactivated_at,
+    deleted_at: firstRow.deleted_at,
     created_at: firstRow.created_at,
     updated_at: firstRow.updated_at,
   }

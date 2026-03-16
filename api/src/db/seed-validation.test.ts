@@ -38,8 +38,7 @@ interface CharacterRecord {
   name: string
   slug: string
   franchise: string
-  series: string
-  continuity: string
+  continuity_family_slug: string
   character_type: string
   is_combined_form: boolean
   faction_slug: string | null
@@ -67,6 +66,7 @@ function loadCharFile(relPath: string): CharacterFile {
 
 // ─── Load all seed data at module scope ──────────────────────────────────────
 
+const continuityFamilies = loadRef('reference/continuity_families.json')
 const factions = loadRef('reference/factions.json')
 const subGroups = loadRef<SubGroupRecord>('reference/sub_groups.json')
 const manufacturers = loadRef('reference/manufacturers.json')
@@ -92,6 +92,7 @@ const charFiles = CHARACTER_FILES.map((f) => ({
 
 // ─── Derived lookup sets ─────────────────────────────────────────────────────
 
+const continuityFamilySlugs = new Set(continuityFamilies.data.map((r) => r.slug))
 const factionSlugs = new Set(factions.data.map((r) => r.slug))
 const subGroupSlugs = new Set(subGroups.data.map((r) => r.slug))
 const manufacturerSlugs = new Set(manufacturers.data.map((r) => r.slug))
@@ -110,7 +111,7 @@ const VALID_COMBINER_ROLES = new Set([
 ])
 
 const REQUIRED_CHAR_FIELDS = [
-  'name', 'slug', 'franchise', 'series', 'continuity',
+  'name', 'slug', 'franchise', 'continuity_family_slug',
   'character_type', 'is_combined_form',
 ] as const
 
@@ -121,6 +122,7 @@ describe('seed data validation', () => {
 
   describe('metadata counts', () => {
     it.each([
+      { label: 'continuity_families', total: continuityFamilies._metadata.total, actual: continuityFamilies.data.length },
       { label: 'factions', total: factions._metadata.total, actual: factions.data.length },
       { label: 'sub_groups', total: subGroups._metadata.total, actual: subGroups.data.length },
       { label: 'manufacturers', total: manufacturers._metadata.total, actual: manufacturers.data.length },
@@ -144,6 +146,7 @@ describe('seed data validation', () => {
 
   describe('slug format', () => {
     it.each([
+      { label: 'continuity_families', records: continuityFamilies.data },
       { label: 'factions', records: factions.data },
       { label: 'sub_groups', records: subGroups.data },
       { label: 'manufacturers', records: manufacturers.data },
@@ -168,6 +171,7 @@ describe('seed data validation', () => {
 
   describe('no duplicate slugs', () => {
     it.each([
+      { label: 'continuity_families', records: continuityFamilies.data },
       { label: 'factions', records: factions.data },
       { label: 'sub_groups', records: subGroups.data },
       { label: 'manufacturers', records: manufacturers.data },
@@ -279,6 +283,18 @@ describe('seed data validation', () => {
         }
       },
     )
+
+    it.each(charFiles)(
+      '$file: continuity_family_slug resolves to continuity_families',
+      ({ file, characters }) => {
+        for (const c of characters) {
+          expect(
+            continuityFamilySlugs.has(c.continuity_family_slug),
+            `${file} > "${c.name}" (${c.slug}): unknown continuity_family_slug "${c.continuity_family_slug}"`,
+          ).toBe(true)
+        }
+      },
+    )
   })
 
   // ── 5. Combiner consistency ────────────────────────────────────────────
@@ -359,18 +375,18 @@ describe('seed data validation', () => {
     )
   })
 
-  // ── 7. Name + franchise + continuity uniqueness ────────────────────────
+  // ── 7. Name + franchise + continuity_family_slug uniqueness ─────────────
 
-  describe('name + franchise + continuity uniqueness', () => {
-    it('no two characters share the same (name, franchise, continuity)', () => {
+  describe('name + franchise + continuity_family_slug uniqueness', () => {
+    it('no two characters share the same (name, franchise, continuity_family_slug)', () => {
       const seen = new Map<string, string>()
       for (const { file, characters } of charFiles) {
         for (const c of characters) {
-          const key = `${c.name.toLowerCase()}|||${c.franchise.toLowerCase()}|||${c.continuity}`
+          const key = `${c.name.toLowerCase()}|||${c.franchise.toLowerCase()}|||${c.continuity_family_slug}`
           const existing = seen.get(key)
           expect(
             existing,
-            `Duplicate: "${c.name}" / "${c.franchise}" / "${c.continuity}" in "${file}" — already in "${existing}"`,
+            `Duplicate: "${c.name}" / "${c.franchise}" / "${c.continuity_family_slug}" in "${file}" — already in "${existing}"`,
           ).toBeUndefined()
           seen.set(key, `${file} > ${c.slug}`)
         }

@@ -47,8 +47,9 @@
     "import_order": 5,
     "references": [
       "factions (via faction_slug)",
-      "sub_groups (via sub_group_slug)",
-      "characters (via combined_form_slug for combiners)"
+      "sub_groups (via sub_group_slugs)",
+      "characters (via combined_form_slug for combiners)",
+      "continuity_families (via continuity_family_slug)"
     ]
   },
   "characters": [
@@ -70,7 +71,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "omnibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Downshift",
@@ -90,7 +92,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "omnibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Overdrive",
@@ -110,7 +113,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "omnibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Aragon",
@@ -130,7 +134,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "powerdashers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Cromar",
@@ -150,7 +155,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "powerdashers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Zetar",
@@ -170,7 +176,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "powerdashers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Barrage",
@@ -190,7 +197,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "deluxe-insecticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Chop Shop",
@@ -210,7 +218,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "deluxe-insecticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ransack",
@@ -230,7 +239,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "deluxe-insecticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Venom",
@@ -250,7 +260,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "deluxe-insecticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Roadbuster",
@@ -270,7 +281,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "deluxe-vehicles"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Whirl",
@@ -290,7 +302,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "deluxe-vehicles"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Topspin",
@@ -310,7 +323,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "jumpstarters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Twin Twist",
@@ -330,7 +344,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "jumpstarters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Backstreet",
@@ -350,7 +365,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "triggerbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dogfight",
@@ -370,7 +386,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "triggerbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Override",
@@ -390,7 +407,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "triggerbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Crankcase",
@@ -410,7 +428,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "triggercons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ruckus",
@@ -430,7 +449,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "triggercons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Windsweeper",
@@ -450,7 +470,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "triggercons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Fizzle",
@@ -470,7 +491,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "sparkabots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Guzzle",
@@ -490,7 +512,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "sparkabots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sizzle",
@@ -510,7 +533,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "sparkabots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Cindersaur",
@@ -530,7 +554,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "firecons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Flamefeather",
@@ -550,7 +575,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "firecons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sparkstalker",
@@ -570,7 +596,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "firecons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Getaway",
@@ -590,7 +617,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "powermasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Joyride",
@@ -610,7 +638,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "powermasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Slapdash",
@@ -630,7 +659,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "powermasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dreadwind",
@@ -650,7 +680,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "powermasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Darkwing",
@@ -670,7 +701,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "powermasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dreadwing",
@@ -690,7 +722,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "powermasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Doubledealer",
@@ -710,7 +743,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "powermasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Quickswitch",
@@ -728,7 +762,8 @@
       "faction_slug": "autobot",
       "combined_form_slug": null,
       "series": "Transformers G1 Toy-only",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Landfill",
@@ -748,7 +783,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "double-targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Quickmix",
@@ -768,7 +804,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "double-targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Scoop",
@@ -788,7 +825,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "double-targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Needlenose",
@@ -808,7 +846,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "double-targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Quake",
@@ -828,7 +867,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "double-targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Spinister",
@@ -848,7 +888,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "double-targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Nightbeat",
@@ -868,7 +909,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hosehead",
@@ -888,7 +930,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Siren",
@@ -908,7 +951,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Fangry",
@@ -928,7 +972,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Horri-Bull",
@@ -948,7 +993,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Squeezeplay",
@@ -968,7 +1014,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Cloudburst",
@@ -988,7 +1035,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Groundbreaker",
@@ -1008,7 +1056,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Landmine",
@@ -1028,7 +1077,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sky High",
@@ -1048,7 +1098,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Splashdown",
@@ -1068,7 +1119,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Waverider",
@@ -1088,7 +1140,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Gunrunner",
@@ -1108,7 +1161,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-vehicles"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bomb-Burst",
@@ -1128,7 +1182,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bugly",
@@ -1148,7 +1203,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Finback",
@@ -1168,7 +1224,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Iguanus",
@@ -1188,7 +1245,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Skullgrin",
@@ -1208,7 +1266,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Submarauder",
@@ -1228,7 +1287,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Roadgrabber",
@@ -1248,7 +1308,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-vehicles"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Catilla",
@@ -1268,7 +1329,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-beasts"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Chainclaw",
@@ -1288,7 +1350,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-beasts"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Carnivac",
@@ -1308,7 +1371,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-beasts"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Snarler",
@@ -1328,7 +1392,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-beasts"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Grand Slam",
@@ -1348,7 +1413,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Raindance",
@@ -1368,7 +1434,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Slamdance",
@@ -1388,7 +1455,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Beastbox",
@@ -1408,7 +1476,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Squawktalk",
@@ -1428,7 +1497,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Squawkbox",
@@ -1448,7 +1518,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bumblebee Pretender",
@@ -1468,7 +1539,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "classic-pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Grimlock Pretender",
@@ -1488,7 +1560,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "classic-pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Jazz Pretender",
@@ -1508,7 +1581,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "classic-pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Starscream Pretender",
@@ -1528,7 +1602,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "classic-pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Vroom",
@@ -1548,7 +1623,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "mega-pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Crossblades",
@@ -1568,7 +1644,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "mega-pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Thunderwing",
@@ -1588,7 +1665,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "mega-pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Skyhammer",
@@ -1608,7 +1686,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "ultra-pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Roadblock",
@@ -1628,7 +1707,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "ultra-pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Birdbrain",
@@ -1648,7 +1728,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-monsters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bristleback",
@@ -1668,7 +1749,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-monsters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Icepick",
@@ -1688,7 +1770,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-monsters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Scowl",
@@ -1708,7 +1791,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-monsters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Slog",
@@ -1728,7 +1812,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-monsters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Wildfly",
@@ -1748,7 +1833,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-monsters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Monstructor",
@@ -1768,7 +1854,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretender-monsters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bludgeon",
@@ -1788,7 +1875,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Octopunch",
@@ -1808,7 +1896,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Stranglehold",
@@ -1828,7 +1917,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Doubleheader",
@@ -1848,7 +1938,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Longtooth",
@@ -1868,7 +1959,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Pincher",
@@ -1888,7 +1980,8 @@
       "series": "Transformers G1 Toy-only",
       "sub_group_slugs": [
         "pretenders"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     }
   ]
 }

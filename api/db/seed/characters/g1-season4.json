@@ -14,8 +14,9 @@
     "import_order": 5,
     "references": [
       "factions (via faction_slug)",
-      "sub_groups (via sub_group_slug)",
-      "characters (via combined_form_slug for combiners)"
+      "sub_groups (via sub_group_slugs)",
+      "characters (via combined_form_slug for combiners)",
+      "continuity_families (via continuity_family_slug)"
     ]
   },
   "characters": [
@@ -37,7 +38,8 @@
       "sub_group_slugs": [
         "headmasters",
         "titans"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Cerebros",
@@ -56,7 +58,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Chromedome",
@@ -75,7 +78,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hardhead",
@@ -94,7 +98,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Highbrow",
@@ -113,7 +118,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Brainstorm",
@@ -132,7 +138,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Stylor",
@@ -151,7 +158,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Duros",
@@ -170,7 +178,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Gort",
@@ -189,7 +198,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Arcana",
@@ -208,7 +218,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Scorponok",
@@ -228,7 +239,8 @@
       "sub_group_slugs": [
         "headmasters",
         "titans"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Mindwipe",
@@ -247,7 +259,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Skullcruncher",
@@ -266,7 +279,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Weirdwolf",
@@ -285,7 +299,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Lord Zarak",
@@ -304,7 +319,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Vorath",
@@ -323,7 +339,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Grax",
@@ -342,7 +359,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Monzo",
@@ -361,7 +379,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Pointblank",
@@ -380,7 +399,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sureshot",
@@ -399,7 +419,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Crosshairs",
@@ -418,7 +439,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Peacemaker",
@@ -437,7 +459,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Spoilsport",
@@ -456,7 +479,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Pinpointer",
@@ -475,7 +499,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Triggerhappy",
@@ -494,7 +519,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Misfire",
@@ -513,7 +539,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Slugslinger",
@@ -532,7 +559,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Blowpipe",
@@ -551,7 +579,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Aimless",
@@ -570,7 +599,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Caliburst",
@@ -589,7 +619,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "targetmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sixshot",
@@ -606,7 +637,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 4: The Rebirth",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Fastlane",
@@ -625,7 +657,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "autobot-clones"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Cloudraker",
@@ -644,7 +677,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "autobot-clones"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Pounce",
@@ -663,7 +697,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "decepticon-clones"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Wingspan",
@@ -682,7 +717,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "decepticon-clones"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Battletrap",
@@ -701,7 +737,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "duocons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Flywheels",
@@ -720,7 +757,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "duocons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Apeface",
@@ -740,7 +778,8 @@
       "sub_group_slugs": [
         "horrorcons",
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Snapdragon",
@@ -760,7 +799,8 @@
       "sub_group_slugs": [
         "horrorcons",
         "headmasters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Spasma",
@@ -779,7 +819,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "horrorcons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Krunk",
@@ -798,7 +839,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "horrorcons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Punch-Counterpunch",
@@ -815,7 +857,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 4: The Rebirth",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Llyra",
@@ -832,7 +875,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 4: The Rebirth",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     }
   ]
 }

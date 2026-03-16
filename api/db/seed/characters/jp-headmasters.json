@@ -15,8 +15,9 @@
     "import_order": 5,
     "references": [
       "factions (via faction_slug)",
-      "sub_groups (via sub_group_slug)",
-      "characters (via combined_form_slug for combiners)"
+      "sub_groups (via sub_group_slugs)",
+      "characters (via combined_form_slug for combiners)",
+      "continuity_families (via continuity_family_slug)"
     ]
   },
   "characters": [
@@ -38,7 +39,8 @@
       "combined_form_slug": "raiden",
       "sub_group_slugs": [
         "trainbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Getsuei",
@@ -58,7 +60,8 @@
       "combined_form_slug": "raiden",
       "sub_group_slugs": [
         "trainbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Kaen",
@@ -78,7 +81,8 @@
       "combined_form_slug": "raiden",
       "sub_group_slugs": [
         "trainbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Seizan",
@@ -98,7 +102,8 @@
       "combined_form_slug": "raiden",
       "sub_group_slugs": [
         "trainbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Suiken",
@@ -118,7 +123,8 @@
       "combined_form_slug": "raiden",
       "sub_group_slugs": [
         "trainbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Yukikaze",
@@ -138,7 +144,8 @@
       "combined_form_slug": "raiden",
       "sub_group_slugs": [
         "trainbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Raiden",
@@ -166,7 +173,8 @@
       ],
       "sub_group_slugs": [
         "trainbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Twincast",
@@ -184,7 +192,8 @@
       "continuity": "G1 Japan",
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Soundblaster",
@@ -202,7 +211,8 @@
       "continuity": "G1 Japan",
       "faction_slug": "decepticon",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Grotusque",
@@ -222,7 +232,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "monsterbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Doublecross",
@@ -242,7 +253,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "monsterbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Repugnus",
@@ -262,7 +274,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "monsterbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Slugfest",
@@ -282,7 +295,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Overkill",
@@ -302,7 +316,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Snaptrap",
@@ -322,7 +337,8 @@
       "combined_form_slug": "piranacon",
       "sub_group_slugs": [
         "seacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Overbite",
@@ -342,7 +358,8 @@
       "combined_form_slug": "piranacon",
       "sub_group_slugs": [
         "seacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Seawing",
@@ -362,7 +379,8 @@
       "combined_form_slug": "piranacon",
       "sub_group_slugs": [
         "seacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Skalor",
@@ -382,7 +400,8 @@
       "combined_form_slug": "piranacon",
       "sub_group_slugs": [
         "seacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Tentakil",
@@ -402,7 +421,8 @@
       "combined_form_slug": "piranacon",
       "sub_group_slugs": [
         "seacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Nautilator",
@@ -422,7 +442,8 @@
       "combined_form_slug": "piranacon",
       "sub_group_slugs": [
         "seacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Piranacon",
@@ -450,7 +471,8 @@
       ],
       "sub_group_slugs": [
         "seacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     }
   ]
 }

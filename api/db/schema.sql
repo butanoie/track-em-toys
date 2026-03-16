@@ -89,16 +89,68 @@ CREATE TABLE public.catalog_edits (
 
 
 --
--- Name: categories; Type: TABLE; Schema: public; Owner: -
+-- Name: character_appearances; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.categories (
+CREATE TABLE public.character_appearances (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
-    name text NOT NULL,
     slug text NOT NULL,
-    parent_id uuid,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    name text NOT NULL,
+    character_id uuid NOT NULL,
+    description text,
+    source_media text,
+    source_name text,
+    year_start integer,
+    year_end integer,
+    metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
+
+
+--
+-- Name: TABLE character_appearances; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.character_appearances IS 'A character''s visual depiction in a specific media source. E.g., G1 cartoon Optimus Prime vs IDW comic Optimus Prime. Items optionally link to an appearance to specify which design the toy represents.';
+
+
+--
+-- Name: COLUMN character_appearances.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_appearances.slug IS 'URL-safe kebab-case key, globally unique (e.g., optimus-prime-g1-cartoon, megatron-idw-phase-1).';
+
+
+--
+-- Name: COLUMN character_appearances.source_media; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_appearances.source_media IS 'Media type. Values: TV, Comic, Movie, OVA, Toy-only, Video Game, Manga.';
+
+
+--
+-- Name: COLUMN character_appearances.source_name; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_appearances.source_name IS 'Specific media title (e.g., The Transformers Season 1, Marvel US Comics, Bumblebee Movie).';
+
+
+--
+-- Name: character_sub_groups; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.character_sub_groups (
+    character_id uuid NOT NULL,
+    sub_group_id uuid NOT NULL
+);
+
+
+--
+-- Name: TABLE character_sub_groups; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.character_sub_groups IS 'Many-to-many junction: characters can belong to multiple sub-groups. E.g., Apeface → Headmasters + Horrorcons; Springer → Triple Changers.';
 
 
 --
@@ -112,14 +164,14 @@ CREATE TABLE public.characters (
     franchise text DEFAULT 'Transformers'::text NOT NULL,
     faction_id uuid,
     character_type text,
-    sub_group_id uuid,
     alt_mode text,
     is_combined_form boolean DEFAULT false NOT NULL,
     combined_form_id uuid,
     combiner_role text,
     metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    continuity_family_id uuid NOT NULL
 );
 
 
@@ -141,7 +193,7 @@ COMMENT ON COLUMN public.characters.slug IS 'URL-safe kebab-case key (e.g., opti
 -- Name: COLUMN characters.character_type; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.characters.character_type IS 'Species/type classification. Not an enum to allow future expansion.';
+COMMENT ON COLUMN public.characters.character_type IS 'Species or gimmick-type classification. Not an enum to allow future expansion. Species types: Transformer, Human, Nebulan, Quintesson, Sharkticon, Junkion, Alien. Gimmick types: Pretender, Godmaster, Powermaster, Targetmaster, Headmaster, Headmaster Junior, Brainmaster, Powered Master, Classic Pretender, Micromaster, Drone. Other: Energy being, Other Robotic, Other Alien.';
 
 
 --
@@ -155,14 +207,57 @@ COMMENT ON COLUMN public.characters.combined_form_id IS 'Self-referential FK: if
 -- Name: COLUMN characters.combiner_role; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.characters.combiner_role IS 'Role in combination: torso, right-arm, left-arm, right-leg, left-leg, head, component. NULL if not a combiner component.';
+COMMENT ON COLUMN public.characters.combiner_role IS 'Role in combination. Standard: torso, right arm, left arm, right leg, left leg. Extended (JP combiners): upper torso, lower torso, upper body, lower body, torso (right half), torso (left half), main body, wings/booster, weapon, back-mounted weapon. NULL if not a combiner component.';
 
 
 --
 -- Name: COLUMN characters.metadata; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.characters.metadata IS 'Extensible JSONB for japanese_name, first_appearance, aliases, notes, etc.';
+COMMENT ON COLUMN public.characters.metadata IS 'Extensible JSONB for japanese_name, first_appearance, first_appearance_season, aliases, series_year, notes, etc.';
+
+
+--
+-- Name: COLUMN characters.continuity_family_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.characters.continuity_family_id IS 'FK → continuity_families. The character identity boundary — same name in different families = different character (e.g., G1 Megatron vs Beast Wars Megatron). Replaces the free-text series and continuity columns from migration 012.';
+
+
+--
+-- Name: continuity_families; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.continuity_families (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    slug text NOT NULL,
+    name text NOT NULL,
+    franchise text,
+    sort_order integer,
+    notes text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE continuity_families; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.continuity_families IS 'Continuity family groupings (Generation 1, Beast Era, Unicron Trilogy, etc.). The identity boundary for characters — same name in different families = different character. Reference table — no updated_at.';
+
+
+--
+-- Name: COLUMN continuity_families.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.continuity_families.slug IS 'URL-safe kebab-case key (e.g., g1, beast-era, movieverse).';
+
+
+--
+-- Name: COLUMN continuity_families.sort_order; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.continuity_families.sort_order IS 'Optional display sort order. Lower values appear first.';
 
 
 --
@@ -217,8 +312,8 @@ CREATE TABLE public.items (
     name text NOT NULL,
     slug text NOT NULL,
     manufacturer_id uuid,
-    character_id uuid,
-    toy_line_id uuid,
+    character_id uuid NOT NULL,
+    toy_line_id uuid NOT NULL,
     year_released integer,
     description text,
     barcode text,
@@ -230,6 +325,8 @@ CREATE TABLE public.items (
     metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    character_appearance_id uuid,
+    size_class text,
     CONSTRAINT items_data_quality_check CHECK ((data_quality = ANY (ARRAY['needs_review'::text, 'verified'::text, 'community_verified'::text])))
 );
 
@@ -253,6 +350,20 @@ COMMENT ON COLUMN public.items.product_code IS 'Manufacturer product designation
 --
 
 COMMENT ON COLUMN public.items.metadata IS 'Extensible JSONB: scale, variant_type, base_product_code, sub_brand, status, etc.';
+
+
+--
+-- Name: COLUMN items.character_appearance_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.items.character_appearance_id IS 'Optional FK → character_appearances. Links an item to a specific visual depiction of a character (e.g., G1 cartoon Optimus vs Movie Optimus). NULL = generic depiction.';
+
+
+--
+-- Name: COLUMN items.size_class; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.items.size_class IS 'Toy size class (e.g., Core, Deluxe, Voyager, Leader, Commander, Titan). Nullable — third-party figures may use non-standard or unknown sizing.';
 
 
 --
@@ -371,7 +482,7 @@ CREATE TABLE public.toy_lines (
     name text NOT NULL,
     slug text NOT NULL,
     franchise text,
-    manufacturer_id uuid,
+    manufacturer_id uuid NOT NULL,
     scale character varying(50),
     description text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -391,8 +502,16 @@ CREATE TABLE public.users (
     avatar_url text,
     deactivated_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    deleted_at timestamp with time zone
 );
+
+
+--
+-- Name: COLUMN users.deleted_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.users.deleted_at IS 'GDPR tombstone. When set, PII columns (email, display_name, avatar_url) have been scrubbed. The row is preserved so foreign keys from items, catalog_edits, item_photos remain intact. App displays "Deleted user" when deleted_at IS NOT NULL.';
 
 
 --
@@ -412,19 +531,27 @@ ALTER TABLE ONLY public.catalog_edits
 
 
 --
--- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: character_appearances character_appearances_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.categories
-    ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.character_appearances
+    ADD CONSTRAINT character_appearances_pkey PRIMARY KEY (id);
 
 
 --
--- Name: categories categories_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: character_appearances character_appearances_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.categories
-    ADD CONSTRAINT categories_slug_key UNIQUE (slug);
+ALTER TABLE ONLY public.character_appearances
+    ADD CONSTRAINT character_appearances_slug_key UNIQUE (slug);
+
+
+--
+-- Name: character_sub_groups character_sub_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_sub_groups
+    ADD CONSTRAINT character_sub_groups_pkey PRIMARY KEY (character_id, sub_group_id);
 
 
 --
@@ -441,6 +568,22 @@ ALTER TABLE ONLY public.characters
 
 ALTER TABLE ONLY public.characters
     ADD CONSTRAINT characters_slug_key UNIQUE (slug);
+
+
+--
+-- Name: continuity_families continuity_families_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.continuity_families
+    ADD CONSTRAINT continuity_families_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: continuity_families continuity_families_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.continuity_families
+    ADD CONSTRAINT continuity_families_slug_key UNIQUE (slug);
 
 
 --
@@ -548,14 +691,6 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- Name: sub_groups sub_groups_name_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sub_groups
-    ADD CONSTRAINT sub_groups_name_key UNIQUE (name);
-
-
---
 -- Name: sub_groups sub_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -639,10 +774,31 @@ CREATE INDEX idx_catalog_edits_status ON public.catalog_edits USING btree (statu
 
 
 --
+-- Name: idx_character_appearances_character; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_character_appearances_character ON public.character_appearances USING btree (character_id);
+
+
+--
+-- Name: idx_character_sub_groups_sub_group; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_character_sub_groups_sub_group ON public.character_sub_groups USING btree (sub_group_id);
+
+
+--
 -- Name: idx_characters_combined_form; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_characters_combined_form ON public.characters USING btree (combined_form_id) WHERE (combined_form_id IS NOT NULL);
+
+
+--
+-- Name: idx_characters_continuity_family; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_characters_continuity_family ON public.characters USING btree (continuity_family_id);
 
 
 --
@@ -653,17 +809,10 @@ CREATE INDEX idx_characters_faction ON public.characters USING btree (faction_id
 
 
 --
--- Name: idx_characters_name_franchise; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_characters_name_franchise_cf; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_characters_name_franchise ON public.characters USING btree (lower(name), lower(franchise));
-
-
---
--- Name: idx_characters_sub_group; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_characters_sub_group ON public.characters USING btree (sub_group_id);
+CREATE UNIQUE INDEX idx_characters_name_franchise_cf ON public.characters USING btree (lower(name), lower(franchise), continuity_family_id);
 
 
 --
@@ -681,10 +830,24 @@ CREATE INDEX idx_item_photos_item ON public.item_photos USING btree (item_id);
 
 
 --
+-- Name: idx_item_photos_one_primary; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_item_photos_one_primary ON public.item_photos USING btree (item_id) WHERE (is_primary = true);
+
+
+--
 -- Name: idx_items_character; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_items_character ON public.items USING btree (character_id);
+
+
+--
+-- Name: idx_items_character_appearance; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_character_appearance ON public.items USING btree (character_appearance_id) WHERE (character_appearance_id IS NOT NULL);
 
 
 --
@@ -706,6 +869,13 @@ CREATE INDEX idx_items_manufacturer ON public.items USING btree (manufacturer_id
 --
 
 CREATE INDEX idx_items_product_code ON public.items USING btree (product_code) WHERE (product_code IS NOT NULL);
+
+
+--
+-- Name: idx_items_size_class; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_size_class ON public.items USING btree (size_class) WHERE (size_class IS NOT NULL);
 
 
 --
@@ -751,6 +921,13 @@ CREATE INDEX idx_refresh_tokens_user_id ON public.refresh_tokens USING btree (us
 
 
 --
+-- Name: idx_sub_groups_name_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_sub_groups_name_franchise ON public.sub_groups USING btree (lower(name), COALESCE(franchise, ''::text));
+
+
+--
 -- Name: idx_toy_lines_manufacturer; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -762,6 +939,13 @@ CREATE INDEX idx_toy_lines_manufacturer ON public.toy_lines USING btree (manufac
 --
 
 CREATE UNIQUE INDEX idx_users_email_lower ON public.users USING btree (lower((email)::text));
+
+
+--
+-- Name: character_appearances character_appearances_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER character_appearances_updated_at BEFORE UPDATE ON public.character_appearances FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
 
 --
@@ -820,7 +1004,7 @@ ALTER TABLE ONLY public.catalog_edits
 --
 
 ALTER TABLE ONLY public.catalog_edits
-    ADD CONSTRAINT catalog_edits_item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id);
+    ADD CONSTRAINT catalog_edits_item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id) ON DELETE SET NULL;
 
 
 --
@@ -832,11 +1016,27 @@ ALTER TABLE ONLY public.catalog_edits
 
 
 --
--- Name: categories categories_parent_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: character_appearances character_appearances_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.categories
-    ADD CONSTRAINT categories_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.categories(id) ON DELETE SET NULL;
+ALTER TABLE ONLY public.character_appearances
+    ADD CONSTRAINT character_appearances_character_id_fkey FOREIGN KEY (character_id) REFERENCES public.characters(id) ON DELETE CASCADE;
+
+
+--
+-- Name: character_sub_groups character_sub_groups_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_sub_groups
+    ADD CONSTRAINT character_sub_groups_character_id_fkey FOREIGN KEY (character_id) REFERENCES public.characters(id) ON DELETE CASCADE;
+
+
+--
+-- Name: character_sub_groups character_sub_groups_sub_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_sub_groups
+    ADD CONSTRAINT character_sub_groups_sub_group_id_fkey FOREIGN KEY (sub_group_id) REFERENCES public.sub_groups(id) ON DELETE CASCADE;
 
 
 --
@@ -848,19 +1048,19 @@ ALTER TABLE ONLY public.characters
 
 
 --
+-- Name: characters characters_continuity_family_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.characters
+    ADD CONSTRAINT characters_continuity_family_id_fkey FOREIGN KEY (continuity_family_id) REFERENCES public.continuity_families(id) ON DELETE RESTRICT;
+
+
+--
 -- Name: characters characters_faction_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.characters
     ADD CONSTRAINT characters_faction_id_fkey FOREIGN KEY (faction_id) REFERENCES public.factions(id) ON DELETE SET NULL;
-
-
---
--- Name: characters characters_sub_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.characters
-    ADD CONSTRAINT characters_sub_group_id_fkey FOREIGN KEY (sub_group_id) REFERENCES public.sub_groups(id) ON DELETE SET NULL;
 
 
 --
@@ -880,11 +1080,19 @@ ALTER TABLE ONLY public.item_photos
 
 
 --
+-- Name: items items_character_appearance_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_character_appearance_id_fkey FOREIGN KEY (character_appearance_id) REFERENCES public.character_appearances(id) ON DELETE SET NULL;
+
+
+--
 -- Name: items items_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.items
-    ADD CONSTRAINT items_character_id_fkey FOREIGN KEY (character_id) REFERENCES public.characters(id);
+    ADD CONSTRAINT items_character_id_fkey FOREIGN KEY (character_id) REFERENCES public.characters(id) ON DELETE RESTRICT;
 
 
 --
@@ -908,7 +1116,7 @@ ALTER TABLE ONLY public.items
 --
 
 ALTER TABLE ONLY public.items
-    ADD CONSTRAINT items_toy_line_id_fkey FOREIGN KEY (toy_line_id) REFERENCES public.toy_lines(id);
+    ADD CONSTRAINT items_toy_line_id_fkey FOREIGN KEY (toy_line_id) REFERENCES public.toy_lines(id) ON DELETE RESTRICT;
 
 
 --
@@ -940,7 +1148,7 @@ ALTER TABLE ONLY public.sub_groups
 --
 
 ALTER TABLE ONLY public.toy_lines
-    ADD CONSTRAINT toy_lines_manufacturer_id_fkey FOREIGN KEY (manufacturer_id) REFERENCES public.manufacturers(id);
+    ADD CONSTRAINT toy_lines_manufacturer_id_fkey FOREIGN KEY (manufacturer_id) REFERENCES public.manufacturers(id) ON DELETE RESTRICT;
 
 
 --
@@ -965,4 +1173,6 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('008'),
     ('009'),
     ('010'),
-    ('011');
+    ('011'),
+    ('012'),
+    ('013');

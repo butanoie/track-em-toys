@@ -16,8 +16,9 @@
     "import_order": 5,
     "references": [
       "factions (via faction_slug)",
-      "sub_groups (via sub_group_slug)",
-      "characters (via combined_form_slug for combiners)"
+      "sub_groups (via sub_group_slugs)",
+      "characters (via combined_form_slug for combiners)",
+      "continuity_families (via continuity_family_slug)"
     ]
   },
   "characters": [
@@ -38,7 +39,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "titans"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sky Lynx",
@@ -55,7 +57,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Scamper",
@@ -72,7 +75,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Six-Gun",
@@ -89,7 +93,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Slammer",
@@ -106,7 +111,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sandstorm",
@@ -125,7 +131,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "triple-changers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Broadside",
@@ -144,7 +151,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "triple-changers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Steeljaw",
@@ -163,7 +171,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ramhorn",
@@ -182,7 +191,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Eject",
@@ -201,7 +211,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Rewind",
@@ -220,7 +231,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Outback",
@@ -239,7 +251,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Pipes",
@@ -258,7 +271,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Swerve",
@@ -277,7 +291,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Tailgate",
@@ -296,7 +311,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hubcap",
@@ -315,7 +331,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Goldbug",
@@ -334,7 +351,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "throttlebots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Chase",
@@ -353,7 +371,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "throttlebots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Freeway",
@@ -372,7 +391,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "throttlebots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Rollbar",
@@ -391,7 +411,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "throttlebots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Searchlight",
@@ -410,7 +431,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "throttlebots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Wideload",
@@ -429,7 +451,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "throttlebots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Scattershot",
@@ -448,7 +471,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "technobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Lightspeed",
@@ -467,7 +491,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "technobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Nosecone",
@@ -486,7 +511,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "technobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Strafe",
@@ -505,7 +531,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "technobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Afterburner",
@@ -524,7 +551,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "technobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Computron",
@@ -550,7 +578,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "technobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Trypticon",
@@ -569,7 +598,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "titans"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Octane",
@@ -588,7 +618,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "triple-changers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Razorclaw",
@@ -607,7 +638,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "predacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Divebomb",
@@ -626,7 +658,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "predacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Headstrong",
@@ -645,7 +678,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "predacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Rampage",
@@ -664,7 +698,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "predacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Tantrum",
@@ -683,7 +718,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "predacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Predaking",
@@ -709,7 +745,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "predacons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hun-Gurrr",
@@ -728,7 +765,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "terrorcons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sinnertwin",
@@ -747,7 +785,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "terrorcons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Blot",
@@ -766,7 +805,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "terrorcons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Cutthroat",
@@ -785,7 +825,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "terrorcons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Rippersnapper",
@@ -804,7 +845,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "terrorcons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Abominus",
@@ -830,7 +872,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "terrorcons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ratbat",
@@ -849,7 +892,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Runabout",
@@ -868,7 +912,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "battlechargers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Runamuck",
@@ -887,7 +932,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "battlechargers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Gnaw",
@@ -904,7 +950,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Marissa Faireborn",
@@ -921,7 +968,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Gregory Swofford",
@@ -938,7 +986,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Jessica Morgan",
@@ -955,7 +1004,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Primacron",
@@ -972,7 +1022,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Primacron's Assistant",
@@ -989,7 +1040,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Tornedron",
@@ -1006,7 +1058,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dirk Manus",
@@ -1023,7 +1076,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Skuxxoid",
@@ -1040,7 +1094,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 3",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     }
   ]
 }

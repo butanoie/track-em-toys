@@ -16,8 +16,9 @@
     "import_order": 5,
     "references": [
       "factions (via faction_slug)",
-      "sub_groups (via sub_group_slug)",
-      "characters (via combined_form_slug for combiners)"
+      "sub_groups (via sub_group_slugs)",
+      "characters (via combined_form_slug for combiners)",
+      "continuity_families (via continuity_family_slug)"
     ]
   },
   "characters": [
@@ -36,7 +37,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Grapple",
@@ -53,7 +55,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hoist",
@@ -70,7 +73,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Inferno",
@@ -87,7 +91,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Red Alert",
@@ -104,7 +109,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Smokescreen",
@@ -121,7 +127,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Skids",
@@ -138,7 +145,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Powerglide",
@@ -157,7 +165,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Warpath",
@@ -176,7 +185,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Beachcomber",
@@ -195,7 +205,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Seaspray",
@@ -214,7 +225,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Cosmos",
@@ -233,7 +245,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "minibots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Omega Supreme",
@@ -252,7 +265,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "titans"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Perceptor",
@@ -269,7 +283,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Blaster",
@@ -286,7 +301,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dirge",
@@ -305,7 +321,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Thrust",
@@ -324,7 +341,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ramjet",
@@ -343,7 +361,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "seekers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Blitzwing",
@@ -362,7 +381,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "triple-changers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Astrotrain",
@@ -381,7 +401,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "triple-changers"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Buzzsaw",
@@ -400,7 +421,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "cassettes"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Silverbolt",
@@ -419,7 +441,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "aerialbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Air Raid",
@@ -438,7 +461,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "aerialbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Fireflight",
@@ -457,7 +481,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "aerialbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Skydive",
@@ -476,7 +501,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "aerialbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Slingshot",
@@ -495,7 +521,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "aerialbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Superion",
@@ -521,7 +548,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "aerialbots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Motormaster",
@@ -540,7 +568,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "stunticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Drag Strip",
@@ -559,7 +588,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "stunticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dead End",
@@ -578,7 +608,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "stunticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Breakdown",
@@ -597,7 +628,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "stunticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Wildrider",
@@ -616,7 +648,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "stunticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Menasor",
@@ -642,7 +675,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "stunticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Onslaught",
@@ -661,7 +695,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "combaticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Blast Off",
@@ -680,7 +715,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "combaticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Vortex",
@@ -699,7 +735,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "combaticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Brawl",
@@ -718,7 +755,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "combaticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Swindle",
@@ -737,7 +775,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "combaticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Bruticus",
@@ -763,7 +802,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "combaticons"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Hot Spot",
@@ -782,7 +822,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "protectobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Streetwise",
@@ -801,7 +842,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "protectobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Blades",
@@ -820,7 +862,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "protectobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "First Aid",
@@ -839,7 +882,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "protectobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Groove",
@@ -858,7 +902,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "protectobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Defensor",
@@ -884,7 +929,8 @@
       "continuity": "G1 North America",
       "sub_group_slugs": [
         "protectobots"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Alpha Trion",
@@ -901,7 +947,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Elita One",
@@ -918,7 +965,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Chromia",
@@ -935,7 +983,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Moonracer",
@@ -952,7 +1001,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Firestar",
@@ -969,7 +1019,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Orion Pax",
@@ -986,7 +1037,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ariel",
@@ -1003,7 +1055,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dion",
@@ -1020,7 +1073,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Devcon",
@@ -1037,7 +1091,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Nightbird",
@@ -1054,7 +1109,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Kremzeek",
@@ -1071,7 +1127,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "TORQ III",
@@ -1088,7 +1145,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Autobot X",
@@ -1105,7 +1163,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Vector Sigma",
@@ -1122,7 +1181,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Carly",
@@ -1139,7 +1199,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Astoria Carlton-Ritz",
@@ -1156,7 +1217,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Raoul",
@@ -1173,7 +1235,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Shawn Berger",
@@ -1190,7 +1253,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Abdul Fakkadi",
@@ -1207,7 +1271,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Dr. Fujiyama",
@@ -1224,7 +1289,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Lord Chumley",
@@ -1241,7 +1307,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Auggie Cahnay",
@@ -1258,7 +1325,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Ali",
@@ -1275,7 +1343,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Alana",
@@ -1292,7 +1361,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Deceptitran",
@@ -1309,7 +1379,8 @@
       "combined_form_slug": null,
       "series": "The Transformers Season 2",
       "continuity": "G1 North America",
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     }
   ]
 }

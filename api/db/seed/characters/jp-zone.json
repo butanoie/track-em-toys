@@ -18,8 +18,9 @@
     "import_order": 5,
     "references": [
       "factions (via faction_slug)",
-      "sub_groups (via sub_group_slug)",
-      "characters (via combined_form_slug for combiners)"
+      "sub_groups (via sub_group_slugs)",
+      "characters (via combined_form_slug for combiners)",
+      "continuity_families (via continuity_family_slug)"
     ]
   },
   "characters": [
@@ -41,7 +42,8 @@
       "combined_form_slug": "sky-powered",
       "sub_group_slugs": [
         "powered-masters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sonic Bomber",
@@ -61,7 +63,8 @@
       "combined_form_slug": "sky-powered",
       "sub_group_slugs": [
         "powered-masters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sky Powered",
@@ -85,7 +88,8 @@
       ],
       "sub_group_slugs": [
         "powered-masters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Roadfire",
@@ -105,7 +109,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "powered-masters"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Rabbicrater",
@@ -123,7 +128,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Moonradar",
@@ -141,7 +147,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Speeder",
@@ -159,7 +166,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Sonic",
@@ -177,7 +185,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Violengiguar",
@@ -195,7 +204,8 @@
       "first_appearance_season": null,
       "faction_slug": "decepticon",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Metrotitan",
@@ -215,7 +225,8 @@
       "combined_form_slug": null,
       "sub_group_slugs": [
         "titans"
-      ]
+      ],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Cain",
@@ -233,7 +244,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Emusa",
@@ -251,7 +263,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     },
     {
       "name": "Akira",
@@ -269,7 +282,8 @@
       "first_appearance_season": null,
       "faction_slug": "autobot",
       "combined_form_slug": null,
-      "sub_group_slugs": []
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
     }
   ]
 }

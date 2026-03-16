@@ -1,20 +1,21 @@
 # Seed Data
 
-Database seed files for the shared catalog tables defined in migrations `011_shared_catalog_tables.sql` and `012_enrich_characters_table.sql`.
+Database seed files for the shared catalog tables defined in migrations `011_shared_catalog_tables.sql`, `012_enrich_characters_table.sql`, and `013_continuity_families_and_appearances.sql`.
 
 ## Import Order
 
 Tables must be seeded in dependency order:
 
-| Order | Table          | File(s)                          | References              |
-|-------|----------------|----------------------------------|-------------------------|
-| 1     | factions       | `reference/factions.json`        | —                       |
-| 2     | sub_groups     | `reference/sub_groups.json`      | factions (faction_slug) |
-| 3     | manufacturers  | `reference/manufacturers.json`   | —                       |
-| 4     | toy_lines      | `reference/toy_lines.json`       | manufacturers (manufacturer_slug) |
-| 5     | characters     | `characters/*.json`              | factions (faction_slug), characters (combined_form_slug) |
-| 5b    | character_sub_groups | `characters/*.json` (sub_group_slugs) | characters, sub_groups (via sub_group_slugs array) |
-| 6     | items          | `items/*.json` (when added)      | manufacturers, toy_lines, characters (all via slugs) |
+| Order | Table               | File(s)                                | References                                                                      |
+|-------|---------------------|----------------------------------------|---------------------------------------------------------------------------------|
+| 0     | continuity_families | `reference/continuity_families.json`   | —                                                                               |
+| 1     | factions            | `reference/factions.json`              | —                                                                               |
+| 2     | sub_groups          | `reference/sub_groups.json`            | factions (faction_slug)                                                         |
+| 3     | manufacturers       | `reference/manufacturers.json`         | —                                                                               |
+| 4     | toy_lines           | `reference/toy_lines.json`             | manufacturers (manufacturer_slug)                                               |
+| 5     | characters          | `characters/*.json`                    | factions (faction_slug), characters (combined_form_slug), continuity_families (continuity_family_slug) |
+| 5b    | character_sub_groups | `characters/*.json` (sub_group_slugs) | characters, sub_groups (via sub_group_slugs array)                              |
+| 6     | items               | `items/*.json` (when added)            | manufacturers, toy_lines, characters, character_appearances (all via slugs)     |
 
 ## FK Convention: Slugs, Not IDs
 
@@ -73,8 +74,9 @@ Characters are **not duplicated** across files — each file contains only NEW c
 | `combiner_role` | `combiner_role` | |
 | `first_appearance` | — | Reference only; not seeded to DB |
 | `first_appearance_season` | — | Reference only; not seeded to DB |
-| `series` | `series` | Added in migration 012. Always populated |
-| `continuity` | `continuity` | Added in migration 012. Always populated |
+| `series` | — | Reference only; not seeded to DB (column removed in migration 013) |
+| `continuity` | — | Reference only; not seeded to DB (column removed in migration 013) |
+| `continuity_family_slug` | `continuity_family_id` | Resolve via `SELECT id FROM continuity_families WHERE slug = $1`. Added in migration 013. Always populated |
 | `notes` | `metadata.notes` | Into JSONB |
 | `series_year` | `metadata.series_year` | Into JSONB |
 | `component_slugs` | — | Not stored directly; inverse of `combined_form_id` FK |

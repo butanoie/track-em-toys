@@ -140,6 +140,16 @@ export interface SubGroup {
   created_at: string
 }
 
+export interface ContinuityFamily {
+  id: string
+  slug: string
+  name: string
+  franchise: string | null
+  sort_order: number | null
+  notes: string | null
+  created_at: string
+}
+
 // ---------------------------------------------------------------------------
 // Shared Catalog — core entities
 // ---------------------------------------------------------------------------
@@ -155,8 +165,7 @@ export interface Character {
   is_combined_form: boolean
   combined_form_id: string | null
   combiner_role: string | null
-  series: string
-  continuity: string
+  continuity_family_id: string
   metadata: Record<string, unknown>
   created_at: string
   updated_at: string
@@ -165,6 +174,21 @@ export interface Character {
 export interface CharacterSubGroup {
   character_id: string
   sub_group_id: string
+}
+
+export interface CharacterAppearance {
+  id: string
+  slug: string
+  name: string
+  character_id: string
+  description: string | null
+  source_media: string | null
+  source_name: string | null
+  year_start: number | null
+  year_end: number | null
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
 }
 
 export interface Manufacturer {
@@ -201,6 +225,8 @@ export interface Item {
   manufacturer_id: string | null
   character_id: string
   toy_line_id: string
+  character_appearance_id: string | null
+  size_class: string | null
   year_released: number | null
   description: string | null
   barcode: string | null
