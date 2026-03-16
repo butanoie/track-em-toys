@@ -108,7 +108,7 @@ The project has completed its authentication foundation (Phases 1.1–1.3) and i
 |-------|-------|----------|-------|
 | #30 | Seed ingestion script | CRITICAL | Slug-to-UUID resolution, two-pass character insert for combiner self-references |
 | #31 | Seed integration tests | CRITICAL | Verify seeded data in real DB |
-| #25 | Character appearances seed | Medium | Optional enrichment, not blocking |
+| #25 | Character appearances seed | Medium | Sprint 1 stretch goal — use research agent (#28) to populate; include in ingestion script (#30) |
 | #26 | Comic book character seed | Low | Data expansion |
 | #27 | Mold relationship tracking | Medium | Needs design spike; can defer to 1.5 |
 
@@ -711,7 +711,8 @@ Three templates in `.github/ISSUE_TEMPLATE/`:
 ### Sprint 1: Seed Pipeline + Research Agent (current)
 1. **#28** — Build Transformers research agent/skill for catalog data population (accelerates all seed work)
 2. **#30** — Seed ingestion script (critical path blocker)
-3. **#31** — Seed ingestion integration tests
+3. **#25** — Seed character_appearances data for G1 media depictions (stretch goal — use research agent to populate; easier to include in ingestion script now than bolt on later)
+4. **#31** — Seed ingestion integration tests (validates #30 + #25)
 
 ### Sprint 2: Catalog API + User Roles
 3. Migration 014: full-text search indexes
@@ -753,7 +754,6 @@ Three templates in `.github/ISSUE_TEMPLATE/`:
 28. Pricing integration (3.0)
 
 ### Parallel / Backlog (any time)
-- #25 — Character appearances seed
 - #27 — Mold relationships
 - #6 — React act() warnings
 - #26 — Comic book characters

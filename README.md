@@ -95,16 +95,41 @@ See [`ml/README.md`](ml/README.md) and [`ml/TRAINING.md`](ml/TRAINING.md) for th
 
 See [`docs/README.md`](docs/README.md) for an index of architecture decisions, requirements, and implementation plans.
 
-## Project Status
+## Development Strategy
+
+**ML-Accelerated, Web-First:** The shortest path from the current state to on-device ML image classification. All collection management features (private items, pricing, tags, CSV import, reporting) are deferred until after ML is functional.
+
+See [`docs/plans/Development_Roadmap_v1_0.md`](docs/plans/Development_Roadmap_v1_0.md) for the full roadmap with dependency graphs, issue tracking strategy, and sprint plans.
+
+### Critical Path to ML
+
+```
+1.4 (Seed Data) → 1.5 (Catalog API) → 1.5b (Roles) → 1.9 (Photo Upload) → 4.0 (ML Training) → 2.0 (iOS App)
+```
+
+### Project Status
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| 1.1 | Database migrations (auth tables, RLS) | Complete |
-| 1.2 | API authentication (signin, refresh, logout, link-account) | Complete |
-| 1.3 | Web SPA authentication (Google + Apple Sign-In) | Complete |
-| 1.4 | Account settings UI (GET /auth/me, link-account flow) | Complete |
-| 1.5 | Apple server-to-server webhooks | Complete |
-| 1.6 | API documentation (Swagger + Scalar) | Complete |
-| 2 | iOS native authentication | In progress |
-| 3 | Catalog data model and API | Planned |
-| 4 | ML image classification | Planned |
+| **Foundation (Complete)** | | |
+| 1.1 | Database migrations (auth tables, RLS) | ✅ Complete |
+| 1.2 | API authentication (OAuth2, ES256 JWT, token rotation) | ✅ Complete |
+| 1.3 | Web SPA authentication (Google + Apple Sign-In) | ✅ Complete |
+| — | Account settings UI, Apple webhooks, API docs (Swagger + Scalar) | ✅ Complete |
+| **ML Track (Active)** | | |
+| 1.4 | Catalog schema & seed data (migrations 011–013, seed JSON, validation tests) | 🔄 In Progress |
+| 1.5 | Catalog API routes (read-only REST with full-text search) | Planned |
+| 1.5b | User roles & admin foundation (user/curator/admin, requireRole middleware) | Planned |
+| 1.7 | Web catalog browsing UI (grid/list, detail pages, search) | Planned |
+| 1.9 | Photo management (catalog photo upload, thumbnails, ML training export) | Planned |
+| 4.0 | ML training pipeline (Create ML, transfer learning, model serving) | Planned |
+| 2.0 | iOS app with on-device Core ML inference + barcode scanning | Planned |
+| **Parallel** | | |
+| 1.12 | Account security & GDPR compliance (account deletion, PII scrubbing) | Planned |
+| **Post-ML (Deferred)** | | |
+| 1.6 | Collection schema & API (private CRUD with RLS) | Deferred |
+| 1.8 | Web collection management UI | Deferred |
+| 1.10 | CSV import | Deferred |
+| 1.11 | Basic reporting & dashboard | Deferred |
+| 3.0 | Pricing integration (eBay API, valuation, insurance reports) | Deferred |
+| 5.0 | Polish & expansion (object detection, Android, community features) | Deferred |
