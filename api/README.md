@@ -204,7 +204,8 @@ The current migrations create:
 |--------|------|-------------|
 | `GET` | `/health` | Health check |
 | `GET` | `/.well-known/jwks.json` | Public JWKS for token verification |
-| `GET` | `/docs` | Interactive API documentation (Scalar) |
+| `GET` | `/reference/` | Interactive API documentation (Scalar) |
+| `GET` | `/reference/openapi.json` | OpenAPI 3.0 JSON spec |
 | `POST` | `/auth/signin` | Sign in with Apple or Google (rate limit: 10/min per IP) |
 | `POST` | `/auth/refresh` | Rotate refresh token for a new access token (rate limit: 5/min per IP) |
 
@@ -261,6 +262,34 @@ curl -X POST http://localhost:3000/auth/signin \
 }
 ```
 
+## API Documentation (Scalar)
+
+The API ships with interactive documentation powered by [Scalar](https://scalar.com/), an OpenAPI-based API reference UI. It is **only available in development and test environments** — production returns 404.
+
+### Accessing the Docs
+
+With the dev server running (`npm run dev`):
+
+| URL | Description |
+|-----|-------------|
+| `https://localhost:3010/reference/` | Interactive Scalar UI — browse endpoints, view request/response schemas, and send test requests |
+| `https://localhost:3010/reference/openapi.json` | Raw OpenAPI 3.0 JSON spec — import into Postman, Insomnia, or other API clients |
+
+> **Note:** Replace `3010` with your configured `PORT` if different. If running without TLS, use `http://` instead.
+
+### What You Can Do in Scalar
+
+- **Browse endpoints** — All registered routes are grouped by tag (`system`, `jwks`, `auth`)
+- **View schemas** — Request bodies, response shapes, and validation rules are documented inline from Fastify's JSON Schema definitions
+- **Send requests** — Use the built-in "Try it" feature to send real requests to your local server
+- **Authentication** — For authenticated endpoints, add your JWT access token via the "Bearer Auth" security scheme in the UI
+
+### How It Works
+
+The documentation is auto-generated from Fastify route schemas — no separate OpenAPI spec file is maintained. When you add `schema` to a route definition (request body, query params, response), it automatically appears in Scalar.
+
+Source: [`src/plugins/docs.ts`](src/plugins/docs.ts)
+
 ## Project Structure
 
 ```
@@ -286,7 +315,7 @@ api/
 │   │   ├── pool.ts          # PostgreSQL connection pool + transaction helper
 │   │   └── queries.ts       # Parameterized SQL queries
 │   ├── plugins/
-│   │   └── docs.ts              # Swagger + Scalar interactive API docs
+│   │   └── docs.ts              # Swagger + Scalar API docs (non-production only)
 │   ├── hooks/
 │   │   └── set-user-context.ts  # Sets app.user_id for PostgreSQL RLS
 │   └── types/
