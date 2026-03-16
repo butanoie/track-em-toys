@@ -51,6 +51,23 @@ cd web && npm run test:e2e    # Playwright e2e tests
 - `vitest.config.ts` is separate from `vite.config.ts` — excludes TanStack Router Vite plugin and uses `jsdom` environment
 - `QueryClient` is instantiated inside `RootLayout` via `useState` (stable per render, not shared between test runs) — not a top-level singleton
 
+### Authentication
+- OAuth-only: Apple Sign-In + Google Sign-In (no email/password auth — no password reset flows needed)
+- Account deletion: "Delete Account" button in settings with explicit confirmation dialog ("Type DELETE to confirm")
+- User role is included in the session data (alongside user profile) from `/auth/me` response
+
+### User Roles & Admin UI
+- Roles: `user`, `curator`, `admin` — included in JWT claims and `/auth/me` response
+- Admin routes under `/admin/*` are **code-split** via lazy `React.lazy()` imports — admin bundles never ship to regular users
+- Role checks in TanStack Router `beforeLoad` guards: redirect to `/` if insufficient role
+- Role-aware navigation: curators see "Manage Catalog" link; admins see "Admin" section
+- Admin pages: user list, role assignment, catalog edit review queue
+
+### Photo Domains (Web UI)
+- Catalog photo gallery on item detail page — shared, visible to all users
+- Photo upload UI (Phase 1.9) requires `curator` role — show/hide upload controls based on user role
+- User collection photos (private, per-item condition shots) are deferred to post-ML Phase 1.6
+
 ## Before Writing New Code
 
 Read existing files for patterns before writing anything new:

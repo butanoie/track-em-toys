@@ -26,6 +26,8 @@ Review each item explicitly. If an item is not applicable (e.g., no new conventi
 - Updating only the root CLAUDE.md when the convention is module-specific — use scoped files
 - Writing vague plan docs — include specific file paths, function signatures, and data flow descriptions
 - Skipping test scenarios — if the feature has user-facing flows or API routes, it needs scenario docs before implementation begins
+- Confusing the two photo domains: **catalog photos** (shared, `item_photos`, no RLS, Phase 1.9) vs **user collection photos** (private, RLS, deferred to Phase 1.6 post-ML). Document which domain applies when writing photo-related features.
+- Forgetting role enforcement: any catalog write route needs `requireRole('curator')` preHandler — document this in the plan, not just the code
 
 ---
 

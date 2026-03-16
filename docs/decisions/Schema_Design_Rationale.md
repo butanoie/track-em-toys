@@ -226,7 +226,45 @@ The import script should:
 
 ---
 
-### 7. Migration numbers
+### 7. User roles
+
+Migration 014b adds a `role` column to the `users` table:
+
+```sql
+ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'
+  CHECK (role IN ('user', 'curator', 'admin'));
+CREATE INDEX idx_users_role ON users (role);
+```
+
+**Why a CHECK constraint instead of a separate `roles` table?** The role set is small and fixed (3 values). A normalized roles table adds JOIN complexity for a feature that doesn't need hierarchical permissions or dynamic role creation. If roles expand beyond 5-6 values, consider a separate table.
+
+**Role is included in JWT claims.** This avoids a DB lookup on every request. When a role changes, the user's next token refresh picks up the new role.
+
+**Why `TEXT` instead of an `ENUM`?** Consistent with the project convention — `character_type`, `combiner_role`, `edit_type`, `status` all use `TEXT + CHECK`. Adding a new role value is an `ALTER TABLE` in either case, but TEXT avoids PostgreSQL's enum type management quirks.
+
+---
+
+### 8. Two photo domains
+
+The system has two distinct types of photos with different privacy models:
+
+**Catalog photos** (`item_photos` table, migration 011):
+- Centrally managed reference images (product shots, box art, alternate angles)
+- Shared across all users — no RLS
+- `uploaded_by` tracks who contributed the photo (attribution, not ownership)
+- Feed ML training directly (app-managed content, not user PII)
+- Upload requires `curator` role
+
+**User collection photos** (future table, deferred to Phase 1.6):
+- Private photos of a collector's own items (condition shots, shelf photos)
+- RLS-protected via `user_id` + `(SELECT current_app_user_id())`
+- Not used for ML training unless user explicitly opts in
+
+**Why not add RLS to `item_photos`?** Catalog photos are shared reference data, like character entries or manufacturer records. Making them private would defeat their purpose — every user should see the same product shots. The `uploaded_by` column exists for attribution and GDPR deletion tracking (if a user deletes their account, their contributed catalog photos can be reassigned or removed), not for access control.
+
+---
+
+### 9. Migration numbers
 
 Core catalog tables were created in migration `011_shared_catalog_tables.sql`. Schema enrichment (series, continuity, combiners, GDPR tombstone) happened in `012_enrich_characters_table.sql`. Continuity families, character appearances, and size class were added in `013_continuity_families_and_appearances.sql`.
 

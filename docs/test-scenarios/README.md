@@ -19,6 +19,17 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | [E2E_PROTECTED_ROUTES.md](E2E_PROTECTED_ROUTES.md) | `web/e2e/protected-routes.spec.ts` | ✅ Implemented |
 | [E2E_SESSION.md](E2E_SESSION.md) | `web/e2e/authenticated-session.spec.ts`, `web/e2e/session-persistence.spec.ts` | ✅ Implemented |
 
+### Planned Scenarios (ML-Accelerated Roadmap)
+
+| Scenario Document | Phase | Status |
+|---|---|---|
+| INT_CATALOG_API.md | 1.5 Catalog API | Not started |
+| INT_USER_ROLES.md | 1.5b User Roles & Admin | Not started |
+| E2E_CATALOG_BROWSING.md | 1.7 Web Catalog UI | Not started |
+| E2E_PHOTO_UPLOAD.md | 1.9 Photo Management (curator role) | Not started |
+| E2E_ADMIN_DASHBOARD.md | 1.5b Admin UI | Not started |
+| E2E_GDPR_DELETION.md | 1.12 Account Deletion | Not started |
+
 ## Creating a New Scenario
 
 1. Create a file in this directory with the appropriate prefix (e.g., `E2E_COLLECTION_MANAGEMENT.md`)
