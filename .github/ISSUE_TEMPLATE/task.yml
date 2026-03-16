@@ -1,0 +1,21 @@
+name: Task
+description: Chore, infrastructure, testing, or documentation task
+labels: ["type:chore"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What needs to be done?
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      description: Checklist of sub-tasks (use `- [ ]` for checkboxes)
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why is this needed? Link to related issues or decisions.

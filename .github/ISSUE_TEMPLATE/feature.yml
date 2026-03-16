@@ -1,0 +1,45 @@
+name: Feature
+description: Propose a new feature or capability
+labels: ["type:feature"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What should this feature do?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know this is done?
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - "1.4 Seed"
+        - "1.5 Catalog API"
+        - "1.5b Roles & Admin"
+        - "1.7 Catalog UI"
+        - "1.9 Photos"
+        - "1.12 GDPR"
+        - "4.0 ML"
+        - "2.0 iOS"
+        - "1.6 Collection API (post-ML)"
+        - "1.8 Collection UI (post-ML)"
+        - "1.10 CSV Import (post-ML)"
+        - "1.11 Reporting (post-ML)"
+        - "3.0 Pricing (post-ML)"
+        - "5.0 Polish"
+  - type: textarea
+    id: depends
+    attributes:
+      label: Dependencies
+      description: Issues or PRs this depends on
+  - type: textarea
+    id: design
+    attributes:
+      label: Design Notes
+      description: Architecture decisions, API shape, schema changes
