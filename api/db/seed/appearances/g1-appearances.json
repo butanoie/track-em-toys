@@ -1,7 +1,7 @@
 {
   "_metadata": {
     "description": "G1 character appearances — NA cartoon (S1-S4 + Movie), G1 toy (cartoon-divergent + toy-only), JP Headmasters, JP Masterforce, JP Victory, JP Zone",
-    "total": 497
+    "total": 508
   },
   "data": [
     {
@@ -49,6 +49,17 @@
       "metadata": {}
     },
     {
+      "slug": "jazz-g1-toy",
+      "name": "Jazz (G1 Toy)",
+      "character_slug": "jazz",
+      "description": "White Porsche 935 Turbo with prominent Martini racing livery — red, blue, and green horizontal stripes along the sides, '4' race number on doors and hood. Robot mode is white with blue visor, compact and blocky compared to the sleeker cartoon design. Diaclone-derived mold with die-cast metal chest plate and chromed bumper",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1984,
+      "year_end": null,
+      "metadata": {}
+    },
+    {
       "slug": "prowl-g1-cartoon",
       "name": "Prowl (G1 Cartoon)",
       "character_slug": "prowl",
@@ -57,6 +68,17 @@
       "source_name": "The Transformers Season 1",
       "year_start": 1984,
       "year_end": 1985,
+      "metadata": {}
+    },
+    {
+      "slug": "prowl-g1-toy",
+      "name": "Prowl (G1 Toy)",
+      "character_slug": "prowl",
+      "description": "Black and white Datsun 280ZX police car with detailed law enforcement livery — 'POLICE' text on doors, 'HIGHWAY PATROL' on rear quarter panels, silver badge emblem, red roof lightbar. Shares the Fairlady Z mold with Bluestreak and Smokescreen. Robot mode is black/white with police deco visible on legs and shoulder-mounted rocket launchers",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1984,
+      "year_end": null,
       "metadata": {}
     },
     {
@@ -93,6 +115,17 @@
       "metadata": {}
     },
     {
+      "slug": "wheeljack-g1-toy",
+      "name": "Wheeljack (G1 Toy)",
+      "character_slug": "wheeljack",
+      "description": "White Lancia Stratos Turbo with Alitalia racing livery — green and red diagonal stripes on hood and sides, 'ALITALIA' text, '539' race number. Robot mode is white/green/red with ear-fin 'wings' and Alitalia deco visible on chest and legs. Diaclone mold with die-cast metal parts and detailed cockpit interior",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1984,
+      "year_end": null,
+      "metadata": {}
+    },
+    {
       "slug": "mirage-g1-cartoon",
       "name": "Mirage (G1 Cartoon)",
       "character_slug": "mirage",
@@ -104,6 +137,17 @@
       "metadata": {}
     },
     {
+      "slug": "mirage-g1-toy",
+      "name": "Mirage (G1 Toy)",
+      "character_slug": "mirage",
+      "description": "Blue and white Ligier JS11 Formula 1 race car with 'Gitanes' cigarette sponsor livery on sidepods, 'elf' oil sponsor logos, and '26' race number on nose cone. Full open-wheel F1 proportions with rear wing. Robot mode is blue with white chest, more compact and angular than the cartoon's taller, leaner design. Diaclone mold with die-cast metal and chromed engine parts",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1984,
+      "year_end": null,
+      "metadata": {}
+    },
+    {
       "slug": "hound-g1-cartoon",
       "name": "Hound (G1 Cartoon)",
       "character_slug": "hound",
@@ -112,6 +156,17 @@
       "source_name": "The Transformers Season 1",
       "year_start": 1984,
       "year_end": 1985,
+      "metadata": {}
+    },
+    {
+      "slug": "hound-g1-toy",
+      "name": "Hound (G1 Toy)",
+      "character_slug": "hound",
+      "description": "Green Mitsubishi J59 military jeep with detailed military markings — white US Army star insignia on hood and doors, 'ARMY' stencil text, spare tire and mounted gun on rear. Robot mode is green with silver face, military deco visible on chest (jeep hood) and legs. Diaclone mold with die-cast metal chest and rubber tires",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1984,
+      "year_end": null,
       "metadata": {}
     },
     {
@@ -244,6 +299,17 @@
       "source_name": "The Transformers Season 1",
       "year_start": 1984,
       "year_end": 1985,
+      "metadata": {}
+    },
+    {
+      "slug": "slag-g1-toy",
+      "name": "Slag (G1 Toy)",
+      "character_slug": "slag",
+      "description": "Gray and red Dinobot with extensive chrome gold detailing on horns, chest plate, and weapons. Die-cast metal construction gives a heftier feel than the cartoon's streamlined look. Triceratops mode has chrome gold horns and collar frill with a more mechanical, segmented appearance than the cartoon's smoother organic design. Red robot chest with prominent Diaclone-era cockpit detail",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1985,
+      "year_end": null,
       "metadata": {}
     },
     {
@@ -489,6 +555,17 @@
       "metadata": {}
     },
     {
+      "slug": "bombshell-g1-toy",
+      "name": "Bombshell (G1 Toy)",
+      "character_slug": "bombshell",
+      "description": "Black, yellow, and purple Insecticon with chrome silver accents on legs and horn. Japanese rhinoceros beetle mode has a more compact, mechanical look with visible screws and panel lines. Robot mode features a prominent chrome cerebro-shell launcher horn on the forehead and chromed thighs. Diaclone Insector mold with die-cast metal parts and sticker details throughout",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1985,
+      "year_end": null,
+      "metadata": {}
+    },
+    {
       "slug": "shrapnel-g1-cartoon",
       "name": "Shrapnel (G1 Cartoon)",
       "character_slug": "shrapnel",
@@ -676,6 +753,17 @@
       "metadata": {}
     },
     {
+      "slug": "tracks-g1-toy",
+      "name": "Tracks (G1 Toy)",
+      "character_slug": "tracks",
+      "description": "Blue Chevrolet Corvette C3 with distinctive flame decals on hood in red/orange, silver side exhaust pipes, and '14' number on doors. Features a third 'flying car' mode with fold-out wings. Robot mode is blue with red chest, flame deco visible on the hood-chest, and wing-doors as back kibble. Diaclone mold with chromed parts",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1985,
+      "year_end": null,
+      "metadata": {}
+    },
+    {
       "slug": "grapple-g1-cartoon",
       "name": "Grapple (G1 Cartoon)",
       "character_slug": "grapple",
@@ -709,6 +797,17 @@
       "metadata": {}
     },
     {
+      "slug": "inferno-g1-toy",
+      "name": "Inferno (G1 Toy)",
+      "character_slug": "inferno",
+      "description": "Red Mitsubishi Fuso fire engine with 'FIRE DEPARTMENT' markings, white extending ladder, emergency lightbar, and detailed fire service decals including unit numbers. Robot mode is predominantly red with the ladder as a back-mounted weapon. Shares base engineering with Grapple (crane variant) but with unique fire truck cab details",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1985,
+      "year_end": null,
+      "metadata": {}
+    },
+    {
       "slug": "red-alert-g1-cartoon",
       "name": "Red Alert (G1 Cartoon)",
       "character_slug": "red-alert",
@@ -720,6 +819,17 @@
       "metadata": {}
     },
     {
+      "slug": "red-alert-g1-toy",
+      "name": "Red Alert (G1 Toy)",
+      "character_slug": "red-alert",
+      "description": "White and red Lamborghini Countach LP500S fire chief vehicle with 'FIRE CHIEF' text on doors, emergency lightbar on roof, red accent striping, and official-looking badge decals. Retooled from the Sideswipe mold with new head sculpt and lightbar. Robot mode is white/red with fire chief markings visible on legs",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1985,
+      "year_end": null,
+      "metadata": {}
+    },
+    {
       "slug": "smokescreen-g1-cartoon",
       "name": "Smokescreen (G1 Cartoon)",
       "character_slug": "smokescreen",
@@ -728,6 +838,17 @@
       "source_name": "The Transformers Season 2",
       "year_start": 1985,
       "year_end": 1986,
+      "metadata": {}
+    },
+    {
+      "slug": "smokescreen-g1-toy",
+      "name": "Smokescreen (G1 Toy)",
+      "character_slug": "smokescreen",
+      "description": "Red, blue, and white Datsun 280ZX Turbo with full racing livery — large '38' race number on doors and roof, 'electrumGold' sponsor decal on hood, additional small sponsor stickers along sides. Shares the Fairlady Z mold with Prowl and Bluestreak but with unique front bumper/spoiler retooling. Robot mode has red forearms and blue legs with race decals visible",
+      "source_media": "Toy-only",
+      "source_name": "The Transformers G1 Toy Line",
+      "year_start": 1985,
+      "year_end": null,
       "metadata": {}
     },
     {
