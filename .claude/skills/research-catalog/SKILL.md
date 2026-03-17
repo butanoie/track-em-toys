@@ -16,7 +16,7 @@ span multiple categories (e.g., "add Beast Wars characters and their appearances
 | Category | Trigger phrases | Target files |
 |---|---|---|
 | **characters** | "add X characters", "add the Stunticons", "add Beast Wars cast" | `api/db/seed/characters/{file}.json` |
-| **items** | "add X-Transbots items", "add FansToys", "add items for" | `api/db/seed/items/{mfr}/{continuity-family}.json` |
+| **items** | "add X-Transbots items", "add FansToys", "add Hasbro G1 items" | `api/db/seed/items/{mfr}/{continuity-family}.json` |
 | **reference** | "add faction", "add sub-group", "add continuity family", "add manufacturer", "add toy line" | `api/db/seed/reference/{table}.json` |
 | **appearances** | "add appearances", "add character appearances", explicit "appearances" | `api/db/seed/appearances/{source}.json` |
 
@@ -114,7 +114,7 @@ This gives you everything needed to write accurate descriptions without web fetc
 
 ### 3b — New characters and items (web research required)
 
-#### Primary source: tfwiki.net
+#### Primary source: tfwiki.net (characters and character data)
 
 For new characters or items, attempt a targeted fetch first:
 
@@ -139,6 +139,29 @@ Extract from tfwiki pages:
   combiner role, combined form, continuity family, character type
 - **Items**: product code, release year, size class, character depicted, toy line
 
+**IMPORTANT**: TFWiki documents **Takara** catalog numbers, NOT Hasbro product codes.
+Do NOT use TFWiki as a source for Hasbro item/stock numbers.
+
+#### Primary source: TFArchive (Hasbro product codes)
+
+For Hasbro item/stock numbers, fetch:
+```
+https://www.tfarchive.com/toys/references/product_code_numbers.php
+```
+
+This page has comprehensive Hasbro 5-digit product codes organized by year (1984-1993).
+Extract the product codes for the specific years you need.
+
+**TFArchive caveats:**
+- Sections are organized by product code assignment year, which may not match retail
+  availability (e.g., Blaster cassettes coded in 1985 but shipped in 1986).
+- Some items only have assortment-level codes (shared by multiple characters in a shipping
+  case), not individual item numbers. Flag these in metadata notes.
+- Major items like Fortress Maximus, Trypticon, and some combiner giftsets may be missing.
+  Use assortment codes when available, or `"UNKNOWN"` with `hasbro-{name}-g1` slug format.
+- 1990 Action Master codes **reuse** the same 057xx range as 1984 items. Slugs disambiguate
+  via character name (e.g., `05751-sunstreaker` vs `05751-wheeljack-action-master`).
+
 #### Fallback: web search
 
 If a tfwiki page is missing or sparse, run a web search:
@@ -146,6 +169,7 @@ If a tfwiki page is missing or sparse, run a web search:
 - Items: `"{ManufacturerName}" "{ProductCode}" third party Transformers masterpiece`
 - For manufacturer items, also search the manufacturer's official product page and fan
   databases (TFW2005.com, Seibertron.com)
+- For Hasbro product codes: search TFArchive or collector databases
 
 #### Parallel fetch for bulk requests
 
@@ -297,6 +321,90 @@ Rules:
 - NEVER use integer FK fields (`manufacturer_id`, `toy_line_id`, `character_id`,
   `character_appearance_id`).
 - For variants: set `metadata.variant_type` and `metadata.base_product_code`.
+
+### Appearance slug selection for items
+
+Choose the appearance that best matches what the physical toy depicts:
+
+| Item type | Appearance to use |
+|---|---|
+| Third-party standard (cartoon-accurate MP) | `{char}-g1-cartoon` |
+| Third-party "Toy Deco" variant | `{char}-g1-toy` |
+| Original Hasbro G1 toy (1984-1990) | `{char}-g1-toy` if it exists (livery/design divergence), else `{char}-g1-cartoon` |
+| Action Masters (non-transforming, cartoon design) | `{char}-g1-cartoon` (always, even though they're 1990 items) |
+| Legends / simplified reissues | `{char}-g1-cartoon` (depict simplified cartoon designs) |
+| Targetmaster/Powermaster reissues | Same as base item (toy is identical with added partner) |
+| Characters only animated in JP series | `{char}-jp-headmasters`, `{char}-jp-masterforce`, or `{char}-jp-victory` |
+
+**Key characters with significant toy-vs-cartoon livery differences** (always use `-g1-toy`
+for original Hasbro items):
+- Jazz (Martini racing livery), Smokescreen (#38 racing), Mirage (Gitanes F1 livery),
+  Wheeljack (Alitalia livery), Prowl (police markings), Hound (military markings),
+  Tracks (flame decals), Red Alert (fire chief markings), Inferno (fire dept markings)
+- Plus existing: Ratchet, Ironhide, Bluestreak, Megatron, Jetfire, Shockwave, Swoop,
+  Astrotrain, Ultra Magnus, Galvatron (proportions/color divergence)
+
+When adding new toy-deco third-party items, also check if the corresponding `-g1-toy`
+appearance exists — if not, create it first.
+
+### Multi-character products
+
+The schema requires exactly one `character_slug` per item. For multi-character retail
+products (cassette 2-packs, combiner giftsets):
+
+- **Cassette 2-packs**: Use the first-listed character as `character_slug`. Note the
+  second character in `metadata.notes`. Example: "Ravage & Rumble" → `character_slug: "ravage"`,
+  notes: "2-pack with Rumble"
+- **Combiner giftsets**: Use the combined form's `character_slug`. Example: Devastator
+  giftset → `character_slug: "devastator"`
+- **Slug for 2-packs**: `{code}-{char1}-and-{char2}` (e.g., `05731-ravage-and-rumble`)
+
+### Official (first-party) Hasbro/Takara items
+
+For vintage Hasbro G1 items (1984-1990):
+- `is_third_party`: always `false`
+- `size_class`: `null` (vintage G1 predated modern size classes)
+- `manufacturer_slug`: `"hasbro"` for US-market items
+- `toy_line_slug`: `"the-transformers-g1"`
+- `metadata.sub_brand`: `"The Transformers"`
+- Product codes: use Hasbro item numbers from TFArchive. When only assortment codes are
+  available, use the assortment code and note it in metadata. When no code is documented,
+  use `"UNKNOWN"` as product_code with `hasbro-{name}-g1` slug format and add
+  `"UNCERTAIN: Hasbro product code not documented in TFArchive"` to notes.
+
+### Bulk item generation with Python
+
+For generating 50+ items, write a Python script instead of hand-crafting JSON. This is
+faster and less error-prone:
+
+```python
+import json
+
+data = json.load(open('items/{mfr}/{file}.json'))
+apps = json.load(open('appearances/{file}.json'))
+app_slugs = {a['slug'] for a in apps['data']}
+
+def item(code, name, slug, char_slug, year, app_override=None, notes="", ...):
+    """Generate a single item record."""
+    app = app_override or find_best_appearance(char_slug)
+    return { "product_code": code, "name": name, ... }
+
+new_items = [
+    item("05796", "Optimus Prime", "05796-optimus-prime", "optimus-prime", 1984, ...),
+    # ... more items
+]
+
+# Verify FKs, merge, update metadata, write
+data['items'].extend(new_items)
+data['_metadata']['total_items'] = len(data['items'])
+json.dump(data, open(..., 'w'), indent=2)
+```
+
+This approach:
+1. Validates all FKs before writing (catches errors early)
+2. Handles metadata count updates automatically
+3. Inserts appearances at the right position (after cartoon counterpart)
+4. Avoids JSON formatting errors from manual editing
 
 ### Valid metadata.status values
 
@@ -507,7 +615,11 @@ globally unique across ALL files.
 - For appearances of existing characters: derive descriptions from the character's seed
   data (alt_mode, faction, character_type) and well-known design features. Do not web-fetch
   per-character — it wastes time and TFWiki articles don't contain visual descriptions.
-- tfwiki.net is the authoritative source for character/item data. Prefer it over all others.
+- **Source authority by data type**:
+  - Character data (faction, alt mode, continuity, sub-groups): **tfwiki.net**
+  - Hasbro product codes / item numbers: **TFArchive** (tfarchive.com)
+  - Third-party item data: manufacturer pages, TFW2005, Seibertron
+  - TFWiki does NOT have Hasbro stock numbers — only Takara catalog numbers
 - **TFWiki URL caveats**: Only main character page URLs work (e.g., `Optimus_Prime_(G1)`).
   Subpage paths like `/cartoon`, `/toys`, `/Generation_1` return 404. Disambiguation
   suffixes: `(G1)`, `(BW)`, `(Armada)`, `(Animated)`, `(Prime)`.
@@ -522,3 +634,16 @@ globally unique across ALL files.
   explicitly asks. The test is the contract; generated data must conform to it.
 - Never fetch authenticated URLs, never include credentials in URLs, never store raw
   fetched HTML in seed files — extract only the structured data.
+- **Hasbro G1 product code scheme**: 5-digit numbers in the 057xx range. Organized by
+  sub-line category: 057xx cars, 058xx jets, 059xx minibots/cassettes, etc. Later years
+  (1988-1990) introduced new ranges (055xx for Micromasters/Pretenders). The 1990 Action
+  Masters reuse the 057xx range from 1984 — product codes are year-scoped, not globally unique.
+- **Hasbro G1 size_class**: Always `null` for vintage items. The modern size class system
+  (Deluxe, Voyager, Leader, etc.) did not exist in 1984-1990.
+- **TFArchive year sections**: May not match actual retail availability. Product code
+  assignment year can differ from when the toy shipped (e.g., Blaster cassettes coded in
+  1985 but sold in 1986 with Season 3). Use the section year by default but correct obvious
+  discrepancies (e.g., Ratbat is unambiguously 1986).
+- **After adding items for a manufacturer**: Audit existing items from OTHER manufacturers
+  (especially third-party "Toy Deco" variants) that reference the same characters. Their
+  `character_appearance_slug` may need updating to match newly created toy appearances.
