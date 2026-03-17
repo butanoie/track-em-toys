@@ -18,6 +18,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | [E2E_AUTHENTICATION.md](E2E_AUTHENTICATION.md) | `web/e2e/login-page.spec.ts` | ✅ Implemented |
 | [E2E_PROTECTED_ROUTES.md](E2E_PROTECTED_ROUTES.md) | `web/e2e/protected-routes.spec.ts` | ✅ Implemented |
 | [E2E_SESSION.md](E2E_SESSION.md) | `web/e2e/authenticated-session.spec.ts`, `web/e2e/session-persistence.spec.ts` | ✅ Implemented |
+| [INT_SEED_INGESTION.md](INT_SEED_INGESTION.md) | `api/src/db/seed-integration.test.ts` | ✅ Implemented |
 
 ### Planned Scenarios (ML-Accelerated Roadmap)
 
