@@ -1,0 +1,2475 @@
+{
+  "_metadata": {
+    "description": "Hasbro G1 Transformers items (1984-1986) — The Transformers original toy line",
+    "generated": "2026-03-17T120000",
+    "total_items": 128,
+    "unresolved_characters": [],
+    "schema_target": "items table from migrations 011 + 013",
+    "import_instructions": [
+      "1. Ensure continuity_families, factions, sub_groups, manufacturers, toy_lines, characters, character_appearances are seeded",
+      "2. For each item: resolve manufacturer_slug, toy_line_slug, character_slug, character_appearance_slug to UUIDs",
+      "3. Insert into items table",
+      "4. metadata JSONB holds: status, variant_type, base_product_code, sub_brand, notes"
+    ],
+    "stats": {
+      "by_year": {
+        "1984": 25,
+        "1985": 45,
+        "1986": 58
+      },
+      "by_category": {
+        "Autobot Cars": 19,
+        "Minibots": 17,
+        "Decepticon Jets/Seekers": 6,
+        "Cassettes/2-packs": 5,
+        "Combiners (individuals)": 30,
+        "Combiner Giftsets": 4,
+        "Dinobots": 5,
+        "Insecticons": 3,
+        "Triple Changers": 6,
+        "Movie Heroes": 5,
+        "Decepticon Leaders": 5,
+        "Autobot Leaders/Commanders": 4,
+        "City-bots": 2,
+        "Other": 17
+      },
+      "year_range": "1984-1986"
+    },
+    "fk_convention": "slug-based — see api/db/seed/README.md",
+    "product_code_source": "Hasbro item/assortment numbers from TFArchive (tfarchive.com/toys/references/product_code_numbers.php)"
+  },
+  "items": [
+    {
+      "product_code": "05701",
+      "name": "Bumblebee",
+      "slug": "05701-bumblebee",
+      "character_slug": "bumblebee",
+      "character_appearance_slug": "bumblebee-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Mini Vehicle. Micro Change MC-04 Mini CAR Robo mold. Yellow Volkswagen Beetle"
+      }
+    },
+    {
+      "product_code": "05702",
+      "name": "Cliffjumper",
+      "slug": "05702-cliffjumper",
+      "character_slug": "cliffjumper",
+      "character_appearance_slug": "cliffjumper-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Mini Vehicle. Micro Change MC-04 Mini CAR Robo mold. Red Porsche 924 Turbo"
+      }
+    },
+    {
+      "product_code": "05703",
+      "name": "Huffer",
+      "slug": "05703-huffer",
+      "character_slug": "huffer",
+      "character_appearance_slug": "huffer-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Mini Vehicle. Micro Change MC-04 Mini CAR Robo mold. Orange semi cab"
+      }
+    },
+    {
+      "product_code": "05704",
+      "name": "Windcharger",
+      "slug": "05704-windcharger",
+      "character_slug": "windcharger",
+      "character_appearance_slug": "windcharger-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Mini Vehicle. Micro Change MC-04 Mini CAR Robo mold. Red Pontiac Firebird Trans Am"
+      }
+    },
+    {
+      "product_code": "05705",
+      "name": "Brawn",
+      "slug": "05705-brawn",
+      "character_slug": "brawn",
+      "character_appearance_slug": "brawn-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Mini Vehicle. Micro Change MC-04 Mini CAR Robo mold. Green Land Rover Defender"
+      }
+    },
+    {
+      "product_code": "05706",
+      "name": "Gears",
+      "slug": "05706-gears",
+      "character_slug": "gears",
+      "character_appearance_slug": "gears-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Mini Vehicle. Micro Change MC-04 Mini CAR Robo mold. Blue/red 4WD truck"
+      }
+    },
+    {
+      "product_code": "05731",
+      "name": "Ravage & Rumble",
+      "slug": "05731-ravage-and-rumble",
+      "character_slug": "ravage",
+      "character_appearance_slug": "ravage-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Cassette 2-pack. Micro Change Cassette molds. Includes Ravage (black jaguar) and Rumble (blue humanoid). Soundwave's cassettes"
+      }
+    },
+    {
+      "product_code": "05732",
+      "name": "Frenzy & Laserbeak",
+      "slug": "05732-frenzy-and-laserbeak",
+      "character_slug": "frenzy",
+      "character_appearance_slug": "frenzy-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Cassette 2-pack. Micro Change Cassette molds. Includes Frenzy (red/blue humanoid) and Laserbeak (red condor). Soundwave's cassettes"
+      }
+    },
+    {
+      "product_code": "05751",
+      "name": "Sunstreaker",
+      "slug": "05751-sunstreaker",
+      "character_slug": "sunstreaker",
+      "character_appearance_slug": "sunstreaker-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone Car Robot No. 03 Countach LP500S mold. Yellow Lamborghini Countach"
+      }
+    },
+    {
+      "product_code": "05752",
+      "name": "Sideswipe",
+      "slug": "05752-sideswipe",
+      "character_slug": "sideswipe",
+      "character_appearance_slug": "sideswipe-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone Car Robot No. 02 Countach LP500S mold. Red Lamborghini Countach"
+      }
+    },
+    {
+      "product_code": "05753",
+      "name": "Hound",
+      "slug": "05753-hound",
+      "character_slug": "hound",
+      "character_appearance_slug": "hound-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone 4WD Jeep mold. Green Mitsubishi J59 military jeep"
+      }
+    },
+    {
+      "product_code": "05754",
+      "name": "Mirage",
+      "slug": "05754-mirage",
+      "character_slug": "mirage",
+      "character_appearance_slug": "mirage-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone Ligier JS11 F1 mold. Blue/white Ligier Formula 1 racer"
+      }
+    },
+    {
+      "product_code": "05755",
+      "name": "Bluestreak",
+      "slug": "05755-bluestreak",
+      "character_slug": "bluestreak",
+      "character_appearance_slug": "bluestreak-g1-toy",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone Fairlady Z mold (shared with Prowl, Smokescreen). Silver/black Datsun 280ZX. Rare silver variant exists; most common release is silver-gray"
+      }
+    },
+    {
+      "product_code": "05756",
+      "name": "Prowl",
+      "slug": "05756-prowl",
+      "character_slug": "prowl",
+      "character_appearance_slug": "prowl-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone Fairlady Z mold (shared with Bluestreak, Smokescreen). Black/white Datsun 280ZX police car"
+      }
+    },
+    {
+      "product_code": "05757",
+      "name": "Jazz",
+      "slug": "05757-jazz",
+      "character_slug": "jazz",
+      "character_appearance_slug": "jazz-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone Porsche 935 mold. White Porsche 935 Turbo with Martini racing livery"
+      }
+    },
+    {
+      "product_code": "05758",
+      "name": "Ironhide",
+      "slug": "05758-ironhide",
+      "character_slug": "ironhide",
+      "character_appearance_slug": "ironhide-g1-toy",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone Onebox Cherry Vanette mold (shared with Ratchet). Red Nissan Cherry Vanette. Toy lacks a head — robot mode uses a sticker face on the windshield"
+      }
+    },
+    {
+      "product_code": "05759",
+      "name": "Ratchet",
+      "slug": "05759-ratchet",
+      "character_slug": "ratchet",
+      "character_appearance_slug": "ratchet-g1-toy",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone Onebox Cherry Vanette mold (shared with Ironhide). White/red ambulance Nissan Cherry Vanette. Toy lacks a head — same sticker-face design as Ironhide"
+      }
+    },
+    {
+      "product_code": "05760",
+      "name": "Wheeljack",
+      "slug": "05760-wheeljack",
+      "character_slug": "wheeljack",
+      "character_appearance_slug": "wheeljack-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone Lancia Stratos Turbo mold. White Lancia Stratos with Alitalia racing livery"
+      }
+    },
+    {
+      "product_code": "05761",
+      "name": "Trailbreaker",
+      "slug": "05761-trailbreaker",
+      "character_slug": "trailbreaker",
+      "character_appearance_slug": "trailbreaker-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Car. Diaclone 4WD Hilux mold. Black Toyota Hilux 4WD pickup with camper shell"
+      }
+    },
+    {
+      "product_code": "05781",
+      "name": "Starscream",
+      "slug": "05781-starscream",
+      "character_slug": "starscream",
+      "character_appearance_slug": "starscream-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Decepticon Jet. Diaclone Jet Fighter F-15 mold (shared with Thundercracker, Skywarp). Gray/red/blue F-15 Eagle"
+      }
+    },
+    {
+      "product_code": "05782",
+      "name": "Thundercracker",
+      "slug": "05782-thundercracker",
+      "character_slug": "thundercracker",
+      "character_appearance_slug": "thundercracker-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Decepticon Jet. Diaclone Jet Fighter F-15 mold (shared with Starscream, Skywarp). Blue F-15 Eagle"
+      }
+    },
+    {
+      "product_code": "05783",
+      "name": "Skywarp",
+      "slug": "05783-skywarp",
+      "character_slug": "skywarp",
+      "character_appearance_slug": "skywarp-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Decepticon Jet. Diaclone Jet Fighter F-15 mold (shared with Starscream, Thundercracker). Black/purple F-15 Eagle"
+      }
+    },
+    {
+      "product_code": "05790",
+      "name": "Soundwave",
+      "slug": "05790-soundwave",
+      "character_slug": "soundwave",
+      "character_appearance_slug": "soundwave-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Decepticon Communications. Micro Change MC-10 Cassette Man mold. Blue microcassette recorder. Includes Buzzsaw microcassette"
+      }
+    },
+    {
+      "product_code": "05793",
+      "name": "Megatron",
+      "slug": "05793-megatron",
+      "character_slug": "megatron",
+      "character_appearance_slug": "megatron-g1-toy",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Decepticon Leader. Micro Change MC-12 Gun Robo mold. Walther P-38 pistol with stock, scope, and silencer accessories"
+      }
+    },
+    {
+      "product_code": "05796",
+      "name": "Optimus Prime",
+      "slug": "05796-optimus-prime",
+      "character_slug": "optimus-prime",
+      "character_appearance_slug": "optimus-prime-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Commander. Diaclone Battle Convoy mold. Red/blue Freightliner FL86 cab-over with gray trailer, Roller scout vehicle, and accessories"
+      }
+    },
+    {
+      "product_code": "05717",
+      "name": "Devastator",
+      "slug": "05717-devastator",
+      "character_slug": "devastator",
+      "character_appearance_slug": "devastator-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Gift set containing all six Constructicons (Scrapper, Hook, Bonecrusher, Scavenger, Long Haul, Mixmaster). First combiner team in the Transformers line"
+      }
+    },
+    {
+      "product_code": "05762",
+      "name": "Skids",
+      "slug": "05762-skids",
+      "character_slug": "skids",
+      "character_appearance_slug": "skids-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Autobot Car. Diaclone Honda City Turbo mold. Blue Honda City Turbo"
+      }
+    },
+    {
+      "product_code": "05770",
+      "name": "Grimlock",
+      "slug": "05770-grimlock",
+      "character_slug": "grimlock",
+      "character_appearance_slug": "grimlock-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Dinobots Assortment 1 (05770). Diaclone Dinosaur Robo mold. Dinobot leader. Gray/gold T-Rex. Product code is assortment-level — individual Hasbro item number not documented"
+      }
+    },
+    {
+      "product_code": "05770",
+      "name": "Slag",
+      "slug": "05770-slag",
+      "character_slug": "slag",
+      "character_appearance_slug": "slag-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Dinobots Assortment 1 (05770). Diaclone Dinosaur Robo mold. Gray/red Triceratops. Product code is assortment-level"
+      }
+    },
+    {
+      "product_code": "05770",
+      "name": "Sludge",
+      "slug": "05770-sludge",
+      "character_slug": "sludge",
+      "character_appearance_slug": "sludge-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Dinobots Assortment 1 (05770). Diaclone Dinosaur Robo mold. Gray/gold Brontosaurus. Product code is assortment-level"
+      }
+    },
+    {
+      "product_code": "05771",
+      "name": "Snarl",
+      "slug": "05771-snarl",
+      "character_slug": "snarl",
+      "character_appearance_slug": "snarl-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Dinobots Assortment 2 (05771). Diaclone Dinosaur Robo mold. Gray/gold/red Stegosaurus. Product code is assortment-level"
+      }
+    },
+    {
+      "product_code": "05771",
+      "name": "Swoop",
+      "slug": "05771-swoop",
+      "character_slug": "swoop",
+      "character_appearance_slug": "swoop-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Dinobots Assortment 2 (05771). Diaclone Dinosaur Robo mold. Gray/red Pteranodon. Toy has red chest plate, cartoon is blue/gray. Product code is assortment-level"
+      }
+    },
+    {
+      "product_code": "05786",
+      "name": "Perceptor",
+      "slug": "05786-perceptor",
+      "character_slug": "perceptor",
+      "character_appearance_slug": "perceptor-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Micro Change MC-20 Microscope mold. Red/black functioning microscope. Autobot scientist"
+      }
+    },
+    {
+      "product_code": "05787",
+      "name": "Blaster",
+      "slug": "05787-blaster",
+      "character_slug": "blaster",
+      "character_appearance_slug": "blaster-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Micro Change MC-21 Cassetteman mold. Orange/yellow boombox. Autobot counterpart to Soundwave. Compatible with standard microcassette tapes"
+      }
+    },
+    {
+      "product_code": "05797",
+      "name": "Jetfire",
+      "slug": "05797-jetfire",
+      "character_slug": "jetfire",
+      "character_appearance_slug": "jetfire-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Bandai Macross VF-1S Super Valkyrie mold. White/red jet fighter. Not featured in cartoon due to Harmony Gold licensing conflict; cartoon equivalent is Skyfire with a different design"
+      }
+    },
+    {
+      "product_code": "05799",
+      "name": "Shockwave",
+      "slug": "05799-shockwave",
+      "character_slug": "shockwave",
+      "character_appearance_slug": "shockwave-g1-toy-radioshack",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "ToyCo/Astro Magnum mold. Purple laser gun with electronic light and sound. Sold through Radio Shack stores in the US as an exclusive"
+      }
+    },
+    {
+      "product_code": "05810",
+      "name": "Omega Supreme",
+      "slug": "05810-omega-supreme",
+      "character_slug": "omega-supreme",
+      "character_appearance_slug": "omega-supreme-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Toybox mold. Motorized tank/rocket base with walking robot mode. Yellow/orange/gray. One of the largest Series 2 toys"
+      }
+    },
+    {
+      "product_code": "05901",
+      "name": "Seaspray",
+      "slug": "05901-seaspray",
+      "character_slug": "seaspray",
+      "character_appearance_slug": "seaspray-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Mini Vehicle. Blue/yellow hovercraft"
+      }
+    },
+    {
+      "product_code": "05902",
+      "name": "Powerglide",
+      "slug": "05902-powerglide",
+      "character_slug": "powerglide",
+      "character_appearance_slug": "powerglide-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Mini Vehicle. Red A-10 Thunderbolt II attack plane. Only flying Minibot"
+      }
+    },
+    {
+      "product_code": "05903",
+      "name": "Warpath",
+      "slug": "05903-warpath",
+      "character_slug": "warpath",
+      "character_appearance_slug": "warpath-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Mini Vehicle. Red/maroon M551 Sheridan tank"
+      }
+    },
+    {
+      "product_code": "05904",
+      "name": "Beachcomber",
+      "slug": "05904-beachcomber",
+      "character_slug": "beachcomber",
+      "character_appearance_slug": "beachcomber-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Mini Vehicle. Blue dune buggy"
+      }
+    },
+    {
+      "product_code": "05905",
+      "name": "Cosmos",
+      "slug": "05905-cosmos",
+      "character_slug": "cosmos",
+      "character_appearance_slug": "cosmos-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Mini Vehicle. Green/yellow flying saucer. Only UFO alt-mode in G1"
+      }
+    },
+    {
+      "product_code": "05915",
+      "name": "Bonecrusher",
+      "slug": "05915-bonecrusher",
+      "character_slug": "bonecrusher",
+      "character_appearance_slug": "bonecrusher-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Constructicon. Diaclone Construction Vehicle mold. Green/purple bulldozer. Forms Devastator's left arm"
+      }
+    },
+    {
+      "product_code": "05916",
+      "name": "Scavenger",
+      "slug": "05916-scavenger",
+      "character_slug": "scavenger",
+      "character_appearance_slug": "scavenger-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Constructicon. Diaclone Construction Vehicle mold. Green/purple excavator. Forms Devastator's right arm"
+      }
+    },
+    {
+      "product_code": "05917",
+      "name": "Scrapper",
+      "slug": "05917-scrapper",
+      "character_slug": "scrapper",
+      "character_appearance_slug": "scrapper-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Constructicon leader. Diaclone Construction Vehicle mold. Green/purple front-end loader. Forms Devastator's right leg"
+      }
+    },
+    {
+      "product_code": "05918",
+      "name": "Hook",
+      "slug": "05918-hook",
+      "character_slug": "hook",
+      "character_appearance_slug": "hook-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Constructicon. Diaclone Construction Vehicle mold. Green/purple crane truck. Forms Devastator's upper torso"
+      }
+    },
+    {
+      "product_code": "05919",
+      "name": "Long Haul",
+      "slug": "05919-long-haul",
+      "character_slug": "long-haul",
+      "character_appearance_slug": "long-haul-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Constructicon. Diaclone Construction Vehicle mold. Green/purple dump truck. Forms Devastator's lower torso"
+      }
+    },
+    {
+      "product_code": "05920",
+      "name": "Mixmaster",
+      "slug": "05920-mixmaster",
+      "character_slug": "mixmaster",
+      "character_appearance_slug": "mixmaster-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Constructicon. Diaclone Construction Vehicle mold. Green/purple cement mixer truck. Forms Devastator's left leg"
+      }
+    },
+    {
+      "product_code": "05921",
+      "name": "Kickback",
+      "slug": "05921-kickback",
+      "character_slug": "kickback",
+      "character_appearance_slug": "kickback-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Insecticon. Diaclone Insector mold. Black/yellow/purple grasshopper"
+      }
+    },
+    {
+      "product_code": "05922",
+      "name": "Shrapnel",
+      "slug": "05922-shrapnel",
+      "character_slug": "shrapnel",
+      "character_appearance_slug": "shrapnel-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Insecticon leader. Diaclone Insector mold. Black/yellow/purple stag beetle"
+      }
+    },
+    {
+      "product_code": "05923",
+      "name": "Bombshell",
+      "slug": "05923-bombshell",
+      "character_slug": "bombshell",
+      "character_appearance_slug": "bombshell-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Insecticon. Diaclone Insector mold. Black/yellow/purple Japanese rhinoceros beetle. Uses cerebro-shells for mind control"
+      }
+    },
+    {
+      "product_code": "05931",
+      "name": "Twin Twist",
+      "slug": "05931-twin-twist",
+      "character_slug": "twin-twist",
+      "character_appearance_slug": "twin-twist-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Jumpstarter. Blue drill tank. Pull-back auto-transforming gimmick. Never animated in cartoon; prominent Wrecker in Marvel UK comics"
+      }
+    },
+    {
+      "product_code": "05932",
+      "name": "Topspin",
+      "slug": "05932-topspin",
+      "character_slug": "topspin",
+      "character_appearance_slug": "topspin-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Jumpstarter. White/blue space shuttle. Pull-back auto-transforming gimmick. Never animated in cartoon; prominent Wrecker in Marvel UK comics"
+      }
+    },
+    {
+      "product_code": "05933",
+      "name": "Ratbat & Frenzy",
+      "slug": "05933-ratbat-and-frenzy",
+      "character_slug": "ratbat",
+      "character_appearance_slug": "ratbat-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Cassette 2-pack. Includes Ratbat (purple bat) and Frenzy (blue humanoid, reissue). Soundwave's cassettes. Product code assigned in 1985 series but shipped 1986"
+      }
+    },
+    {
+      "product_code": "05934",
+      "name": "Rewind & Steeljaw",
+      "slug": "05934-rewind-and-steeljaw",
+      "character_slug": "rewind",
+      "character_appearance_slug": "rewind-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Cassette 2-pack. Includes Rewind (black humanoid) and Steeljaw (gold lion). Blaster's cassettes. Product code assigned in 1985 series but shipped 1986"
+      }
+    },
+    {
+      "product_code": "05935",
+      "name": "Ramhorn & Eject",
+      "slug": "05935-ramhorn-and-eject",
+      "character_slug": "ramhorn",
+      "character_appearance_slug": "ramhorn-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Cassette 2-pack. Includes Ramhorn (red rhinoceros) and Eject (blue humanoid). Blaster's cassettes. Product code assigned in 1985 series but shipped 1986"
+      }
+    },
+    {
+      "product_code": "05936",
+      "name": "Blitzwing",
+      "slug": "05936-blitzwing",
+      "character_slug": "blitzwing",
+      "character_appearance_slug": "blitzwing-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Triple Changer. Tan/purple MiG-25 jet and Type 74 tank. First wave of Triple Changers"
+      }
+    },
+    {
+      "product_code": "05937",
+      "name": "Astrotrain",
+      "slug": "05937-astrotrain",
+      "character_slug": "astrotrain",
+      "character_appearance_slug": "astrotrain-g1-toy-us",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Triple Changer. White/purple space shuttle and locomotive. US release color scheme differs from Japanese version"
+      }
+    },
+    {
+      "product_code": "05946",
+      "name": "Chop Shop",
+      "slug": "05946-chop-shop",
+      "character_slug": "chop-shop",
+      "character_appearance_slug": "chop-shop-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Deluxe Insecticon. Bandai Beetras mold. Purple/black stag beetle. Excluded from cartoon due to Takara licensing conflict with Bandai"
+      }
+    },
+    {
+      "product_code": "05947",
+      "name": "Barrage",
+      "slug": "05947-barrage",
+      "character_slug": "barrage",
+      "character_appearance_slug": "barrage-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Deluxe Insecticon. Bandai Beetras mold. Yellow/black Japanese rhinoceros beetle. Excluded from cartoon due to Takara licensing conflict"
+      }
+    },
+    {
+      "product_code": "05948",
+      "name": "Venom",
+      "slug": "05948-venom",
+      "character_slug": "venom",
+      "character_appearance_slug": "venom-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Deluxe Insecticon. Bandai Beetras mold. Green/black cicada. Excluded from cartoon due to Takara licensing conflict"
+      }
+    },
+    {
+      "product_code": "05949",
+      "name": "Ransack",
+      "slug": "05949-ransack",
+      "character_slug": "ransack",
+      "character_appearance_slug": "ransack-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Deluxe Insecticon. Bandai Beetras mold. Red/black grasshopper. Excluded from cartoon due to Takara licensing conflict"
+      }
+    },
+    {
+      "product_code": "05951",
+      "name": "Red Alert",
+      "slug": "05951-red-alert",
+      "character_slug": "red-alert",
+      "character_appearance_slug": "red-alert-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Autobot Car. Diaclone Countach LP500S mold retool (shared with Sideswipe). White/red Lamborghini Countach fire chief"
+      }
+    },
+    {
+      "product_code": "05952",
+      "name": "Grapple",
+      "slug": "05952-grapple",
+      "character_slug": "grapple",
+      "character_appearance_slug": "grapple-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Autobot Car. Diaclone Crane mold (shared with Inferno). Orange crane truck"
+      }
+    },
+    {
+      "product_code": "05953",
+      "name": "Smokescreen",
+      "slug": "05953-smokescreen",
+      "character_slug": "smokescreen",
+      "character_appearance_slug": "smokescreen-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Autobot Car. Diaclone Fairlady Z mold retool (shared with Prowl, Bluestreak). Red/blue/yellow Datsun 280ZX race car #38"
+      }
+    },
+    {
+      "product_code": "05954",
+      "name": "Inferno",
+      "slug": "05954-inferno",
+      "character_slug": "inferno",
+      "character_appearance_slug": "inferno-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Autobot Car. Diaclone Fire Engine mold (shared with Grapple). Red Mitsubishi Fuso fire engine with extending ladder"
+      }
+    },
+    {
+      "product_code": "05955",
+      "name": "Hoist",
+      "slug": "05955-hoist",
+      "character_slug": "hoist",
+      "character_appearance_slug": "hoist-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Autobot Car. Diaclone Toyota Hilux mold retool (shared with Trailbreaker). Green Toyota Hilux tow truck"
+      }
+    },
+    {
+      "product_code": "05956",
+      "name": "Tracks",
+      "slug": "05956-tracks",
+      "character_slug": "tracks",
+      "character_appearance_slug": "tracks-g1-cartoon",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 2 Autobot Car. Diaclone Corvette mold. Blue Chevrolet Corvette C3 with flying car mode"
+      }
+    },
+    {
+      "product_code": "05993",
+      "name": "Whirl",
+      "slug": "05993-whirl",
+      "character_slug": "whirl",
+      "character_appearance_slug": "whirl-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Deluxe Vehicle. Takatoku/Dorvack Bell AH-1S Cobra helicopter mold. Blue attack helicopter. Excluded from cartoon due to Takara licensing; prominent Wrecker in Marvel UK"
+      }
+    },
+    {
+      "product_code": "05994",
+      "name": "Roadbuster",
+      "slug": "05994-roadbuster",
+      "character_slug": "roadbuster",
+      "character_appearance_slug": "roadbuster-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Deluxe Vehicle. Takatoku/Dorvack VV-54AR mold. Orange/green armed 4WD buggy. Excluded from cartoon due to Takara licensing; prominent Wrecker in Marvel UK"
+      }
+    },
+    {
+      "product_code": "12501",
+      "name": "Overdrive",
+      "slug": "12501-overdrive",
+      "character_slug": "overdrive",
+      "character_appearance_slug": "overdrive-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Omnibot. Diaclone Double Changer mold. Red Ferrari 512 BB. Mail-order exclusive — not available at retail. Triple changer (car/armed car/robot)"
+      }
+    },
+    {
+      "product_code": "12502",
+      "name": "Downshift",
+      "slug": "12502-downshift",
+      "character_slug": "downshift",
+      "character_appearance_slug": "downshift-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Omnibot. Diaclone Double Changer mold. White Toyota Celica XX. Mail-order exclusive. Triple changer (car/armed car/robot)"
+      }
+    },
+    {
+      "product_code": "12503",
+      "name": "Camshaft",
+      "slug": "12503-camshaft",
+      "character_slug": "camshaft",
+      "character_appearance_slug": "camshaft-g1-toy",
+      "year_released": 1985,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Omnibot. Diaclone Double Changer mold. Silver Mazda Savanna RX-7. Mail-order exclusive. Triple changer (car/armed car/robot)"
+      }
+    },
+    {
+      "product_code": "05791",
+      "name": "Metroplex",
+      "slug": "05791-metroplex",
+      "character_slug": "metroplex",
+      "character_appearance_slug": "metroplex-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Autobot City. Triple changer: robot, city, and battle station modes. Includes Scamper, Six-Gun, and Slammer mini-vehicles. Largest Autobot in the 1986 line"
+      }
+    },
+    {
+      "product_code": "05794",
+      "name": "Galvatron",
+      "slug": "05794-galvatron",
+      "character_slug": "galvatron",
+      "character_appearance_slug": "galvatron-g1-toy",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Decepticon Leader. Gray/purple/orange triple changer: robot, laser cannon, and laser pistol. Electronic light-up cannon. Toy colors differ significantly from cartoon's purple/gray"
+      }
+    },
+    {
+      "product_code": "05795",
+      "name": "Ultra Magnus",
+      "slug": "05795-ultra-magnus",
+      "character_slug": "ultra-magnus",
+      "character_appearance_slug": "ultra-magnus-g1-toy",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Autobot City Commander. Diaclone Powered Convoy mold. White cab-over truck with blue/red car carrier armor. Inner robot is a white Optimus Prime-style figure"
+      }
+    },
+    {
+      "product_code": "05807",
+      "name": "Sky Lynx",
+      "slug": "05807-sky-lynx",
+      "character_slug": "sky-lynx",
+      "character_appearance_slug": "sky-lynx-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Autobot. Motorized walking electronics. White/blue/red space shuttle that separates into bird and lynx. Splits into two independent creatures that combine"
+      }
+    },
+    {
+      "product_code": "05815",
+      "name": "Superion",
+      "slug": "05815-superion",
+      "character_slug": "superion",
+      "character_appearance_slug": "superion-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Aerialbot combiner gift set. Contains Silverbolt, Air Raid, Skydive, Fireflight, Slingshot. First Autobot combiner team"
+      }
+    },
+    {
+      "product_code": "05816",
+      "name": "Menasor",
+      "slug": "05816-menasor",
+      "character_slug": "menasor",
+      "character_appearance_slug": "menasor-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Stunticon combiner gift set. Contains Motormaster, Dead End, Breakdown, Wildrider, Drag Strip"
+      }
+    },
+    {
+      "product_code": "05818",
+      "name": "Defensor",
+      "slug": "05818-defensor",
+      "character_slug": "defensor",
+      "character_appearance_slug": "defensor-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Protectobot combiner gift set. Contains Hot Spot, Streetwise, Blades, First Aid, Groove"
+      }
+    },
+    {
+      "product_code": "05841",
+      "name": "Air Raid",
+      "slug": "05841-air-raid",
+      "character_slug": "air-raid",
+      "character_appearance_slug": "air-raid-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Aerialbot. Black/white F-15 Eagle. Forms Superion's left leg"
+      }
+    },
+    {
+      "product_code": "05842",
+      "name": "Skydive",
+      "slug": "05842-skydive",
+      "character_slug": "skydive",
+      "character_appearance_slug": "skydive-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Aerialbot. Gray/red F-16 Fighting Falcon. Forms Superion's right leg"
+      }
+    },
+    {
+      "product_code": "05843",
+      "name": "Fireflight",
+      "slug": "05843-fireflight",
+      "character_slug": "fireflight",
+      "character_appearance_slug": "fireflight-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Aerialbot. Red/white F-4 Phantom II. Forms Superion's right arm"
+      }
+    },
+    {
+      "product_code": "05844",
+      "name": "Slingshot",
+      "slug": "05844-slingshot",
+      "character_slug": "slingshot",
+      "character_appearance_slug": "slingshot-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Aerialbot. White AV-8B Harrier II. Forms Superion's left arm"
+      }
+    },
+    {
+      "product_code": "05845",
+      "name": "Dead End",
+      "slug": "05845-dead-end",
+      "character_slug": "dead-end",
+      "character_appearance_slug": "dead-end-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Stunticon. Maroon Porsche 928. Forms Menasor's left leg"
+      }
+    },
+    {
+      "product_code": "05846",
+      "name": "Breakdown",
+      "slug": "05846-breakdown",
+      "character_slug": "breakdown",
+      "character_appearance_slug": "breakdown-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Stunticon. White Lamborghini Countach. Forms Menasor's right leg"
+      }
+    },
+    {
+      "product_code": "05847",
+      "name": "Wildrider",
+      "slug": "05847-wildrider",
+      "character_slug": "wildrider",
+      "character_appearance_slug": "wildrider-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Stunticon. Gray Ferrari 308 GTB. Forms Menasor's left arm"
+      }
+    },
+    {
+      "product_code": "05848",
+      "name": "Drag Strip",
+      "slug": "05848-drag-strip",
+      "character_slug": "drag-strip",
+      "character_appearance_slug": "drag-strip-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Stunticon. Yellow Tyrrell P34 F1 race car. Forms Menasor's right arm"
+      }
+    },
+    {
+      "product_code": "05849",
+      "name": "Brawl",
+      "slug": "05849-brawl",
+      "character_slug": "brawl",
+      "character_appearance_slug": "brawl-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Combaticon. Green Leopard 1 tank. Forms Bruticus's left leg"
+      }
+    },
+    {
+      "product_code": "05850",
+      "name": "Swindle",
+      "slug": "05850-swindle",
+      "character_slug": "swindle",
+      "character_appearance_slug": "swindle-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Combaticon. Tan FMC XR311 jeep. Forms Bruticus's right leg"
+      }
+    },
+    {
+      "product_code": "05851",
+      "name": "Blast Off",
+      "slug": "05851-blast-off",
+      "character_slug": "blast-off",
+      "character_appearance_slug": "blast-off-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Combaticon. Brown space shuttle. Forms Bruticus's right arm"
+      }
+    },
+    {
+      "product_code": "05852",
+      "name": "Vortex",
+      "slug": "05852-vortex",
+      "character_slug": "vortex",
+      "character_appearance_slug": "vortex-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Combaticon. Gray/purple UH-60 Black Hawk helicopter. Forms Bruticus's left arm"
+      }
+    },
+    {
+      "product_code": "05853",
+      "name": "Streetwise",
+      "slug": "05853-streetwise",
+      "character_slug": "streetwise",
+      "character_appearance_slug": "streetwise-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Protectobot. White/red Nissan 300ZX police car. Forms Defensor's left leg"
+      }
+    },
+    {
+      "product_code": "05854",
+      "name": "Groove",
+      "slug": "05854-groove",
+      "character_slug": "groove",
+      "character_appearance_slug": "groove-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Protectobot. White/gold police motorcycle. Forms Defensor's right leg"
+      }
+    },
+    {
+      "product_code": "05855",
+      "name": "Blades",
+      "slug": "05855-blades",
+      "character_slug": "blades",
+      "character_appearance_slug": "blades-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Protectobot. Red/white rescue helicopter. Forms Defensor's right arm"
+      }
+    },
+    {
+      "product_code": "05856",
+      "name": "First Aid",
+      "slug": "05856-first-aid",
+      "character_slug": "first-aid",
+      "character_appearance_slug": "first-aid-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Protectobot. White Toyota Town Ace ambulance. Forms Defensor's left arm"
+      }
+    },
+    {
+      "product_code": "05857",
+      "name": "Hot Rod",
+      "slug": "05857-hot-rod",
+      "character_slug": "hot-rod",
+      "character_appearance_slug": "hot-rod-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Transformers: The Movie hero. Red/orange/yellow futuristic sports car with engine-block exhaust pipes. Becomes Rodimus Prime in the film"
+      }
+    },
+    {
+      "product_code": "05858",
+      "name": "Rodimus Prime",
+      "slug": "05858-rodimus-prime",
+      "character_slug": "rodimus-prime",
+      "character_appearance_slug": "rodimus-prime-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Autobot Leader. Red/orange/gray Winnebago-style futuristic RV. Hot Rod's evolved form after receiving the Matrix of Leadership"
+      }
+    },
+    {
+      "product_code": "05860",
+      "name": "Blurr",
+      "slug": "05860-blurr",
+      "character_slug": "blurr",
+      "character_appearance_slug": "blurr-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Transformers: The Movie. Blue futuristic Cybertronian hovercar. Fastest Autobot. Voiced by John Moschitta Jr"
+      }
+    },
+    {
+      "product_code": "05861",
+      "name": "Kup",
+      "slug": "05861-kup",
+      "character_slug": "kup",
+      "character_appearance_slug": "kup-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Transformers: The Movie. Teal/gray futuristic pickup truck. Veteran Autobot warrior"
+      }
+    },
+    {
+      "product_code": "05862",
+      "name": "Silverbolt",
+      "slug": "05862-silverbolt",
+      "character_slug": "silverbolt",
+      "character_appearance_slug": "silverbolt-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Aerialbot leader. White Concorde. Forms Superion's torso. Afraid of heights despite being a jet"
+      }
+    },
+    {
+      "product_code": "05863",
+      "name": "Motormaster",
+      "slug": "05863-motormaster",
+      "character_slug": "motormaster",
+      "character_appearance_slug": "motormaster-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Stunticon leader. Black Kenworth K100 semi-truck. Forms Menasor's torso. Rival of Optimus Prime"
+      }
+    },
+    {
+      "product_code": "05864",
+      "name": "Onslaught",
+      "slug": "05864-onslaught",
+      "character_slug": "onslaught",
+      "character_appearance_slug": "onslaught-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Combaticon leader. Blue/green anti-aircraft truck. Forms Bruticus's torso"
+      }
+    },
+    {
+      "product_code": "05865",
+      "name": "Hot Spot",
+      "slug": "05865-hot-spot",
+      "character_slug": "hot-spot",
+      "character_appearance_slug": "hot-spot-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Protectobot leader. Blue fire engine. Forms Defensor's torso"
+      }
+    },
+    {
+      "product_code": "05878",
+      "name": "Wreck-Gar",
+      "slug": "05878-wreck-gar",
+      "character_slug": "wreck-gar",
+      "character_appearance_slug": "wreck-gar-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Transformers: The Movie. Orange/brown motorcycle. Junkion leader. Speaks in TV quotes. Voiced by Eric Idle"
+      }
+    },
+    {
+      "product_code": "05906",
+      "name": "Wheelie",
+      "slug": "05906-wheelie",
+      "character_slug": "wheelie",
+      "character_appearance_slug": "wheelie-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Transformers: The Movie. Orange futuristic car. Speaks in rhyming couplets. Mini Vehicle size class"
+      }
+    },
+    {
+      "product_code": "05907",
+      "name": "Outback",
+      "slug": "05907-outback",
+      "character_slug": "outback",
+      "character_appearance_slug": "outback-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Mini Vehicle. Tan/brown Land Rover Defender retool (Brawn remold)"
+      }
+    },
+    {
+      "product_code": "05908",
+      "name": "Tailgate",
+      "slug": "05908-tailgate",
+      "character_slug": "tailgate",
+      "character_appearance_slug": "tailgate-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Mini Vehicle. White Pontiac Firebird Trans Am retool (Windcharger remold)"
+      }
+    },
+    {
+      "product_code": "05909",
+      "name": "Hubcap",
+      "slug": "05909-hubcap",
+      "character_slug": "hubcap",
+      "character_appearance_slug": "hubcap-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Mini Vehicle. Yellow Volkswagen Beetle retool (Bumblebee remold). Often confused with Bumblebee due to similar color and mold"
+      }
+    },
+    {
+      "product_code": "05910",
+      "name": "Pipes",
+      "slug": "05910-pipes",
+      "character_slug": "pipes",
+      "character_appearance_slug": "pipes-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Mini Vehicle. Blue semi cab retool (Huffer remold)"
+      }
+    },
+    {
+      "product_code": "05911",
+      "name": "Swerve",
+      "slug": "05911-swerve",
+      "character_slug": "swerve",
+      "character_appearance_slug": "swerve-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Mini Vehicle. Red 4WD truck retool (Gears remold)"
+      }
+    },
+    {
+      "product_code": "05926",
+      "name": "Runabout",
+      "slug": "05926-runabout",
+      "character_slug": "runabout",
+      "character_appearance_slug": "runabout-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Battlecharger. Black Lotus Esprit. Pull-back auto-transforming gimmick"
+      }
+    },
+    {
+      "product_code": "05927",
+      "name": "Runamuck",
+      "slug": "05927-runamuck",
+      "character_slug": "runamuck",
+      "character_appearance_slug": "runamuck-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Battlecharger. White Lotus Esprit. Pull-back auto-transforming gimmick. Companion to Runabout"
+      }
+    },
+    {
+      "product_code": "05938",
+      "name": "Springer",
+      "slug": "05938-springer",
+      "character_slug": "springer",
+      "character_appearance_slug": "springer-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Autobot Triple Changer. Green/yellow armored car and helicopter. Transformers: The Movie character. Wrecker leader in comics"
+      }
+    },
+    {
+      "product_code": "05941",
+      "name": "Sandstorm",
+      "slug": "05941-sandstorm",
+      "character_slug": "sandstorm",
+      "character_appearance_slug": "sandstorm-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Autobot Triple Changer. Orange/black dune buggy and helicopter"
+      }
+    },
+    {
+      "product_code": "05942",
+      "name": "Broadside",
+      "slug": "05942-broadside",
+      "character_slug": "broadside",
+      "character_appearance_slug": "broadside-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Autobot Triple Changer. Gray/red aircraft carrier and jet fighter. Afraid of water and flying despite both alt modes"
+      }
+    },
+    {
+      "product_code": "05943",
+      "name": "Octane",
+      "slug": "05943-octane",
+      "character_slug": "octane",
+      "character_appearance_slug": "octane-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Decepticon Triple Changer. White/purple fuel tanker truck and Boeing 767 jet"
+      }
+    },
+    {
+      "product_code": "05960",
+      "name": "Razorclaw",
+      "slug": "05960-razorclaw",
+      "character_slug": "razorclaw",
+      "character_appearance_slug": "razorclaw-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Predacon leader. Black/orange/yellow lion. Forms Predaking's torso"
+      }
+    },
+    {
+      "product_code": "05961",
+      "name": "Rampage",
+      "slug": "05961-rampage",
+      "character_slug": "rampage",
+      "character_appearance_slug": "rampage-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Predacon. Red/orange tiger. Forms Predaking's right leg"
+      }
+    },
+    {
+      "product_code": "05962",
+      "name": "Divebomb",
+      "slug": "05962-divebomb",
+      "character_slug": "divebomb",
+      "character_appearance_slug": "divebomb-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Predacon. Black/orange eagle. Forms Predaking's right arm"
+      }
+    },
+    {
+      "product_code": "05963",
+      "name": "Tantrum",
+      "slug": "05963-tantrum",
+      "character_slug": "tantrum",
+      "character_appearance_slug": "tantrum-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Predacon. Red/yellow bull. Forms Predaking's left leg"
+      }
+    },
+    {
+      "product_code": "05964",
+      "name": "Headstrong",
+      "slug": "05964-headstrong",
+      "character_slug": "headstrong",
+      "character_appearance_slug": "headstrong-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Predacon. Yellow/orange rhinoceros. Forms Predaking's left arm"
+      }
+    },
+    {
+      "product_code": "05965",
+      "name": "Gnaw",
+      "slug": "05965-gnaw",
+      "character_slug": "gnaw",
+      "character_appearance_slug": "gnaw-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Sharkticon. Purple/teal shark-monster. Quintessons' foot soldiers. Transformers: The Movie"
+      }
+    },
+    {
+      "product_code": "05984",
+      "name": "Ramjet",
+      "slug": "05984-ramjet",
+      "character_slug": "ramjet",
+      "character_appearance_slug": "ramjet-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Conehead Seeker. White/black F-15 Eagle retool with conical nosecone intakes. Diaclone Jet Fighter mold variant"
+      }
+    },
+    {
+      "product_code": "05985",
+      "name": "Dirge",
+      "slug": "05985-dirge",
+      "character_slug": "dirge",
+      "character_appearance_slug": "dirge-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Conehead Seeker. Blue/tan F-15 Eagle retool with forward-swept delta wings. Engines cause fear in enemies"
+      }
+    },
+    {
+      "product_code": "05986",
+      "name": "Thrust",
+      "slug": "05986-thrust",
+      "character_slug": "thrust",
+      "character_appearance_slug": "thrust-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Conehead Seeker. Maroon/black F-15 Eagle retool with VTOL fan intakes. Loud and boastful"
+      }
+    },
+    {
+      "product_code": "05987",
+      "name": "Scourge",
+      "slug": "05987-scourge",
+      "character_slug": "scourge",
+      "character_appearance_slug": "scourge-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Transformers: The Movie. Blue/gray futuristic hovercraft. Tracker. Leader of the Sweeps. Created by Unicron from Thundercracker"
+      }
+    },
+    {
+      "product_code": "05988",
+      "name": "Cyclonus",
+      "slug": "05988-cyclonus",
+      "character_slug": "cyclonus",
+      "character_appearance_slug": "cyclonus-g1-cartoon",
+      "year_released": 1986,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Transformers: The Movie. Purple/gray futuristic space jet. Galvatron's second-in-command. Created by Unicron from Skywarp (or Bombshell — origin disputed)"
+      }
+    }
+  ]
+}

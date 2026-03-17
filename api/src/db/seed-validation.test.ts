@@ -129,6 +129,7 @@ const charFiles = CHARACTER_FILES.map((f) => ({
 
 const ITEM_FILES = [
   'items/fanstoys/fanstoys.json',
+  'items/hasbro/g1-items.json',
 ] as const
 
 const itemFiles = ITEM_FILES.map((f) => ({
