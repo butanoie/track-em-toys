@@ -104,7 +104,8 @@ CREATE TABLE public.character_appearances (
     year_end integer,
     metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT character_appearances_source_media_check CHECK ((source_media = ANY (ARRAY['TV'::text, 'Comic/Manga'::text, 'Movie'::text, 'OVA'::text, 'Toy-only'::text, 'Video Game'::text])))
 );
 
 
@@ -126,7 +127,7 @@ COMMENT ON COLUMN public.character_appearances.slug IS 'URL-safe kebab-case key,
 -- Name: COLUMN character_appearances.source_media; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.character_appearances.source_media IS 'Media type. Values: TV, Comic, Movie, OVA, Toy-only, Video Game, Manga.';
+COMMENT ON COLUMN public.character_appearances.source_media IS 'Media type. Constrained to: TV, Comic/Manga, Movie, OVA, Toy-only, Video Game.';
 
 
 --
@@ -1175,4 +1176,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('010'),
     ('011'),
     ('012'),
-    ('013');
+    ('013'),
+    ('014');

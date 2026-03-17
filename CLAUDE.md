@@ -112,16 +112,14 @@ When documenting configuration and setup:
 - Hardcoded credentials
 - Private authentication details
 
+### Documentation Accuracy ###
+- Verify file paths referenced actually exist in the repo
+- Verify code examples have correct syntax
+
 ## Shell Scripts
 - Always quote variables: `"$VAR"` not `$VAR` — unquoted variables cause word splitting and globbing bugs
 - Never use `chmod 777` or `chmod a+w` — use minimum permissions needed (e.g. `chmod 755` for executables)
 - Use `set -euo pipefail` at the top of scripts to fail fast on errors
-
-## Documentation Accuracy
-When editing `.md` files:
-- Verify file paths referenced actually exist in the repo
-- Verify code examples have correct syntax
-- Never include actual secrets — only references to `.env.example`
 
 ## Testing Requirements
 
@@ -162,8 +160,6 @@ Tests are mandatory, not optional — no code change is complete without corresp
 - Bug fixes need a regression test at the appropriate layer
 
 ## Commit Standards
-- NEVER commit unless the user explicitly says to commit — creating files, fixing bugs, or writing changelogs does NOT imply committing
-- Completing a task (e.g. "create a changelog", "add ESLint") is NOT permission to commit; wait for explicit instruction
 - Write clear, descriptive commit messages
 - Follow conventional commits format
 - Reference issue numbers when applicable
@@ -172,8 +168,6 @@ Tests are mandatory, not optional — no code change is complete without corresp
 ## Feature Development Gates
 
 These gates apply to any non-trivial feature work, whether using `/feature-dev` or working ad-hoc. Trivial changes (bug fixes, config tweaks, small additions) do not require them.
-
-**When using task tracking, gates MUST appear as explicit tasks** — not just behavioral reminders. Create gate tasks that block subsequent phases (e.g., Post-Architecture Gate blocks Implementation; Post-Review Gate blocks Summary).
 
 ### Verification Gate
 

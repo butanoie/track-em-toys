@@ -59,6 +59,7 @@ interface ItemRecord {
   slug: string
   product_code: string
   character_slug: string
+  character_appearance_slug: string | null
   manufacturer_slug: string
   toy_line_slug: string
   is_third_party: boolean
@@ -71,6 +72,24 @@ interface ItemRecord {
 interface ItemFile {
   _metadata: { total_items: number; [key: string]: unknown }
   items: ItemRecord[]
+}
+
+interface AppearanceRecord {
+  slug: string
+  name: string
+  character_slug: string
+  description: string | null
+  source_media: string | null
+  source_name: string | null
+  year_start: number | null
+  year_end: number | null
+  metadata: Record<string, unknown>
+  [key: string]: unknown
+}
+
+interface AppearanceFile {
+  _metadata: { total: number; [key: string]: unknown }
+  data: AppearanceRecord[]
 }
 
 // ─── Loaders ─────────────────────────────────────────────────────────────────
@@ -87,6 +106,10 @@ function loadItemFile(relPath: string): ItemFile {
   return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as ItemFile
 }
 
+function loadAppearanceFile(relPath: string): AppearanceFile {
+  return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as AppearanceFile
+}
+
 // ─── Load all seed data at module scope ──────────────────────────────────────
 
 const continuityFamilies = loadRef('reference/continuity_families.json')
@@ -96,16 +119,7 @@ const manufacturers = loadRef('reference/manufacturers.json')
 const toyLines = loadRef<ToyLineRecord>('reference/toy_lines.json')
 
 const CHARACTER_FILES = [
-  'characters/g1-season1.json',
-  'characters/g1-season2.json',
-  'characters/g1-movie.json',
-  'characters/g1-season3.json',
-  'characters/g1-season4.json',
-  'characters/g1-toy-only.json',
-  'characters/jp-headmasters.json',
-  'characters/jp-masterforce.json',
-  'characters/jp-victory.json',
-  'characters/jp-zone.json',
+  'characters/g1-characters.json',
 ] as const
 
 const charFiles = CHARACTER_FILES.map((f) => ({
@@ -114,12 +128,27 @@ const charFiles = CHARACTER_FILES.map((f) => ({
 }))
 
 const ITEM_FILES = [
-  'manufacturers/fanstoys/fanstoys.json',
+  'items/fanstoys/fanstoys.json',
+  'items/hasbro/g1-items.json',
 ] as const
 
 const itemFiles = ITEM_FILES.map((f) => ({
   file: f,
   ...loadItemFile(f),
+}))
+
+// Dynamically discover appearance files — no manual registration needed
+const APPEARANCES_DIR = path.join(SEED_DIR, 'appearances')
+const APPEARANCE_FILES = fs.existsSync(APPEARANCES_DIR)
+  ? fs.readdirSync(APPEARANCES_DIR)
+      .filter((f) => f.endsWith('.json'))
+      .sort()
+      .map((f) => `appearances/${f}`)
+  : []
+
+const appearanceFiles = APPEARANCE_FILES.map((f) => ({
+  file: f,
+  ...loadAppearanceFile(f),
 }))
 
 // ─── Derived lookup sets ─────────────────────────────────────────────────────
@@ -131,6 +160,7 @@ const manufacturerSlugs = new Set(manufacturers.data.map((r) => r.slug))
 const toyLineSlugs = new Set(toyLines.data.map((r) => r.slug))
 const allCharacters = charFiles.flatMap(({ characters }) => characters)
 const allCharacterSlugs = new Set(allCharacters.map((c) => c.slug))
+const allAppearanceSlugs = new Set(appearanceFiles.flatMap(({ data }) => data.map((a) => a.slug)))
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -146,6 +176,14 @@ const VALID_COMBINER_ROLES = new Set([
 const REQUIRED_CHAR_FIELDS = [
   'name', 'slug', 'franchise', 'continuity_family_slug',
   'character_type', 'is_combined_form',
+] as const
+
+const VALID_SOURCE_MEDIA = new Set([
+  'TV', 'Comic/Manga', 'Movie', 'OVA', 'Toy-only', 'Video Game',
+])
+
+const REQUIRED_APPEARANCE_FIELDS = [
+  'slug', 'name', 'character_slug', 'source_media', 'source_name',
 ] as const
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
@@ -497,6 +535,19 @@ describe('seed data validation', () => {
     )
 
     it.each(itemFiles)(
+      '$file: character_appearance_slug resolves to appearances',
+      ({ file, items }) => {
+        for (const item of items) {
+          if (item.character_appearance_slug === null) continue
+          expect(
+            allAppearanceSlugs.has(item.character_appearance_slug),
+            `${file} > "${item.name}" (${item.slug}): unknown character_appearance_slug "${item.character_appearance_slug}"`,
+          ).toBe(true)
+        }
+      },
+    )
+
+    it.each(itemFiles)(
       '$file: required item fields present',
       ({ file, items }) => {
         for (const item of items) {
@@ -523,6 +574,93 @@ describe('seed data validation', () => {
               field in item,
               `${file} > "${item.slug}": has legacy integer field "${field}" — use slug-based references`,
             ).toBe(false)
+          }
+        }
+      },
+    )
+  })
+
+  // ── 9. Character appearance seed files ────────────────────────────────
+
+  describe('character appearance seed files', () => {
+    it.each(appearanceFiles)(
+      '$file: _metadata.total matches data array length',
+      ({ file, _metadata, data }) => {
+        expect(
+          data.length,
+          `${file}: _metadata.total is ${_metadata.total} but data has ${data.length} entries`,
+        ).toBe(_metadata.total)
+      },
+    )
+
+    it.each(appearanceFiles)(
+      '$file: all appearance slugs match kebab-case format',
+      ({ file, data }) => {
+        for (const a of data) {
+          expect(SLUG_RE.test(a.slug), `${file} > "${a.name}": invalid slug "${a.slug}"`).toBe(true)
+        }
+      },
+    )
+
+    it.each(appearanceFiles)(
+      '$file: no duplicate appearance slugs within file',
+      ({ file, data }) => {
+        const seen = new Set<string>()
+        for (const a of data) {
+          expect(seen.has(a.slug), `${file}: duplicate slug "${a.slug}"`).toBe(false)
+          seen.add(a.slug)
+        }
+      },
+    )
+
+    it('no duplicate appearance slugs across all appearance files', () => {
+      const seen = new Map<string, string>()
+      for (const { file, data } of appearanceFiles) {
+        for (const a of data) {
+          const existing = seen.get(a.slug)
+          expect(
+            existing,
+            `Slug "${a.slug}" appears in both "${existing}" and "${file}"`,
+          ).toBeUndefined()
+          seen.set(a.slug, file)
+        }
+      }
+    })
+
+    it.each(appearanceFiles)(
+      '$file: character_slug resolves to characters',
+      ({ file, data }) => {
+        for (const a of data) {
+          expect(
+            allCharacterSlugs.has(a.character_slug),
+            `${file} > "${a.name}" (${a.slug}): unknown character_slug "${a.character_slug}"`,
+          ).toBe(true)
+        }
+      },
+    )
+
+    it.each(appearanceFiles)(
+      '$file: source_media is a valid value',
+      ({ file, data }) => {
+        for (const a of data) {
+          if (a.source_media === null) continue
+          expect(
+            VALID_SOURCE_MEDIA.has(a.source_media),
+            `${file} > "${a.name}" (${a.slug}): unknown source_media "${a.source_media}"`,
+          ).toBe(true)
+        }
+      },
+    )
+
+    it.each(appearanceFiles)(
+      '$file: required appearance fields present',
+      ({ file, data }) => {
+        for (const a of data) {
+          for (const field of REQUIRED_APPEARANCE_FIELDS) {
+            expect(
+              field in a,
+              `${file} > "${a.slug}": missing required field "${field}"`,
+            ).toBe(true)
           }
         }
       },
