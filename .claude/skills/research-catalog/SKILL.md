@@ -16,7 +16,7 @@ span multiple categories (e.g., "add Beast Wars characters and their appearances
 | Category | Trigger phrases | Target files |
 |---|---|---|
 | **characters** | "add X characters", "add the Stunticons", "add Beast Wars cast" | `api/db/seed/characters/{file}.json` |
-| **items** | "add X-Transbots items", "add FansToys", "add items for" | `api/db/seed/manufacturers/{mfr}/{mfr}.json` |
+| **items** | "add X-Transbots items", "add FansToys", "add items for" | `api/db/seed/items/{mfr}/{continuity-family}.json` |
 | **reference** | "add faction", "add sub-group", "add continuity family", "add manufacturer", "add toy line" | `api/db/seed/reference/{table}.json` |
 | **appearances** | "add appearances", "add character appearances", explicit "appearances" | `api/db/seed/appearances/{source}.json` |
 
@@ -69,7 +69,7 @@ for s in sorted(slugs): print(s)
 ### 2c — Load all item files
 
 ```bash
-find /Users/buta/Repos/track-em-toys/api/db/seed/manufacturers -name '*.json' -type f
+find /Users/buta/Repos/track-em-toys/api/db/seed/items -name '*.json' -type f
 ```
 
 Read every item file found. Build `existingItemSlugs` set.
@@ -261,7 +261,7 @@ Rules:
 
 ### 4c — Items format
 
-Target file: `api/db/seed/manufacturers/{manufacturer-slug}/{manufacturer-slug}.json`
+Target file: `api/db/seed/items/{manufacturer-slug}/{continuity-family}.json`
 
 Each item record:
 ```json

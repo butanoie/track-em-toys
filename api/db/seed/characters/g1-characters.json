@@ -1,7 +1,7 @@
 {
   "_metadata": {
     "description": "G1 continuity family characters — NA cartoon (S1-S4 + Movie), toy-only, and JP anime (Headmasters, Masterforce, Victory, Zone)",
-    "total_characters": 439
+    "total_characters": 440
   },
   "characters": [
     {
@@ -3797,6 +3797,20 @@
       "slug": "llyra",
       "franchise": "Transformers",
       "faction_slug": "nebulan",
+      "combined_form_slug": null,
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1"
+    },
+    {
+      "name": "Jetfire",
+      "character_type": "Transformer",
+      "alt_mode": "VF-1S Super Valkyrie fighter jet (Macross/Bandai mold)",
+      "is_combined_form": false,
+      "combiner_role": null,
+      "notes": "Bandai-licensed Macross VF-1S Valkyrie mold sold as Jetfire. Completely different design from the cartoon character Skyfire due to licensing restrictions",
+      "slug": "jetfire",
+      "franchise": "Transformers",
+      "faction_slug": "autobot",
       "combined_form_slug": null,
       "sub_group_slugs": [],
       "continuity_family_slug": "g1"
