@@ -12,366 +12,366 @@
     {
       "name": "Dinobots",
       "slug": "dinobots",
-      "franchise": "Transformers",
       "notes": "Autobot sub-team with dinosaur alt modes. Created by Wheeljack and Ratchet",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Minibots",
       "slug": "minibots",
-      "franchise": "Transformers",
       "notes": "Smaller Autobot warriors. Includes Bumblebee, Cliffjumper, Brawn, etc.",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Aerialbots",
       "slug": "aerialbots",
-      "franchise": "Transformers",
       "notes": "Autobot air team. Combine to form Superion. Created via Vector Sigma",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Protectobots",
       "slug": "protectobots",
-      "franchise": "Transformers",
       "notes": "Autobot emergency services team. Combine to form Defensor",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Technobots",
       "slug": "technobots",
-      "franchise": "Transformers",
       "notes": "Autobot scientist team. Combine to form Computron. Created by Grimlock. Introduced Season 3",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Throttlebots",
       "slug": "throttlebots",
-      "franchise": "Transformers",
       "notes": "Autobot speed team. Includes Goldbug, Chase, Freeway, etc. Introduced Season 3",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Autobot Clones",
       "slug": "autobot-clones",
-      "franchise": "Transformers",
       "notes": "Fastlane and Cloudraker. Identical robot modes, different alt modes. Introduced Season 4",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Headmasters",
       "slug": "headmasters",
-      "franchise": "Transformers",
       "notes": "Transformers who binary-bond with head partners. Both factions. In NA: Nebulan partners. In JP: small Cybertronians from planet Master",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Targetmasters",
       "slug": "targetmasters",
-      "franchise": "Transformers",
       "notes": "Transformers who binary-bond with weapon partners. Both factions. Introduced Season 4 (NA) / Headmasters E27 (JP)",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Seekers",
       "slug": "seekers",
-      "franchise": "Transformers",
       "notes": "Decepticon jet warriors. Original trio: Starscream, Skywarp, Thundercracker. Includes Coneheads and retroactively named background jets",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Constructicons",
       "slug": "constructicons",
-      "franchise": "Transformers",
       "notes": "Decepticon construction vehicle team. Combine to form Devastator. First combiner team",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Insecticons",
       "slug": "insecticons",
-      "franchise": "Transformers",
       "notes": "Decepticon insect warriors. Bombshell, Shrapnel, Kickback. Can clone themselves. See also: Deluxe Insecticons",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Stunticons",
       "slug": "stunticons",
-      "franchise": "Transformers",
       "notes": "Decepticon car team. Combine to form Menasor. Created via Vector Sigma",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Combaticons",
       "slug": "combaticons",
-      "franchise": "Transformers",
       "notes": "Decepticon military vehicle team. Combine to form Bruticus. Created by Starscream",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Triple Changers",
       "slug": "triple-changers",
-      "franchise": "Transformers",
       "notes": "Transformers with two alt modes. Decepticons (Blitzwing, Astrotrain) and Autobots (Sandstorm, Broadside, Springer)",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Predacons",
       "slug": "predacons",
-      "franchise": "Transformers",
       "notes": "Decepticon animal team. Combine to form Predaking. Introduced Season 3",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Terrorcons",
       "slug": "terrorcons",
-      "franchise": "Transformers",
       "notes": "Decepticon monster team. Combine to form Abominus. Introduced Season 3",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Seacons",
       "slug": "seacons",
-      "franchise": "Transformers",
       "notes": "Decepticon sea creature team. Combine to form Piranacon/King Poseidon. 6 members (Nautilator becomes weapon)",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Decepticon Clones",
       "slug": "decepticon-clones",
-      "franchise": "Transformers",
       "notes": "Pounce and Wingspan. Identical robot modes, different alt modes. Introduced Season 4",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Duocons",
       "slug": "duocons",
-      "franchise": "Transformers",
       "notes": "Two vehicles that combine into one robot. Battletrap and Flywheels. Introduced Season 4",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Horrorcons",
       "slug": "horrorcons",
-      "franchise": "Transformers",
       "notes": "Headmaster triple-changer Decepticons. Apeface and Snapdragon. Introduced Season 4",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Cassettes",
       "slug": "cassettes",
-      "franchise": "Transformers",
       "notes": "Microcassette Transformers. Autobot (Blaster's) and Decepticon (Soundwave/Soundblaster's). Includes combining cassettes",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Battlechargers",
       "slug": "battlechargers",
-      "franchise": "Transformers",
       "notes": "Runabout and Runamuck. Pull-back auto-transforming. Introduced Season 3",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Trainbots",
       "slug": "trainbots",
-      "franchise": "Transformers",
       "notes": "Japanese-exclusive Autobot combiner team. Six train alt modes → Raiden. Only 6-member Autobot combiner in G1. JP Headmasters",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Monsterbots",
       "slug": "monsterbots",
-      "franchise": "Transformers",
       "notes": "Autobot beast warriors. Grotusque, Doublecross, Repugnus. Called Firebots in Japan. JP Headmasters / 1987 US toy",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Pretenders",
       "slug": "pretenders",
-      "franchise": "Transformers",
       "notes": "Transformers with organic or armored outer shells. Both factions. In JP Masterforce: Autobots shrink to human size; Decepticons become monsters. 1988-1989 US toyline",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Godmasters",
       "slug": "godmasters",
-      "franchise": "Transformers",
       "notes": "JP Masterforce: Humans who merge with transtector robot bodies via engine bonding. Western equivalent: Powermasters. Both factions",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Headmaster Juniors",
       "slug": "headmaster-juniors",
-      "franchise": "Transformers",
       "notes": "JP Masterforce: Human children/teens who become Headmasters via Masterbraces. Both factions. Autobot: Shuta Go, Cab, Minerva. Decepticon: Wilder, Cancer, Bullhorn",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Brainmasters",
       "slug": "brainmasters",
-      "franchise": "Transformers",
       "notes": "JP Victory: Autobots with small partners that form the host's face. Star Saber, Blacker, Braver, Laster. Combine to form Road Caesar (minus Star Saber)",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Multiforce",
       "slug": "multiforce",
-      "franchise": "Transformers",
       "notes": "JP Victory: Six Autobots that can pair-combine with any member, or all six form Landcross. Unique pair-combining gimmick",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Breastforce",
       "slug": "breastforce",
-      "franchise": "Transformers",
       "notes": "JP Victory: Elite Decepticon team. Each has a breast animal partner that becomes a weapon. Six members combine to form Liokaiser",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Dinoforce",
       "slug": "dinoforce",
-      "franchise": "Transformers",
       "notes": "JP Victory: Decepticon Pretenders with dinosaur shells. Six members combine to form Dinoking. Bumbling comic relief. Recolored Pretender Monsters",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Rescue Patrol",
       "slug": "rescue-patrol",
-      "franchise": "Transformers",
       "notes": "JP Victory: Autobot Micromaster team. Holi (leader), Fire, Boater, Pipo. Child-like personalities",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Powered Masters",
       "slug": "powered-masters",
-      "franchise": "Transformers",
       "notes": "JP Zone: Autobot leaders with motorized gimmicks and base modes. Dai Atlas, Sonic Bomber, Roadfire. Combine to form Sky Powered",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Omnibots",
       "slug": "omnibots",
-      "franchise": "Transformers",
       "notes": "1985 mail-order Autobots. Camshaft, Downshift, Overdrive. Triple changers (car/armed car/robot). Diaclone Double Changer molds",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Powerdashers",
       "slug": "powerdashers",
-      "franchise": "Transformers",
       "notes": "1985 mail-order Autobots. Pull-back motor gimmick. Aragon, Cromar, Zetar. Names unofficial (from Diaclone)",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Deluxe Insecticons",
       "slug": "deluxe-insecticons",
-      "franchise": "Transformers",
       "notes": "1985 Decepticons. Barrage, Chop Shop, Ransack, Venom. Bandai molds — excluded from cartoon due to Takara licensing conflict",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Deluxe Vehicles",
       "slug": "deluxe-vehicles",
-      "franchise": "Transformers",
       "notes": "1985 Autobots. Roadbuster, Whirl. Takatoku/Dorvack molds — excluded from cartoon. Prominent Wreckers in Marvel UK comics",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Jumpstarters",
       "slug": "jumpstarters",
-      "franchise": "Transformers",
       "notes": "1985 Autobots. Topspin, Twin Twist. Pull-back auto-transform gimmick. Animation models exist but never used. Wreckers in comics",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Triggerbots",
       "slug": "triggerbots",
-      "franchise": "Transformers",
       "notes": "1988 Autobots. Backstreet, Dogfight, Override. Flip-out gun gimmick. Budget price point",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Triggercons",
       "slug": "triggercons",
-      "franchise": "Transformers",
       "notes": "1988 Decepticons. Crankcase, Ruckus, Windsweeper. Flip-out gun gimmick. Decepticon counterpart to Triggerbots",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Sparkabots",
       "slug": "sparkabots",
-      "franchise": "Transformers",
       "notes": "1988 Autobots. Fizzle, Guzzle, Sizzle. Friction-spark gimmick. Called Sparkler Mini-Bots on packaging",
-      "faction_slug": "autobot"
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Firecons",
       "slug": "firecons",
-      "franchise": "Transformers",
       "notes": "1988 Decepticons. Cindersaur, Flamefeather, Sparkstalker. Friction-spark gimmick. Brief cameo in JP Masterforce (non-speaking)",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Powermasters",
       "slug": "powermasters",
-      "franchise": "Transformers",
       "notes": "1988 Hasbro. Nebulan engine partners unlock transformation. Both factions. JP equivalent: Godmasters (different characters). Includes Powermaster Optimus Prime",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Double Targetmasters",
       "slug": "double-targetmasters",
-      "franchise": "Transformers",
       "notes": "1988 Hasbro. Transformers with TWO Nebulan weapon partners each. Both factions. Landfill, Quickmix, Scoop (A), Needlenose, Quake, Spinister (D)",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Pretender Beasts",
       "slug": "pretender-beasts",
-      "franchise": "Transformers",
       "notes": "1988 Hasbro. Pretenders with beast shells. Catilla, Chainclaw (A), Carnivac, Snarler (D). Carnivac is a fan-favorite Wrecker from Marvel UK",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Pretender Vehicles",
       "slug": "pretender-vehicles",
-      "franchise": "Transformers",
       "notes": "1988 Hasbro. Pretenders whose shells are driveable vehicles. Gunrunner (A), Roadgrabber (D)",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Classic Pretenders",
       "slug": "classic-pretenders",
-      "franchise": "Transformers",
       "notes": "1989 Hasbro. Simplified versions of classic characters (Bumblebee, Grimlock, Jazz, Starscream) in Pretender shells. Also sold shell-less as Legends (Kmart exclusive)",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Mega Pretenders",
       "slug": "mega-pretenders",
-      "franchise": "Transformers",
       "notes": "1989 Hasbro. Pretenders whose vehicle-mode shells also transform. Vroom, Crossblades (A), Thunderwing (D). Thunderwing is a major Marvel comics character",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Ultra Pretenders",
       "slug": "ultra-pretenders",
-      "franchise": "Transformers",
       "notes": "1989 Hasbro. Both inner robot AND outer shell transform independently. Skyhammer (A), Roadblock (D). Extremely prone to gold plastic syndrome",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     },
     {
       "name": "Pretender Monsters",
       "slug": "pretender-monsters",
-      "franchise": "Transformers",
       "notes": "1989 Decepticons. Six small Pretenders that combine to form Monstructor. JP counterpart: Dinoking (Victory, recolored with dinosaur shells). Very prone to GPS",
-      "faction_slug": "decepticon"
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Titans",
       "slug": "titans",
-      "franchise": "Transformers",
       "notes": "Giant city/base-forming Transformers. Transform into cities, battle stations, or planetary-scale bases. Includes G1 city-bots and Japanese-exclusive base-formers.",
-      "faction_slug": null
+      "faction_slug": null,
+      "franchise_slug": "transformers"
     }
   ]
 }

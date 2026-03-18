@@ -9,72 +9,72 @@
     {
       "name": "Generation 1",
       "slug": "g1",
-      "franchise": "Transformers",
       "sort_order": 10,
-      "notes": "Original 1984 continuity family. Encompasses NA cartoon (Seasons 1-4), the 1986 movie, Japanese series (Headmasters, Masterforce, Victory, Zone), G2, all comic publishers (Marvel US/UK, Dreamwave, IDW Phase 1 & 2, Skybound/Energon Universe), Binaltech, and Classics. Toy-only G1 characters also belong here."
+      "notes": "Original 1984 continuity family. Encompasses NA cartoon (Seasons 1-4), the 1986 movie, Japanese series (Headmasters, Masterforce, Victory, Zone), G2, all comic publishers (Marvel US/UK, Dreamwave, IDW Phase 1 & 2, Skybound/Energon Universe), Binaltech, and Classics. Toy-only G1 characters also belong here.",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Beast Era",
       "slug": "beast-era",
-      "franchise": "Transformers",
       "sort_order": 20,
-      "notes": "Beast Wars (1996-1999) and Beast Machines (1999-2000). Separate family because character names are reused for entirely different characters (Beast Wars Megatron is not G1 Megatron)."
+      "notes": "Beast Wars (1996-1999) and Beast Machines (1999-2000). Separate family because character names are reused for entirely different characters (Beast Wars Megatron is not G1 Megatron).",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Robots in Disguise (2001)",
       "slug": "robots-in-disguise-2001",
-      "franchise": "Transformers",
       "sort_order": 30,
-      "notes": "Car Robots (2000) / Robots in Disguise (2001). Japanese series adapted for Western audiences. Standalone continuity."
+      "notes": "Car Robots (2000) / Robots in Disguise (2001). Japanese series adapted for Western audiences. Standalone continuity.",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Unicron Trilogy",
       "slug": "unicron-trilogy",
-      "franchise": "Transformers",
       "sort_order": 40,
-      "notes": "Armada (2002-2003), Energon (2004-2005), Cybertron (2005-2006). Shared continuity across three series with distinct character designs."
+      "notes": "Armada (2002-2003), Energon (2004-2005), Cybertron (2005-2006). Shared continuity across three series with distinct character designs.",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Live-Action Movies",
       "slug": "movieverse",
-      "franchise": "Transformers",
       "sort_order": 50,
-      "notes": "Live-action film series. Bay films (2007-2017), Bumblebee (2018), Rise of the Beasts (2023). Distinct character designs per film."
+      "notes": "Live-action film series. Bay films (2007-2017), Bumblebee (2018), Rise of the Beasts (2023). Distinct character designs per film.",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Transformers Animated",
       "slug": "animated",
-      "franchise": "Transformers",
       "sort_order": 60,
-      "notes": "Transformers Animated (2007-2009). Stylized standalone continuity set in futuristic Detroit."
+      "notes": "Transformers Animated (2007-2009). Stylized standalone continuity set in futuristic Detroit.",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Aligned / Prime",
       "slug": "aligned",
-      "franchise": "Transformers",
       "sort_order": 70,
-      "notes": "Aligned continuity family. War for Cybertron / Fall of Cybertron games, Transformers Prime (2010-2013), Rescue Bots (2012-2016), Robots in Disguise 2015, and related novels."
+      "notes": "Aligned continuity family. War for Cybertron / Fall of Cybertron games, Transformers Prime (2010-2013), Rescue Bots (2012-2016), Robots in Disguise 2015, and related novels.",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Cyberverse",
       "slug": "cyberverse",
-      "franchise": "Transformers",
       "sort_order": 80,
-      "notes": "Cyberverse animated series (2018-2021). Standalone continuity blending lore from multiple prior series."
+      "notes": "Cyberverse animated series (2018-2021). Standalone continuity blending lore from multiple prior series.",
+      "franchise_slug": "transformers"
     },
     {
       "name": "EarthSpark",
       "slug": "earthspark",
-      "franchise": "Transformers",
       "sort_order": 90,
-      "notes": "Transformers: EarthSpark (2022-present). Paramount+ animated series introducing Terran characters born on Earth."
+      "notes": "Transformers: EarthSpark (2022-present). Paramount+ animated series introducing Terran characters born on Earth.",
+      "franchise_slug": "transformers"
     },
     {
       "name": "Transformers One",
       "slug": "one",
-      "franchise": "Transformers",
       "sort_order": 100,
-      "notes": "Transformers One (2024). Animated theatrical film depicting the pre-war origin of Optimus Prime and Megatron on Cybertron. Own continuity."
+      "notes": "Transformers One (2024). Animated theatrical film depicting the pre-war origin of Optimus Prime and Megatron on Cybertron. Own continuity.",
+      "franchise_slug": "transformers"
     }
   ]
 }

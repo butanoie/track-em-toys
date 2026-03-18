@@ -8,12 +8,13 @@ Tables must be seeded in dependency order:
 
 | Order | Table               | File(s)                                | References                                                                      |
 |-------|---------------------|----------------------------------------|---------------------------------------------------------------------------------|
-| 0     | continuity_families | `reference/continuity_families.json`   | —                                                                               |
-| 1     | factions            | `reference/factions.json`              | —                                                                               |
-| 2     | sub_groups          | `reference/sub_groups.json`            | factions (faction_slug)                                                         |
+| -1    | franchises          | `reference/franchises.json`            | —                                                                               |
+| 0     | continuity_families | `reference/continuity_families.json`   | franchises (franchise_slug)                                                     |
+| 1     | factions            | `reference/factions.json`              | franchises (franchise_slug)                                                     |
+| 2     | sub_groups          | `reference/sub_groups.json`            | factions (faction_slug), franchises (franchise_slug)                            |
 | 3     | manufacturers       | `reference/manufacturers.json`         | —                                                                               |
-| 4     | toy_lines           | `reference/toy_lines.json`             | manufacturers (manufacturer_slug)                                               |
-| 5     | characters          | `characters/*.json`                    | factions (faction_slug), characters (combined_form_slug), continuity_families (continuity_family_slug) |
+| 4     | toy_lines           | `reference/toy_lines.json`             | manufacturers (manufacturer_slug), franchises (franchise_slug)                  |
+| 5     | characters          | `characters/*.json`                    | factions (faction_slug), characters (combined_form_slug), continuity_families (continuity_family_slug), franchises (franchise_slug) |
 | 5b    | character_sub_groups | `characters/*.json` (sub_group_slugs) | characters, sub_groups (via sub_group_slugs array)                              |
 | 5.5   | character_appearances | `appearances/*.json`                 | characters (character_slug)                                                     |
 | 6     | items               | `items/*.json` (when added)            | manufacturers, toy_lines, characters, character_appearances (all via slugs)     |
@@ -46,7 +47,7 @@ All G1 continuity family characters live in a single file:
 
 | File | Source | Characters |
 |------|--------|-----------|
-| `g1-characters.json` | G1 family: NA cartoon (S1-S4 + Movie), toy-only, JP anime (Headmasters, Masterforce, Victory, Zone) | 439 |
+| `g1-characters.json` | G1 family: NA cartoon (S1-S4 + Movie), toy-only, JP anime (Headmasters, Masterforce, Victory, Zone) | 440 |
 
 Characters are ordered by narrative chronology (NA S1 → S2 → Movie → S3 → S4 → toy-only → JP series). No character is duplicated — each appears once at its earliest debut.
 
@@ -56,7 +57,7 @@ Characters are ordered by narrative chronology (NA S1 → S2 → Movie → S3 �
 |---|---|---|
 | `name` | `name` | |
 | `slug` | `slug` | |
-| `franchise` | `franchise` | |
+| `franchise_slug` | `franchise_id` | Resolve via `SELECT id FROM franchises WHERE slug = $1` |
 | `faction_slug` | `faction_id` | Resolve via `SELECT id FROM factions WHERE slug = $1` |
 | `character_type` | `character_type` | Species or gimmick type (see migration 012 comment) |
 | `sub_group_slugs` | `character_sub_groups` | Array of slugs → insert into junction table. Resolve each via `SELECT id FROM sub_groups WHERE slug = $1` |

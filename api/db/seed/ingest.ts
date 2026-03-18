@@ -24,10 +24,12 @@ interface ReferenceRecord {
 
 interface SubGroupRecord extends ReferenceRecord {
   faction_slug: string | null
+  franchise_slug: string
 }
 
 interface ToyLineRecord extends ReferenceRecord {
   manufacturer_slug: string
+  franchise_slug: string
 }
 
 interface ManufacturerRecord extends ReferenceRecord {
@@ -38,21 +40,26 @@ interface ManufacturerRecord extends ReferenceRecord {
   notes: string | null
 }
 
+interface FranchiseRecord extends ReferenceRecord {
+  sort_order: number | null
+  notes: string | null
+}
+
 interface ContinuityFamilyRecord extends ReferenceRecord {
-  franchise: string | null
+  franchise_slug: string
   sort_order: number | null
   notes: string | null
 }
 
 interface FactionRecord extends ReferenceRecord {
-  franchise: string | null
+  franchise_slug: string
   notes: string | null
 }
 
 interface CharacterRecord {
   name: string
   slug: string
-  franchise: string
+  franchise_slug: string
   faction_slug: string | null
   character_type: string | null
   alt_mode: string | null
@@ -183,7 +190,7 @@ function resolveOptionalSlug(
 }
 
 const SLUG_TABLES = new Set([
-  'continuity_families', 'factions', 'sub_groups',
+  'franchises', 'continuity_families', 'factions', 'sub_groups',
   'manufacturers', 'toy_lines', 'characters',
   'character_appearances',
 ])
@@ -208,22 +215,49 @@ async function buildSlugMap(
 
 // ─── Reference table upserts ────────────────────────────────────────────────
 
+async function upsertFranchises(
+  client: pg.PoolClient,
+): Promise<Map<string, string>> {
+  const file = loadJson<ReferenceFile<FranchiseRecord>>(
+    path.join(SEED_DIR, 'reference/franchises.json'),
+  )
+  for (const r of file.data) {
+    await client.query(
+      `INSERT INTO franchises (slug, name, sort_order, notes)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (slug) DO UPDATE SET
+         name = EXCLUDED.name,
+         sort_order = EXCLUDED.sort_order,
+         notes = EXCLUDED.notes`,
+      [r.slug, r.name, r.sort_order ?? null, r.notes ?? null],
+    )
+  }
+  log.info({ table: 'franchises', count: file.data.length }, 'upserted')
+  return buildSlugMap(client, 'franchises')
+}
+
 async function upsertContinuityFamilies(
   client: pg.PoolClient,
+  franchiseMap: Map<string, string>,
 ): Promise<Map<string, string>> {
   const file = loadJson<ReferenceFile<ContinuityFamilyRecord>>(
     path.join(SEED_DIR, 'reference/continuity_families.json'),
   )
   for (const r of file.data) {
+    const franchiseId = resolveSlug(
+      franchiseMap,
+      r.franchise_slug,
+      `continuity_families > "${r.slug}"`,
+    )
     await client.query(
-      `INSERT INTO continuity_families (slug, name, franchise, sort_order, notes)
+      `INSERT INTO continuity_families (slug, name, franchise_id, sort_order, notes)
        VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT (slug) DO UPDATE SET
          name = EXCLUDED.name,
-         franchise = EXCLUDED.franchise,
+         franchise_id = EXCLUDED.franchise_id,
          sort_order = EXCLUDED.sort_order,
          notes = EXCLUDED.notes`,
-      [r.slug, r.name, r.franchise ?? null, r.sort_order ?? null, r.notes ?? null],
+      [r.slug, r.name, franchiseId, r.sort_order ?? null, r.notes ?? null],
     )
   }
   log.info({ table: 'continuity_families', count: file.data.length }, 'upserted')
@@ -232,19 +266,25 @@ async function upsertContinuityFamilies(
 
 async function upsertFactions(
   client: pg.PoolClient,
+  franchiseMap: Map<string, string>,
 ): Promise<Map<string, string>> {
   const file = loadJson<ReferenceFile<FactionRecord>>(
     path.join(SEED_DIR, 'reference/factions.json'),
   )
   for (const r of file.data) {
+    const franchiseId = resolveSlug(
+      franchiseMap,
+      r.franchise_slug,
+      `factions > "${r.slug}"`,
+    )
     await client.query(
-      `INSERT INTO factions (name, slug, franchise, notes)
+      `INSERT INTO factions (name, slug, franchise_id, notes)
        VALUES ($1, $2, $3, $4)
        ON CONFLICT (slug) DO UPDATE SET
          name = EXCLUDED.name,
-         franchise = EXCLUDED.franchise,
+         franchise_id = EXCLUDED.franchise_id,
          notes = EXCLUDED.notes`,
-      [r.name, r.slug, r.franchise ?? null, r.notes ?? null],
+      [r.name, r.slug, franchiseId, r.notes ?? null],
     )
   }
   log.info({ table: 'factions', count: file.data.length }, 'upserted')
@@ -254,6 +294,7 @@ async function upsertFactions(
 async function upsertSubGroups(
   client: pg.PoolClient,
   factionMap: Map<string, string>,
+  franchiseMap: Map<string, string>,
 ): Promise<Map<string, string>> {
   const file = loadJson<ReferenceFile<SubGroupRecord>>(
     path.join(SEED_DIR, 'reference/sub_groups.json'),
@@ -264,15 +305,20 @@ async function upsertSubGroups(
       r.faction_slug,
       `sub_groups > "${r.slug}"`,
     )
+    const franchiseId = resolveSlug(
+      franchiseMap,
+      r.franchise_slug,
+      `sub_groups > "${r.slug}"`,
+    )
     await client.query(
-      `INSERT INTO sub_groups (name, slug, faction_id, franchise, notes)
+      `INSERT INTO sub_groups (name, slug, faction_id, franchise_id, notes)
        VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT (slug) DO UPDATE SET
          name = EXCLUDED.name,
          faction_id = EXCLUDED.faction_id,
-         franchise = EXCLUDED.franchise,
+         franchise_id = EXCLUDED.franchise_id,
          notes = EXCLUDED.notes`,
-      [r.name, r.slug, factionId, r.franchise ?? null, r.notes ?? null],
+      [r.name, r.slug, factionId, franchiseId, r.notes ?? null],
     )
   }
   log.info({ table: 'sub_groups', count: file.data.length }, 'upserted')
@@ -315,6 +361,7 @@ async function upsertManufacturers(
 async function upsertToyLines(
   client: pg.PoolClient,
   manufacturerMap: Map<string, string>,
+  franchiseMap: Map<string, string>,
 ): Promise<Map<string, string>> {
   const file = loadJson<ReferenceFile<ToyLineRecord>>(
     path.join(SEED_DIR, 'reference/toy_lines.json'),
@@ -325,12 +372,17 @@ async function upsertToyLines(
       r.manufacturer_slug,
       `toy_lines > "${r.slug}"`,
     )
+    const franchiseId = resolveSlug(
+      franchiseMap,
+      r.franchise_slug,
+      `toy_lines > "${r.slug}"`,
+    )
     await client.query(
-      `INSERT INTO toy_lines (name, slug, franchise, manufacturer_id, scale, description)
+      `INSERT INTO toy_lines (name, slug, franchise_id, manufacturer_id, scale, description)
        VALUES ($1, $2, $3, $4, $5, $6)
        ON CONFLICT (slug) DO UPDATE SET
          name = EXCLUDED.name,
-         franchise = EXCLUDED.franchise,
+         franchise_id = EXCLUDED.franchise_id,
          manufacturer_id = EXCLUDED.manufacturer_id,
          scale = EXCLUDED.scale,
          description = EXCLUDED.description,
@@ -338,7 +390,7 @@ async function upsertToyLines(
       [
         r.name,
         r.slug,
-        r.franchise ?? null,
+        franchiseId,
         manufacturerId,
         r.scale ?? null,
         r.description ?? null,
@@ -364,6 +416,7 @@ async function upsertCharactersPass1(
   allCharacters: CharacterRecord[],
   continuityFamilyMap: Map<string, string>,
   factionMap: Map<string, string>,
+  franchiseMap: Map<string, string>,
 ): Promise<Map<string, string>> {
   for (const c of allCharacters) {
     const continuityFamilyId = resolveSlug(
@@ -376,17 +429,22 @@ async function upsertCharactersPass1(
       c.faction_slug,
       `characters > "${c.slug}"`,
     )
+    const franchiseId = resolveSlug(
+      franchiseMap,
+      c.franchise_slug,
+      `characters > "${c.slug}"`,
+    )
     const metadata = assembleCharacterMetadata(c)
 
     await client.query(
       `INSERT INTO characters
-         (name, slug, franchise, faction_id, character_type, alt_mode,
+         (name, slug, franchise_id, faction_id, character_type, alt_mode,
           is_combined_form, combined_form_id, combiner_role,
           continuity_family_id, metadata)
        VALUES ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9, $10)
        ON CONFLICT (slug) DO UPDATE SET
          name = EXCLUDED.name,
-         franchise = EXCLUDED.franchise,
+         franchise_id = EXCLUDED.franchise_id,
          faction_id = EXCLUDED.faction_id,
          character_type = EXCLUDED.character_type,
          alt_mode = EXCLUDED.alt_mode,
@@ -399,7 +457,7 @@ async function upsertCharactersPass1(
       [
         c.name,
         c.slug,
-        c.franchise,
+        franchiseId,
         factionId,
         c.character_type ?? null,
         c.alt_mode ?? null,
@@ -610,7 +668,8 @@ async function runPurge(client: pg.PoolClient): Promise<void> {
        manufacturers,
        sub_groups,
        factions,
-       continuity_families
+       continuity_families,
+       franchises
      CASCADE`,
   )
   log.info('catalog tables truncated')
@@ -619,12 +678,15 @@ async function runPurge(client: pg.PoolClient): Promise<void> {
 // ─── Main ───────────────────────────────────────────────────────────────────
 
 async function runSeed(client: pg.PoolClient): Promise<void> {
+  // -1: Franchises (must be first — all other reference tables depend on it)
+  const franchiseMap = await upsertFranchises(client)
+
   // 0-4: Reference tables
-  const continuityFamilyMap = await upsertContinuityFamilies(client)
-  const factionMap = await upsertFactions(client)
-  const subGroupMap = await upsertSubGroups(client, factionMap)
+  const continuityFamilyMap = await upsertContinuityFamilies(client, franchiseMap)
+  const factionMap = await upsertFactions(client, franchiseMap)
+  const subGroupMap = await upsertSubGroups(client, factionMap, franchiseMap)
   const manufacturerMap = await upsertManufacturers(client)
-  const toyLineMap = await upsertToyLines(client, manufacturerMap)
+  const toyLineMap = await upsertToyLines(client, manufacturerMap, franchiseMap)
 
   // 5: Characters — load all files, then two-pass insert
   const charFiles = discoverJsonFiles(path.join(SEED_DIR, 'characters'))
@@ -640,6 +702,7 @@ async function runSeed(client: pg.PoolClient): Promise<void> {
     allCharacters,
     continuityFamilyMap,
     factionMap,
+    franchiseMap,
   )
 
   // 5b: Character sub-groups junction

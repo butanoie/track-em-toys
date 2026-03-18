@@ -125,6 +125,8 @@ When documenting configuration and setup:
 
 Tests are mandatory, not optional — no code change is complete without corresponding tests. Use the appropriate test layer for what you're testing:
 
+- Codex will review your code when you're done.
+
 ### Unit Tests (always required)
 - **What:** Pure functions, utilities, type guards, schema validation, business logic
 - **Where:** Co-located `*.test.ts` files (API: `src/**/*.test.ts`, Web: `src/**/*.test.ts`)

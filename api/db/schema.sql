@@ -162,7 +162,6 @@ CREATE TABLE public.characters (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     name text NOT NULL,
     slug text NOT NULL,
-    franchise text DEFAULT 'Transformers'::text NOT NULL,
     faction_id uuid,
     character_type text,
     alt_mode text,
@@ -172,7 +171,8 @@ CREATE TABLE public.characters (
     metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    continuity_family_id uuid NOT NULL
+    continuity_family_id uuid NOT NULL,
+    franchise_id uuid NOT NULL
 );
 
 
@@ -233,10 +233,10 @@ CREATE TABLE public.continuity_families (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     slug text NOT NULL,
     name text NOT NULL,
-    franchise text,
     sort_order integer,
     notes text,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    franchise_id uuid NOT NULL
 );
 
 
@@ -269,9 +269,9 @@ CREATE TABLE public.factions (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     name text NOT NULL,
     slug text NOT NULL,
-    franchise text,
     notes text,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    franchise_id uuid NOT NULL
 );
 
 
@@ -287,6 +287,41 @@ COMMENT ON TABLE public.factions IS 'Canonical factions/allegiances (Autobot, De
 --
 
 COMMENT ON COLUMN public.factions.slug IS 'URL-safe kebab-case key (e.g., autobot, decepticon, quintesson)';
+
+
+--
+-- Name: franchises; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.franchises (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    slug text NOT NULL,
+    name text NOT NULL,
+    sort_order integer,
+    notes text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE franchises; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.franchises IS 'Top-level franchise groupings (Transformers, G.I. Joe, etc.). The primary domain boundary for the catalog.';
+
+
+--
+-- Name: COLUMN franchises.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.franchises.slug IS 'URL-safe kebab-case key (e.g., transformers, gi-joe, star-wars).';
+
+
+--
+-- Name: COLUMN franchises.sort_order; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.franchises.sort_order IS 'Optional display sort order. Lower values appear first.';
 
 
 --
@@ -454,9 +489,9 @@ CREATE TABLE public.sub_groups (
     name text NOT NULL,
     slug text NOT NULL,
     faction_id uuid,
-    franchise text,
     notes text,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    franchise_id uuid NOT NULL
 );
 
 
@@ -482,12 +517,12 @@ CREATE TABLE public.toy_lines (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     name text NOT NULL,
     slug text NOT NULL,
-    franchise text,
     manufacturer_id uuid NOT NULL,
     scale character varying(50),
     description text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    franchise_id uuid NOT NULL
 );
 
 
@@ -609,6 +644,30 @@ ALTER TABLE ONLY public.factions
 
 ALTER TABLE ONLY public.factions
     ADD CONSTRAINT factions_slug_key UNIQUE (slug);
+
+
+--
+-- Name: franchises franchises_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.franchises
+    ADD CONSTRAINT franchises_name_key UNIQUE (name);
+
+
+--
+-- Name: franchises franchises_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.franchises
+    ADD CONSTRAINT franchises_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: franchises franchises_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.franchises
+    ADD CONSTRAINT franchises_slug_key UNIQUE (slug);
 
 
 --
@@ -810,10 +869,17 @@ CREATE INDEX idx_characters_faction ON public.characters USING btree (faction_id
 
 
 --
+-- Name: idx_characters_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_characters_franchise ON public.characters USING btree (franchise_id);
+
+
+--
 -- Name: idx_characters_name_franchise_cf; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_characters_name_franchise_cf ON public.characters USING btree (lower(name), lower(franchise), continuity_family_id);
+CREATE UNIQUE INDEX idx_characters_name_franchise_cf ON public.characters USING btree (lower(name), franchise_id, continuity_family_id);
 
 
 --
@@ -821,6 +887,20 @@ CREATE UNIQUE INDEX idx_characters_name_franchise_cf ON public.characters USING 
 --
 
 CREATE INDEX idx_characters_type ON public.characters USING btree (character_type);
+
+
+--
+-- Name: idx_continuity_families_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_continuity_families_franchise ON public.continuity_families USING btree (franchise_id);
+
+
+--
+-- Name: idx_factions_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_factions_franchise ON public.factions USING btree (franchise_id);
 
 
 --
@@ -922,10 +1002,24 @@ CREATE INDEX idx_refresh_tokens_user_id ON public.refresh_tokens USING btree (us
 
 
 --
+-- Name: idx_sub_groups_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_sub_groups_franchise ON public.sub_groups USING btree (franchise_id);
+
+
+--
 -- Name: idx_sub_groups_name_franchise; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_sub_groups_name_franchise ON public.sub_groups USING btree (lower(name), COALESCE(franchise, ''::text));
+CREATE UNIQUE INDEX idx_sub_groups_name_franchise ON public.sub_groups USING btree (lower(name), franchise_id);
+
+
+--
+-- Name: idx_toy_lines_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_toy_lines_franchise ON public.toy_lines USING btree (franchise_id);
 
 
 --
@@ -1065,6 +1159,30 @@ ALTER TABLE ONLY public.characters
 
 
 --
+-- Name: characters characters_franchise_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.characters
+    ADD CONSTRAINT characters_franchise_id_fkey FOREIGN KEY (franchise_id) REFERENCES public.franchises(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: continuity_families continuity_families_franchise_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.continuity_families
+    ADD CONSTRAINT continuity_families_franchise_id_fkey FOREIGN KEY (franchise_id) REFERENCES public.franchises(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: factions factions_franchise_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.factions
+    ADD CONSTRAINT factions_franchise_id_fkey FOREIGN KEY (franchise_id) REFERENCES public.franchises(id) ON DELETE RESTRICT;
+
+
+--
 -- Name: item_photos item_photos_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1145,6 +1263,22 @@ ALTER TABLE ONLY public.sub_groups
 
 
 --
+-- Name: sub_groups sub_groups_franchise_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sub_groups
+    ADD CONSTRAINT sub_groups_franchise_id_fkey FOREIGN KEY (franchise_id) REFERENCES public.franchises(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: toy_lines toy_lines_franchise_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.toy_lines
+    ADD CONSTRAINT toy_lines_franchise_id_fkey FOREIGN KEY (franchise_id) REFERENCES public.franchises(id) ON DELETE RESTRICT;
+
+
+--
 -- Name: toy_lines toy_lines_manufacturer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1177,4 +1311,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('011'),
     ('012'),
     ('013'),
-    ('014');
+    ('014'),
+    ('015');
