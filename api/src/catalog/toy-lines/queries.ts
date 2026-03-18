@@ -14,6 +14,11 @@ export interface ToyLineRow {
   updated_at: string
 }
 
+/**
+ * List toy lines for a franchise.
+ *
+ * @param franchiseSlug - Franchise slug filter
+ */
 export async function listToyLines(franchiseSlug: string): Promise<ToyLineRow[]> {
   const { rows } = await pool.query<ToyLineRow>(
     `SELECT tl.id, tl.name, tl.slug,
@@ -30,6 +35,12 @@ export async function listToyLines(franchiseSlug: string): Promise<ToyLineRow[]>
   return rows
 }
 
+/**
+ * Fetch a single toy line by franchise and slug.
+ *
+ * @param franchiseSlug - Franchise slug filter
+ * @param toyLineSlug - Toy line slug to look up
+ */
 export async function getToyLineBySlug(
   franchiseSlug: string,
   toyLineSlug: string,

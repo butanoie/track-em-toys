@@ -25,6 +25,9 @@ const adminRateLimitDelete = { rateLimit: { max: 5, timeWindow: '1 minute' } } a
  * Register all admin routes under the /admin prefix.
  * All routes require admin role via preHandler chain.
  * Admin writes use withTransaction (unlike catalog reads which use pool.query directly).
+ *
+ * @param fastify - Fastify instance for route registration
+ * @param _opts - Fastify plugin options (unused)
  */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function adminRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {

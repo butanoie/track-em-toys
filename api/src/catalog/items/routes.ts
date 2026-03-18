@@ -8,6 +8,11 @@ interface FranchiseParams { franchise: string }
 interface FranchiseSlugParams { franchise: string; slug: string }
 interface PaginationQuery { limit?: number; cursor?: string }
 
+/**
+ * Format an item row for list responses.
+ *
+ * @param row - Database row to format
+ */
 function formatListItem(row: ItemListRow) {
   return {
     id: row.id,
@@ -26,6 +31,11 @@ function formatListItem(row: ItemListRow) {
   }
 }
 
+/**
+ * Format an item detail for the detail response.
+ *
+ * @param detail - Item detail to format
+ */
 function formatDetail(detail: ItemDetail) {
   const { base, photos } = detail
   return {
@@ -51,6 +61,12 @@ function formatDetail(detail: ItemDetail) {
 
 const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const
 
+/**
+ * Register item catalog routes.
+ *
+ * @param fastify - Fastify instance
+ * @param _opts - Fastify plugin options (unused)
+ */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function itemRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   fastify.get<{ Params: FranchiseParams; Querystring: PaginationQuery }>(

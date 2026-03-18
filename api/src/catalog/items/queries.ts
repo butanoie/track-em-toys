@@ -57,6 +57,11 @@ export interface ListItemsParams {
   cursor: { name: string; id: string } | null
 }
 
+/**
+ * List items for a franchise with cursor pagination.
+ *
+ * @param params - Cursor-paginated list parameters
+ */
 export async function listItems(
   params: ListItemsParams,
 ): Promise<{ rows: ItemListRow[]; totalCount: number }> {
@@ -113,6 +118,12 @@ export interface ItemDetail {
   photos: PhotoRow[]
 }
 
+/**
+ * Fetch a single item by franchise and slug.
+ *
+ * @param franchiseSlug - Franchise slug filter
+ * @param itemSlug - Item slug to look up
+ */
 export async function getItemBySlug(
   franchiseSlug: string,
   itemSlug: string,

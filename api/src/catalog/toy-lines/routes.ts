@@ -6,6 +6,11 @@ import { listToyLinesSchema, getToyLineSchema } from './schemas.js'
 interface FranchiseParams { franchise: string }
 interface FranchiseSlugParams { franchise: string; slug: string }
 
+/**
+ * Format a toy line row for responses.
+ *
+ * @param row - Database row to format
+ */
 function formatToyLine(row: ToyLineRow) {
   return {
     id: row.id,
@@ -22,6 +27,12 @@ function formatToyLine(row: ToyLineRow) {
 
 const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const
 
+/**
+ * Register toy line catalog routes.
+ *
+ * @param fastify - Fastify instance
+ * @param _opts - Fastify plugin options (unused)
+ */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function toyLineRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   fastify.get<{ Params: FranchiseParams }>(

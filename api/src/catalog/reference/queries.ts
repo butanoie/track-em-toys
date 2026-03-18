@@ -12,6 +12,11 @@ export interface FactionRow {
   created_at: string
 }
 
+/**
+ * List factions for a franchise.
+ *
+ * @param franchiseSlug - Franchise slug filter
+ */
 export async function listFactions(franchiseSlug: string): Promise<FactionRow[]> {
   const { rows } = await pool.query<FactionRow>(
     `SELECT f.id, f.name, f.slug, f.notes, f.created_at
@@ -24,6 +29,12 @@ export async function listFactions(franchiseSlug: string): Promise<FactionRow[]>
   return rows
 }
 
+/**
+ * Fetch a single faction by franchise and slug.
+ *
+ * @param franchiseSlug - Franchise slug filter
+ * @param factionSlug - Faction slug to look up
+ */
 export async function getFactionBySlug(
   franchiseSlug: string,
   factionSlug: string,
@@ -52,6 +63,11 @@ export interface SubGroupRow {
   created_at: string
 }
 
+/**
+ * List sub-groups for a franchise.
+ *
+ * @param franchiseSlug - Franchise slug filter
+ */
 export async function listSubGroups(franchiseSlug: string): Promise<SubGroupRow[]> {
   const { rows } = await pool.query<SubGroupRow>(
     `SELECT sg.id, sg.name, sg.slug, sg.notes, sg.created_at,
@@ -66,6 +82,12 @@ export async function listSubGroups(franchiseSlug: string): Promise<SubGroupRow[
   return rows
 }
 
+/**
+ * Fetch a single sub-group by franchise and slug.
+ *
+ * @param franchiseSlug - Franchise slug filter
+ * @param subGroupSlug - Sub-group slug to look up
+ */
 export async function getSubGroupBySlug(
   franchiseSlug: string,
   subGroupSlug: string,
@@ -95,6 +117,11 @@ export interface ContinuityFamilyRow {
   created_at: string
 }
 
+/**
+ * List continuity families for a franchise.
+ *
+ * @param franchiseSlug - Franchise slug filter
+ */
 export async function listContinuityFamilies(franchiseSlug: string): Promise<ContinuityFamilyRow[]> {
   const { rows } = await pool.query<ContinuityFamilyRow>(
     `SELECT cf.id, cf.slug, cf.name, cf.sort_order, cf.notes, cf.created_at
@@ -107,6 +134,12 @@ export async function listContinuityFamilies(franchiseSlug: string): Promise<Con
   return rows
 }
 
+/**
+ * Fetch a single continuity family by franchise and slug.
+ *
+ * @param franchiseSlug - Franchise slug filter
+ * @param cfSlug - Continuity family slug to look up
+ */
 export async function getContinuityFamilyBySlug(
   franchiseSlug: string,
   cfSlug: string,

@@ -63,7 +63,11 @@ export const nullableSlugNameRef = {
   oneOf: [slugNameRef, { type: 'null' }],
 } as const
 
-/** Cursor-paginated list response wrapper. */
+/**
+ * Cursor-paginated list response wrapper.
+ *
+ * @param itemSchema - JSON Schema for array items
+ */
 export function cursorListResponse(itemSchema: object) {
   return {
     type: 'object',

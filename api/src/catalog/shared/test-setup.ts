@@ -47,6 +47,9 @@ vi.mock('../../auth/key-store.js', () => ({
   getPublicKeyPem: vi.fn().mockReturnValue(testPublicPem),
 }))
 
+/**
+ * Import the server module with mocked dependencies.
+ */
 export async function setupCatalogTest() {
   return import('../../server.js')
 }

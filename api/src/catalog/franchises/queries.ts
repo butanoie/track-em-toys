@@ -9,6 +9,9 @@ export interface FranchiseRow {
   created_at: string
 }
 
+/**
+ * List all franchises ordered by sort order.
+ */
 export async function listFranchises(): Promise<FranchiseRow[]> {
   const { rows } = await pool.query<FranchiseRow>(
     `SELECT id, slug, name, sort_order, notes, created_at
@@ -18,6 +21,11 @@ export async function listFranchises(): Promise<FranchiseRow[]> {
   return rows
 }
 
+/**
+ * Fetch a single franchise by slug.
+ *
+ * @param slug - Franchise slug to look up
+ */
 export async function getFranchiseBySlug(slug: string): Promise<FranchiseRow | null> {
   const { rows } = await pool.query<FranchiseRow>(
     `SELECT id, slug, name, sort_order, notes, created_at

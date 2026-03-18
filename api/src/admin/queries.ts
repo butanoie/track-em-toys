@@ -19,6 +19,8 @@ const ADMIN_USER_COLUMNS = 'id, email, display_name, avatar_url, role, deactivat
 /**
  * Escape ILIKE special characters in a search string.
  * Order matters: escape backslash first, then % and _.
+ *
+ * @param input - Raw search string to escape
  */
 function escapeIlike(input: string): string {
   return input.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
@@ -28,6 +30,8 @@ function escapeIlike(input: string): string {
  * List users with optional role and email filters.
  * Uses pool.query() directly — no transaction needed for read-only admin queries.
  * No RLS on users table; this is intentional (admin has full visibility).
+ *
+ * @param params - Filter, pagination, and sort options
  */
 export async function listAdminUsers(params: {
   role?: UserRole
@@ -72,6 +76,9 @@ export async function listAdminUsers(params: {
  * Uses FOR UPDATE to serialize concurrent mutations on the same user —
  * critical for last-admin protection (two concurrent demotions must not
  * both read count=2, pass the guard, and both commit).
+ *
+ * @param client - Database client with transaction
+ * @param userId - Target user UUID
  */
 export async function findUserForAdmin(
   client: QueryOnlyClient,
@@ -86,6 +93,10 @@ export async function findUserForAdmin(
 
 /**
  * Update a user's role. Checks rowCount to ensure the update was applied.
+ *
+ * @param client - Database client with transaction
+ * @param userId - Target user UUID
+ * @param role - New role to assign
  */
 export async function updateUserRole(
   client: QueryOnlyClient,
@@ -101,6 +112,9 @@ export async function updateUserRole(
 
 /**
  * Reactivate a deactivated user by clearing deactivated_at.
+ *
+ * @param client - Database client with transaction
+ * @param userId - Target user UUID
  */
 export async function reactivateUser(
   client: QueryOnlyClient,
@@ -119,6 +133,9 @@ export async function reactivateUser(
  *
  * ON DELETE CASCADE on oauth_accounts and refresh_tokens does NOT fire because the
  * users row is preserved as a tombstone — explicit DELETEs are required.
+ *
+ * @param client - Database client with transaction
+ * @param userId - Target user UUID
  */
 export async function gdprPurgeUser(
   client: QueryOnlyClient,
@@ -151,6 +168,8 @@ export async function gdprPurgeUser(
 /**
  * Count the number of active (non-deactivated, non-deleted) admins.
  * Used for last-admin protection before demotion.
+ *
+ * @param client - Database client with transaction
  */
 export async function countActiveAdmins(
   client: QueryOnlyClient,

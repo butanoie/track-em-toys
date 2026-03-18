@@ -30,6 +30,8 @@ export function hasRequiredRole(actual: UserRole, required: UserRole): boolean {
  * Defense-in-depth: even if an unknown role like 'superadmin' passed JWT
  * verification, ROLE_HIERARCHY[unknown] returns undefined, and
  * undefined >= 0 is false — so hasRequiredRole fails safely.
+ *
+ * @param user - JWT payload to validate
  */
 export function isRolePayload(
   user: unknown,
@@ -49,7 +51,7 @@ export function isRolePayload(
 export function requireRole(
   minRole: UserRole,
 ): (request: FastifyRequest, reply: FastifyReply) => Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/require-await -- must match Fastify preHandler async signature
+   
   return async (request: FastifyRequest, reply: FastifyReply) => {
     if (!isRolePayload(request.user)) {
       return reply.code(403).send({ error: 'Forbidden' })

@@ -25,6 +25,8 @@ export interface SearchParams {
  * Tokens are split on whitespace. Each token except the last is an exact match.
  * The last token gets :* for prefix matching. All tokens are joined with &.
  * Returns null if the input produces no valid tokens.
+ *
+ * @param input - Raw user search string
  */
 export function buildSearchTsquery(input: string): string | null {
   const tokens = input
@@ -45,6 +47,11 @@ export function buildSearchTsquery(input: string): string | null {
   return parts.join(' & ')
 }
 
+/**
+ * Full-text search across characters and items.
+ *
+ * @param params - Search query parameters
+ */
 export async function searchCatalog(
   params: SearchParams,
 ): Promise<{ rows: SearchResultRow[]; totalCount: number }> {

@@ -47,6 +47,8 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - User FKs keep their original nullability — `NOT NULL` FKs like `catalog_edits.editor_id` stay `NOT NULL` because the referenced user row always exists
 - App checks `u.deleted_at IS NOT NULL` on JOINs to display "Deleted user" instead of the scrubbed fields
 - Auth data (`refresh_tokens`, `oauth_accounts`) is hard-deleted during scrub — no need for tombstone on auth tables
+- GDPR purge must also scrub `auth_events` PII (`ip_address`, `user_agent`, `metadata`) — IP addresses and user agents are personal data under GDPR
+- **Known tech debt:** `oauth_accounts` and `refresh_tokens` have `ON DELETE CASCADE` from migrations 002/003 (pre-tombstone). These never fire since the users row is never deleted. Should be changed to `ON DELETE RESTRICT` in a future migration.
 - When adding a new table with a user FK, no special ON DELETE clause is needed (default RESTRICT is correct)
 
 ### User Roles & Authorization
@@ -66,7 +68,8 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - Admin mutation routes must block self-modification (`params.id === request.user.sub` → 403)
 - All `:id` path params must have `format: 'uuid'` in the route schema to prevent 500 from invalid UUIDs
 - Admin audit events logged to `auth_events`: `role_changed`, `account_deactivated`, `account_reactivated`, `user_purged`
-- `getUserStatusAndRole()` checks both `deactivated_at` AND `deleted_at` — returns `{ status: 'active' | 'deactivated' | 'deleted' | 'not_found', role }` in a single DB query
+- Any function that gates user access (signin, refresh, admin mutations) must check BOTH `deactivated_at` AND `deleted_at` — never assume one implies the other
+- `getUserStatusAndRole()` is the canonical function for this — returns `{ status: 'active' | 'deactivated' | 'deleted' | 'not_found', role }` in a single DB query
 - `findUserForAdmin()` uses `FOR UPDATE` to serialize concurrent mutations (critical for last-admin protection)
 - First admin user bootstrapped via CLI command: `npm run set-role -- <email> admin`
 
@@ -243,6 +246,8 @@ For any new field returned in a response:
 - Add it to the Fastify response schema with correct type (including `| null` if nullable)
 - Add it to the corresponding TypeScript interface in `src/types/index.ts`
 - Add it to `required: [...]` if always present
+- Add it to the web Zod schema in `web/src/lib/zod-schemas.ts` — Zod strips unknown keys by default, so a missing field silently disappears from the web client
+- Update all mock `User` objects in test files — search for the interface name across `*.test.ts` files
 
 ### 12. DB CHECK constraints match TypeScript unions
 

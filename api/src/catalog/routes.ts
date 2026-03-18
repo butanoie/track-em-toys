@@ -4,6 +4,12 @@ import { manufacturerRoutes } from './manufacturers/routes.js'
 import { searchRoutes } from './search/routes.js'
 import { franchiseScopedRoutes } from './franchise-scoped.js'
 
+/**
+ * Register top-level catalog routes.
+ *
+ * @param fastify - Fastify instance
+ * @param _opts - Fastify plugin options (unused)
+ */
 export async function catalogRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   // Unscoped routes
   await fastify.register(franchiseRoutes, { prefix: '/franchises' })
