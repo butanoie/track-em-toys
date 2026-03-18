@@ -118,11 +118,19 @@ Two distinct photo types with different privacy models:
 - Pre-commit hook (husky + lint-staged) auto-formats staged files on commit
 - VS Code: format-on-save enabled via `track-em-toys.code-workspace` settings
 - Root `package.json` is a tooling host only (husky + lint-staged + prettier) — NOT an npm workspace
+- `.prettierignore` does NOT auto-discover from subdirectories — per-module scripts use `--ignore-path ../.prettierignore`
+- Prettier converts regex hex escapes (e.g. `\x00`) to literal bytes — place `eslint-disable` comments directly above the `.replace()` line, not above the enclosing expression
 
 ## Build Commands
 
 See each module's CLAUDE.md for build, test, lint, and typecheck commands:
 `api/CLAUDE.md`, `web/CLAUDE.md`, `ios/CLAUDE.md`
+
+Root-level commands (run from repo root):
+
+- `npm install` — install husky + lint-staged (required once after clone)
+- `npm run format` — Prettier format entire repo
+- `npm run format:check` — Prettier check entire repo (CI mode)
 
 ## Security Guidelines for Documentation
 
