@@ -1,8 +1,9 @@
 // @ts-check
 
-import eslint from '@eslint/js'
-import tseslint from 'typescript-eslint'
-import jsdoc from 'eslint-plugin-jsdoc'
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import jsdoc from 'eslint-plugin-jsdoc';
+import prettierConfig from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
@@ -24,10 +25,13 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      '@typescript-eslint/consistent-type-assertions': ['error', {
-        assertionStyle: 'as',
-        objectLiteralTypeAssertions: 'never',
-      }],
+      '@typescript-eslint/consistent-type-assertions': [
+        'error',
+        {
+          assertionStyle: 'as',
+          objectLiteralTypeAssertions: 'never',
+        },
+      ],
 
       // Prevent void on non-Promise return values (e.g. void reply.setCookie())
       'no-void': ['error', { allowAsStatement: false }],
@@ -37,11 +41,13 @@ export default tseslint.config(
         'error',
         {
           selector: 'Literal[value=/SELECT \\*/]',
-          message: 'Use explicit column lists instead of SELECT *. This prevents future columns from leaking into typed structs.',
+          message:
+            'Use explicit column lists instead of SELECT *. This prevents future columns from leaking into typed structs.',
         },
         {
           selector: 'Literal[value=/RETURNING \\*/]',
-          message: 'Use explicit column lists instead of RETURNING *. This prevents future columns from leaking into typed structs.',
+          message:
+            'Use explicit column lists instead of RETURNING *. This prevents future columns from leaking into typed structs.',
         },
         {
           selector: 'TemplateLiteral:has(TemplateElement[value.raw=/SELECT \\*/])',
@@ -54,18 +60,24 @@ export default tseslint.config(
       ],
 
       // JSDoc — require on exported functions, not on everything
-      'jsdoc/require-jsdoc': ['warn', {
-        publicOnly: true,
-        require: {
-          FunctionDeclaration: true,
-          MethodDefinition: true,
-          ArrowFunctionExpression: false,
-          FunctionExpression: false,
+      'jsdoc/require-jsdoc': [
+        'warn',
+        {
+          publicOnly: true,
+          require: {
+            FunctionDeclaration: true,
+            MethodDefinition: true,
+            ArrowFunctionExpression: false,
+            FunctionExpression: false,
+          },
         },
-      }],
-      'jsdoc/require-description': ['warn', {
-        contexts: ['FunctionDeclaration', 'MethodDefinition'],
-      }],
+      ],
+      'jsdoc/require-description': [
+        'warn',
+        {
+          contexts: ['FunctionDeclaration', 'MethodDefinition'],
+        },
+      ],
       'jsdoc/require-param-type': 'off',
       'jsdoc/require-returns-type': 'off',
       'jsdoc/require-returns': 'off',
@@ -88,4 +100,5 @@ export default tseslint.config(
       'jsdoc/require-description': 'off',
     },
   },
-)
+  prettierConfig
+);

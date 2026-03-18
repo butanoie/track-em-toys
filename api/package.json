@@ -15,7 +15,9 @@
     "set-role": "tsx scripts/set-role.ts",
     "seed": "tsx db/seed/ingest.ts",
     "seed:purge": "tsx db/seed/ingest.ts --purge --confirm",
-    "typecheck:seed": "tsc -p tsconfig.seed.json --noEmit"
+    "typecheck:seed": "tsc -p tsconfig.seed.json --noEmit",
+    "format": "prettier --ignore-path ../.prettierignore --write .",
+    "format:check": "prettier --ignore-path ../.prettierignore --check ."
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
@@ -39,7 +41,9 @@
     "@types/pg": "^8.11.0",
     "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^10.0.1",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jsdoc": "^62.7.0",
+    "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.0",

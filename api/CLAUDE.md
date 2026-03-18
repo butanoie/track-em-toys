@@ -15,17 +15,21 @@ cd api && npm test            # Vitest + ESLint (combined)
 cd api && npm run typecheck   # tsc type-check only
 cd api && npm run lint        # ESLint only
 cd api && npm run lint:fix    # ESLint with auto-fix
+cd api && npm run format      # Prettier format all files
+cd api && npm run format:check # Prettier check (CI mode)
 ```
 
 ## Conventions
 
 ### Fastify
+
 - Plugin functions MUST be `async (fastify: FastifyInstance, _opts: object): Promise<void>`
 - ALL response schemas MUST have `additionalProperties: false` and `required: [...]`
 - Array item schemas also need `additionalProperties: false` and `required`
 - NEVER use `void` before a synchronous method call — it suppresses errors silently
 
 ### Database
+
 - PostgreSQL auto-names inline FK constraints as `{table}_{column}_fkey` — use this pattern when dropping/recreating constraints in migrations
 - NEVER use `SELECT *` or `RETURNING *` — always list explicit columns matching the TypeScript interface
 - Column lists must stay in sync with the corresponding TypeScript type in `src/types/index.ts`
@@ -43,6 +47,7 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - When changing a UNIQUE constraint, grep `ON CONFLICT` in `db/seed/ingest.ts` — the conflict target must match the new constraint exactly
 
 ### GDPR / User Deletion (Tombstone Pattern)
+
 - User "deletion" = scrub PII (`email`, `display_name`, `avatar_url`) + set `deleted_at` — the `users` row is preserved as a tombstone so all FKs remain intact
 - NEVER use `ON DELETE CASCADE` or `ON DELETE SET NULL` on user FKs — the user row is never actually deleted from the database
 - User FKs keep their original nullability — `NOT NULL` FKs like `catalog_edits.editor_id` stay `NOT NULL` because the referenced user row always exists
@@ -53,6 +58,7 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - When adding a new table with a user FK, no special ON DELETE clause is needed (default RESTRICT is correct)
 
 ### User Roles & Authorization
+
 - `users.role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'curator', 'admin'))`
 - Role is included in JWT access token claims — no DB lookup needed per request
 - `requireRole(role)` Fastify preHandler middleware enforces role checks; returns 403 if insufficient
@@ -75,18 +81,22 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - First admin user bootstrapped via CLI command: `npm run set-role -- <email> admin`
 
 ### Photo Domains
+
 Two distinct photo types:
+
 - **Catalog photos** (`item_photos`): Shared reference images, no RLS. `uploaded_by` tracks contributor for attribution. Feed ML training directly. Upload requires `curator` role.
 - **User collection photos** (future, post-ML): Private, RLS-protected. Separate table with `user_id` + RLS policy using `(SELECT current_app_user_id())`.
 - `item_photos` does NOT have RLS — this is intentional. Catalog photos are app-managed content visible to all users.
 
 ### Cookie Handling
+
 - Cookies are signed via `@fastify/cookie` with `signed: true`
 - ALWAYS read signed cookies with `request.unsignCookie(request.cookies[NAME])`
 - NEVER read `request.cookies[NAME]` directly — returns raw `s:value.hmac` wire format
 - Check `.valid === true` before using the value; `.valid === false` means tampered → 401
 
 ### OAuth / JWT Security
+
 - Provider `aud` claims MUST be normalized before comparison:
   `const audList = Array.isArray(aud) ? aud : [aud]`
 - `client_type` ('native' | 'web') is derived from the verified `aud` claim at signin, stored
@@ -96,12 +106,14 @@ Two distinct photo types:
   must permit unauthenticated access (`app.user_id = ''`) during signin
 
 ### Type Safety
+
 - NEVER use `as T` without a preceding runtime check or type guard function
 - NEVER use `as unknown as T` — write a proper type guard instead
 - Response schema nullability must match the actual return type (e.g. `string | null`, not `string`)
 - Provider claim types that may be `string | string[]` must be handled for both shapes
 
 ### Catalog API (Phase 1.5+)
+
 - Catalog routes live in `src/catalog/` with domain-scoped modules (characters/, items/, etc.)
 - Catalog queries colocate with routes (`src/catalog/characters/queries.ts`), NOT in `src/db/queries.ts`
 - Catalog reads use `pool.query()` directly — no `withTransaction`, no RLS context
@@ -121,6 +133,7 @@ Two distinct photo types:
 ## Before Writing New Code
 
 Read existing files for patterns before writing anything new:
+
 - New route handler → read `src/auth/routes.ts` for handler structure, `src/catalog/characters/routes.ts` for catalog patterns
 - New query function → read `src/db/queries.ts` for auth query patterns, `src/catalog/characters/queries.ts` for catalog patterns
 - New test file → read `src/auth/routes.test.ts` for test patterns
@@ -133,6 +146,7 @@ Match existing patterns exactly. Do not introduce new conventions.
 ## Refactoring Safety (API-Specific)
 
 In addition to the root CLAUDE.md refactoring rules:
+
 - **Never remove a Fastify hook (`preValidation`, `onRequest`, `onSend`) without understanding its purpose** — it may enforce content-type, auth, or rate limiting
 - **Never simplify `withTransaction` error handling** without verifying that security-critical writes still commit before error responses are sent
 - **Never remove or reorder cookie unsigning logic** — the `readSignedCookie` → `valid` check → use pattern is security-critical
@@ -176,7 +190,7 @@ grep -rn "additionalProperties" src/auth/schemas.ts
 Every response schema object must have `additionalProperties: false` and `required: [...]`,
 including array item schemas.
 
-### 5. No SELECT * or RETURNING *
+### 5. No SELECT _ or RETURNING _
 
 ```bash
 grep -n "SELECT \*\|RETURNING \*\|u\.\*" src/db/queries.ts
@@ -244,6 +258,7 @@ commit. If such a write exists, commit first, then return the error outside the 
 ### 11. Schema/type alignment
 
 For any new field returned in a response:
+
 - Add it to the Fastify response schema with correct type (including `| null` if nullable)
 - Add it to the corresponding TypeScript interface in `src/types/index.ts`
 - Add it to `required: [...]` if always present
@@ -327,6 +342,7 @@ Every status code the handler produces must have a schema entry, and vice versa.
 ### 20. Integration test coverage
 
 Every new route handler must have `fastify.inject()` tests covering:
+
 - Happy path, auth failure (401/403), validation failure (400), key error paths
 - Each distinct conditional branch (e.g. new user vs. existing user)
 - Non-fatal audit log failure (mock `logAuthEvent` to throw, assert success + `log.error`)
@@ -413,41 +429,45 @@ Files that commonly need updating: `api/src/types/index.ts`, `docs/diagrams/toy-
 ## Key Patterns
 
 ### Signed cookie reads
+
 ```typescript
 // CORRECT — use the readSignedCookie helper in route handlers
-const unsigned = readSignedCookie(request, COOKIE_NAME)
-if (unsigned !== null && !unsigned.valid) return reply.code(401).send({ error: 'Invalid token' })
-const value = unsigned?.value ?? null
+const unsigned = readSignedCookie(request, COOKIE_NAME);
+if (unsigned !== null && !unsigned.valid) return reply.code(401).send({ error: 'Invalid token' });
+const value = unsigned?.value ?? null;
 
 // WRONG — bypasses the helper and reads the raw s:value.hmac wire format
-const value = request.cookies[COOKIE_NAME]
+const value = request.cookies[COOKIE_NAME];
 ```
 
 ### HttpError — inside transactions only
+
 ```typescript
 // Inside withTransaction: triggers ROLLBACK + HTTP response
 await withTransaction(async (client) => {
-  const token = await queries.findToken(client, hash)
-  if (!token) throw new HttpError(401, { error: 'Invalid token' })
-})
+  const token = await queries.findToken(client, hash);
+  if (!token) throw new HttpError(401, { error: 'Invalid token' });
+});
 
 // Pre-transaction: reply directly
-if (isNetworkError(err)) return reply.code(503).send({ error: 'Service unavailable' })
+if (isNetworkError(err)) return reply.code(503).send({ error: 'Service unavailable' });
 
 // Post-COMMIT: plain Error for redaction
-throw new Error('JWT signing failed')
+throw new Error('JWT signing failed');
 ```
 
 ### HTTP side-effects outside transaction callbacks
+
 ```typescript
 // CORRECT — clear cookie AFTER withTransaction resolves (confirmed COMMIT)
 await withTransaction(async (client) => {
-  await queries.revokeRefreshToken(client, hash)
-}, userId)
-clearRefreshTokenCookie(reply) // outside callback
+  await queries.revokeRefreshToken(client, hash);
+}, userId);
+clearRefreshTokenCookie(reply); // outside callback
 ```
 
 ### Security-critical writes must commit before returning errors
+
 ```typescript
 // CORRECT — commit revocation first, then return error outside the transaction
 await withTransaction(async (client) => {
@@ -462,6 +482,7 @@ return reply.code(401).send({ error: 'Token reuse detected' })
 ```
 
 ### Atomic state mutations after async
+
 ```typescript
 // CORRECT — complete all async work first, then assign state synchronously
 const jwk = await exportJWK(publicKey)
@@ -471,82 +492,100 @@ cachedJwks = [...]
 ```
 
 ### Expiry date arithmetic
+
 ```typescript
 // CORRECT — UTC milliseconds, immune to DST transitions
-const expiresAt = new Date(Date.now() + DAYS * 24 * 60 * 60 * 1000)
+const expiresAt = new Date(Date.now() + DAYS * 24 * 60 * 60 * 1000);
 ```
 
 ### Content-Type hook — allow absent header
+
 ```typescript
 fastify.addHook('preValidation', async (request, reply) => {
-  if (request.method !== 'POST') return
-  const contentType = request.headers['content-type']
-  if (contentType === undefined) return
-  const baseType = contentType.split(';')[0]?.trim() ?? ''
-  if (baseType !== 'application/json') return reply.code(415).send({ error: '...' })
-})
+  if (request.method !== 'POST') return;
+  const contentType = request.headers['content-type'];
+  if (contentType === undefined) return;
+  const baseType = contentType.split(';')[0]?.trim() ?? '';
+  if (baseType !== 'application/json') return reply.code(415).send({ error: '...' });
+});
 ```
 
 ### User-supplied string sanitization
+
 ```typescript
 // eslint-disable-next-line no-control-regex
-return input.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, maxLen) || null
+return (
+  input
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    .trim()
+    .slice(0, maxLen) || null
+);
 ```
 
 ### Audit / logging — severity levels
+
 ```typescript
 // All auth audit log failures → log.error with event_type in message (security events)
 // Message includes event_type for fast identification and uses "will commit" (still inside transaction)
-fastify.log.error({ err: auditErr }, 'audit log failed for signin — signin will commit')
-fastify.log.error({ err: auditErr }, 'audit log failed for refresh — token rotation will commit')
-fastify.log.error({ err: auditErr }, 'audit log failed for logout — token revocation will commit')
+fastify.log.error({ err: auditErr }, 'audit log failed for signin — signin will commit');
+fastify.log.error({ err: auditErr }, 'audit log failed for refresh — token rotation will commit');
+fastify.log.error({ err: auditErr }, 'audit log failed for logout — token revocation will commit');
 
 // Operational diagnostic (not an audit catch block) → log.warn
-request.log.warn({ tokenHashPrefix, userId }, 'Logout: refresh token not found in database')
+request.log.warn({ tokenHashPrefix, userId }, 'Logout: refresh token not found in database');
 ```
 
 ### Test mocks — no double cast
+
 ```typescript
 // CORRECT — export a narrow type from source, use satisfies in tests
-export type QueryOnlyClient = Pick<PoolClient, 'query'>
-const mockClient = { query: vi.fn() } satisfies QueryOnlyClient
+export type QueryOnlyClient = Pick<PoolClient, 'query'>;
+const mockClient = { query: vi.fn() } satisfies QueryOnlyClient;
 ```
 
 ### Vitest module isolation
+
 ```typescript
-vi.resetModules()
-vi.doMock('../config.js', () => ({ config: { /* override */ } }))
-const { myFn } = await import('./module.js')
-vi.doUnmock('../config.js')
-vi.resetModules()
+vi.resetModules();
+vi.doMock('../config.js', () => ({
+  config: {
+    /* override */
+  },
+}));
+const { myFn } = await import('./module.js');
+vi.doUnmock('../config.js');
+vi.resetModules();
 ```
 
 When adding a new exported function to a module that is `vi.mock()`'d in tests, you MUST add it to every mock definition for that module — otherwise tests get `No "funcName" export is defined on the mock` runtime errors. Search: `vi.mock.*module-path` across test files.
 
 ### URL sanitization for storage
+
 ```typescript
 function sanitizeAvatarUrl(url: string): string | null {
   try {
-    const parsed = new URL(url)
-    if (parsed.protocol !== 'https:') return null
-    if (parsed.username !== '' || parsed.password !== '') return null
-    return parsed.href
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:') return null;
+    if (parsed.username !== '' || parsed.password !== '') return null;
+    return parsed.href;
   } catch {
-    return null
+    return null;
   }
 }
 ```
 
 ### Named constants for column width limits
+
 ```typescript
-const MAX_DEVICE_INFO_LENGTH = 255 // refresh_tokens.device_info VARCHAR(255)
-const deviceInfo = sanitize(rawDeviceInfo, MAX_DEVICE_INFO_LENGTH)
+const MAX_DEVICE_INFO_LENGTH = 255; // refresh_tokens.device_info VARCHAR(255)
+const deviceInfo = sanitize(rawDeviceInfo, MAX_DEVICE_INFO_LENGTH);
 ```
 
 ### Test non-null assertions
+
 ```typescript
 // CORRECT — assert before using !
-const call = logCalls.find(([, p]) => p.event_type === 'signin')
-expect(call).toBeDefined()
-expect(call![1].user_agent).toBe('Mozilla/5.0')
+const call = logCalls.find(([, p]) => p.event_type === 'signin');
+expect(call).toBeDefined();
+expect(call![1].user_agent).toBe('Mozilla/5.0');
 ```

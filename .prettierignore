@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+
+# Auto-generated files
+web/src/routeTree.gen.ts
+web/src/vite-env.d.ts
+
+# Database migrations — hand-formatted SQL with intentional alignment
+api/db/migrations/
+
+# Database schema snapshot
+api/db/schema.sql
+
+# Seed data — large structured JSON, hand-tuned formatting
+api/db/seed/
+
+# iOS — managed by Xcode, not this tooling
+ios/
+
+# Keys and certs
+*.pem
+*.p8
+.certs/
+
+# Lock files
+**/package-lock.json

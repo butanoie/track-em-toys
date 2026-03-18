@@ -1,6 +1,6 @@
 ---
 name: run-checks
-description: Run pre-submission verification checks across API and Web modules — tests, lint, typecheck, and build
+description: Run pre-submission verification checks across API and Web modules — tests, lint, typecheck, format, and build
 ---
 
 # Run Checks
@@ -22,7 +22,13 @@ npm test 2>&1 | tail -20
 # 2. TypeScript type-check
 npm run typecheck 2>&1 | tail -10
 
-# 3. Build
+# 3. TypeScript type-check
+npm run typecheck 2>&1 | tail -10
+
+# 4. Format check (Prettier)
+npm run format:check 2>&1 | tail -10
+
+# 5. Build
 npm run build 2>&1 | tail -10
 ```
 
@@ -40,7 +46,10 @@ npm run lint 2>&1 | tail -10
 # 3. TypeScript type-check
 npm run typecheck 2>&1 | tail -10
 
-# 4. Build
+# 4. Format check (Prettier)
+npm run format:check 2>&1 | tail -10
+
+# 5. Build
 npm run build 2>&1 | tail -10
 ```
 
@@ -49,10 +58,10 @@ npm run build 2>&1 | tail -10
 After running all checks, present a summary table:
 
 ```
-| Module | Tests | Lint | Typecheck | Build |
-|--------|-------|------|-----------|-------|
-| API    | ✅/❌  | ✅/❌ | ✅/❌      | ✅/❌  |
-| Web    | ✅/❌  | ✅/❌ | ✅/❌      | ✅/❌  |
+| Module | Tests | Lint | Typecheck | Format | Build |
+|--------|-------|------|-----------|--------|-------|
+| API    | ✅/❌  | ✅/❌ | ✅/❌      | ✅/❌   | ✅/❌  |
+| Web    | ✅/❌  | ✅/❌ | ✅/❌      | ✅/❌   | ✅/❌  |
 ```
 
 If any check failed, show the relevant error output below the table.
