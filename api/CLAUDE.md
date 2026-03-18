@@ -39,6 +39,7 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - Seed FK naming: JSON uses `{table}_slug` (e.g. `franchise_slug`, `faction_slug`), DB column is `{table}_id` (UUID FK). Ingest script resolves slugs to UUIDs via `resolveSlug()` maps
 - Reference tables follow the pattern: `id UUID PK, slug TEXT UNIQUE, name TEXT, sort_order INT, notes TEXT, created_at TIMESTAMPTZ` (no `updated_at`)
 - When adding a column to a reference table: add to seed JSON, record interface in `ingest.ts`, TypeScript interface in `types/index.ts`, and validation tests in `seed-validation.test.ts`
+- When changing a UNIQUE constraint, grep `ON CONFLICT` in `db/seed/ingest.ts` — the conflict target must match the new constraint exactly
 
 ### GDPR / User Deletion (Tombstone Pattern)
 - User "deletion" = scrub PII (`email`, `display_name`, `avatar_url`) + set `deleted_at` — the `users` row is preserved as a tombstone so all FKs remain intact
@@ -98,7 +99,7 @@ Two distinct photo types:
 - Cursor pagination encodes `{ v: 1, name, id }` as base64url — always include version field
 - Cursor UUID comparison uses `$N::uuid`, not text cast
 - Error responses use `reply.code(N).send({ error: '...' })` — no HttpError (no transactions)
-- All declared schema properties MUST appear in `required` arrays — Fastify's serializer silently strips unrequired null fields from responses
+- CRITICAL: Every property in a response schema's `properties` MUST appear in `required` — Fastify's fast-json-stringify silently DROPS unrequired null fields from the response body, so clients never see them
 - Count queries must have identical JOINs as data queries (minus cursor/LIMIT) to avoid inflated total_count
 - Migrations that depend on columns added by other migrations must be ordered accordingly — do not create indexes on columns that don't exist yet
 - See `docs/decisions/ADR_Catalog_API_Architecture.md` for full architecture

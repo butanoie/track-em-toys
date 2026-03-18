@@ -47,7 +47,8 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - RLS uses (SELECT current_app_user_id()) subselect wrapper for initPlan caching
 - JWT: ES256 asymmetric signing, JWKS discovery, SHA-256 refresh token hashing
 - RLS policies: always use the (SELECT ...) wrapper, never bare function calls
-- Catalog tables use UUID primary keys with a unique `slug` column for stable cross-references and URL-friendly API routes
+- Catalog tables use UUID primary keys with a `slug` column for stable cross-references and URL-friendly API routes
+- Catalog slugs are franchise-scoped: `UNIQUE(slug, franchise_id)` — NOT globally unique. Manufacturers and franchises remain globally unique.
 - Seed data (`api/db/seed/`) uses slug-based FK references — never integer IDs — to avoid fragile positional coupling
 - GDPR user deletion uses tombstone pattern: scrub PII (email, display_name, avatar_url), set `deleted_at`, keep the row so all FKs remain intact. NEVER use `ON DELETE CASCADE` or `ON DELETE SET NULL` on user FKs. App checks `deleted_at IS NOT NULL` to display "Deleted user". Phase 1.12 implements the deletion endpoint + UI.
 
