@@ -1,5 +1,5 @@
-import net from 'node:net'
-import type pg from 'pg'
+import net from 'node:net';
+import type pg from 'pg';
 import type {
   User,
   UserRole,
@@ -9,12 +9,12 @@ import type {
   OAuthProvider,
   UserResponse,
   ClientType,
-} from '../types/index.js'
+} from '../types/index.js';
 
 /** Re-export PoolClient so route helpers can accept a typed client parameter. */
-export type { PoolClient as QueriesClient } from './pool.js'
+export type { PoolClient as QueriesClient } from './pool.js';
 /** Re-export row types for use in route helpers. */
-export type { User as UserRow, OAuthAccount as OAuthAccountRow } from '../types/index.js'
+export type { User as UserRow, OAuthAccount as OAuthAccountRow } from '../types/index.js';
 
 /**
  * Minimal database client interface: only the promise-returning `query` overload.
@@ -29,12 +29,12 @@ export type { User as UserRow, OAuthAccount as OAuthAccountRow } from '../types/
 export interface QueryOnlyClient {
   query<R extends pg.QueryResultRow = pg.QueryResultRow>(
     queryTextOrConfig: string | pg.QueryConfig,
-    values?: unknown[],
-  ): Promise<pg.QueryResult<R>>
+    values?: unknown[]
+  ): Promise<pg.QueryResult<R>>;
 }
 
 /** Maximum length for user_agent stored in auth_events.user_agent VARCHAR(512). */
-const MAX_AUTH_EVENT_USER_AGENT_LENGTH = 512
+const MAX_AUTH_EVENT_USER_AGENT_LENGTH = 512;
 
 // ─── Users ───────────────────────────────────────────────────────────────────
 
@@ -44,15 +44,12 @@ const MAX_AUTH_EVENT_USER_AGENT_LENGTH = 512
  * @param client - Database client
  * @param id - User UUID
  */
-export async function findUserById(
-  client: QueryOnlyClient,
-  id: string,
-): Promise<User | null> {
+export async function findUserById(client: QueryOnlyClient, id: string): Promise<User | null> {
   const { rows } = await client.query<User>(
     'SELECT id, email, email_verified, display_name, avatar_url, role, deactivated_at, deleted_at, created_at, updated_at FROM users WHERE id = $1',
-    [id],
-  )
-  return rows[0] ?? null
+    [id]
+  );
+  return rows[0] ?? null;
 }
 
 /**
@@ -61,15 +58,12 @@ export async function findUserById(
  * @param client - Database client
  * @param email - Email address to search
  */
-export async function findUserByEmail(
-  client: QueryOnlyClient,
-  email: string,
-): Promise<User | null> {
+export async function findUserByEmail(client: QueryOnlyClient, email: string): Promise<User | null> {
   const { rows } = await client.query<User>(
     'SELECT id, email, email_verified, display_name, avatar_url, role, deactivated_at, deleted_at, created_at, updated_at FROM users WHERE LOWER(email) = LOWER($1) AND email_verified = true',
-    [email],
-  )
-  return rows[0] ?? null
+    [email]
+  );
+  return rows[0] ?? null;
 }
 
 /**
@@ -84,21 +78,21 @@ export async function findUserByEmail(
 export async function createUser(
   client: QueryOnlyClient,
   params: {
-    email: string | null
-    email_verified: boolean
-    display_name: string | null
-    avatar_url: string | null
-  },
+    email: string | null;
+    email_verified: boolean;
+    display_name: string | null;
+    avatar_url: string | null;
+  }
 ): Promise<User> {
   const { rows } = await client.query<User>(
     `INSERT INTO users (email, email_verified, display_name, avatar_url)
      VALUES (LOWER($1), $2, $3, $4)
      RETURNING id, email, email_verified, display_name, avatar_url, role, deactivated_at, deleted_at, created_at, updated_at`,
-    [params.email, params.email_verified, params.display_name, params.avatar_url],
-  )
-  const user = rows[0]
-  if (!user) throw new Error('INSERT INTO users returned no rows')
-  return user
+    [params.email, params.email_verified, params.display_name, params.avatar_url]
+  );
+  const user = rows[0];
+  if (!user) throw new Error('INSERT INTO users returned no rows');
+  return user;
 }
 
 /**
@@ -111,13 +105,13 @@ export async function createUser(
 export async function updateUserDisplayName(
   client: QueryOnlyClient,
   userId: string,
-  displayName: string,
+  displayName: string
 ): Promise<void> {
   await client.query(
     `UPDATE users SET display_name = $2, updated_at = NOW()
      WHERE id = $1 AND display_name IS NULL`,
-    [userId, displayName],
-  )
+    [userId, displayName]
+  );
 }
 
 /**
@@ -128,22 +122,19 @@ export async function updateUserDisplayName(
  * @param client - Database client
  * @param userId - User UUID
  */
-export async function setUserEmailVerified(
-  client: QueryOnlyClient,
-  userId: string,
-): Promise<void> {
+export async function setUserEmailVerified(client: QueryOnlyClient, userId: string): Promise<void> {
   await client.query(
     'UPDATE users SET email_verified = true, updated_at = NOW() WHERE id = $1 AND email_verified = false',
-    [userId],
-  )
+    [userId]
+  );
 }
 
-export type UserAccountStatus = 'active' | 'deactivated' | 'deleted' | 'not_found'
+export type UserAccountStatus = 'active' | 'deactivated' | 'deleted' | 'not_found';
 
 /** Result from getUserStatusAndRole: account status + current role (if user exists). */
 export interface UserStatusAndRole {
-  status: UserAccountStatus
-  role: UserRole | null
+  status: UserAccountStatus;
+  role: UserRole | null;
 }
 
 /**
@@ -155,19 +146,16 @@ export interface UserStatusAndRole {
  * @param client - Database client
  * @param userId - User UUID
  */
-export async function getUserStatusAndRole(
-  client: QueryOnlyClient,
-  userId: string,
-): Promise<UserStatusAndRole> {
+export async function getUserStatusAndRole(client: QueryOnlyClient, userId: string): Promise<UserStatusAndRole> {
   const { rows } = await client.query<{ role: UserRole; deactivated_at: string | null; deleted_at: string | null }>(
     'SELECT role, deactivated_at, deleted_at FROM users WHERE id = $1',
-    [userId],
-  )
-  const row = rows[0]
-  if (!row) return { status: 'not_found', role: null }
-  if (row.deleted_at !== null) return { status: 'deleted', role: row.role }
-  if (row.deactivated_at !== null) return { status: 'deactivated', role: row.role }
-  return { status: 'active', role: row.role }
+    [userId]
+  );
+  const row = rows[0];
+  if (!row) return { status: 'not_found', role: null };
+  if (row.deleted_at !== null) return { status: 'deleted', role: row.role };
+  if (row.deactivated_at !== null) return { status: 'deactivated', role: row.role };
+  return { status: 'active', role: row.role };
 }
 
 /**
@@ -177,22 +165,19 @@ export async function getUserStatusAndRole(
  * @param client - Database client
  * @param userId - User UUID
  */
-export async function deactivateUser(
-  client: QueryOnlyClient,
-  userId: string,
-): Promise<void> {
+export async function deactivateUser(client: QueryOnlyClient, userId: string): Promise<void> {
   await client.query(
     'UPDATE users SET deactivated_at = NOW(), updated_at = NOW() WHERE id = $1 AND deactivated_at IS NULL',
-    [userId],
-  )
+    [userId]
+  );
 }
 
 // ─── OAuth Accounts ──────────────────────────────────────────────────────────
 
 /** Combined result from findOAuthAccountWithUser. */
 export interface OAuthAccountWithUser {
-  oauthAccount: OAuthAccount
-  user: User
+  oauthAccount: OAuthAccount;
+  user: User;
 }
 
 /**
@@ -212,27 +197,27 @@ export interface OAuthAccountWithUser {
 export async function findOAuthAccountWithUser(
   client: QueryOnlyClient,
   provider: OAuthProvider,
-  providerUserId: string,
+  providerUserId: string
 ): Promise<OAuthAccountWithUser | null> {
   const { rows } = await client.query<{
-    oauth_account_id: string
-    oa_user_id: string
-    oa_provider: OAuthProvider
-    oa_provider_user_id: string
-    oa_email: string | null
-    oa_is_private_email: boolean
-    oa_raw_profile: Record<string, unknown> | null
-    oa_created_at: string
-    user_id: string
-    user_email: string | null
-    email_verified: boolean
-    display_name: string | null
-    avatar_url: string | null
-    user_role: UserRole
-    deactivated_at: string | null
-    deleted_at: string | null
-    user_created_at: string
-    updated_at: string
+    oauth_account_id: string;
+    oa_user_id: string;
+    oa_provider: OAuthProvider;
+    oa_provider_user_id: string;
+    oa_email: string | null;
+    oa_is_private_email: boolean;
+    oa_raw_profile: Record<string, unknown> | null;
+    oa_created_at: string;
+    user_id: string;
+    user_email: string | null;
+    email_verified: boolean;
+    display_name: string | null;
+    avatar_url: string | null;
+    user_role: UserRole;
+    deactivated_at: string | null;
+    deleted_at: string | null;
+    user_created_at: string;
+    updated_at: string;
   }>(
     `SELECT
        oa.id                 AS oauth_account_id,
@@ -256,11 +241,11 @@ export async function findOAuthAccountWithUser(
      FROM oauth_accounts oa
      JOIN users u ON u.id = oa.user_id
      WHERE oa.provider = $1 AND oa.provider_user_id = $2`,
-    [provider, providerUserId],
-  )
+    [provider, providerUserId]
+  );
 
-  const row = rows[0]
-  if (!row) return null
+  const row = rows[0];
+  if (!row) return null;
 
   const oauthAccount: OAuthAccount = {
     id: row.oauth_account_id,
@@ -271,7 +256,7 @@ export async function findOAuthAccountWithUser(
     is_private_email: row.oa_is_private_email,
     raw_profile: row.oa_raw_profile,
     created_at: row.oa_created_at,
-  }
+  };
 
   const user: User = {
     id: row.user_id,
@@ -284,9 +269,9 @@ export async function findOAuthAccountWithUser(
     deleted_at: row.deleted_at,
     created_at: row.user_created_at,
     updated_at: row.updated_at,
-  }
+  };
 
-  return { oauthAccount, user }
+  return { oauthAccount, user };
 }
 
 /**
@@ -299,13 +284,13 @@ export async function findOAuthAccountWithUser(
 export async function findOAuthAccount(
   client: QueryOnlyClient,
   provider: OAuthProvider,
-  providerUserId: string,
+  providerUserId: string
 ): Promise<OAuthAccount | null> {
   const { rows } = await client.query<OAuthAccount>(
     'SELECT id, user_id, provider, provider_user_id, email, is_private_email, raw_profile, created_at FROM oauth_accounts WHERE provider = $1 AND provider_user_id = $2',
-    [provider, providerUserId],
-  )
-  return rows[0] ?? null
+    [provider, providerUserId]
+  );
+  return rows[0] ?? null;
 }
 
 /**
@@ -318,13 +303,13 @@ export async function findOAuthAccount(
 export async function createOAuthAccount(
   client: QueryOnlyClient,
   params: {
-    user_id: string
-    provider: OAuthProvider
-    provider_user_id: string
-    email: string | null
-    is_private_email: boolean
-    raw_profile: Record<string, unknown> | null
-  },
+    user_id: string;
+    provider: OAuthProvider;
+    provider_user_id: string;
+    email: string | null;
+    is_private_email: boolean;
+    raw_profile: Record<string, unknown> | null;
+  }
 ): Promise<OAuthAccount | null> {
   const { rows } = await client.query<OAuthAccount>(
     `INSERT INTO oauth_accounts (user_id, provider, provider_user_id, email, is_private_email, raw_profile)
@@ -338,9 +323,9 @@ export async function createOAuthAccount(
       params.email,
       params.is_private_email,
       params.raw_profile ? JSON.stringify(params.raw_profile) : null,
-    ],
-  )
-  return rows[0] ?? null
+    ]
+  );
+  return rows[0] ?? null;
 }
 
 /**
@@ -349,34 +334,31 @@ export async function createOAuthAccount(
  * @param client - Database client
  * @param userId - User UUID
  */
-export async function findOAuthAccountsByUserId(
-  client: QueryOnlyClient,
-  userId: string,
-): Promise<OAuthAccount[]> {
+export async function findOAuthAccountsByUserId(client: QueryOnlyClient, userId: string): Promise<OAuthAccount[]> {
   const { rows } = await client.query<OAuthAccount>(
     'SELECT id, user_id, provider, provider_user_id, email, is_private_email, raw_profile, created_at FROM oauth_accounts WHERE user_id = $1',
-    [userId],
-  )
-  return rows
+    [userId]
+  );
+  return rows;
 }
 
 /** Shape returned by findUserWithAccounts. */
 export interface UserWithAccounts {
-  user: User
-  accounts: OAuthAccount[]
+  user: User;
+  accounts: OAuthAccount[];
 }
 
 /** Row shape returned by the LEFT JOIN query inside findUserWithAccounts. */
 type UserWithAccountsRow = User & {
-  oa_id: string | null
-  oa_user_id: string | null
-  oa_provider: OAuthProvider | null
-  oa_provider_user_id: string | null
-  oa_email: string | null
-  oa_is_private_email: boolean | null
-  oa_raw_profile: Record<string, unknown> | null
-  oa_created_at: Date | string | null
-}
+  oa_id: string | null;
+  oa_user_id: string | null;
+  oa_provider: OAuthProvider | null;
+  oa_provider_user_id: string | null;
+  oa_email: string | null;
+  oa_is_private_email: boolean | null;
+  oa_raw_profile: Record<string, unknown> | null;
+  oa_created_at: Date | string | null;
+};
 
 /**
  * Type guard: verifies all required non-null oauth_account fields are present
@@ -386,12 +368,12 @@ type UserWithAccountsRow = User & {
  * @param r - A row from the LEFT JOIN query in findUserWithAccounts
  */
 function isCompleteOAuthRow(r: UserWithAccountsRow): r is UserWithAccountsRow & {
-  oa_id: string
-  oa_user_id: string
-  oa_provider: OAuthProvider
-  oa_provider_user_id: string
-  oa_is_private_email: boolean
-  oa_created_at: Date | string
+  oa_id: string;
+  oa_user_id: string;
+  oa_provider: OAuthProvider;
+  oa_provider_user_id: string;
+  oa_is_private_email: boolean;
+  oa_created_at: Date | string;
 } {
   return (
     typeof r.oa_id === 'string' &&
@@ -400,7 +382,7 @@ function isCompleteOAuthRow(r: UserWithAccountsRow): r is UserWithAccountsRow & 
     typeof r.oa_provider_user_id === 'string' &&
     typeof r.oa_is_private_email === 'boolean' &&
     r.oa_created_at != null
-  )
+  );
 }
 
 /**
@@ -410,10 +392,7 @@ function isCompleteOAuthRow(r: UserWithAccountsRow): r is UserWithAccountsRow & 
  * @param client - Database client
  * @param userId - User UUID
  */
-export async function findUserWithAccounts(
-  client: QueryOnlyClient,
-  userId: string,
-): Promise<UserWithAccounts | null> {
+export async function findUserWithAccounts(client: QueryOnlyClient, userId: string): Promise<UserWithAccounts | null> {
   // Use a LEFT JOIN so the user row is returned even when they have no accounts yet.
   // All oauth_account columns are aliased with an "oa_" prefix to avoid collisions
   // with the user columns (both tables have id, email, created_at, etc.).
@@ -431,11 +410,11 @@ export async function findUserWithAccounts(
      FROM users u
      LEFT JOIN oauth_accounts oa ON oa.user_id = u.id
      WHERE u.id = $1`,
-    [userId],
-  )
+    [userId]
+  );
 
-  const firstRow = rows[0] ?? null
-  if (!firstRow) return null
+  const firstRow = rows[0] ?? null;
+  if (!firstRow) return null;
   const user: User = {
     id: firstRow.id,
     email: firstRow.email,
@@ -447,23 +426,24 @@ export async function findUserWithAccounts(
     deleted_at: firstRow.deleted_at,
     created_at: firstRow.created_at,
     updated_at: firstRow.updated_at,
-  }
+  };
 
   // Collect the accounts from all JOIN rows (each row is one oauth_account)
-  const accounts = rows
-    .filter(isCompleteOAuthRow)
-    .map((r) => ({
-      id: r.oa_id,
-      user_id: r.oa_user_id,
-      provider: r.oa_provider,
-      provider_user_id: r.oa_provider_user_id,
-      email: r.oa_email,
-      is_private_email: r.oa_is_private_email,
-      raw_profile: r.oa_raw_profile,
-      created_at: r.oa_created_at,
-    } satisfies OAuthAccount))
+  const accounts = rows.filter(isCompleteOAuthRow).map(
+    (r) =>
+      ({
+        id: r.oa_id,
+        user_id: r.oa_user_id,
+        provider: r.oa_provider,
+        provider_user_id: r.oa_provider_user_id,
+        email: r.oa_email,
+        is_private_email: r.oa_is_private_email,
+        raw_profile: r.oa_raw_profile,
+        created_at: r.oa_created_at,
+      }) satisfies OAuthAccount
+  );
 
-  return { user, accounts }
+  return { user, accounts };
 }
 
 /**
@@ -477,15 +457,15 @@ export async function findUserWithAccounts(
 export async function userHasProvider(
   client: QueryOnlyClient,
   userId: string,
-  provider: OAuthProvider,
+  provider: OAuthProvider
 ): Promise<boolean> {
   const { rows } = await client.query<{ exists: boolean }>(
     `SELECT EXISTS(
        SELECT 1 FROM oauth_accounts WHERE user_id = $1 AND provider = $2
      ) AS exists`,
-    [userId, provider],
-  )
-  return rows[0]?.exists ?? false
+    [userId, provider]
+  );
+  return rows[0]?.exists ?? false;
 }
 
 // ─── Refresh Tokens ──────────────────────────────────────────────────────────
@@ -499,22 +479,22 @@ export async function userHasProvider(
 export async function createRefreshToken(
   client: QueryOnlyClient,
   params: {
-    user_id: string
-    token_hash: string
-    device_info: string | null
-    expires_at: Date
-    client_type: ClientType
-  },
+    user_id: string;
+    token_hash: string;
+    device_info: string | null;
+    expires_at: Date;
+    client_type: ClientType;
+  }
 ): Promise<RefreshToken> {
   const { rows } = await client.query<RefreshToken>(
     `INSERT INTO refresh_tokens (user_id, token_hash, device_info, expires_at, client_type)
      VALUES ($1, $2, $3, $4, $5)
      RETURNING id, user_id, token_hash, device_info, expires_at, revoked_at, client_type, created_at`,
-    [params.user_id, params.token_hash, params.device_info, params.expires_at, params.client_type],
-  )
-  const token = rows[0]
-  if (!token) throw new Error('INSERT INTO refresh_tokens returned no rows')
-  return token
+    [params.user_id, params.token_hash, params.device_info, params.expires_at, params.client_type]
+  );
+  const token = rows[0];
+  if (!token) throw new Error('INSERT INTO refresh_tokens returned no rows');
+  return token;
 }
 
 /**
@@ -523,15 +503,12 @@ export async function createRefreshToken(
  * @param client - Database client
  * @param tokenHash - SHA-256 hex digest of the token
  */
-export async function findRefreshTokenByHash(
-  client: QueryOnlyClient,
-  tokenHash: string,
-): Promise<RefreshToken | null> {
+export async function findRefreshTokenByHash(client: QueryOnlyClient, tokenHash: string): Promise<RefreshToken | null> {
   const { rows } = await client.query<RefreshToken>(
     'SELECT id, user_id, token_hash, device_info, expires_at, revoked_at, client_type, created_at FROM refresh_tokens WHERE token_hash = $1',
-    [tokenHash],
-  )
-  return rows[0] ?? null
+    [tokenHash]
+  );
+  return rows[0] ?? null;
 }
 
 /**
@@ -568,13 +545,13 @@ export async function findRefreshTokenByHash(
  */
 export async function findRefreshTokenForRotation(
   client: QueryOnlyClient,
-  tokenHash: string,
+  tokenHash: string
 ): Promise<RefreshToken | null> {
   const { rows } = await client.query<RefreshToken>(
     'SELECT id, user_id, token_hash, device_info, expires_at, revoked_at, client_type, created_at FROM refresh_tokens WHERE token_hash = $1 AND expires_at > NOW() FOR UPDATE',
-    [tokenHash],
-  )
-  return rows[0] ?? null
+    [tokenHash]
+  );
+  return rows[0] ?? null;
 }
 
 /**
@@ -590,16 +567,13 @@ export async function findRefreshTokenForRotation(
  * @param client - Database client
  * @param userId - User UUID to potentially delete
  */
-export async function deleteOrphanUser(
-  client: QueryOnlyClient,
-  userId: string,
-): Promise<void> {
+export async function deleteOrphanUser(client: QueryOnlyClient, userId: string): Promise<void> {
   await client.query(
     `DELETE FROM users WHERE id = $1 AND NOT EXISTS (
        SELECT 1 FROM oauth_accounts WHERE user_id = $1
      )`,
-    [userId],
-  )
+    [userId]
+  );
 }
 
 /**
@@ -609,16 +583,10 @@ export async function deleteOrphanUser(
  * @param tokenHash - SHA-256 hex digest of the token to revoke
  * @throws {Error} if no row is updated — the token must exist in the database before calling this function.
  */
-export async function revokeRefreshToken(
-  client: QueryOnlyClient,
-  tokenHash: string,
-): Promise<void> {
-  const result = await client.query(
-    'UPDATE refresh_tokens SET revoked_at = NOW() WHERE token_hash = $1',
-    [tokenHash],
-  )
+export async function revokeRefreshToken(client: QueryOnlyClient, tokenHash: string): Promise<void> {
+  const result = await client.query('UPDATE refresh_tokens SET revoked_at = NOW() WHERE token_hash = $1', [tokenHash]);
   if ((result.rowCount ?? 0) === 0) {
-    throw new Error(`revokeRefreshToken: token not found (hash prefix: ${tokenHash.slice(0, 8)})`)
+    throw new Error(`revokeRefreshToken: token not found (hash prefix: ${tokenHash.slice(0, 8)})`);
   }
 }
 
@@ -628,14 +596,10 @@ export async function revokeRefreshToken(
  * @param client - Database client
  * @param userId - User UUID
  */
-export async function revokeAllUserRefreshTokens(
-  client: QueryOnlyClient,
-  userId: string,
-): Promise<void> {
-  await client.query(
-    'UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL',
-    [userId],
-  )
+export async function revokeAllUserRefreshTokens(client: QueryOnlyClient, userId: string): Promise<void> {
+  await client.query('UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL', [
+    userId,
+  ]);
 }
 
 // ─── Auth Events ─────────────────────────────────────────────────────────────
@@ -649,43 +613,38 @@ export async function revokeAllUserRefreshTokens(
 export async function logAuthEvent(
   client: QueryOnlyClient,
   params: {
-    user_id: string | null
-    event_type: AuthEventType
-    ip_address: string | null
-    user_agent: string | null
-    metadata?: Record<string, unknown> | null
-  },
+    user_id: string | null;
+    event_type: AuthEventType;
+    ip_address: string | null;
+    user_agent: string | null;
+    metadata?: Record<string, unknown> | null;
+  }
 ): Promise<void> {
   // Validate the IP string before binding to the INET column. Malformed values
   // (e.g. IPv6 zone IDs like "::1%eth0") would otherwise abort the transaction.
   // net.isIP() accepts zone IDs (e.g. "::1%eth0") even though PostgreSQL INET rejects them,
   // so we also explicitly reject any address containing a '%' character.
   const safeIp =
-    params.ip_address !== null &&
-    !params.ip_address.includes('%') &&
-    net.isIP(params.ip_address) !== 0
+    params.ip_address !== null && !params.ip_address.includes('%') && net.isIP(params.ip_address) !== 0
       ? params.ip_address
-      : null
+      : null;
 
   // Defense-in-depth: sanitize user_agent even if callers already sanitize it.
   // Strips control characters, trims whitespace, and truncates to 512 chars.
   const safeUserAgent =
     params.user_agent !== null
-      ? // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
-        params.user_agent.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_AUTH_EVENT_USER_AGENT_LENGTH) || null
-      : null
+      ? params.user_agent
+          // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
+          .replace(/[\x00-\x1F\x7F]/g, '')
+          .trim()
+          .slice(0, MAX_AUTH_EVENT_USER_AGENT_LENGTH) || null
+      : null;
 
   await client.query(
     `INSERT INTO auth_events (user_id, event_type, ip_address, user_agent, metadata)
      VALUES ($1, $2, $3, $4, $5)`,
-    [
-      params.user_id,
-      params.event_type,
-      safeIp,
-      safeUserAgent,
-      params.metadata ? JSON.stringify(params.metadata) : null,
-    ],
-  )
+    [params.user_id, params.event_type, safeIp, safeUserAgent, params.metadata ? JSON.stringify(params.metadata) : null]
+  );
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -702,5 +661,5 @@ export function toUserResponse(user: User): UserResponse {
     display_name: user.display_name,
     avatar_url: user.avatar_url,
     role: user.role,
-  }
+  };
 }

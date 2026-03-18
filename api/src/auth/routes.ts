@@ -1,12 +1,12 @@
-import { withTransaction } from '../db/pool.js'
-import * as queries from '../db/queries.js'
-import { verifyAppleToken, isPrivateRelayEmail } from './apple.js'
-import { verifyGoogleToken } from './google.js'
-import { hashToken, createAndStoreRefreshToken, rotateRefreshToken } from './tokens.js'
-import { signinSchema, refreshSchema, logoutSchema, meSchema, linkAccountSchema } from './schemas.js'
-import { REFRESH_TOKEN_COOKIE, setRefreshTokenCookie, clearRefreshTokenCookie, readSignedCookie } from './cookies.js'
-import { isNetworkError, ProviderVerificationError, HttpError } from './errors.js'
-import type { FastifyInstance, FastifyRequest, FastifyReply, FastifyBaseLogger } from 'fastify'
+import { withTransaction } from '../db/pool.js';
+import * as queries from '../db/queries.js';
+import { verifyAppleToken, isPrivateRelayEmail } from './apple.js';
+import { verifyGoogleToken } from './google.js';
+import { hashToken, createAndStoreRefreshToken, rotateRefreshToken } from './tokens.js';
+import { signinSchema, refreshSchema, logoutSchema, meSchema, linkAccountSchema } from './schemas.js';
+import { REFRESH_TOKEN_COOKIE, setRefreshTokenCookie, clearRefreshTokenCookie, readSignedCookie } from './cookies.js';
+import { isNetworkError, ProviderVerificationError, HttpError } from './errors.js';
+import type { FastifyInstance, FastifyRequest, FastifyReply, FastifyBaseLogger } from 'fastify';
 import type {
   User,
   UserRole,
@@ -16,20 +16,20 @@ import type {
   LinkAccountRequest,
   ProviderClaims,
   OAuthProvider,
-} from '../types/index.js'
+} from '../types/index.js';
 
 /** Maximum length for device_info / user-agent stored in refresh_tokens.device_info VARCHAR(255). */
-const MAX_DEVICE_INFO_LENGTH = 255
+const MAX_DEVICE_INFO_LENGTH = 255;
 /** Maximum length for user-agent stored in auth_events.user_agent VARCHAR(512). */
-const MAX_AUDIT_USER_AGENT_LENGTH = 512
+const MAX_AUDIT_USER_AGENT_LENGTH = 512;
 /** Maximum length for display_name stored in users.display_name VARCHAR(255). */
-const MAX_DISPLAY_NAME_LENGTH = 255
+const MAX_DISPLAY_NAME_LENGTH = 255;
 /**
  * Maximum allowed avatar URL length. The DB column is TEXT (unbounded); this
  * application-level limit is the sole width constraint. If the column is ever
  * changed to VARCHAR, this constant must match.
  */
-const MAX_AVATAR_URL_LENGTH = 2048
+const MAX_AVATAR_URL_LENGTH = 2048;
 
 /**
  * UUID v4 regular expression for sub claim validation.
@@ -37,7 +37,7 @@ const MAX_AVATAR_URL_LENGTH = 2048
  * uppercase input and normalise. The /i flag allows clients to pass UUIDs in any
  * case without rejecting valid tokens.
  */
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Validate a string is a well-formed UUID. Returns true if valid.
@@ -45,7 +45,7 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
  * @param value - The string to test
  */
 function isValidUuid(value: string): boolean {
-  return UUID_REGEX.test(value)
+  return UUID_REGEX.test(value);
 }
 
 /**
@@ -60,7 +60,7 @@ function isUserPayload(user: unknown): user is { sub: string } {
     'sub' in user &&
     // TS cannot narrow property types from 'in' checks; cast to access .sub safely after shape guard
     typeof (user as Record<string, unknown>).sub === 'string'
-  )
+  );
 }
 
 /**
@@ -71,10 +71,15 @@ function isUserPayload(user: unknown): user is { sub: string } {
  * @param maxLength - Column width to truncate to
  */
 function sanitizeUserAgent(request: FastifyRequest, maxLength: number): string | null {
-  const ua = request.headers['user-agent']
-  if (typeof ua !== 'string') return null
-  // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
-  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, maxLength) || null
+  const ua = request.headers['user-agent'];
+  if (typeof ua !== 'string') return null;
+  return (
+    ua
+      // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
+      .replace(/[\x00-\x1F\x7F]/g, '')
+      .trim()
+      .slice(0, maxLength) || null
+  );
 }
 
 /**
@@ -83,7 +88,7 @@ function sanitizeUserAgent(request: FastifyRequest, maxLength: number): string |
  * @param request - Fastify request object
  */
 function getUserAgent(request: FastifyRequest): string | null {
-  return sanitizeUserAgent(request, MAX_DEVICE_INFO_LENGTH)
+  return sanitizeUserAgent(request, MAX_DEVICE_INFO_LENGTH);
 }
 
 /**
@@ -92,19 +97,15 @@ function getUserAgent(request: FastifyRequest): string | null {
  * @param request - Fastify request object
  */
 function getRawUserAgent(request: FastifyRequest): string | null {
-  return sanitizeUserAgent(request, MAX_AUDIT_USER_AGENT_LENGTH)
+  return sanitizeUserAgent(request, MAX_AUDIT_USER_AGENT_LENGTH);
 }
 
-async function verifyProviderToken(
-  provider: OAuthProvider,
-  idToken: string,
-  nonce?: string,
-): Promise<ProviderClaims> {
+async function verifyProviderToken(provider: OAuthProvider, idToken: string, nonce?: string): Promise<ProviderClaims> {
   if (provider === 'apple') {
-    if (!nonce) throw new ProviderVerificationError('Nonce is required for Apple Sign-In')
-    return verifyAppleToken(idToken, nonce)
+    if (!nonce) throw new ProviderVerificationError('Nonce is required for Apple Sign-In');
+    return verifyAppleToken(idToken, nonce);
   }
-  return verifyGoogleToken(idToken)
+  return verifyGoogleToken(idToken);
 }
 
 /**
@@ -123,21 +124,21 @@ async function verifyProviderTokenOrReply(
   idToken: string,
   nonce: string | undefined,
   log: FastifyBaseLogger,
-  reply: FastifyReply,
+  reply: FastifyReply
 ): Promise<ProviderClaims | null> {
   try {
-    return await verifyProviderToken(provider, idToken, nonce)
+    return await verifyProviderToken(provider, idToken, nonce);
   } catch (err) {
     if (err instanceof ProviderVerificationError) {
-      reply.code(401).send({ error: 'Invalid provider token' })
-      return null // reply already sent; callers check `if (!claims) return`
+      reply.code(401).send({ error: 'Invalid provider token' });
+      return null; // reply already sent; callers check `if (!claims) return`
     }
     if (isNetworkError(err)) {
-      log.error({ err }, 'Provider token verification infrastructure error')
-      reply.code(503).send({ error: 'Authentication service unavailable' })
-      return null // reply already sent; callers check `if (!claims) return`
+      log.error({ err }, 'Provider token verification infrastructure error');
+      reply.code(503).send({ error: 'Authentication service unavailable' });
+      return null; // reply already sent; callers check `if (!claims) return`
     }
-    throw err
+    throw err;
   }
 }
 
@@ -155,7 +156,7 @@ function sanitizeRawProfile(claims: ProviderClaims): Record<string, unknown> {
   return {
     sub: claims.sub,
     email_verified: claims.email_verified,
-  }
+  };
 }
 
 /**
@@ -166,9 +167,12 @@ function sanitizeRawProfile(claims: ProviderClaims): Record<string, unknown> {
  * @param name - Raw user-supplied display name
  */
 function sanitizeDisplayName(name: string): string | null {
-  // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
-  const stripped = name.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_DISPLAY_NAME_LENGTH)
-  return stripped.length > 0 ? stripped : null
+  const stripped = name
+    // eslint-disable-next-line no-control-regex -- intentional: strip control chars from user input
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    .trim()
+    .slice(0, MAX_DISPLAY_NAME_LENGTH);
+  return stripped.length > 0 ? stripped : null;
 }
 
 /**
@@ -180,15 +184,15 @@ function sanitizeDisplayName(name: string): string | null {
  * @param url - Raw avatar URL from provider claims
  */
 function sanitizeAvatarUrl(url: string | null | undefined): string | null {
-  if (!url || url.length > MAX_AVATAR_URL_LENGTH) return null
+  if (!url || url.length > MAX_AVATAR_URL_LENGTH) return null;
   try {
-    const parsed = new URL(url)
-    if (parsed.protocol !== 'https:') return null
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:') return null;
     // Reject URLs containing credentials (userinfo) to prevent storing them in the DB
-    if (parsed.username !== '' || parsed.password !== '') return null
-    return parsed.href
+    if (parsed.username !== '' || parsed.password !== '') return null;
+    return parsed.href;
   } catch {
-    return null
+    return null;
   }
 }
 
@@ -200,7 +204,7 @@ function sanitizeAvatarUrl(url: string | null | undefined): string | null {
  */
 function assertAccountActive(user: Pick<User, 'deactivated_at' | 'deleted_at'>): void {
   if (user.deleted_at || user.deactivated_at) {
-    throw new HttpError(403, { error: 'Account deactivated' })
+    throw new HttpError(403, { error: 'Account deactivated' });
   }
 }
 
@@ -217,22 +221,22 @@ function assertAccountActive(user: Pick<User, 'deactivated_at' | 'deleted_at'>):
 async function handleOAuthConflict(
   client: queries.QueriesClient,
   provider: OAuthProvider,
-  providerUserId: string,
+  providerUserId: string
 ): Promise<{ user: queries.UserRow; oauthAccount: queries.OAuthAccountRow } | null> {
-  const oauthAccount = await queries.findOAuthAccount(client, provider, providerUserId)
-  if (!oauthAccount) return null
+  const oauthAccount = await queries.findOAuthAccount(client, provider, providerUserId);
+  if (!oauthAccount) return null;
 
-  const user = await queries.findUserById(client, oauthAccount.user_id)
-  if (!user) throw new Error('User not found for oauth account')
-  assertAccountActive(user)
+  const user = await queries.findUserById(client, oauthAccount.user_id);
+  if (!user) throw new Error('User not found for oauth account');
+  assertAccountActive(user);
 
-  return { user, oauthAccount }
+  return { user, oauthAccount };
 }
 
 /** Result from resolveOrCreateUser. */
 interface ResolvedUser {
-  user: queries.UserRow
-  oauthAccount: queries.OAuthAccountRow
+  user: queries.UserRow;
+  oauthAccount: queries.OAuthAccountRow;
 }
 
 /**
@@ -260,32 +264,32 @@ async function resolveOrCreateUser(
   ip: string,
   ua: string | null,
   rawUa: string | null,
-  log: FastifyBaseLogger,
+  log: FastifyBaseLogger
 ): Promise<ResolvedUser> {
   // ── Branch A: existing oauth_account ──────────────────────────────────────
   // Use a single JOIN query to fetch both the oauth_account and user in one
   // round-trip — this is the most frequent code path (returning user signin).
-  const existingWithUser = await queries.findOAuthAccountWithUser(client, provider, claims.sub)
+  const existingWithUser = await queries.findOAuthAccountWithUser(client, provider, claims.sub);
 
   if (existingWithUser) {
-    const { oauthAccount: existingOAuthAccount } = existingWithUser
-    let existingUser = existingWithUser.user
-    assertAccountActive(existingUser)
+    const { oauthAccount: existingOAuthAccount } = existingWithUser;
+    let existingUser = existingWithUser.user;
+    assertAccountActive(existingUser);
 
     // Upgrade email_verified if the provider now asserts it is true but stored value is false
     if (claims.email_verified && !existingUser.email_verified) {
-      await queries.setUserEmailVerified(client, existingUser.id)
+      await queries.setUserEmailVerified(client, existingUser.id);
       // Reflect the upgrade in the returned user object without a second DB round-trip
-      existingUser = { ...existingUser, email_verified: true }
+      existingUser = { ...existingUser, email_verified: true };
     }
 
     // Update display_name if missing and provided
     if (safeName && !existingUser.display_name) {
-      await queries.updateUserDisplayName(client, existingUser.id, safeName)
-      return { user: { ...existingUser, display_name: safeName }, oauthAccount: existingOAuthAccount }
+      await queries.updateUserDisplayName(client, existingUser.id, safeName);
+      return { user: { ...existingUser, display_name: safeName }, oauthAccount: existingOAuthAccount };
     }
 
-    return { user: existingUser, oauthAccount: existingOAuthAccount }
+    return { user: existingUser, oauthAccount: existingOAuthAccount };
   }
 
   // ── Branch B: verified-email account linking ───────────────────────────────
@@ -301,10 +305,10 @@ async function resolveOrCreateUser(
   // from user-initiated 'link_account') so security teams can monitor and alert on
   // this path independently.
   if (claims.email && claims.email_verified) {
-    const existingUser = await queries.findUserByEmail(client, claims.email)
+    const existingUser = await queries.findUserByEmail(client, claims.email);
 
     if (existingUser) {
-      assertAccountActive(existingUser)
+      assertAccountActive(existingUser);
 
       const oauthAccount = await queries.createOAuthAccount(client, {
         user_id: existingUser.id,
@@ -313,15 +317,15 @@ async function resolveOrCreateUser(
         email: claims.email,
         is_private_email: isPrivateRelayEmail(claims.email),
         raw_profile: sanitizeRawProfile(claims),
-      })
+      });
 
       // Handle concurrent insert race — if insert returned null, re-fetch
       if (!oauthAccount) {
-        const resolved = await handleOAuthConflict(client, provider, claims.sub)
+        const resolved = await handleOAuthConflict(client, provider, claims.sub);
         if (!resolved) {
-          throw new Error('Concurrent request conflict, please retry')
+          throw new Error('Concurrent request conflict, please retry');
         }
-        return resolved
+        return resolved;
       }
 
       try {
@@ -331,12 +335,12 @@ async function resolveOrCreateUser(
           ip_address: ip,
           user_agent: rawUa,
           metadata: { provider, auto_linked: true },
-        })
+        });
       } catch (auditErr) {
-        log.error({ err: auditErr }, 'audit log failed for provider_auto_linked — signin will commit')
+        log.error({ err: auditErr }, 'audit log failed for provider_auto_linked — signin will commit');
       }
 
-      return { user: existingUser, oauthAccount }
+      return { user: existingUser, oauthAccount };
     }
   }
 
@@ -349,7 +353,7 @@ async function resolveOrCreateUser(
     email_verified: claims.email_verified,
     display_name: safeName ?? (claims.name ? sanitizeDisplayName(claims.name) : null),
     avatar_url: sanitizeAvatarUrl(claims.picture),
-  })
+  });
 
   const oauthAccount = await queries.createOAuthAccount(client, {
     user_id: newUser.id,
@@ -358,36 +362,36 @@ async function resolveOrCreateUser(
     email: claims.email,
     is_private_email: claims.email ? isPrivateRelayEmail(claims.email) : false,
     raw_profile: sanitizeRawProfile(claims),
-  })
+  });
 
   // ON CONFLICT means another concurrent request created the oauth_account first.
   // Re-fetch to get the winner's user.
   if (!oauthAccount) {
-    const resolved = await handleOAuthConflict(client, provider, claims.sub)
+    const resolved = await handleOAuthConflict(client, provider, claims.sub);
     if (!resolved) {
-      throw new Error('Concurrent request conflict, please retry')
+      throw new Error('Concurrent request conflict, please retry');
     }
     // The user row we created above is now an orphan (no linked oauth_account).
     // TODO(#42): add a scheduled cleanup job for any orphans missed by inline cleanup.
     // Attempt inline cleanup — if it fails, warn and continue (transaction still commits).
     try {
-      await queries.deleteOrphanUser(client, newUser.id)
+      await queries.deleteOrphanUser(client, newUser.id);
       // Cleanup succeeded: log at debug level since the orphan was resolved inline.
       log.debug(
         { orphanUserId: newUser.id, provider, providerUserId: claims.sub },
-        'orphan user row created during concurrent signup race — cleaned up inline',
-      )
+        'orphan user row created during concurrent signup race — cleaned up inline'
+      );
     } catch (cleanupErr) {
       // Cleanup failed: log at warn level so the background job can pick this up.
       log.warn(
         { err: cleanupErr, orphanUserId: newUser.id, provider, providerUserId: claims.sub },
-        'orphan user cleanup failed — will be caught by background job',
-      )
+        'orphan user cleanup failed — will be caught by background job'
+      );
     }
-    return resolved
+    return resolved;
   }
 
-  return { user: newUser, oauthAccount }
+  return { user: newUser, oauthAccount };
 }
 
 /**
@@ -397,33 +401,31 @@ async function resolveOrCreateUser(
  *
  * @param request - Fastify request object
  */
-function extractRefreshToken(
-  request: FastifyRequest,
-): { token: string } | { statusCode: number; error: string } {
+function extractRefreshToken(request: FastifyRequest): { token: string } | { statusCode: number; error: string } {
   // Extract refresh_token from the request body with defensive guards.
   // request.body is typed as unknown on the base FastifyRequest; this helper is
   // shared across /refresh and /logout so we must guard before accessing properties.
-  const body = request.body
-  let rawBodyToken: string | null = null
+  const body = request.body;
+  let rawBodyToken: string | null = null;
   if (typeof body === 'object' && body !== null && 'refresh_token' in body) {
     // body typed as unknown on base FastifyRequest; typeof guard above confirms object shape
-    const candidate = (body as Record<string, unknown>).refresh_token
+    const candidate = (body as Record<string, unknown>).refresh_token;
     if (typeof candidate === 'string') {
-      rawBodyToken = candidate
+      rawBodyToken = candidate;
     }
   }
   // readSignedCookie atomically reads and verifies the HMAC of the signed cookie.
   // Cookies are stored in `s:value.hmac` wire format by @fastify/cookie when
   // signed:true is set; unsignCookie() strips the prefix and verifies the HMAC.
-  const unsigned = readSignedCookie(request, REFRESH_TOKEN_COOKIE)
+  const unsigned = readSignedCookie(request, REFRESH_TOKEN_COOKIE);
   if (unsigned !== null && !unsigned.valid) {
     // Cookie present but HMAC invalid — treat as tampered
-    return { statusCode: 401, error: 'Invalid refresh token' }
+    return { statusCode: 401, error: 'Invalid refresh token' };
   }
-  const cookieToken = unsigned?.value ?? null
-  const token = rawBodyToken ?? cookieToken
-  if (!token) return { statusCode: 401, error: 'Missing refresh token' }
-  return { token }
+  const cookieToken = unsigned?.value ?? null;
+  const token = rawBodyToken ?? cookieToken;
+  if (!token) return { statusCode: 401, error: 'Missing refresh token' };
+  return { token };
 }
 
 /**
@@ -442,13 +444,13 @@ async function signAccessToken(
   userId: string,
   role: UserRole,
   log: FastifyBaseLogger,
-  operation: string,
+  operation: string
 ): Promise<string> {
   try {
-    return await reply.jwtSign({ sub: userId, role })
+    return await reply.jwtSign({ sub: userId, role });
   } catch (signErr) {
-    log.error({ err: signErr }, `JWT signing failed after successful ${operation}`)
-    throw new Error('Token signing failed', { cause: signErr })
+    log.error({ err: signErr }, `JWT signing failed after successful ${operation}`);
+    throw new Error('Token signing failed', { cause: signErr });
   }
 }
 
@@ -468,18 +470,18 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
   // urlencoded or multipart/form-data).
 
   fastify.addHook('preValidation', async (request, reply) => {
-    if (request.method !== 'POST') return
-    const contentType = request.headers['content-type']
+    if (request.method !== 'POST') return;
+    const contentType = request.headers['content-type'];
     // Allow requests with no Content-Type header (zero-body POSTs).
     // A client sending a body-less POST correctly omits Content-Type entirely.
-    if (contentType === undefined) return
+    if (contentType === undefined) return;
     // Split on ';' to strip parameters (e.g. charset=utf-8) and compare only the MIME type.
     // startsWith() would incorrectly accept 'application/jsonp' or 'application/json-evil'.
-    const baseType = (contentType.split(';')[0] ?? '').trim()
+    const baseType = (contentType.split(';')[0] ?? '').trim();
     if (baseType !== 'application/json') {
-      return reply.code(415).send({ error: 'Content-Type must be application/json' })
+      return reply.code(415).send({ error: 'Content-Type must be application/json' });
     }
-  })
+  });
 
   // ─── POST /signin ─────────────────────────────────────────────────────────
 
@@ -490,26 +492,26 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
       config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
     },
     async (request, reply) => {
-      const { provider, id_token, nonce, user_info } = request.body
+      const { provider, id_token, nonce, user_info } = request.body;
 
-      const ip = request.ip
-      const ua = getUserAgent(request)
-      const rawUa = getRawUserAgent(request)
-      const safeName = user_info?.name ? sanitizeDisplayName(user_info.name) : null
+      const ip = request.ip;
+      const ua = getUserAgent(request);
+      const rawUa = getRawUserAgent(request);
+      const safeName = user_info?.name ? sanitizeDisplayName(user_info.name) : null;
 
-      const claims = await verifyProviderTokenOrReply(provider, id_token, nonce, fastify.log, reply)
-      if (!claims) return
+      const claims = await verifyProviderTokenOrReply(provider, id_token, nonce, fastify.log, reply);
+      if (!claims) return;
 
-      const clientType = claims.client_type
+      const clientType = claims.client_type;
 
       // userId is intentionally omitted — the user may not exist yet (new signup).
       // Auth tables must permit unauthenticated access (app.user_id = '') during signin.
       // Transaction handles all DB work; JWT signing happens after COMMIT
       const txResult = await withTransaction(async (client) => {
-        const { user } = await resolveOrCreateUser(client, provider, claims, safeName, ip, ua, rawUa, fastify.log)
+        const { user } = await resolveOrCreateUser(client, provider, claims, safeName, ip, ua, rawUa, fastify.log);
 
         // Generate refresh token (DB-bound); JWT signing deferred to after COMMIT
-        const refreshToken = await createAndStoreRefreshToken(client, user.id, ua, clientType)
+        const refreshToken = await createAndStoreRefreshToken(client, user.id, ua, clientType);
 
         // Log signin event — non-fatal: audit log failure must not roll back the business transaction
         try {
@@ -519,20 +521,20 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
             ip_address: ip,
             user_agent: rawUa,
             metadata: { provider },
-          })
+          });
         } catch (auditErr) {
-          fastify.log.error({ err: auditErr }, 'audit log failed for signin — signin will commit')
+          fastify.log.error({ err: auditErr }, 'audit log failed for signin — signin will commit');
         }
 
         return {
           userId: user.id,
           refreshToken,
           user: queries.toUserResponse(user),
-        }
-      })
+        };
+      });
 
       // JWT signing happens after transaction COMMIT — decoupled from DB lifecycle
-      const accessToken = await signAccessToken(reply, txResult.userId, txResult.user.role, fastify.log, 'signin')
+      const accessToken = await signAccessToken(reply, txResult.userId, txResult.user.role, fastify.log, 'signin');
 
       if (clientType === 'native') {
         // Native clients (iOS/Android): token in body, no cookie
@@ -540,18 +542,18 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
           access_token: accessToken,
           refresh_token: txResult.refreshToken,
           user: txResult.user,
-        }
+        };
       }
 
       // Web clients: token in httpOnly cookie, null in body
-      setRefreshTokenCookie(reply, txResult.refreshToken)
+      setRefreshTokenCookie(reply, txResult.refreshToken);
       return {
         access_token: accessToken,
         refresh_token: null,
         user: txResult.user,
-      }
-    },
-  )
+      };
+    }
+  );
 
   // ─── POST /refresh ────────────────────────────────────────────────────────
 
@@ -565,16 +567,16 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
       config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
     },
     async (request, reply) => {
-      const extracted = extractRefreshToken(request)
+      const extracted = extractRefreshToken(request);
       if ('statusCode' in extracted) {
-        return reply.code(extracted.statusCode).send({ error: extracted.error })
+        return reply.code(extracted.statusCode).send({ error: extracted.error });
       }
-      const { token: refreshToken } = extracted
+      const { token: refreshToken } = extracted;
 
-      const tokenHash = hashToken(refreshToken)
-      const ip = request.ip
-      const ua = getUserAgent(request)
-      const rawUa = getRawUserAgent(request)
+      const tokenHash = hashToken(refreshToken);
+      const ip = request.ip;
+      const ua = getUserAgent(request);
+      const rawUa = getRawUserAgent(request);
 
       // Transaction handles all DB work; JWT signing deferred to after COMMIT.
       // refresh_tokens has NO RLS policies (confirmed in migrations 003–008) so
@@ -591,11 +593,11 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
         // reuse detection and revocation — a single locked read replaces the
         // previous two-query pattern. The SQL also filters expired tokens via
         // AND expires_at > NOW() to avoid a separate JS date comparison.
-        const token = await queries.findRefreshTokenForRotation(client, tokenHash)
+        const token = await queries.findRefreshTokenForRotation(client, tokenHash);
 
         if (!token) {
           // Token not found or expired (SQL filters both with AND expires_at > NOW())
-          throw new HttpError(401, { error: 'Invalid refresh token' })
+          throw new HttpError(401, { error: 'Invalid refresh token' });
         }
 
         // Token exists but is already revoked — reuse detected.
@@ -609,7 +611,7 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
         // ROLLBACK, which would undo the revocation. Instead, return a tagged union value so the
         // caller can send the 401 AFTER this transaction commits.
         if (token.revoked_at) {
-          await queries.revokeAllUserRefreshTokens(client, token.user_id)
+          await queries.revokeAllUserRefreshTokens(client, token.user_id);
           // Audit log is best-effort: a failure must not roll back the security-critical
           // revocation. Log at error level — failing to record a security event is serious.
           try {
@@ -618,12 +620,15 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
               event_type: 'token_reuse_detected',
               ip_address: ip,
               user_agent: rawUa,
-            })
+            });
           } catch (auditErr) {
-            fastify.log.error({ err: auditErr }, 'audit log failed for token_reuse_detected — security revocation will commit')
+            fastify.log.error(
+              { err: auditErr },
+              'audit log failed for token_reuse_detected — security revocation will commit'
+            );
           }
           // Return tagged union value — revocation is committed when withTransaction resolves normally
-          return { type: 'reuse_detected' as const, userId: token.user_id }
+          return { type: 'reuse_detected' as const, userId: token.user_id };
         }
 
         // NOTE: getUserStatusAndRole has no row lock. This is safe only if account deactivation
@@ -631,20 +636,14 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
         // race exists between token lock acquisition and this deactivation check.
         // Single query fetches both account status and current role — role may have
         // changed since the original signin, so it's fetched fresh from DB.
-        const { status: userStatus, role } = await queries.getUserStatusAndRole(client, token.user_id)
+        const { status: userStatus, role } = await queries.getUserStatusAndRole(client, token.user_id);
         // 'not_found', 'deactivated', and 'deleted' all return the same message to prevent user enumeration
         if (userStatus !== 'active' || !role) {
-          throw new HttpError(403, { error: 'Account deactivated' })
+          throw new HttpError(403, { error: 'Account deactivated' });
         }
 
         // Rotate: revoke old, create new (carry over the stored client_type)
-        const newRefreshToken = await rotateRefreshToken(
-          client,
-          tokenHash,
-          token.user_id,
-          ua,
-          token.client_type,
-        )
+        const newRefreshToken = await rotateRefreshToken(client, tokenHash, token.user_id, ua, token.client_type);
 
         // Non-fatal: audit log failure must not roll back the token rotation
         try {
@@ -653,9 +652,9 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
             event_type: 'refresh',
             ip_address: ip,
             user_agent: rawUa,
-          })
+          });
         } catch (auditErr) {
-          fastify.log.error({ err: auditErr }, 'audit log failed for refresh — token rotation will commit')
+          fastify.log.error({ err: auditErr }, 'audit log failed for refresh — token rotation will commit');
         }
 
         return {
@@ -664,34 +663,34 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
           role,
           refreshToken: newRefreshToken,
           clientType: token.client_type,
-        }
-      })
+        };
+      });
 
       // Revocation committed above (transaction returned normally). Send 401 now,
       // outside the transaction, so the DB write is guaranteed to have persisted.
       if (txResult.type === 'reuse_detected') {
-        return reply.code(401).send({ error: 'Token reuse detected' })
+        return reply.code(401).send({ error: 'Token reuse detected' });
       }
 
       // JWT signing happens after transaction COMMIT — decoupled from DB lifecycle
-      const accessToken = await signAccessToken(reply, txResult.userId, txResult.role, fastify.log, 'refresh')
+      const accessToken = await signAccessToken(reply, txResult.userId, txResult.role, fastify.log, 'refresh');
 
       if (txResult.clientType === 'native') {
         // Native clients: token in body, no cookie
         return {
           access_token: accessToken,
           refresh_token: txResult.refreshToken,
-        }
+        };
       }
 
       // Web clients: token in httpOnly cookie, null in body
-      setRefreshTokenCookie(reply, txResult.refreshToken)
+      setRefreshTokenCookie(reply, txResult.refreshToken);
       return {
         access_token: accessToken,
         refresh_token: null,
-      }
-    },
-  )
+      };
+    }
+  );
 
   // ─── POST /logout ─────────────────────────────────────────────────────────
 
@@ -703,48 +702,51 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
       config: { rateLimit: { max: 20, timeWindow: '1 minute' } },
     },
     async (request, reply) => {
-      const extracted = extractRefreshToken(request)
+      const extracted = extractRefreshToken(request);
       if ('statusCode' in extracted) {
-        return reply.code(extracted.statusCode).send({ error: extracted.error })
+        return reply.code(extracted.statusCode).send({ error: extracted.error });
       }
-      const { token: refreshToken } = extracted
+      const { token: refreshToken } = extracted;
 
       if (!isUserPayload(request.user)) {
-        return reply.code(401).send({ error: 'Unauthorized' })
+        return reply.code(401).send({ error: 'Unauthorized' });
       }
-      const user = request.user
+      const user = request.user;
 
       // Validate sub is a well-formed UUID before doing any DB work (matches layout of /link-account)
       if (!isValidUuid(user.sub)) {
-        return reply.code(401).send({ error: 'Unauthorized' })
+        return reply.code(401).send({ error: 'Unauthorized' });
       }
 
-      const tokenHash = hashToken(refreshToken)
-      const ip = request.ip
-      const rawUa = getRawUserAgent(request)
+      const tokenHash = hashToken(refreshToken);
+      const ip = request.ip;
+      const rawUa = getRawUserAgent(request);
 
       await withTransaction(async (client) => {
         // Intentionally uses findRefreshTokenByHash (no expiry filter) so users can
         // revoke sessions even after the refresh token has expired. This ensures a
         // clean logout regardless of token state.
-        const token = await queries.findRefreshTokenByHash(client, tokenHash)
+        const token = await queries.findRefreshTokenByHash(client, tokenHash);
 
         if (!token) {
           // Token not found — log a warning for observability; do NOT clear cookie
           // since the token was never actually revoked.
-          request.log.warn({ tokenHashPrefix: tokenHash.slice(0, 8), userId: user.sub }, 'Logout: refresh token not found in database')
-          throw new HttpError(401, { error: 'Invalid refresh token' })
+          request.log.warn(
+            { tokenHashPrefix: tokenHash.slice(0, 8), userId: user.sub },
+            'Logout: refresh token not found in database'
+          );
+          throw new HttpError(401, { error: 'Invalid refresh token' });
         }
 
         if (token.user_id !== user.sub) {
-          throw new HttpError(403, { error: 'Token does not belong to this user' })
+          throw new HttpError(403, { error: 'Token does not belong to this user' });
         }
 
         if (token.revoked_at !== null) {
-          throw new HttpError(401, { error: 'Refresh token already revoked' })
+          throw new HttpError(401, { error: 'Refresh token already revoked' });
         }
 
-        await queries.revokeRefreshToken(client, tokenHash)
+        await queries.revokeRefreshToken(client, tokenHash);
 
         // Non-fatal: audit log failure must not roll back the token revocation
         try {
@@ -753,20 +755,20 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
             event_type: 'logout',
             ip_address: ip,
             user_agent: rawUa,
-          })
+          });
         } catch (auditErr) {
-          fastify.log.error({ err: auditErr }, 'audit log failed for logout — token revocation will commit')
+          fastify.log.error({ err: auditErr }, 'audit log failed for logout — token revocation will commit');
         }
-      }, user.sub)
+      }, user.sub);
 
       // Clear the httpOnly cookie only after the transaction has committed successfully.
       // Keeping this outside the callback ensures the HTTP response is only mutated
       // once the DB state is confirmed, and keeps side-effects out of the DB callback.
-      clearRefreshTokenCookie(reply)
+      clearRefreshTokenCookie(reply);
 
-      return reply.code(204).send()
-    },
-  )
+      return reply.code(204).send();
+    }
+  );
 
   // ─── GET /me ─────────────────────────────────────────────────────────────
 
@@ -779,18 +781,18 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
     },
     async (request, reply) => {
       if (!isUserPayload(request.user)) {
-        return reply.code(401).send({ error: 'Unauthorized' })
+        return reply.code(401).send({ error: 'Unauthorized' });
       }
-      const user = request.user
+      const user = request.user;
 
       if (!isValidUuid(user.sub)) {
-        return reply.code(401).send({ error: 'Unauthorized' })
+        return reply.code(401).send({ error: 'Unauthorized' });
       }
 
       const result = await withTransaction(async (client) => {
-        const userWithAccounts = await queries.findUserWithAccounts(client, user.sub)
+        const userWithAccounts = await queries.findUserWithAccounts(client, user.sub);
         if (!userWithAccounts) {
-          throw new HttpError(401, { error: 'User not found' })
+          throw new HttpError(401, { error: 'User not found' });
         }
 
         return {
@@ -799,12 +801,12 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
             provider: a.provider,
             email: a.email,
           })),
-        }
-      }, user.sub)
+        };
+      }, user.sub);
 
-      return result
-    },
-  )
+      return result;
+    }
+  );
 
   // ─── POST /link-account ───────────────────────────────────────────────────
 
@@ -819,22 +821,22 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
       config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
     },
     async (request, reply) => {
-      const { provider, id_token, nonce } = request.body
+      const { provider, id_token, nonce } = request.body;
 
       if (!isUserPayload(request.user)) {
-        return reply.code(401).send({ error: 'Unauthorized' })
+        return reply.code(401).send({ error: 'Unauthorized' });
       }
-      const user = request.user
-      const ip = request.ip
-      const rawUa = getRawUserAgent(request)
+      const user = request.user;
+      const ip = request.ip;
+      const rawUa = getRawUserAgent(request);
 
       // Validate sub is a well-formed UUID before using it in DB queries
       if (!isValidUuid(user.sub)) {
-        return reply.code(401).send({ error: 'Unauthorized' })
+        return reply.code(401).send({ error: 'Unauthorized' });
       }
 
-      const claims = await verifyProviderTokenOrReply(provider, id_token, nonce, fastify.log, reply)
-      if (!claims) return
+      const claims = await verifyProviderTokenOrReply(provider, id_token, nonce, fastify.log, reply);
+      if (!claims) return;
 
       const result = await withTransaction(async (client) => {
         // TOCTOU note: the findOAuthAccount + userHasProvider pre-checks below run without
@@ -847,19 +849,19 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
         // ON CONFLICT path rather than a tailored message from the pre-check path.
 
         // Check if provider account already linked to another user
-        const existing = await queries.findOAuthAccount(client, provider, claims.sub)
+        const existing = await queries.findOAuthAccount(client, provider, claims.sub);
         if (existing && existing.user_id !== user.sub) {
           throw new HttpError(409, {
             error: 'This provider account is already linked to a different user',
-          })
+          });
         }
 
         // Check if current user already has this provider
-        const hasProvider = await queries.userHasProvider(client, user.sub, provider)
+        const hasProvider = await queries.userHasProvider(client, user.sub, provider);
         if (hasProvider) {
           throw new HttpError(409, {
             error: 'You already have an account linked with this provider',
-          })
+          });
         }
 
         // Create the link
@@ -870,11 +872,11 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
           email: claims.email,
           is_private_email: claims.email ? isPrivateRelayEmail(claims.email) : false,
           raw_profile: sanitizeRawProfile(claims),
-        })
+        });
 
         // ON CONFLICT DO NOTHING returned null — a concurrent request already linked this account
         if (!linked) {
-          throw new HttpError(409, { error: 'Account already linked' })
+          throw new HttpError(409, { error: 'Account already linked' });
         }
 
         // Non-fatal: audit log failure must not roll back the account link
@@ -885,14 +887,14 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
             ip_address: ip,
             user_agent: rawUa,
             metadata: { provider },
-          })
+          });
         } catch (auditErr) {
-          fastify.log.error({ err: auditErr }, 'audit log failed for link_account — account link will commit')
+          fastify.log.error({ err: auditErr }, 'audit log failed for link_account — account link will commit');
         }
 
         // Return updated user with linked accounts in a single JOIN query
-        const userWithAccounts = await queries.findUserWithAccounts(client, user.sub)
-        if (!userWithAccounts) throw new HttpError(500, { error: 'Failed to fetch user after account link' })
+        const userWithAccounts = await queries.findUserWithAccounts(client, user.sub);
+        if (!userWithAccounts) throw new HttpError(500, { error: 'Failed to fetch user after account link' });
 
         return {
           ...queries.toUserResponse(userWithAccounts.user),
@@ -900,10 +902,10 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
             provider: a.provider,
             email: a.email,
           })),
-        }
-      }, user.sub)
+        };
+      }, user.sub);
 
-      return result
-    },
-  )
+      return result;
+    }
+  );
 }

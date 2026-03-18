@@ -20,46 +20,46 @@ npm run dev             # https://dev.track-em-toys.com:5173
 
 Copy `.env.example` to `.env` and fill in each value.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `VITE_API_URL` | Yes | API base URL (e.g., `http://localhost:3000`) |
-| `VITE_GOOGLE_CLIENT_ID` | Yes | Google OAuth Web Client ID from [Google Cloud Console](https://console.cloud.google.com/apis/credentials) |
-| `VITE_APPLE_SERVICES_ID` | Yes | Apple Services ID for web sign-in from [Apple Developer Portal](https://developer.apple.com/account/resources/) |
-| `VITE_APPLE_REDIRECT_URI` | Yes | Apple Sign-In callback URL (e.g., `https://dev.track-em-toys.com:5173/auth/apple-callback`) |
+| Variable                  | Required | Description                                                                                                     |
+| ------------------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| `VITE_API_URL`            | Yes      | API base URL (e.g., `http://localhost:3000`)                                                                    |
+| `VITE_GOOGLE_CLIENT_ID`   | Yes      | Google OAuth Web Client ID from [Google Cloud Console](https://console.cloud.google.com/apis/credentials)       |
+| `VITE_APPLE_SERVICES_ID`  | Yes      | Apple Services ID for web sign-in from [Apple Developer Portal](https://developer.apple.com/account/resources/) |
+| `VITE_APPLE_REDIRECT_URI` | Yes      | Apple Sign-In callback URL (e.g., `https://dev.track-em-toys.com:5173/auth/apple-callback`)                     |
 
 All `VITE_` prefixed variables are exposed to the browser at build time (Vite convention).
 
 ## NPM Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start Vite dev server with HTTPS and HMR |
-| `npm run build` | Type-check (`tsc -b`) then bundle with Vite |
-| `npm run preview` | Serve the production build locally |
-| `npm run typecheck` | Type-check only (no emit, no bundle) |
-| `npm run lint` | Run ESLint (flat config, type-checked) |
-| `npm run lint:fix` | Run ESLint with auto-fix |
-| `npm test` | Run unit tests once (vitest + jsdom) |
-| `npm run test:watch` | Run unit tests in watch mode |
-| `npm run test:e2e` | Run Playwright end-to-end tests |
-| `npm run test:e2e:ui` | Run Playwright tests with interactive UI |
+| Script                | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `npm run dev`         | Start Vite dev server with HTTPS and HMR    |
+| `npm run build`       | Type-check (`tsc -b`) then bundle with Vite |
+| `npm run preview`     | Serve the production build locally          |
+| `npm run typecheck`   | Type-check only (no emit, no bundle)        |
+| `npm run lint`        | Run ESLint (flat config, type-checked)      |
+| `npm run lint:fix`    | Run ESLint with auto-fix                    |
+| `npm test`            | Run unit tests once (vitest + jsdom)        |
+| `npm run test:watch`  | Run unit tests in watch mode                |
+| `npm run test:e2e`    | Run Playwright end-to-end tests             |
+| `npm run test:e2e:ui` | Run Playwright tests with interactive UI    |
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Framework | React 19 |
-| Language | TypeScript (strict mode, no `any`) |
-| Build | Vite 6 |
-| Routing | TanStack Router (file-based, auto code-splitting) |
-| Server state | TanStack Query |
-| Styling | Tailwind CSS 4 |
-| Components | Shadcn/ui (Radix UI primitives) |
-| Icons | Lucide React |
-| Validation | Zod |
-| Unit tests | Vitest + Testing Library + jsdom |
-| E2E tests | Playwright |
-| Linting | ESLint 9 (flat config) + typescript-eslint 8 |
+| Layer        | Technology                                        |
+| ------------ | ------------------------------------------------- |
+| Framework    | React 19                                          |
+| Language     | TypeScript (strict mode, no `any`)                |
+| Build        | Vite 6                                            |
+| Routing      | TanStack Router (file-based, auto code-splitting) |
+| Server state | TanStack Query                                    |
+| Styling      | Tailwind CSS 4                                    |
+| Components   | Shadcn/ui (Radix UI primitives)                   |
+| Icons        | Lucide React                                      |
+| Validation   | Zod                                               |
+| Unit tests   | Vitest + Testing Library + jsdom                  |
+| E2E tests    | Playwright                                        |
+| Linting      | ESLint 9 (flat config) + typescript-eslint 8      |
 
 ## Project Structure
 

@@ -1,8 +1,19 @@
-import { errorResponse, slugParam } from '../shared/schemas.js'
+import { errorResponse, slugParam } from '../shared/schemas.js';
 
 const manufacturerItem = {
   type: 'object',
-  required: ['id', 'name', 'slug', 'is_official_licensee', 'country', 'website_url', 'aliases', 'notes', 'created_at', 'updated_at'],
+  required: [
+    'id',
+    'name',
+    'slug',
+    'is_official_licensee',
+    'country',
+    'website_url',
+    'aliases',
+    'notes',
+    'created_at',
+    'updated_at',
+  ],
   additionalProperties: false,
   properties: {
     id: { type: 'string' },
@@ -16,7 +27,7 @@ const manufacturerItem = {
     created_at: { type: 'string' },
     updated_at: { type: 'string' },
   },
-} as const
+} as const;
 
 export const listManufacturersSchema = {
   description: 'List all manufacturers.',
@@ -33,7 +44,7 @@ export const listManufacturersSchema = {
     },
     500: errorResponse,
   },
-} as const
+} as const;
 
 export const getManufacturerSchema = {
   description: 'Get a manufacturer by slug.',
@@ -45,4 +56,4 @@ export const getManufacturerSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;

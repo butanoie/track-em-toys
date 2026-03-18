@@ -19,13 +19,13 @@ track-em-toys/
 
 ## Prerequisites
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| [Node.js](https://nodejs.org/) | 22 LTS | API and web dev servers |
-| [PostgreSQL](https://www.postgresql.org/) | 17+ | Database |
-| [dbmate](https://github.com/amacneil/dbmate#installation) | Latest | Database migrations |
-| [mkcert](https://github.com/FiloSottile/mkcert) | Latest | Local HTTPS certificates |
-| [Xcode](https://developer.apple.com/xcode/) | 26.2 | iOS/macOS app (requires Apple Developer account) |
+| Tool                                                      | Version | Purpose                                          |
+| --------------------------------------------------------- | ------- | ------------------------------------------------ |
+| [Node.js](https://nodejs.org/)                            | 22 LTS  | API and web dev servers                          |
+| [PostgreSQL](https://www.postgresql.org/)                 | 17+     | Database                                         |
+| [dbmate](https://github.com/amacneil/dbmate#installation) | Latest  | Database migrations                              |
+| [mkcert](https://github.com/FiloSottile/mkcert)           | Latest  | Local HTTPS certificates                         |
+| [Xcode](https://developer.apple.com/xcode/)               | 26.2    | iOS/macOS app (requires Apple Developer account) |
 
 ## Quick Start
 
@@ -73,16 +73,16 @@ See [`ml/README.md`](ml/README.md) and [`ml/TRAINING.md`](ml/TRAINING.md) for th
 
 ## Development Commands
 
-| Command | Description |
-|---------|-------------|
-| `cd api && npm run dev` | API dev server with hot reload |
-| `cd api && npm test` | API tests + lint |
-| `cd api && npm run typecheck` | API type-check (no emit) |
-| `cd web && npm run dev` | Web dev server (Vite) |
-| `cd web && npm test` | Web unit tests (vitest) |
-| `cd web && npm run test:e2e` | Web E2E tests (Playwright) |
-| `cd web && npm run lint` | Web ESLint |
-| `cd web && npm run typecheck` | Web type-check (tsc -b) |
+| Command                       | Description                    |
+| ----------------------------- | ------------------------------ |
+| `cd api && npm run dev`       | API dev server with hot reload |
+| `cd api && npm test`          | API tests + lint               |
+| `cd api && npm run typecheck` | API type-check (no emit)       |
+| `cd web && npm run dev`       | Web dev server (Vite)          |
+| `cd web && npm test`          | Web unit tests (vitest)        |
+| `cd web && npm run test:e2e`  | Web E2E tests (Playwright)     |
+| `cd web && npm run lint`      | Web ESLint                     |
+| `cd web && npm run typecheck` | Web type-check (tsc -b)        |
 
 ## Architecture
 
@@ -109,27 +109,27 @@ See [`docs/plans/Development_Roadmap_v1_0.md`](docs/plans/Development_Roadmap_v1
 
 ### Project Status
 
-| Phase | Description | Status |
-|-------|-------------|--------|
-| **Foundation (Complete)** | | |
-| 1.1 | Database migrations (auth tables, RLS) | ✅ Complete |
-| 1.2 | API authentication (OAuth2, ES256 JWT, token rotation) | ✅ Complete |
-| 1.3 | Web SPA authentication (Google + Apple Sign-In) | ✅ Complete |
-| — | Account settings UI, Apple webhooks, API docs (Swagger + Scalar) | ✅ Complete |
-| **ML Track (Active)** | | |
-| 1.4 | Catalog schema & seed data (migrations 011–013, seed JSON, validation tests) | 🔄 In Progress |
-| 1.5 | Catalog API routes (read-only REST with full-text search) | Planned |
-| 1.5b | User roles & admin foundation (user/curator/admin, requireRole middleware) | Planned |
-| 1.7 | Web catalog browsing UI (grid/list, detail pages, search) | Planned |
-| 1.9 | Photo management (catalog photo upload, thumbnails, ML training export) | Planned |
-| 4.0 | ML training pipeline (Create ML, transfer learning, model serving) | Planned |
-| 2.0 | iOS app with on-device Core ML inference + barcode scanning | Planned |
-| **Parallel** | | |
-| 1.12 | Account security & GDPR compliance (account deletion, PII scrubbing) | Planned |
-| **Post-ML (Deferred)** | | |
-| 1.6 | Collection schema & API (private CRUD with RLS) | Deferred |
-| 1.8 | Web collection management UI | Deferred |
-| 1.10 | CSV import | Deferred |
-| 1.11 | Basic reporting & dashboard | Deferred |
-| 3.0 | Pricing integration (eBay API, valuation, insurance reports) | Deferred |
-| 5.0 | Polish & expansion (object detection, Android, community features) | Deferred |
+| Phase                     | Description                                                                  | Status         |
+| ------------------------- | ---------------------------------------------------------------------------- | -------------- |
+| **Foundation (Complete)** |                                                                              |                |
+| 1.1                       | Database migrations (auth tables, RLS)                                       | ✅ Complete    |
+| 1.2                       | API authentication (OAuth2, ES256 JWT, token rotation)                       | ✅ Complete    |
+| 1.3                       | Web SPA authentication (Google + Apple Sign-In)                              | ✅ Complete    |
+| —                         | Account settings UI, Apple webhooks, API docs (Swagger + Scalar)             | ✅ Complete    |
+| **ML Track (Active)**     |                                                                              |                |
+| 1.4                       | Catalog schema & seed data (migrations 011–013, seed JSON, validation tests) | 🔄 In Progress |
+| 1.5                       | Catalog API routes (read-only REST with full-text search)                    | Planned        |
+| 1.5b                      | User roles & admin foundation (user/curator/admin, requireRole middleware)   | Planned        |
+| 1.7                       | Web catalog browsing UI (grid/list, detail pages, search)                    | Planned        |
+| 1.9                       | Photo management (catalog photo upload, thumbnails, ML training export)      | Planned        |
+| 4.0                       | ML training pipeline (Create ML, transfer learning, model serving)           | Planned        |
+| 2.0                       | iOS app with on-device Core ML inference + barcode scanning                  | Planned        |
+| **Parallel**              |                                                                              |                |
+| 1.12                      | Account security & GDPR compliance (account deletion, PII scrubbing)         | Planned        |
+| **Post-ML (Deferred)**    |                                                                              |                |
+| 1.6                       | Collection schema & API (private CRUD with RLS)                              | Deferred       |
+| 1.8                       | Web collection management UI                                                 | Deferred       |
+| 1.10                      | CSV import                                                                   | Deferred       |
+| 1.11                      | Basic reporting & dashboard                                                  | Deferred       |
+| 3.0                       | Pricing integration (eBay API, valuation, insurance reports)                 | Deferred       |
+| 5.0                       | Polish & expansion (object detection, Android, community features)           | Deferred       |

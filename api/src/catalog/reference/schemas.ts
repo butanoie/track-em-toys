@@ -1,4 +1,4 @@
-import { errorResponse, franchiseParam, franchiseSlugParams, nullableSlugNameRef } from '../shared/schemas.js'
+import { errorResponse, franchiseParam, franchiseSlugParams, nullableSlugNameRef } from '../shared/schemas.js';
 
 // ---------------------------------------------------------------------------
 // Factions
@@ -15,7 +15,7 @@ const factionItem = {
     notes: { type: ['string', 'null'] },
     created_at: { type: 'string' },
   },
-} as const
+} as const;
 
 export const listFactionsSchema = {
   description: 'List factions in a franchise.',
@@ -32,7 +32,7 @@ export const listFactionsSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;
 
 export const getFactionSchema = {
   description: 'Get a faction by slug within a franchise.',
@@ -44,7 +44,7 @@ export const getFactionSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;
 
 // ---------------------------------------------------------------------------
 // Sub-Groups
@@ -62,7 +62,7 @@ const subGroupItem = {
     notes: { type: ['string', 'null'] },
     created_at: { type: 'string' },
   },
-} as const
+} as const;
 
 export const listSubGroupsSchema = {
   description: 'List sub-groups in a franchise.',
@@ -79,7 +79,7 @@ export const listSubGroupsSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;
 
 export const getSubGroupSchema = {
   description: 'Get a sub-group by slug within a franchise.',
@@ -91,7 +91,7 @@ export const getSubGroupSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;
 
 // ---------------------------------------------------------------------------
 // Continuity Families
@@ -109,7 +109,7 @@ const continuityFamilyItem = {
     notes: { type: ['string', 'null'] },
     created_at: { type: 'string' },
   },
-} as const
+} as const;
 
 export const listContinuityFamiliesSchema = {
   description: 'List continuity families in a franchise.',
@@ -126,7 +126,7 @@ export const listContinuityFamiliesSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;
 
 export const getContinuityFamilySchema = {
   description: 'Get a continuity family by slug within a franchise.',
@@ -138,4 +138,4 @@ export const getContinuityFamilySchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;

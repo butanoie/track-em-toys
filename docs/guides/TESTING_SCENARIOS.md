@@ -2,7 +2,7 @@
 
 A testing approach where behavior specifications (Gherkin-syntax scenarios) are written as documentation before test code. This creates a traceable link from requirement to running test — without the overhead of BDD tooling.
 
-> **Note:** This project uses plain Playwright and Vitest — not Cucumber or playwright-bdd. See [ADR: Integration Testing Strategy](../decisions/ADR_Integration_Testing_Strategy.md) for the rationale. Gherkin is used here as a *specification language in markdown docs*, not as executable feature files.
+> **Note:** This project uses plain Playwright and Vitest — not Cucumber or playwright-bdd. See [ADR: Integration Testing Strategy](../decisions/ADR_Integration_Testing_Strategy.md) for the rationale. Gherkin is used here as a _specification language in markdown docs_, not as executable feature files.
 
 ## The Pattern
 
@@ -68,11 +68,11 @@ Scenario: OAuth provider returns an error
 Each scenario document maps to one or more spec files. The mapping table in `docs/test-scenarios/README.md` tracks this relationship.
 
 ```markdown
-| Scenario Document | Spec File | Status |
-|---|---|---|
-| E2E_AUTHENTICATION.md | web/e2e/login-page.spec.ts | ✅ Implemented |
+| Scenario Document       | Spec File                        | Status         |
+| ----------------------- | -------------------------------- | -------------- |
+| E2E_AUTHENTICATION.md   | web/e2e/login-page.spec.ts       | ✅ Implemented |
 | E2E_PROTECTED_ROUTES.md | web/e2e/protected-routes.spec.ts | ✅ Implemented |
-| INT_TOKEN_REFRESH.md | api/src/auth/routes.test.ts | ✅ Implemented |
+| INT_TOKEN_REFRESH.md    | api/src/auth/routes.test.ts      | ✅ Implemented |
 ```
 
 ## Gherkin in Test Code
@@ -84,9 +84,9 @@ For new tests, use Given/When/Then shorthand in test titles. This makes test int
 ```typescript
 // Recommended for new tests
 test('Given unauthenticated user, When navigating to /, Then redirected to /login', async ({ page }) => {
-  await page.goto('/')
-  await expect(page).toHaveURL(/\/login/)
-})
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/login/);
+});
 ```
 
 ### Existing Tests
@@ -108,10 +108,10 @@ For tests covering multi-step flows, include the full Gherkin scenario as JSDoc:
  * ```
  */
 test('Given valid session, When navigating to /, Then dashboard is displayed', async ({ page }) => {
-  await setupAuthenticated(page)
-  await page.goto('/')
-  await expect(page.getByRole('heading', { name: /your collection/i })).toBeVisible()
-})
+  await setupAuthenticated(page);
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: /your collection/i })).toBeVisible();
+});
 ````
 
 ## When to Write Scenario Docs
@@ -119,6 +119,7 @@ test('Given valid session, When navigating to /, Then dashboard is displayed', a
 ### Required (Feature Development)
 
 During Phase 4 (Architecture Design) of non-trivial features, write scenario documents covering:
+
 - **Happy path** — the primary success flow
 - **Error cases** — what happens when things go wrong
 - **Edge cases** — boundary conditions, empty states, concurrent access

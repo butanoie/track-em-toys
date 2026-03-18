@@ -41,25 +41,25 @@ Utility-first styling cuts layout iteration time by 60–70% compared to CSS-in-
 
 ### Key Dependency Choices
 
-| Choice | Why |
-|--------|-----|
-| **Vite** (not CRA) | 10–100x faster builds; native ES modules; CRA is effectively deprecated |
+| Choice                              | Why                                                                                       |
+| ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| **Vite** (not CRA)                  | 10–100x faster builds; native ES modules; CRA is effectively deprecated                   |
 | **TanStack Query** (not Apollo/SWR) | Best server-state management for data-heavy catalog; caching, deduplication, invalidation |
-| **React Hook Form + Zod** | Modern form handling standard; schema-based validation with TypeScript integration |
-| **Vitest + Testing Library** | Gold standard for React testing in 2026 |
+| **React Hook Form + Zod**           | Modern form handling standard; schema-based validation with TypeScript integration        |
+| **Vitest + Testing Library**        | Gold standard for React testing in 2026                                                   |
 
 ---
 
 ## Comparison Table
 
-| Criterion | Shadcn/ui + Tailwind | Material-UI | Chakra UI | Nuxt UI (Vue) |
-|-----------|---|---|---|---|
-| **Component richness** | 50+ (copy-paste) | 60+ (npm) | 40+ (npm) | 50+ (copy-paste) |
-| **Customization ease** | Excellent (own code) | Good (overrides) | Excellent (sx prop) | Excellent (own code) |
-| **Bundle size (typical)** | 40–50 KB | 80–120 KB | 60–80 KB | 40–50 KB |
-| **Design system lock-in** | None | High | Medium | None |
-| **DataTable component** | TanStack Table (excellent) | MUI DataGrid (good) | Community (adequate) | Community (adequate) |
-| **Ecosystem size** | Largest (React) | Large (React) | Large (React) | Medium (Vue) |
+| Criterion                 | Shadcn/ui + Tailwind       | Material-UI         | Chakra UI            | Nuxt UI (Vue)        |
+| ------------------------- | -------------------------- | ------------------- | -------------------- | -------------------- |
+| **Component richness**    | 50+ (copy-paste)           | 60+ (npm)           | 40+ (npm)            | 50+ (copy-paste)     |
+| **Customization ease**    | Excellent (own code)       | Good (overrides)    | Excellent (sx prop)  | Excellent (own code) |
+| **Bundle size (typical)** | 40–50 KB                   | 80–120 KB           | 60–80 KB             | 40–50 KB             |
+| **Design system lock-in** | None                       | High                | Medium               | None                 |
+| **DataTable component**   | TanStack Table (excellent) | MUI DataGrid (good) | Community (adequate) | Community (adequate) |
+| **Ecosystem size**        | Largest (React)            | Large (React)       | Large (React)        | Medium (Vue)         |
 
 ---
 
@@ -82,12 +82,14 @@ The iOS app is the primary field-use tool (barcode scanning, photo capture, ML i
 ## Consequences
 
 **Positive:**
+
 - Zero framework lock-in — components are owned source code, not npm dependencies
 - Small bundle size (~40–50 KB gzipped for 10–15 components)
 - Full TypeScript support throughout the stack
 - TanStack Table handles 10,000+ item collections without performance issues
 
 **Negative:**
+
 - Shadcn/ui components require manual updates (no `npm update` — must re-copy from upstream)
 - Tailwind utility classes can make JSX verbose for complex layouts
 
@@ -97,10 +99,10 @@ The iOS app is the primary field-use tool (barcode scanning, photo capture, ML i
 
 ## Summary
 
-| Decision | Why |
-|----------|-----|
-| React 19 (not Vue) | Largest ecosystem, most third-party tool maturity |
-| Shadcn/ui (not Material-UI) | No lock-in; copy-paste components you own |
-| Tailwind (not CSS-in-JS) | 60–70% faster layout iteration |
+| Decision                        | Why                                                 |
+| ------------------------------- | --------------------------------------------------- |
+| React 19 (not Vue)              | Largest ecosystem, most third-party tool maturity   |
+| Shadcn/ui (not Material-UI)     | No lock-in; copy-paste components you own           |
+| Tailwind (not CSS-in-JS)        | 60–70% faster layout iteration                      |
 | TanStack Query (not Apollo/SWR) | Best server-state management for data-heavy catalog |
-| Vite (not CRA) | 10–100x faster builds; CRA is deprecated |
+| Vite (not CRA)                  | 10–100x faster builds; CRA is deprecated            |

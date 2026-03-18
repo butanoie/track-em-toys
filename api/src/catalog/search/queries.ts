@@ -1,20 +1,20 @@
-import { pool } from '../../db/pool.js'
+import { pool } from '../../db/pool.js';
 
 export interface SearchResultRow {
-  entity_type: 'character' | 'item'
-  id: string
-  name: string
-  slug: string
-  franchise_slug: string
-  franchise_name: string
-  rank: number
+  entity_type: 'character' | 'item';
+  id: string;
+  name: string;
+  slug: string;
+  franchise_slug: string;
+  franchise_name: string;
+  rank: number;
 }
 
 export interface SearchParams {
-  query: string
-  franchiseSlug: string | null
-  limit: number
-  offset: number
+  query: string;
+  franchiseSlug: string | null;
+  limit: number;
+  offset: number;
 }
 
 /**
@@ -35,16 +35,16 @@ export function buildSearchTsquery(input: string): string | null {
     .replace(/-/g, ' ')
     .replace(/[^\w\s]/g, '')
     .split(/\s+/)
-    .filter((t) => t.length > 0)
+    .filter((t) => t.length > 0);
 
-  if (tokens.length === 0) return null
+  if (tokens.length === 0) return null;
 
   const parts = tokens.map((token, i) => {
-    const escaped = token.replace(/'/g, "''")
-    return i === tokens.length - 1 ? `'${escaped}':*` : `'${escaped}'`
-  })
+    const escaped = token.replace(/'/g, "''");
+    return i === tokens.length - 1 ? `'${escaped}':*` : `'${escaped}'`;
+  });
 
-  return parts.join(' & ')
+  return parts.join(' & ');
 }
 
 /**
@@ -52,14 +52,12 @@ export function buildSearchTsquery(input: string): string | null {
  *
  * @param params - Search query parameters
  */
-export async function searchCatalog(
-  params: SearchParams,
-): Promise<{ rows: SearchResultRow[]; totalCount: number }> {
-  const { query, franchiseSlug, limit, offset } = params
+export async function searchCatalog(params: SearchParams): Promise<{ rows: SearchResultRow[]; totalCount: number }> {
+  const { query, franchiseSlug, limit, offset } = params;
 
-  const tsqueryStr = buildSearchTsquery(query)
+  const tsqueryStr = buildSearchTsquery(query);
   if (!tsqueryStr) {
-    return { rows: [], totalCount: 0 }
+    return { rows: [], totalCount: 0 };
   }
 
   const dataQuery = `
@@ -85,7 +83,7 @@ export async function searchCatalog(
          AND ($2::text IS NULL OR fr.slug = $2)
     ) results
     ORDER BY rank DESC, name ASC, entity_type ASC, id ASC
-    LIMIT $3 OFFSET $4`
+    LIMIT $3 OFFSET $4`;
 
   const countQuery = `
     SELECT (
@@ -100,15 +98,15 @@ export async function searchCatalog(
          JOIN franchises fr ON fr.id = i.franchise_id
         WHERE i.search_vector @@ to_tsquery('simple', $1)
           AND ($2::text IS NULL OR fr.slug = $2))
-    ) AS total_count`
+    ) AS total_count`;
 
   const [dataResult, countResult] = await Promise.all([
     pool.query<SearchResultRow>(dataQuery, [tsqueryStr, franchiseSlug, limit, offset]),
     pool.query<{ total_count: number }>(countQuery, [tsqueryStr, franchiseSlug]),
-  ])
+  ]);
 
   return {
     rows: dataResult.rows,
     totalCount: countResult.rows[0]?.total_count ?? 0,
-  }
+  };
 }

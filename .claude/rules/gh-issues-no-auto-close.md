@@ -1,6 +1,7 @@
 NEVER close or complete GitHub issues via `gh issue close` or similar commands.
 
 Issues can only be closed by:
+
 1. Manual confirmation from the user
 2. A merged pull request that references the issue
 

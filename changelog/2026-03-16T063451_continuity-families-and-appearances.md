@@ -11,29 +11,35 @@ Normalized the free-text `series` and `continuity` columns on `characters` into 
 ## Changes
 
 ### New Tables
+
 - **`continuity_families`** — Reference table (10 entries: G1, Beast Era, Unicron Trilogy, Live-Action Movies, Animated, Aligned/Prime, Cyberverse, EarthSpark, Transformers One, Robots in Disguise 2001). The identity boundary for characters — same name in different families = different character.
 - **`character_appearances`** — Editable entity tracking a character's visual depiction in specific media. Items optionally link to an appearance via `character_appearance_id`.
 
 ### Modified Tables
+
 - **`characters`** — Added `continuity_family_id UUID NOT NULL FK → continuity_families`. Dropped `series` and `continuity` TEXT columns. Replaced unique index with `(lower(name), lower(franchise), continuity_family_id)`.
 - **`items`** — Added nullable `character_appearance_id UUID FK → character_appearances` and nullable `size_class TEXT`.
 
 ### Seed Data
+
 - New: `api/db/seed/reference/continuity_families.json` (10 families)
 - Updated: All 10 character seed files — added `continuity_family_slug: "g1"`, kept `series`/`continuity` as reference-only fields
 
 ### Types
+
 - Added `ContinuityFamily` and `CharacterAppearance` interfaces
 - Updated `Character` (removed `series`/`continuity`, added `continuity_family_id`)
 - Updated `Item` (added `character_appearance_id`, `size_class`)
 
 ### Tests
+
 - 490 tests passing (up from 477)
 - Added continuity families to all reference table validation loops
 - Added `continuity_family_slug` FK integrity test
 - Updated uniqueness test to use `continuity_family_slug`
 
 ### Documentation
+
 - Updated `docs/decisions/Schema_Design_Rationale.md` — new sections 3a (continuity families), 3b (character appearances), 3c (size class)
 - Updated `docs/diagrams/toy-catalog-database-diagrams.jsx` — new table cards and relationships
 - Updated `api/db/seed/README.md` — import order and column mapping

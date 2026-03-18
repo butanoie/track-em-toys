@@ -1,6 +1,6 @@
-import type { FastifyInstance } from 'fastify'
-import { listManufacturers, getManufacturerBySlug } from './queries.js'
-import { listManufacturersSchema, getManufacturerSchema } from './schemas.js'
+import type { FastifyInstance } from 'fastify';
+import { listManufacturers, getManufacturerBySlug } from './queries.js';
+import { listManufacturersSchema, getManufacturerSchema } from './schemas.js';
 
 /**
  * Register manufacturer catalog routes.
@@ -17,10 +17,10 @@ export async function manufacturerRoutes(fastify: FastifyInstance, _opts: object
       config: { rateLimit: { max: 100, timeWindow: '1 minute' } },
     },
     async () => {
-      const data = await listManufacturers()
-      return { data }
-    },
-  )
+      const data = await listManufacturers();
+      return { data };
+    }
+  );
 
   fastify.get<{ Params: { slug: string } }>(
     '/:slug',
@@ -29,11 +29,11 @@ export async function manufacturerRoutes(fastify: FastifyInstance, _opts: object
       config: { rateLimit: { max: 100, timeWindow: '1 minute' } },
     },
     async (request, reply) => {
-      const manufacturer = await getManufacturerBySlug(request.params.slug)
+      const manufacturer = await getManufacturerBySlug(request.params.slug);
       if (!manufacturer) {
-        return reply.code(404).send({ error: 'Manufacturer not found' })
+        return reply.code(404).send({ error: 'Manufacturer not found' });
       }
-      return manufacturer
-    },
-  )
+      return manufacturer;
+    }
+  );
 }

@@ -1,4 +1,4 @@
-import { errorResponse } from '../catalog/shared/schemas.js'
+import { errorResponse } from '../catalog/shared/schemas.js';
 
 /** Reusable admin user item shape for list and detail responses. */
 const adminUserSchema = {
@@ -15,7 +15,7 @@ const adminUserSchema = {
     deleted_at: { type: ['string', 'null'] },
     created_at: { type: 'string' },
   },
-} as const
+} as const;
 
 const uuidParam = {
   type: 'object',
@@ -23,7 +23,7 @@ const uuidParam = {
   properties: {
     id: { type: 'string', format: 'uuid' },
   },
-} as const
+} as const;
 
 /** GET /admin/users */
 export const listUsersSchema = {
@@ -56,11 +56,11 @@ export const listUsersSchema = {
     401: errorResponse,
     403: errorResponse,
   },
-} as const
+} as const;
 
 /** PATCH /admin/users/:id/role */
 export const patchUserRoleSchema = {
-  description: 'Change a user\'s role. Cannot modify own role or assign above own level. Requires admin role.',
+  description: "Change a user's role. Cannot modify own role or assign above own level. Requires admin role.",
   tags: ['admin'],
   summary: 'Assign role',
   security: [{ bearerAuth: [] }],
@@ -81,7 +81,7 @@ export const patchUserRoleSchema = {
     404: errorResponse,
     409: errorResponse,
   },
-} as const
+} as const;
 
 /** POST /admin/users/:id/deactivate */
 export const deactivateUserSchema = {
@@ -97,11 +97,12 @@ export const deactivateUserSchema = {
     404: errorResponse,
     409: errorResponse,
   },
-} as const
+} as const;
 
 /** POST /admin/users/:id/reactivate */
 export const reactivateUserSchema = {
-  description: 'Reactivate a previously deactivated user account. The user must re-authenticate via OAuth. Requires admin role.',
+  description:
+    'Reactivate a previously deactivated user account. The user must re-authenticate via OAuth. Requires admin role.',
   tags: ['admin'],
   summary: 'Reactivate user',
   security: [{ bearerAuth: [] }],
@@ -113,11 +114,12 @@ export const reactivateUserSchema = {
     404: errorResponse,
     409: errorResponse,
   },
-} as const
+} as const;
 
 /** DELETE /admin/users/:id */
 export const deleteUserSchema = {
-  description: 'GDPR-compliant user deletion: scrub PII, hard-delete auth data, preserve tombstone row. Requires admin role.',
+  description:
+    'GDPR-compliant user deletion: scrub PII, hard-delete auth data, preserve tombstone row. Requires admin role.',
   tags: ['admin'],
   summary: 'GDPR purge user',
   security: [{ bearerAuth: [] }],
@@ -129,4 +131,4 @@ export const deleteUserSchema = {
     404: errorResponse,
     409: errorResponse,
   },
-} as const
+} as const;

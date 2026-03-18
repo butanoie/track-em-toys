@@ -19,11 +19,13 @@ Added the complete iOS/macOS Xcode project with multiplatform support (iPhone + 
 Complete Xcode project setup for the multiplatform iOS/macOS app, referencing existing Swift source files created in a prior phase.
 
 **Created:**
+
 - `ios/track-em-toys.xcodeproj/` — Xcode project with iOS + macOS destinations, Swift 6, SwiftUI
 - `ios/track-em-toys/Assets.xcassets/` — Asset catalog (app icon, accent color)
 - `ios/track-em-toys/Info.plist.example` — Template for Google Sign-In URL scheme config
 
 **Source files staged (written in prior phase, first time committed):**
+
 - `ios/track-em-toys/App/TrackEmToysApp.swift` — App entry point
 - `ios/track-em-toys/Auth/` — AuthManager, AuthView, AppleSignInCoordinator, GoogleSignInCoordinator, KeychainService
 - `ios/track-em-toys/Networking/` — APIClient, AuthEndpoints, NetworkModels
@@ -35,15 +37,18 @@ Complete Xcode project setup for the multiplatform iOS/macOS app, referencing ex
 Three issues preventing Apple Sign-In on the native macOS and iOS clients:
 
 **a) Missing network entitlement (macOS App Sandbox)**
+
 - Added `com.apple.security.network.client = true` to `track-em-toys.entitlements`
 - Without this, macOS sandbox blocks all outgoing network connections (`NSURLErrorDomain -1003`)
 
 **b) Incorrect API port and hostname**
+
 - Changed debug base URL from `https://localhost:3000` to `https://127.0.0.1:3010`
 - Port 3010 matches the actual Fastify server configuration
 - `127.0.0.1` avoids IPv6 loopback issues (macOS resolves `localhost` to `::1` first, but Fastify binds to `0.0.0.0` IPv4-only)
 
 **c) Nonce hash mismatch**
+
 - Changed `AuthManager.signInWithApple()` to send `SHA256(rawNonce)` instead of `rawNonce`
 - The `apple-signin-auth` library compares the nonce parameter directly against Apple's ID token claim, which contains the hashed nonce
 - Fixed: `nonce: AppleSignInCoordinator.sha256Hex(result.rawNonce)`
@@ -51,21 +56,25 @@ Three issues preventing Apple Sign-In on the native macOS and iOS clients:
 ### 3. TLS / mkcert Documentation
 
 **Modified:**
+
 - `api/README.md` — Added TLS section: env vars, mkcert cert generation, iOS Simulator CA trust, cert regeneration instructions. Fixed Apple Sign-In nonce docs (was "raw nonce", now "SHA-256 hex hash").
 
 ### 4. iOS Setup Guide
 
 **Created:**
+
 - `docs/iOS_Xcode_Project_Setup_Guide.md` — Step-by-step guide covering project creation, file wiring, build settings, SPM dependencies, Google OAuth plist, signing & capabilities (including network entitlement), TLS cert setup, iOS Simulator CA injection, and troubleshooting table
 
 ### 5. iOS Auth Architecture Blueprint
 
 **Created:**
+
 - `docs/iOS_Authentication_Architecture_Blueprint.md` — Architecture document for the iOS auth layer design decisions
 
 ### 6. Miscellaneous Updates
 
 **Modified:**
+
 - `.gitignore` — Added `ios/track-em-toys/Info.plist` and `*.apps.googleusercontent.com.plist` (developer-specific OAuth config)
 - `CLAUDE.md` — Updated minimum deployment targets from iOS 17/macOS 14 to iOS 26.2/macOS 26.2
 - `docs/Toy_Collection_Catalog_Requirements_v1_0.md` — Updated device baselines (iPhone 15 Pro+) and iOS minimum (26.2+)
@@ -133,6 +142,7 @@ Must be repeated after erasing a simulator or using a new instance.
 ## Related Files
 
 **Created (33 files):**
+
 - `ios/track-em-toys.xcodeproj/` (project, workspace, package resolved, scheme management)
 - `ios/track-em-toys/` (app source, auth, networking, assets, entitlements)
 - `ios/track-em-toysTests/` (auth tests, networking tests)
@@ -140,6 +150,7 @@ Must be repeated after erasing a simulator or using a new instance.
 - `docs/iOS_Authentication_Architecture_Blueprint.md`
 
 **Modified (4 files):**
+
 - `.gitignore` — iOS-specific ignores
 - `CLAUDE.md` — deployment target update
 - `api/README.md` — TLS docs, nonce docs
@@ -149,15 +160,15 @@ Must be repeated after erasing a simulator or using a new instance.
 
 ## Summary Statistics
 
-| Metric | Value |
-|--------|-------|
-| Files created | 29 |
-| Files modified | 4 |
-| Total lines added | ~4,055 |
-| Swift source files | 9 |
-| Swift test files | 6 |
-| Documentation files | 2 |
-| Bug fixes | 3 (entitlement, port, nonce) |
+| Metric              | Value                        |
+| ------------------- | ---------------------------- |
+| Files created       | 29                           |
+| Files modified      | 4                            |
+| Total lines added   | ~4,055                       |
+| Swift source files  | 9                            |
+| Swift test files    | 6                            |
+| Documentation files | 2                            |
+| Bug fixes           | 3 (entitlement, port, nonce) |
 
 ---
 

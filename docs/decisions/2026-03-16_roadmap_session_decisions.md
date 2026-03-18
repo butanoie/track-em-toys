@@ -41,10 +41,10 @@
 
 **Decision:** There are two distinct types of photos with different privacy models:
 
-| Domain | Table | Visibility | RLS | ML Training | When |
-|--------|-------|-----------|-----|-------------|------|
-| **Catalog photos** | `item_photos` | Shared, all users see them | None | Yes — directly, no consent needed | Phase 1.9 (ML path) |
-| **User collection photos** | New table (TBD) | Private to owner | Yes, via `uploaded_by` + RLS | No (or opt-in later) | Post-ML with Phase 1.6 |
+| Domain                     | Table           | Visibility                 | RLS                          | ML Training                       | When                   |
+| -------------------------- | --------------- | -------------------------- | ---------------------------- | --------------------------------- | ---------------------- |
+| **Catalog photos**         | `item_photos`   | Shared, all users see them | None                         | Yes — directly, no consent needed | Phase 1.9 (ML path)    |
+| **User collection photos** | New table (TBD) | Private to owner           | Yes, via `uploaded_by` + RLS | No (or opt-in later)              | Post-ML with Phase 1.6 |
 
 **Rationale:** Catalog photos are centrally managed app content (product shots, box art) — reference images that all users see. They feed ML training directly because they are app-managed, not user PII. User collection photos (condition shots of their own items) are personal and private — these come later with the collection schema.
 
@@ -57,6 +57,7 @@
 **Decision:** Add a GDPR-compliant account deletion feature to the roadmap.
 
 **Scope:**
+
 - `DELETE /auth/account` endpoint with PII scrubbing (tombstone pattern)
 - Hard-delete refresh tokens, OAuth accounts
 - Remove user's catalog photo contributions from storage
@@ -72,11 +73,13 @@
 **Decision:** Implement user roles and admin functionality within the same web application, using role-gated routes with code-splitting. Do not build a separate admin app.
 
 **Roles:**
+
 - `user` — Browse catalog, manage own collection (post-ML)
 - `curator` — All user powers + manage catalog items, characters, photos, review edits
 - `admin` — All curator powers + user management, role assignment, account operations
 
 **Implementation:**
+
 - `users.role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'curator', 'admin'))`
 - `requireRole()` Fastify preHandler middleware
 - Role included in JWT access token claims
@@ -84,6 +87,7 @@
 - First user bootstrapped as admin via CLI command
 
 **Alternatives considered:**
+
 1. **Role column, same app** — Too simple, no code-splitting
 2. **Separate admin app** — Strongest security but doubles maintenance burden; overkill for current scale
 3. **Hybrid (chosen)** — Role column + same app + code-split admin routes. Can extract to separate app later if security requirements tighten.
@@ -97,6 +101,7 @@
 **Decision:** Use GitHub Projects v2 + Milestones + structured labels for project tracking.
 
 **Structure:**
+
 - **Projects v2:** "Track'em Toys Roadmap" with custom fields (Priority, Phase, Effort, Track)
 - **Milestones:** One per sub-phase (1.4, 1.5, 1.5b, 1.7, 1.9, 1.12, 4.0, 2.0 active; 1.6, 1.8, 1.10, 1.11, 3.0, 5.0 deferred)
 - **Labels:** `namespace:value` pattern — `type:*`, `phase:*`, `priority:*`, module labels

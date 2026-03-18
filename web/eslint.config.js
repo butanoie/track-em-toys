@@ -1,9 +1,10 @@
 // @ts-check
 
-import eslint from '@eslint/js'
-import tseslint from 'typescript-eslint'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import prettierConfig from 'eslint-config-prettier';
 
 // Shared rule relaxations for all test files (vitest unit tests + Playwright E2E)
 const testRuleOverrides = /** @type {const} */ ({
@@ -19,17 +20,11 @@ const testRuleOverrides = /** @type {const} */ ({
   '@typescript-eslint/no-unnecessary-type-assertion': 'off',
   '@typescript-eslint/consistent-type-assertions': 'off',
   '@typescript-eslint/no-misused-promises': 'off',
-})
+});
 
 export default tseslint.config(
   {
-    ignores: [
-      'dist/**',
-      'node_modules/**',
-      'src/routeTree.gen.ts',
-      'playwright-report/**',
-      'test-results/**',
-    ],
+    ignores: ['dist/**', 'node_modules/**', 'src/routeTree.gen.ts', 'playwright-report/**', 'test-results/**'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -50,10 +45,13 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      '@typescript-eslint/consistent-type-assertions': ['error', {
-        assertionStyle: 'as',
-        objectLiteralTypeAssertions: 'never',
-      }],
+      '@typescript-eslint/consistent-type-assertions': [
+        'error',
+        {
+          assertionStyle: 'as',
+          objectLiteralTypeAssertions: 'never',
+        },
+      ],
 
       // Prevent bare `as T` without runtime check (project CLAUDE.md rule)
       '@typescript-eslint/no-unsafe-assignment': 'error',
@@ -79,9 +77,12 @@ export default tseslint.config(
       'react-refresh': reactRefresh,
     },
     rules: {
-      'react-refresh/only-export-components': ['warn', {
-        allowConstantExport: true,
-      }],
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
+        },
+      ],
     },
   },
   {
@@ -129,4 +130,5 @@ export default tseslint.config(
       'react-refresh/only-export-components': 'off',
     },
   },
-)
+  prettierConfig
+);

@@ -10,6 +10,7 @@
 Track'em Toys needs user authentication before any private collection features can be built. The architecture research document already defines the auth strategy: OAuth2 via Apple Sign-In and Google Sign-In, with a unified backend endpoint, short-lived JWTs, and database-backed refresh tokens. This plan turns that research into an actionable implementation sequence across all four monorepo components.
 
 **API Framework Decision: Node.js 22 LTS + Fastify 5 + TypeScript**
+
 - `apple-signin-auth` is the most maintained Apple Sign-In library (handles JWKS caching, client secret generation, token verification)
 - `google-auth-library` provides `OAuth2Client.verifyIdToken()` with built-in caching
 - TypeScript shared between API and web frontend
@@ -90,6 +91,7 @@ Indexes: `(user_id)`, `(event_type, created_at)`, `(created_at)` — last index 
 > `ON DELETE SET NULL` preserves audit history after account deletion — the event row remains with `user_id = NULL`.
 
 **RLS session context function** (used by all future RLS policies):
+
 ```sql
 CREATE OR REPLACE FUNCTION current_app_user_id() RETURNS UUID AS $$
 BEGIN
@@ -118,28 +120,31 @@ Use `dbmate` — plain SQL files, no ORM coupling, tracks applied migrations in 
 ### Encryption at Rest
 
 All PostgreSQL storage volumes **must** use provider-managed encryption at rest:
+
 - **AWS RDS:** AES-256 encryption enabled at instance creation (default for new instances)
 - **GCP Cloud SQL:** Google-managed encryption keys (enabled by default)
 - **Local dev:** Not required — dev databases contain only test data
 
 Column-level encryption (via `pgcrypto`) is not used because:
+
 - Email addresses must support `UNIQUE` constraints and indexed lookups
 - Provider-level disk encryption covers the threat model (unauthorized disk access)
 - Application-level encryption would add query complexity without meaningful benefit for this data classification
 
 ### Data Retention Policies
 
-| Data | Retention | Mechanism |
-|------|-----------|-----------|
-| `users` rows | Until account deletion request | Hard delete via API or Apple webhook |
-| `oauth_accounts.raw_profile` | 30 days after account creation | Application-level cleanup job nullifies the column |
-| `refresh_tokens` (expired/revoked) | 60 days after expiry/revocation | Scheduled cleanup job (Phase 5) |
-| `auth_events` | 90 days | Scheduled cleanup job; extend if compliance requires longer |
-| `device_info` on refresh_tokens | Bounded by token cleanup (60 days) | Deleted with the parent refresh_token row |
+| Data                               | Retention                          | Mechanism                                                   |
+| ---------------------------------- | ---------------------------------- | ----------------------------------------------------------- |
+| `users` rows                       | Until account deletion request     | Hard delete via API or Apple webhook                        |
+| `oauth_accounts.raw_profile`       | 30 days after account creation     | Application-level cleanup job nullifies the column          |
+| `refresh_tokens` (expired/revoked) | 60 days after expiry/revocation    | Scheduled cleanup job (Phase 5)                             |
+| `auth_events`                      | 90 days                            | Scheduled cleanup job; extend if compliance requires longer |
+| `device_info` on refresh_tokens    | Bounded by token cleanup (60 days) | Deleted with the parent refresh_token row                   |
 
 ### Account Deletion Procedure
 
 When a user requests deletion (or Apple sends `account-delete` webhook):
+
 1. Set `users.deactivated_at = NOW()` — immediately blocks auth middleware
 2. Revoke all active refresh tokens for the user
 3. Log `account_deactivated` event in `auth_events`
@@ -152,6 +157,7 @@ When a user requests deletion (or Apple sends `account-delete` webhook):
 The `oauth_accounts.raw_profile` JSONB column stores only whitelisted fields from the provider response (`sub`, `email_verified`) — not the full claims payload. The application layer extracts `sub`, `email`, `email_verified`, `name`, and `picture` from claims at sign-in time and stores them in typed columns; `raw_profile` is a minimal audit record.
 
 A scheduled job nullifies `raw_profile` on rows older than 30 days:
+
 ```sql
 UPDATE oauth_accounts SET raw_profile = NULL
 WHERE raw_profile IS NOT NULL AND created_at < NOW() - INTERVAL '30 days';
@@ -201,6 +207,7 @@ tsx (dev)             vitest (dev)            @types/pg (dev)
 ```
 
 **Library roles:**
+
 - `@fastify/jwt` — Request lifecycle JWT operations: `reply.jwtSign()`, `request.jwtVerify()`, dynamic secret callback for `kid`-based key rotation. Uses `fast-jwt` internally for ES256 support.
 - `@fastify/cookie` — Sets and reads `httpOnly; Secure; SameSite=Strict` cookies for refresh tokens on the web client. The API sets the refresh token as a cookie on signin/refresh responses; the browser sends it automatically on `/auth/refresh` requests (see Phase 3 Token Storage Strategy).
 - `jose` — JWKS utilities: `exportJWK()` to build the public key set, `createLocalJWKSet()` for verification, and exposes `GET /.well-known/jwks.json` for future service-to-service token verification.
@@ -208,13 +215,16 @@ tsx (dev)             vitest (dev)            @types/pg (dev)
 ### Endpoints
 
 **POST /auth/signin** — Rate limit: 10/min per IP
+
 ```
 Request:  { provider: "apple" | "google", id_token: string, nonce?: string, user_info?: { name?: string } }
 Response: { access_token, refresh_token, user: { id, email, display_name, avatar_url } }
 Cookie:   Set-Cookie: refresh_token=<token>; HttpOnly; Secure; SameSite=Strict; Path=/auth
 ```
+
 `nonce` is required when `provider = "apple"` (raw nonce for replay protection; see Apple Sign-In Nonce).
 Flow:
+
 1. Validate `id_token` with provider library (Apple accepts both Bundle ID and Services ID as audience; Google accepts both Web and iOS client IDs). For Apple, verify the `nonce` claim matches the server-generated nonce (see Apple Sign-In Nonce below).
 2. Extract `sub`, `email`, `email_verified` from claims
 3. Look up `oauth_accounts` by `(provider, provider_user_id)`
@@ -233,28 +243,34 @@ Flow:
 > **Deactivation checks on race-condition paths:** Every code path that re-fetches a user after a concurrent-insert conflict must validate `user.deactivated_at IS NULL`. This is enforced by the shared `handleOAuthConflict()` helper which calls `assertNotDeactivated()` on the resolved user.
 
 **POST /auth/refresh** — Rate limit: 5/min per token hash (falls back to IP if no body)
+
 ```
 Request:  { refresh_token?: string }   — optional; also accepted via httpOnly cookie
 Response: { access_token, refresh_token }
 ```
+
 Rate-limiting keys on the token hash (not just IP) to prevent bypass via IP rotation.
 The refresh token is accepted from the JSON body **or** the `refresh_token` httpOnly cookie (web clients send it automatically). Body takes precedence if both are present.
 Flow: Hash token → check for reuse (revoked token presented → revoke ALL user tokens + log `token_reuse_detected`) → find active token in DB (not revoked, not expired) → check user not deactivated → revoke old → create new (rotation) → issue new access JWT after transaction commits. Revoke + create must be atomic (single transaction). The rotated refresh token is set as an httpOnly cookie on the response.
 
 **POST /auth/logout** — Requires valid access token
+
 ```
 Request:  { refresh_token?: string }   — optional; also accepted via httpOnly cookie
 Response: 204 No Content
 ```
+
 Before revoking, the endpoint verifies the refresh token belongs to the authenticated user (`token.user_id === request.user.sub`). Returns 403 if the token belongs to a different user. Clears the httpOnly cookie on the response.
 
 **POST /auth/link-account** — Requires valid access token, rate limit: 5/min per user (keyed by user ID, not IP)
+
 ```
 Request:  { provider: "apple" | "google", id_token: string, nonce?: string }
 Response: { user with updated linked accounts }
 Errors:   409 — provider account already linked to a different user
           409 — user already has an account with this provider
 ```
+
 `nonce` is required when `provider = "apple"`.
 
 Flow: Verify `id_token` (+ nonce for Apple) → check if `(provider, provider_user_id)` exists for another user → 409 if so → check if current user already has this provider → 409 if so → insert new `oauth_accounts` row → return updated user.
@@ -264,15 +280,16 @@ Flow: Verify `id_token` (+ nonce for Apple) → check if `(provider, provider_us
 Use **ES256 (ECDSA P-256)** asymmetric signing with two libraries working together:
 
 **`@fastify/jwt`** handles the request lifecycle with a single registration using the dynamic secret callback (supports key rotation from day one):
+
 ```typescript
 // Single plugin registration — dynamic secret resolves keys by kid
 fastify.register(jwt, {
   decode: { complete: true },
   secret: {
-    private: keyStore.getPrivateKey(),  // current signing key PEM
+    private: keyStore.getPrivateKey(), // current signing key PEM
     public: async (request, token) => {
-      const { kid } = token.header
-      return keyStore.getPublicKey(kid)  // returns PEM for the matching kid
+      const { kid } = token.header;
+      return keyStore.getPublicKey(kid); // returns PEM for the matching kid
     },
   },
   sign: {
@@ -286,24 +303,26 @@ fastify.register(jwt, {
     allowedIss: ['track-em-toys'],
     allowedAud: ['track-em-toys-api'],
   },
-})
+});
 
 // Signing: const token = await reply.jwtSign({ sub: userId })
 // Verifying: await request.jwtVerify() → sets request.user
 ```
 
 **`jose`** provides the JWKS endpoint for external verification:
+
 ```typescript
 // Expose public keys as JWKS for service-to-service verification
-import { exportJWK } from 'jose'
+import { exportJWK } from 'jose';
 
 fastify.get('/.well-known/jwks.json', async () => {
-  const jwk = await exportJWK(publicKey)
-  return { keys: [{ ...jwk, kid: process.env.JWT_KEY_ID, alg: 'ES256', use: 'sig' }] }
-})
+  const jwk = await exportJWK(publicKey);
+  return { keys: [{ ...jwk, kid: process.env.JWT_KEY_ID, alg: 'ES256', use: 'sig' }] };
+});
 ```
 
 **Key rotation procedure:**
+
 1. Generate new ES256 key pair, assign a new `kid`
 2. Deploy with both old and new public keys in the key store
 3. New tokens are signed with the new `kid`
@@ -315,12 +334,14 @@ fastify.get('/.well-known/jwks.json', async () => {
 Prevent `id_token` replay by including a server-generated nonce:
 
 **Client-side (iOS and web):**
+
 1. Generate 32 random bytes, hex-encode → `rawNonce`
 2. SHA-256 hash the raw nonce → `hashedNonce`
 3. Include `hashedNonce` in the Apple auth request (`ASAuthorizationAppleIDRequest.nonce` on iOS, `nonce` param in Apple JS SDK on web)
 4. Send `rawNonce` alongside `id_token` in `POST /auth/signin`
 
 **API-side:**
+
 1. SHA-256 hash the received `rawNonce`
 2. Compare against the `nonce` claim inside the decoded `id_token`
 3. Reject if they don't match or if `nonce` is missing
@@ -349,13 +370,14 @@ Instead, `withTransaction(fn, userId?)` accepts an optional `userId` parameter a
 // Authenticated routes pass request.user.sub:
 const result = await withTransaction(async (client) => {
   // client already has app.user_id set — RLS policies apply
-  await client.query('SELECT * FROM user_collection_items')
-}, request.user.sub)
+  await client.query('SELECT * FROM user_collection_items');
+}, request.user.sub);
 ```
 
 ### Environment Variables
 
 See `api/.env.example`:
+
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/trackem_dev
 JWT_PRIVATE_KEY=<ES256 PEM private key — generate with: openssl ecparam -genkey -name prime256v1 -noout>
@@ -370,6 +392,7 @@ TRUST_PROXY=false
 ```
 
 **Config validation at startup:**
+
 - `CORS_ORIGIN=*` is rejected when credentials are enabled (prevents CORS bypass)
 - Empty string env vars are treated as unset (not silently used)
 - `TRUST_PROXY=true` enables Fastify's `trustProxy` for correct `request.ip` behind reverse proxies
@@ -377,6 +400,7 @@ TRUST_PROXY=false
 ### Input Validation
 
 All request body fields have `maxLength` constraints enforced by Fastify JSON Schema validation:
+
 - `id_token`: 8192 chars (JWT tokens can be large)
 - `nonce`: 256 chars
 - `user_info.name`: 255 chars (matches DB column limit)
@@ -419,6 +443,7 @@ npx shadcn@latest init
 ```
 
 Create `web/.env.example`:
+
 ```env
 VITE_API_URL=http://localhost:3000
 VITE_GOOGLE_CLIENT_ID=<Google OAuth Web Client ID>
@@ -486,29 +511,31 @@ A thin wrapper around `fetch` that handles authentication concerns.
 ```typescript
 // Pseudocode — actual implementation in api-client.ts
 
-let refreshPromise: Promise<boolean> | null = null
+let refreshPromise: Promise<boolean> | null = null;
 
 async function fetchWithAuth(url: string, options?: RequestInit): Promise<Response> {
-  const response = await baseFetch(url, withAuthHeaders(options))
+  const response = await baseFetch(url, withAuthHeaders(options));
 
   if (response.status === 401 && !url.includes('/auth/refresh')) {
     // Deduplicate concurrent refresh attempts with a shared promise
     if (!refreshPromise) {
-      refreshPromise = attemptRefresh().finally(() => { refreshPromise = null })
+      refreshPromise = attemptRefresh().finally(() => {
+        refreshPromise = null;
+      });
     }
 
-    const refreshed = await refreshPromise
+    const refreshed = await refreshPromise;
     if (refreshed) {
       // Retry the original request with the new access token
-      return baseFetch(url, withAuthHeaders(options))
+      return baseFetch(url, withAuthHeaders(options));
     }
 
     // Refresh failed — clear auth state, redirect to login
-    authStore.clear()
-    window.location.href = '/login'
+    authStore.clear();
+    window.location.href = '/login';
   }
 
-  return response
+  return response;
 }
 ```
 
@@ -517,6 +544,7 @@ The shared `refreshPromise` acts as a mutex: if three requests all get 401 simul
 ### Token Storage Strategy
 
 **Refresh token: httpOnly cookie (managed entirely by the API)**
+
 - The API sets the cookie on `/auth/signin` and `/auth/refresh` responses
 - The API clears the cookie on `/auth/logout` responses
 - JavaScript has zero access to the refresh token — this is the design intent
@@ -524,6 +552,7 @@ The shared `refreshPromise` acts as a mutex: if three requests all get 401 simul
 - The cookie's `Path=/auth` scope means it is only sent on requests to `/auth/*` endpoints
 
 **Access token: in-memory only (module-scoped variable, NOT React state)**
+
 - Stored in a module-scoped variable in `auth-store.ts`, not in React state or context
 - This prevents the token from appearing in React DevTools or component tree snapshots
 - The `AuthProvider` reads from this store but does not hold the token as state itself
@@ -533,13 +562,17 @@ The shared `refreshPromise` acts as a mutex: if three requests all get 401 simul
 
 ```typescript
 // auth-store.ts — singleton module
-let accessToken: string | null = null
+let accessToken: string | null = null;
 
 export const authStore = {
   getToken: () => accessToken,
-  setToken: (token: string) => { accessToken = token },
-  clear: () => { accessToken = null },
-}
+  setToken: (token: string) => {
+    accessToken = token;
+  },
+  clear: () => {
+    accessToken = null;
+  },
+};
 ```
 
 ### Zod Schemas (`zod-schemas.ts`)
@@ -547,43 +580,45 @@ export const authStore = {
 Define schemas matching the exact API response shapes from `api/src/auth/schemas.ts` and `api/src/types/index.ts`:
 
 ```typescript
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const UserResponseSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email().nullable(),
   display_name: z.string().nullable(),
   avatar_url: z.string().url().nullable(),
-})
+});
 
 // Web clients receive refresh_token: null (token is in httpOnly cookie)
 export const AuthResponseSchema = z.object({
   access_token: z.string().min(1),
   refresh_token: z.null(),
   user: UserResponseSchema,
-})
+});
 
 // Web clients receive refresh_token: null on refresh too
 export const TokenResponseSchema = z.object({
   access_token: z.string().min(1),
   refresh_token: z.null(),
-})
+});
 
 export const LinkAccountResponseSchema = UserResponseSchema.extend({
-  linked_accounts: z.array(z.object({
-    provider: z.enum(['apple', 'google']),
-    email: z.string().nullable(),
-  })),
-})
+  linked_accounts: z.array(
+    z.object({
+      provider: z.enum(['apple', 'google']),
+      email: z.string().nullable(),
+    })
+  ),
+});
 
 export const ApiErrorSchema = z.object({
   error: z.string(),
-})
+});
 
-export type UserResponse = z.infer<typeof UserResponseSchema>
-export type AuthResponse = z.infer<typeof AuthResponseSchema>
-export type TokenResponse = z.infer<typeof TokenResponseSchema>
-export type LinkAccountResponse = z.infer<typeof LinkAccountResponseSchema>
+export type UserResponse = z.infer<typeof UserResponseSchema>;
+export type AuthResponse = z.infer<typeof AuthResponseSchema>;
+export type TokenResponse = z.infer<typeof TokenResponseSchema>;
+export type LinkAccountResponse = z.infer<typeof LinkAccountResponseSchema>;
 ```
 
 > **Why `refresh_token: z.null()`?** The API returns `refresh_token: null` in JSON for web clients. The actual refresh token is in the `Set-Cookie` header, invisible to JavaScript. The Zod schema enforces this expectation — if the API ever accidentally sends a non-null token to a web client, the parse will fail and the error will be caught immediately.
@@ -591,11 +626,13 @@ export type LinkAccountResponse = z.infer<typeof LinkAccountResponseSchema>
 ### AuthProvider and useAuth Hook
 
 **AuthProvider.tsx** manages:
+
 - `user: UserResponse | null` — current authenticated user (React state)
 - `isLoading: boolean` — true during initial silent refresh on mount
 - `isAuthenticated: boolean` — derived from `user !== null`
 
 **Initialization flow (on app mount):**
+
 1. `AuthProvider` mounts with `isLoading = true`
 2. Calls `POST /auth/refresh` with `credentials: 'include'` (cookie sent automatically)
 3. If successful: parse response with `TokenResponseSchema`, store `access_token` in `authStore`, restore cached `UserResponse` from `sessionStorage`
@@ -610,14 +647,15 @@ export type LinkAccountResponse = z.infer<typeof LinkAccountResponseSchema>
 - Future: a `GET /auth/me` endpoint can replace this pattern cleanly (Phase 5 candidate).
 
 **useAuth hook:**
+
 ```typescript
 interface AuthContext {
-  user: UserResponse | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  signInWithGoogle: (credential: string) => Promise<void>
-  signInWithApple: (idToken: string, nonce: string, userName?: string) => Promise<void>
-  logout: () => Promise<void>
+  user: UserResponse | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  signInWithGoogle: (credential: string) => Promise<void>;
+  signInWithApple: (idToken: string, nonce: string, userName?: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 ```
 
@@ -633,13 +671,13 @@ const queryClient = new QueryClient({
     queries: {
       retry: (failureCount, error) => {
         // Do not retry auth failures — the 401 interceptor handles refresh
-        if (error instanceof ApiError && error.status === 401) return false
-        return failureCount < 3
+        if (error instanceof ApiError && error.status === 401) return false;
+        return failureCount < 3;
       },
       staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
-})
+});
 ```
 
 On logout, call `queryClient.clear()` to purge all cached data.
@@ -667,11 +705,11 @@ Apple Sign-In on web uses a **redirect flow** with `form_post` response mode.
 2. Generate nonce client-side:
    ```typescript
    async function generateNonce(): Promise<{ raw: string; hashed: string }> {
-     const bytes = crypto.getRandomValues(new Uint8Array(32))
-     const raw = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
-     const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw))
-     const hashed = Array.from(new Uint8Array(hashBuffer), b => b.toString(16).padStart(2, '0')).join('')
-     return { raw, hashed }
+     const bytes = crypto.getRandomValues(new Uint8Array(32));
+     const raw = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+     const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+     const hashed = Array.from(new Uint8Array(hashBuffer), (b) => b.toString(16).padStart(2, '0')).join('');
+     return { raw, hashed };
    }
    ```
 3. Store `rawNonce` and `state` in `sessionStorage` before redirect
@@ -681,11 +719,11 @@ Apple Sign-In on web uses a **redirect flow** with `form_post` response mode.
      clientId: import.meta.env.VITE_APPLE_SERVICES_ID,
      scope: 'name email',
      redirectURI: import.meta.env.VITE_APPLE_REDIRECT_URI,
-     state: crypto.randomUUID(),  // CSRF protection
+     state: crypto.randomUUID(), // CSRF protection
      nonce: hashedNonce,
      usePopup: false,
-   })
-   AppleID.auth.signIn()
+   });
+   AppleID.auth.signIn();
    ```
 
 **Callback handling (`AppleCallback.tsx`):**
@@ -693,10 +731,12 @@ Apple Sign-In on web uses a **redirect flow** with `form_post` response mode.
 Apple POSTs back to the redirect URI with `application/x-www-form-urlencoded` body containing `id_token`, `code`, `state`, and optionally `user` (JSON string, sent only on first authorization).
 
 Since a pure SPA cannot receive Apple's form_post directly, use an API relay approach:
+
 - The API accepts Apple's callback at `POST /auth/apple-callback`, extracts `id_token` and `user` fields, then redirects to `GET /auth/apple-callback?token=<id_token>&user=<encoded_user>` on the web app
 - The SPA route reads these query params, retrieves `rawNonce` and `state` from `sessionStorage`, validates state (CSRF check), then calls `POST /auth/signin`
 
 **Apple Name Persistence (web):**
+
 - Store `user.name` from Apple's first-time callback in `sessionStorage`
 - Only clear after receiving a successful `/auth/signin` response that includes a `display_name`
 - If signin fails, the name remains in `sessionStorage` for retry
@@ -737,14 +777,14 @@ In addition to the reactive 401 interceptor, implement a proactive timer:
 
 ```typescript
 function scheduleRefresh(accessToken: string): void {
-  const payload = JSON.parse(atob(accessToken.split('.')[1]))
-  const expiresAt = payload.exp * 1000
-  const refreshAt = expiresAt - 60_000  // 60 seconds before expiry
-  const delay = Math.max(refreshAt - Date.now(), 0)
+  const payload = JSON.parse(atob(accessToken.split('.')[1]));
+  const expiresAt = payload.exp * 1000;
+  const refreshAt = expiresAt - 60_000; // 60 seconds before expiry
+  const delay = Math.max(refreshAt - Date.now(), 0);
 
   refreshTimerId = window.setTimeout(async () => {
-    await attemptRefresh()
-  }, delay)
+    await attemptRefresh();
+  }, delay);
 }
 ```
 
@@ -756,30 +796,30 @@ Cancel the timer on logout.
 class ApiError extends Error {
   constructor(
     public readonly status: number,
-    public readonly body: { error: string },
+    public readonly body: { error: string }
   ) {
-    super(body.error)
-    this.name = 'ApiError'
+    super(body.error);
+    this.name = 'ApiError';
   }
 }
 ```
 
-| Status | Meaning | Web Client Action |
-|--------|---------|-------------------|
-| 401 | Access token expired/invalid | Silent refresh via interceptor (automatic) |
-| 403 | Account deactivated | Show "account deactivated" message, clear auth state |
-| 409 | Conflict (link-account) | Show provider already linked message |
-| 415 | Content-Type missing | Bug — fix the fetch wrapper |
-| 429 | Rate limited | Show "too many attempts, try again later" |
+| Status | Meaning                      | Web Client Action                                    |
+| ------ | ---------------------------- | ---------------------------------------------------- |
+| 401    | Access token expired/invalid | Silent refresh via interceptor (automatic)           |
+| 403    | Account deactivated          | Show "account deactivated" message, clear auth state |
+| 409    | Conflict (link-account)      | Show provider already linked message                 |
+| 415    | Content-Type missing         | Bug — fix the fetch wrapper                          |
+| 429    | Rate limited                 | Show "too many attempts, try again later"            |
 
 ### Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `VITE_API_URL` | Yes | API base URL (`http://localhost:3000` for dev) |
-| `VITE_GOOGLE_CLIENT_ID` | Yes | Google OAuth Web Client ID |
-| `VITE_APPLE_SERVICES_ID` | Yes | Apple Services ID (web) |
-| `VITE_APPLE_REDIRECT_URI` | Yes | Apple callback URL for form_post redirect |
+| Variable                  | Required | Description                                    |
+| ------------------------- | -------- | ---------------------------------------------- |
+| `VITE_API_URL`            | Yes      | API base URL (`http://localhost:3000` for dev) |
+| `VITE_GOOGLE_CLIENT_ID`   | Yes      | Google OAuth Web Client ID                     |
+| `VITE_APPLE_SERVICES_ID`  | Yes      | Apple Services ID (web)                        |
+| `VITE_APPLE_REDIRECT_URI` | Yes      | Apple callback URL for form_post redirect      |
 
 The `VITE_` prefix is required for Vite to expose these to client-side code. None of these are secrets.
 
@@ -827,6 +867,7 @@ ios/track-em-toys/
 ### Apple Sign-In (Native — No SDK Needed)
 
 Built into iOS via `AuthenticationServices` framework:
+
 1. Generate 32 random bytes → hex-encode as `rawNonce`, SHA-256 hash as `hashedNonce`
 2. Create `ASAuthorizationAppleIDProvider` + request with scopes `[.fullName, .email]`
 3. Set `request.nonce = hashedNonce`
@@ -887,6 +928,7 @@ Apple sends `fullName` only on the very first authorization. If the `POST /auth/
 ### Account Linking
 
 For Apple private relay users (`@privaterelay.appleid.com`) who can't be auto-linked by email:
+
 - "Link Account" option in user settings (web + iOS)
 - Flow: user is signed in → taps "Link Google Account" → Google sign-in → sends `id_token` to `POST /auth/link-account`
 
@@ -894,10 +936,10 @@ For Apple private relay users (`@privaterelay.appleid.com`) who can't be auto-li
 
 **POST /auth/webhooks/apple** — Verify JWT signature with Apple's JWKS
 
-| Event | Action |
-|-------|--------|
-| `consent-revoked` | Revoke all refresh tokens for that Apple oauth_account |
-| `account-delete` | Set `users.deactivated_at`, revoke tokens, log event, schedule hard delete after 30 days (see Data Retention section) |
+| Event             | Action                                                                                                                |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `consent-revoked` | Revoke all refresh tokens for that Apple oauth_account                                                                |
+| `account-delete`  | Set `users.deactivated_at`, revoke tokens, log event, schedule hard delete after 30 days (see Data Retention section) |
 
 ### Refresh Token Reuse Detection
 
@@ -910,6 +952,7 @@ Scheduled tasks (pg_cron or application-level).
 > **Batching:** For tables that grow large (`auth_events`, `refresh_tokens`), use batched deletes to avoid long-running locks: `DELETE FROM ... WHERE ctid IN (SELECT ctid FROM ... LIMIT 10000)` in a loop until zero rows affected. Consider partitioning `auth_events` by month if volume exceeds ~1M rows/month.
 
 **Refresh token cleanup (60 days):**
+
 ```sql
 DELETE FROM refresh_tokens
 WHERE (expires_at < NOW() - INTERVAL '60 days')
@@ -917,18 +960,22 @@ WHERE (expires_at < NOW() - INTERVAL '60 days')
 ```
 
 **Auth events cleanup (90 days):**
+
 ```sql
 DELETE FROM auth_events WHERE created_at < NOW() - INTERVAL '90 days';
 ```
 
 **raw_profile cleanup (30 days):**
+
 > **Note:** As of Phase 2, `raw_profile` only stores whitelisted fields (`sub`, `email_verified`), not full OAuth claims. This cleanup job is still useful for data minimization but the PII risk is significantly reduced.
+
 ```sql
 UPDATE oauth_accounts SET raw_profile = NULL
 WHERE raw_profile IS NOT NULL AND created_at < NOW() - INTERVAL '30 days';
 ```
 
 **Deactivated account hard delete (30-day grace period):**
+
 ```sql
 DELETE FROM users
 WHERE deactivated_at IS NOT NULL AND deactivated_at < NOW() - INTERVAL '30 days';
@@ -937,6 +984,7 @@ WHERE deactivated_at IS NOT NULL AND deactivated_at < NOW() - INTERVAL '30 days'
 ### Security Hardening
 
 Already implemented in Phase 2:
+
 - ✅ Rate limiting on all auth endpoints (per-IP for signin, per-user for link-account, per-token-hash for refresh)
 - ✅ Refresh token rotation on every use with reuse detection
 - ✅ ES256 asymmetric JWT signing with `kid` header for zero-downtime key rotation
@@ -955,6 +1003,7 @@ Already implemented in Phase 2:
 - ✅ Debug-level logging for JWT verification failures (aids troubleshooting without leaking info to clients)
 
 Remaining for Phase 5:
+
 - `Referer`/`Origin` header check as defense-in-depth
 
 ---
@@ -989,9 +1038,9 @@ Phases 3 and 4 can run in parallel since both depend only on the API (Phase 2).
 
 ## Key Reference Files
 
-| File | Purpose |
-|------|---------|
-| `docs/decisions/Architecture_Research_for_Toy_Collection_Catalog_and_Pricing_App.md` | Auth schema, token strategy, RLS patterns, provider quirks |
-| `docs/requirements/Toy_Collection_Catalog_Requirements_v1_0.md` | Functional requirements, implementation phases |
-| `docs/decisions/Frontend_Framework_Recommendation_2026.md` | Web stack decisions (React 19, Shadcn/ui, TanStack Query) |
-| `CLAUDE.md` | Project constraints (no pbxproj edits, Swift 6, migration conventions, .env rules) |
+| File                                                                                 | Purpose                                                                            |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `docs/decisions/Architecture_Research_for_Toy_Collection_Catalog_and_Pricing_App.md` | Auth schema, token strategy, RLS patterns, provider quirks                         |
+| `docs/requirements/Toy_Collection_Catalog_Requirements_v1_0.md`                      | Functional requirements, implementation phases                                     |
+| `docs/decisions/Frontend_Framework_Recommendation_2026.md`                           | Web stack decisions (React 19, Shadcn/ui, TanStack Query)                          |
+| `CLAUDE.md`                                                                          | Project constraints (no pbxproj edits, Swift 6, migration conventions, .env rules) |

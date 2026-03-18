@@ -1,16 +1,16 @@
-import { pool } from '../../db/pool.js'
+import { pool } from '../../db/pool.js';
 
 export interface ManufacturerRow {
-  id: string
-  name: string
-  slug: string
-  is_official_licensee: boolean
-  country: string | null
-  website_url: string | null
-  aliases: string[]
-  notes: string | null
-  created_at: string
-  updated_at: string
+  id: string;
+  name: string;
+  slug: string;
+  is_official_licensee: boolean;
+  country: string | null;
+  website_url: string | null;
+  aliases: string[];
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 /**
@@ -21,9 +21,9 @@ export async function listManufacturers(): Promise<ManufacturerRow[]> {
     `SELECT id, name, slug, is_official_licensee, country, website_url,
             aliases, notes, created_at, updated_at
        FROM manufacturers
-      ORDER BY name ASC`,
-  )
-  return rows
+      ORDER BY name ASC`
+  );
+  return rows;
 }
 
 /**
@@ -37,7 +37,7 @@ export async function getManufacturerBySlug(slug: string): Promise<ManufacturerR
             aliases, notes, created_at, updated_at
        FROM manufacturers
       WHERE slug = $1`,
-    [slug],
-  )
-  return rows[0] ?? null
+    [slug]
+  );
+  return rows[0] ?? null;
 }

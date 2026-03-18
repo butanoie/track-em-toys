@@ -1,15 +1,15 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { apiFetchJson } from '@/lib/api-client'
-import { LinkAccountResponseSchema, type LinkAccountResponse } from '@/lib/zod-schemas'
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiFetchJson } from '@/lib/api-client';
+import { LinkAccountResponseSchema, type LinkAccountResponse } from '@/lib/zod-schemas';
 
 interface LinkAccountParams {
-  provider: 'apple' | 'google'
-  id_token: string
-  nonce?: string
+  provider: 'apple' | 'google';
+  id_token: string;
+  nonce?: string;
 }
 
 export function useLinkAccount() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation<LinkAccountResponse, Error, LinkAccountParams>({
     mutationFn: (params) =>
@@ -18,7 +18,7 @@ export function useLinkAccount() {
         body: JSON.stringify(params),
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
     },
-  })
+  });
 }

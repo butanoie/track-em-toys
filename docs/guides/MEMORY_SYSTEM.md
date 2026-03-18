@@ -51,6 +51,7 @@ type: project
 ---
 
 Authentication implementation phases:
+
 - Phase 1.1 (DB migrations) — complete
 - Phase 1.2 (API auth) — complete
 - Phase 1.3 (Web SPA auth) — complete
@@ -86,7 +87,7 @@ Bug reports are tracked in GitHub Issues on the private repo.
 
 - User role, expertise level, and collaboration preferences
 - Corrections to AI behavior (the "don't do X" moments)
-- Architecture decisions with rationale (the *why*)
+- Architecture decisions with rationale (the _why_)
 - Pointers to external systems (dashboards, trackers, docs)
 - Phase completion status and project milestones
 
@@ -104,7 +105,7 @@ CLAUDE.md defines rules and workflows, but Claude doesn't always halt execution 
 
 ### The Pattern
 
-If a CLAUDE.md rule is critical enough that Claude should **stop and confirm** rather than silently proceed, create a feedback memory that tells Claude *how to enforce it*.
+If a CLAUDE.md rule is critical enough that Claude should **stop and confirm** rather than silently proceed, create a feedback memory that tells Claude _how to enforce it_.
 
 **Example: Documentation Gates**
 
@@ -139,11 +140,13 @@ If the user asks to skip, confirm once before proceeding.
 ### When to Use This Pattern
 
 Use a feedback memory to enforce a rule when:
+
 - The rule requires Claude to **halt and wait** rather than continue autonomously
 - Skipping the rule has caused problems before (or would cause problems that are hard to detect)
 - The rule is in CLAUDE.md but Claude has been observed ignoring or glossing over it
 
 Do NOT use this pattern for:
+
 - Rules that Claude already follows reliably from CLAUDE.md alone
 - Conventions that are self-evident from reading the code
 - One-time instructions for the current conversation only
@@ -154,4 +157,4 @@ Do NOT use this pattern for:
 - Check for duplicates before creating new memories
 - Keep `MEMORY.md` index concise — it loads into every conversation
 - Organize semantically by topic, not chronologically
-- When in doubt about whether something is a memory vs. a CLAUDE.md rule: if it governs AI behavior for *all* future work, it's a CLAUDE.md rule; if it's context about *this project's state*, it's a memory
+- When in doubt about whether something is a memory vs. a CLAUDE.md rule: if it governs AI behavior for _all_ future work, it's a CLAUDE.md rule; if it's context about _this project's state_, it's a memory

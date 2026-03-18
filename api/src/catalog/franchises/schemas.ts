@@ -1,4 +1,4 @@
-import { errorResponse, slugParam } from '../shared/schemas.js'
+import { errorResponse, slugParam } from '../shared/schemas.js';
 
 const franchiseItem = {
   type: 'object',
@@ -12,7 +12,7 @@ const franchiseItem = {
     notes: { type: ['string', 'null'] },
     created_at: { type: 'string' },
   },
-} as const
+} as const;
 
 export const listFranchisesSchema = {
   description: 'List all franchises.',
@@ -29,7 +29,7 @@ export const listFranchisesSchema = {
     },
     500: errorResponse,
   },
-} as const
+} as const;
 
 export const getFranchiseSchema = {
   description: 'Get a franchise by slug.',
@@ -41,4 +41,4 @@ export const getFranchiseSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;

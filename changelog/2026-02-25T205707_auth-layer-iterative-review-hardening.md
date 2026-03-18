@@ -19,6 +19,7 @@ Six intensive passes of code review were performed on the Track'em Toys API auth
 ### 1. Security-Critical Fixes
 
 #### Token Reuse Revocation Persistence Issue
+
 **Problem:** `/refresh` endpoint was not persisting token revocation when reuse was detected. The `revokeAllUserRefreshTokens` mutation was called inside a `withTransaction` callback that ended with `throw new HttpError(401)`, causing the transaction to ROLLBACK and undo the revocation before the 401 response was sent.
 
 **Solution:** Implemented a tagged union return pattern that separates revocation success (commits the transaction) from HTTP error response (returned post-commit).
@@ -28,34 +29,35 @@ Six intensive passes of code review were performed on the Track'em Toys API auth
 return await withTransaction(client, async (txClient) => {
   // ... token validation ...
   if (isReused) {
-    await queries.revokeAllUserRefreshTokens(client, token.user_id) // Happens inside TX
+    await queries.revokeAllUserRefreshTokens(client, token.user_id); // Happens inside TX
     // ROLLBACK undoes the revocation!
-    throw new HttpError(401, { error: 'Token reuse detected' })
+    throw new HttpError(401, { error: 'Token reuse detected' });
   }
   // ... normal rotation ...
-})
+});
 
 // After: tagged union ensures revocation is committed before 401 response
 const result = await withTransaction(client, async (txClient) => {
   // ... token validation ...
   if (isReused) {
-    await queries.revokeAllUserRefreshTokens(txClient, token.user_id) // Inside TX
+    await queries.revokeAllUserRefreshTokens(txClient, token.user_id); // Inside TX
     // Return tagged value — TX commits successfully
-    return { type: 'reuse_detected' as const, userId: token.user_id }
+    return { type: 'reuse_detected' as const, userId: token.user_id };
   }
   // ... normal rotation returns { type: 'rotated' as const, ... }
-})
+});
 
 // Handle reuse outside the transaction — 401 sent after COMMIT
 if (result.type === 'reuse_detected') {
-  reply.code(401).send({ error: 'Token reuse detected' })
-  return
+  reply.code(401).send({ error: 'Token reuse detected' });
+  return;
 }
 ```
 
 **Impact:** Security-critical: Token revocation now persists. Reused tokens are permanently revoked and cannot be rotated again, preventing attackers from maintaining session persistence after detection.
 
 #### Audit Logging Severity Level
+
 **Problem:** Provider auto-linking event (when two accounts are auto-linked during sign-in) was logged at `log.warn` level when the audit log failed, but it's a security event.
 
 **Solution:** Changed to `log.error` for the `provider_auto_linked` audit log failure path.
@@ -75,6 +77,7 @@ catch (err) {
 **Impact:** Security events are now consistently logged at error level, ensuring they appear in production security monitoring dashboards.
 
 #### Missing Rate Limiting
+
 **Problem:** `/logout` endpoint was missing rate limit configuration, allowing potential brute-force attacks.
 
 **Solution:** Added rate limit configuration: max 20 requests per 1 minute window.
@@ -83,7 +86,7 @@ catch (err) {
 fastify.post('/logout', {
   rateLimit: { max: 20, timeWindow: '1 minute' },
   // ... handler ...
-})
+});
 ```
 
 ---
@@ -93,11 +96,13 @@ fastify.post('/logout', {
 #### HTTP Status Code Accuracy
 
 **Missing Token in `/refresh` Request**
+
 - **Before:** Returned 400 (Bad Request)
 - **After:** Returns 401 (Unauthorized)
 - **Reason:** Missing auth token is an authentication failure, not a malformed request
 
 **Schema Validation Cleanup**
+
 - `logoutSchema`: Added missing 400 response for malformed request body
 - `signinSchema`: Removed dead 409 (Conflict) response entry
 - `refreshSchema`: Removed dead 400 entries, added proper 400 for AJV validation failures
@@ -114,9 +119,14 @@ fastify.post('/logout', {
  * Truncates aggressively since device_info is short.
  */
 function getUserAgent(request: FastifyRequest): string | null {
-  const ua = request.headers['user-agent']
-  if (typeof ua !== 'string') return null
-  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, 255) || null
+  const ua = request.headers['user-agent'];
+  if (typeof ua !== 'string') return null;
+  return (
+    ua
+      .replace(/[\x00-\x1F\x7F]/g, '')
+      .trim()
+      .slice(0, 255) || null
+  );
 }
 
 /**
@@ -124,9 +134,14 @@ function getUserAgent(request: FastifyRequest): string | null {
  * Truncates at the wider limit to preserve full UAs.
  */
 function getRawUserAgent(request: FastifyRequest): string | null {
-  const ua = request.headers['user-agent']
-  if (typeof ua !== 'string') return null
-  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, 512) || null
+  const ua = request.headers['user-agent'];
+  if (typeof ua !== 'string') return null;
+  return (
+    ua
+      .replace(/[\x00-\x1F\x7F]/g, '')
+      .trim()
+      .slice(0, 512) || null
+  );
 }
 ```
 
@@ -138,6 +153,7 @@ function getRawUserAgent(request: FastifyRequest): string | null {
 #### JSDoc Correction
 
 **File:** `api/src/db/queries.ts`
+
 - `findOAuthAccountWithUser` JSDoc incorrectly claimed the function "throws" but it actually returns `null` on not found. Fixed to reflect actual behavior.
 
 ---
@@ -147,24 +163,27 @@ function getRawUserAgent(request: FastifyRequest): string | null {
 #### TypeScript Error Elimination
 
 **`QueryOnlyClient` Interface Narrowing**
+
 - **Before:** Interface had both synchronous and async query overloads, causing 57 TypeScript build errors
 - **After:** Narrowed to promise-only overload to match actual usage (all queries are async)
 - **Files Affected:** `api/src/db/queries.ts`, `api/src/db/queries.test.ts`
 
 **Cast Safety: Eliminated All 56 `as never` Casts**
+
 - **Before:** Used `as never` to suppress TypeScript errors in test file
   ```typescript
-  const result = response as never
+  const result = response as never;
   ```
 - **After:** Replaced with typed casts using `pg.QueryResult<T>`
   ```typescript
-  const result: pg.QueryResult<User> = response
+  const result: pg.QueryResult<User> = response;
   ```
 - **Files Affected:** `api/src/db/queries.test.ts` (56 replacements)
 
 #### Network Error Code Completeness
 
 Added missing network error codes to `NETWORK_ERROR_CODES` set in `api/src/auth/errors.ts`:
+
 - `EHOSTDOWN` - Host is down
 - `ENETDOWN` - Network is down
 
@@ -173,12 +192,14 @@ These errors now properly trigger 503 responses instead of 401.
 #### Provider Claim Type Consistency
 
 **File:** `api/src/auth/routes.ts`
+
 - Renamed `ProviderClaims.clientType` to `client_type` to maintain snake_case consistency with JSON claims from OAuth providers
 - Updated all references to use snake_case
 
 #### Error Class Organization
 
 **File:** `api/src/auth/errors.ts` (NEW)
+
 - Extracted `HttpError` from `api/src/auth/routes.ts` to dedicated errors module
 - Added `ProviderVerificationError` for OAuth token validation failures
 - Added `isNetworkError()` type guard function
@@ -189,26 +210,25 @@ These errors now properly trigger 503 responses instead of 401.
 ### 4. Test Coverage Expansion
 
 #### Network Error Handling Tests
+
 Added 503 response tests for infrastructure failures (Google + Apple providers, `/signin` + `/link-account`):
 
 ```typescript
 // /signin Google provider network error
 it('should return 503 when verifyGoogleToken throws a network error', async () => {
-  vi.mocked(verifyGoogleToken).mockRejectedValue(
-    new Error('network: ECONNRESET')
-  )
+  vi.mocked(verifyGoogleToken).mockRejectedValue(new Error('network: ECONNRESET'));
   const response = await app.inject({
     method: 'POST',
     url: '/auth/signin',
-    payload: { credential: 'token123', client_type: 'web' }
-  })
-  expect(response.statusCode).toBe(503)
-})
+    payload: { credential: 'token123', client_type: 'web' },
+  });
+  expect(response.statusCode).toBe(503);
+});
 
 // /signin Apple provider network error
 it('should return 503 when verifyAppleToken throws a network error', async () => {
   // Similar test for Apple
-})
+});
 
 // /link-account network errors (2 tests, Google + Apple)
 ```
@@ -216,6 +236,7 @@ it('should return 503 when verifyAppleToken throws a network error', async () =>
 **Impact:** 4 new tests covering network infrastructure failures ensure 503 responses are returned for transient issues, not 401s.
 
 #### Token Reuse Revocation Tests
+
 Added assertions to verify revocation is committed when reuse is detected:
 
 ```typescript
@@ -223,74 +244,77 @@ it('should revoke all user refresh tokens when reuse is detected', async () => {
   const response = await app.inject({
     method: 'POST',
     url: '/auth/refresh',
-    cookies: { refresh_token: reusedToken }
-  })
+    cookies: { refresh_token: reusedToken },
+  });
 
-  expect(response.statusCode).toBe(401)
+  expect(response.statusCode).toBe(401);
 
   // Verify revocation mutation was called AND committed
-  expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(
-    expect.any(Object),
-    userId
-  )
+  expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(expect.any(Object), userId);
   expect(queries.logAuthEvent).toHaveBeenCalledWith(
     expect.any(Object),
     expect.objectContaining({
       event_type: 'token_reuse_detected',
-      user_id: userId
+      user_id: userId,
     })
-  )
-})
+  );
+});
 ```
 
 #### Audit Log Failure Path Tests
+
 Added tests for security-critical paths where audit logging fails:
 
 ```typescript
 // Branch B: provider_auto_linked audit log failure should log.error (not warn)
 it('Branch B: should call log.error (not log.warn) and return 200 when logAuthEvent throws', async () => {
-  vi.mocked(queries.logAuthEvent).mockRejectedValue(
-    new Error('audit db error')
-  )
+  vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('audit db error'));
   const response = await app.inject({
     method: 'POST',
     url: '/auth/signin',
-    payload: { credential: token, client_type: 'web' }
-  })
+    payload: { credential: token, client_type: 'web' },
+  });
 
-  expect(response.statusCode).toBe(200)
-  expect(log.error).toHaveBeenCalled() // Not log.warn
-})
+  expect(response.statusCode).toBe(200);
+  expect(log.error).toHaveBeenCalled(); // Not log.warn
+});
 ```
 
 #### Cookie Configuration Consistency
+
 **File:** `api/src/auth/cookies.test.ts`
+
 - Replaced hardcoded `30 * 24 * 60 * 60` (seconds) with `REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60`
 - Added `try/finally` wrappers for config mutations to prevent state leak between tests
 - **Reason:** Ensures test isolation and makes the constant reusable
 
 #### Test Isolation Improvements
+
 **File:** `api/vitest.config.ts`
+
 - Added `isolate: true` configuration to vitest environment to ensure complete isolation between test files
 - **Impact:** Prevents cross-test pollution of global state, database mocks, and config
 
 #### New Errors Test File
+
 **File:** `api/src/auth/errors.test.ts` (NEW, 11 tests)
+
 - Tests for `ProviderVerificationError` constructor and name
 - Tests for `isNetworkError()` type guard (all NETWORK_ERROR_CODES values)
 - Tests for non-network errors returning false from `isNetworkError()`
 - Edge cases: null, undefined, plain objects
 
 #### Test Assertions Hardening
+
 Added `toBeDefined()` guards before unsafe `!` accesses and before SQL string assertions across all test files:
 
 ```typescript
 // Before (potentially unsafe)
-expect(response.body).toContain(query!)
+expect(response.body).toContain(query!);
 
 // After (safe)
-expect(query).toBeDefined()
-expect(response.body).toContain(query!)
+expect(query).toBeDefined();
+expect(response.body).toContain(query!);
 ```
 
 ---
@@ -298,6 +322,7 @@ expect(response.body).toContain(query!)
 ### 5. Self-Improving Review Infrastructure
 
 #### Code Review Skill Enhancement
+
 **File:** `.claude/skills/code-review/skill.md` (NEW Step 6)
 
 Added automated Step 6 to the code review workflow:
@@ -306,6 +331,7 @@ Added automated Step 6 to the code review workflow:
 >
 > After completing the review, examine all Critical and High severity findings.
 > For each unique class of issue that is not already in the domain agent's checklist:
+>
 > 1. Read the relevant domain agent file (e.g., `backend-dev.md`)
 > 2. Add a new numbered checklist item that precisely describes the pattern to watch for
 > 3. Include a grep command in the checklist for easy verification
@@ -314,11 +340,13 @@ Added automated Step 6 to the code review workflow:
 **Rationale:** Prevents the same vulnerability/bug class from escaping future reviews. The agent instruction file becomes a living document of discovered patterns.
 
 #### Backend-Dev Agent Checklist Updates
+
 **File:** `.claude/agents/backend-dev.md`
 
 Added 4 new items to prevent recurrence of discovered issues:
 
 **Item 32: Transaction Callback Error Pattern**
+
 ```
 - [ ] 32. Security-critical writes (revocation, account deletion) must NOT
        throw HttpError inside the withTransaction callback. Instead,
@@ -328,6 +356,7 @@ Added 4 new items to prevent recurrence of discovered issues:
 ```
 
 **Item 33: Test File Coverage Requirement**
+
 ```
 - [ ] 33. Every source file in api/src/auth/ must have a companion
        .test.ts file. Verify no orphan sources:
@@ -335,6 +364,7 @@ Added 4 new items to prevent recurrence of discovered issues:
 ```
 
 **Item 34: Data Truncation Consistency**
+
 ```
 - [ ] 34. When the same source value is stored in two columns with
        different character limits, use separate truncation functions
@@ -343,6 +373,7 @@ Added 4 new items to prevent recurrence of discovered issues:
 ```
 
 **Extended Item 21: Audit Log Failure Handling**
+
 ```
 - [ ] 21. Non-fatal audit log failures must have tests that assert:
        (a) The security-critical write (revocation, account link) was called
@@ -351,6 +382,7 @@ Added 4 new items to prevent recurrence of discovered issues:
 ```
 
 **Extended Item 26: Schema Entry Validation**
+
 ```
 - [ ] 26. Fastify schemas must be bidirectional:
        (a) No dead response entries (responses defined but never returned)
@@ -407,20 +439,25 @@ reply.code(200).send({
 ```
 
 **Why this works:**
+
 1. `withTransaction` auto-commits when the callback returns normally (doesn't throw)
 2. Revocation write is committed to database
 3. HTTP response (401) is sent after COMMIT, guaranteeing durability
 4. If the client retries, the revoked token will fail on next verification
 
 **Antipattern (what we fixed):**
+
 ```typescript
 // WRONG: Revocation is rolled back
-throw new HttpError(401, { /* ... */ }) // Throws inside TX → ROLLBACK
+throw new HttpError(401, {
+  /* ... */
+}); // Throws inside TX → ROLLBACK
 ```
 
 ### Dual Truncation Pattern
 
 Track'em Toys stores user-agent strings in two places with different size constraints:
+
 - `refresh_tokens.device_info`: VARCHAR(255) — short, used for device identification
 - `auth_events.user_agent`: VARCHAR(512) — wide, used for audit forensics
 
@@ -428,17 +465,22 @@ Track'em Toys stores user-agent strings in two places with different size constr
 
 ```typescript
 // Define constants alongside table schema widths
-const MAX_DEVICE_INFO_LENGTH = 255      // Matches VARCHAR(255)
-const MAX_AUDIT_USER_AGENT_LENGTH = 512 // Matches VARCHAR(512)
+const MAX_DEVICE_INFO_LENGTH = 255; // Matches VARCHAR(255)
+const MAX_AUDIT_USER_AGENT_LENGTH = 512; // Matches VARCHAR(512)
 
 /**
  * For device_info storage: truncate at 255.
  * Sanitize control characters and trim.
  */
 function getUserAgent(request: FastifyRequest): string | null {
-  const ua = request.headers['user-agent']
-  if (typeof ua !== 'string') return null
-  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_DEVICE_INFO_LENGTH) || null
+  const ua = request.headers['user-agent'];
+  if (typeof ua !== 'string') return null;
+  return (
+    ua
+      .replace(/[\x00-\x1F\x7F]/g, '')
+      .trim()
+      .slice(0, MAX_DEVICE_INFO_LENGTH) || null
+  );
 }
 
 /**
@@ -446,28 +488,34 @@ function getUserAgent(request: FastifyRequest): string | null {
  * Use this when logging, not for device_info.
  */
 function getRawUserAgent(request: FastifyRequest): string | null {
-  const ua = request.headers['user-agent']
-  if (typeof ua !== 'string') return null
-  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_AUDIT_USER_AGENT_LENGTH) || null
+  const ua = request.headers['user-agent'];
+  if (typeof ua !== 'string') return null;
+  return (
+    ua
+      .replace(/[\x00-\x1F\x7F]/g, '')
+      .trim()
+      .slice(0, MAX_AUDIT_USER_AGENT_LENGTH) || null
+  );
 }
 ```
 
 **Usage:**
+
 ```typescript
 // In /signin handler
-const ua = getUserAgent(request)      // 255 chars → refresh_tokens.device_info
-const rawUa = getRawUserAgent(request) // 512 chars → auth_events.user_agent
+const ua = getUserAgent(request); // 255 chars → refresh_tokens.device_info
+const rawUa = getRawUserAgent(request); // 512 chars → auth_events.user_agent
 
 // Store both
 const refreshToken = await createRefreshToken(client, {
   device_info: ua, // 255 chars
   // ...
-})
+});
 
 await logAuthEvent(client, {
   user_agent: rawUa, // 512 chars — full fidelity for audit
   // ...
-})
+});
 ```
 
 ---
@@ -475,6 +523,7 @@ await logAuthEvent(client, {
 ## Validation & Testing
 
 ### Test Execution Summary
+
 ```
  Test Files  13 passed (13)
       Tests  326 passed (326)
@@ -483,6 +532,7 @@ await logAuthEvent(client, {
 ```
 
 **Test Files:**
+
 - api/src/auth/routes.test.ts (95 tests)
 - api/src/auth/tokens.test.ts
 - api/src/auth/cookies.test.ts
@@ -498,6 +548,7 @@ await logAuthEvent(client, {
 - api/src/server.test.ts
 
 ### TypeScript Compilation
+
 ```
 0 errors
 0 warnings
@@ -505,6 +556,7 @@ All files: strict mode compliance ✅
 ```
 
 ### Code Quality
+
 ```
 ESLint (source files only): 0 violations
 No dead code
@@ -515,6 +567,7 @@ All imports resolved
 ### Test Coverage Details
 
 #### New Passing Tests (326 Total)
+
 - **4 tests**: Network error handling (503 responses) for Google/Apple on `/signin` and `/link-account`
 - **8 tests**: Token reuse revocation path (including assertions on `revokeAllUserRefreshTokens` calls)
 - **6 tests**: Audit log failure paths with correct log levels
@@ -527,22 +580,26 @@ All imports resolved
 ## Impact Assessment
 
 ### Security Impact: HIGH
+
 1. **Token Reuse Revocation:** Attackers who present a reused token are now permanently unable to rotate it. Session hijacking via token theft is now detectable and fatal.
 2. **Audit Logging:** Security events are now consistently logged at error level, ensuring SOC/security teams see them in monitoring.
 3. **Rate Limiting:** `/logout` endpoint is now protected against enumeration attacks.
 4. **Network Error Handling:** Infrastructure failures (e.g., Google/Apple OAuth service down) now return 503, not 401, preventing false security rejections.
 
 ### Correctness Impact: HIGH
+
 1. **HTTP Status Codes:** Clients can now reliably distinguish authentication failures (401) from malformed requests (400) from server errors (5xx).
 2. **User-Agent Audit Trail:** Audit logs now preserve full user-agent strings up to 512 characters, dramatically improving forensic capabilities.
 3. **Type Safety:** Eliminated 57 TypeScript build errors and 56 unsafe casts. Code is now strictly type-safe.
 
 ### Developer Experience Impact: MEDIUM
+
 1. **Self-Improving Checklist:** Backend developers no longer need to remember lessons from past code reviews—the agent file captures them automatically.
 2. **Pattern Documentation:** New checklist items provide clear patterns for token rotation, test file requirements, and data truncation logic.
 3. **Test Isolation:** `isolate: true` in vitest prevents mysterious test pollution bugs.
 
 ### Maintainability Impact: MEDIUM
+
 1. **Error Class Organization:** `api/src/auth/errors.ts` provides a single source of truth for error types, improving IDE autocomplete and reducing duplication.
 2. **Constant Definitions:** Magic numbers (255, 512) are now named constants, improving code readability and reducing copy-paste errors.
 3. **JSDoc Accuracy:** Corrected JSDoc now accurately reflects function behavior, reducing documentation debt.
@@ -552,6 +609,7 @@ All imports resolved
 ## Related Files
 
 ### Created Files (3)
+
 - `/Users/buta/Repos/track-em-toys/api/src/auth/errors.ts` — Error class definitions and type guards (77 lines)
 - `/Users/buta/Repos/track-em-toys/api/src/auth/errors.test.ts` — Error class tests (96 lines)
 - `/Users/buta/Repos/track-em-toys/.claude/skills/code-review/skill.md` — Self-improving review infrastructure (added Step 6)
@@ -559,6 +617,7 @@ All imports resolved
 ### Modified Files (17)
 
 #### Authentication Layer (10 files)
+
 - `/Users/buta/Repos/track-em-toys/api/src/auth/routes.ts` — 868 lines
   - Token reuse tagged union pattern
   - Dual user-agent truncation functions (getUserAgent, getRawUserAgent)
@@ -602,6 +661,7 @@ All imports resolved
   - Dead response entry cleanup
 
 #### Database Layer (2 files)
+
 - `/Users/buta/Repos/track-em-toys/api/src/db/queries.ts` — 668 lines
   - QueryOnlyClient interface narrowing
   - JSDoc corrections for findOAuthAccountWithUser
@@ -611,6 +671,7 @@ All imports resolved
   - Test isolation improvements
 
 #### Configuration & Infrastructure (3 files)
+
 - `/Users/buta/Repos/track-em-toys/api/src/config.ts`
   - Configuration handling
 
@@ -621,6 +682,7 @@ All imports resolved
   - Added 4 new checklist items (32, 33, 34, extended 21 and 26)
 
 #### Other Files (2 files)
+
 - `/Users/buta/Repos/track-em-toys/api/src/index.ts` — Server initialization
 - `/Users/buta/Repos/track-em-toys/api/src/server.ts` — Server setup
 
@@ -629,44 +691,48 @@ All imports resolved
 ## Summary Statistics
 
 ### Code Volume
-| Metric | Value |
-|--------|-------|
-| Test files created | 1 (`errors.test.ts`) |
-| Error class files created | 1 (`errors.ts`) |
-| Source files modified | 15 |
-| Total files modified | 17 |
-| New test cases | 37+ |
-| Unsafe casts eliminated | 56 |
-| TypeScript build errors fixed | 57 |
-| ESLint violations fixed | ~12 |
+
+| Metric                        | Value                |
+| ----------------------------- | -------------------- |
+| Test files created            | 1 (`errors.test.ts`) |
+| Error class files created     | 1 (`errors.ts`)      |
+| Source files modified         | 15                   |
+| Total files modified          | 17                   |
+| New test cases                | 37+                  |
+| Unsafe casts eliminated       | 56                   |
+| TypeScript build errors fixed | 57                   |
+| ESLint violations fixed       | ~12                  |
 
 ### Test Coverage
-| Metric | Value |
-|--------|-------|
-| Total test files | 13 |
-| Total tests passing | 326 |
-| Network error tests | 4 |
-| Token reuse tests | 8 |
-| Audit log failure tests | 6 |
-| Error class tests | 11 |
-| Cookie isolation tests | 8 |
+
+| Metric                  | Value |
+| ----------------------- | ----- |
+| Total test files        | 13    |
+| Total tests passing     | 326   |
+| Network error tests     | 4     |
+| Token reuse tests       | 8     |
+| Audit log failure tests | 6     |
+| Error class tests       | 11    |
+| Cookie isolation tests  | 8     |
 
 ### Quality Metrics
-| Metric | Value |
-|--------|-------|
-| TypeScript errors | 0 |
-| ESLint violations (src) | 0 |
-| Test pass rate | 100% (326/326) |
-| Avg test duration | 658ms |
-| Critical security fixes | 3 |
-| High-severity fixes | 5+ |
-| Medium-severity fixes | 8+ |
+
+| Metric                  | Value          |
+| ----------------------- | -------------- |
+| TypeScript errors       | 0              |
+| ESLint violations (src) | 0              |
+| Test pass rate          | 100% (326/326) |
+| Avg test duration       | 658ms          |
+| Critical security fixes | 3              |
+| High-severity fixes     | 5+             |
+| Medium-severity fixes   | 8+             |
 
 ### Agent Improvements
-| Metric | Value |
-|--------|-------|
-| New backend-dev checklist items | 4 |
-| Extended checklist items | 2 |
+
+| Metric                                  | Value      |
+| --------------------------------------- | ---------- |
+| New backend-dev checklist items         | 4          |
+| Extended checklist items                | 2          |
 | Self-improving infrastructure additions | 1 (Step 6) |
 
 ---

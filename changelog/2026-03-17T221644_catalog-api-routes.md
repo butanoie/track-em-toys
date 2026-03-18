@@ -23,11 +23,13 @@ Three migrations following the single-responsibility convention:
 - **018 — FTS Generated Columns:** Added `search_vector tsvector GENERATED ALWAYS AS (...) STORED` columns to characters and items with GIN indexes. Uses `simple` text config (no stemming — proper nouns dominate the dataset).
 
 **Created:**
+
 - `api/db/migrations/016_slug_scoping.sql`
 - `api/db/migrations/017_items_franchise_id.sql`
 - `api/db/migrations/018_fts_generated_columns.sql`
 
 **Modified:**
+
 - `api/db/schema.sql` — auto-generated dump updated
 - `api/db/seed/ingest.ts` — `ON CONFLICT` clauses updated from `(slug)` to `(slug, franchise_id)` for franchise-scoped tables
 - `api/src/types/index.ts` — added `franchise_id` to `Item` interface
@@ -36,17 +38,18 @@ Three migrations following the single-responsibility convention:
 
 Seven domain modules under `api/src/catalog/`, each with routes, queries, and schemas:
 
-| Module | Endpoints | Pagination | Franchise Scoped |
-|---|---|---|---|
-| `franchises/` | list, detail | — | No (top-level) |
-| `manufacturers/` | list, detail | — | No (globally unique) |
-| `characters/` | list, detail | Cursor | Yes |
-| `items/` | list, detail | Cursor | Yes |
-| `toy-lines/` | list, detail | — | Yes |
-| `reference/` | factions, sub-groups, continuity-families (list + detail each) | — | Yes |
-| `search/` | full-text search | Offset | Optional filter |
+| Module           | Endpoints                                                      | Pagination | Franchise Scoped     |
+| ---------------- | -------------------------------------------------------------- | ---------- | -------------------- |
+| `franchises/`    | list, detail                                                   | —          | No (top-level)       |
+| `manufacturers/` | list, detail                                                   | —          | No (globally unique) |
+| `characters/`    | list, detail                                                   | Cursor     | Yes                  |
+| `items/`         | list, detail                                                   | Cursor     | Yes                  |
+| `toy-lines/`     | list, detail                                                   | —          | Yes                  |
+| `reference/`     | factions, sub-groups, continuity-families (list + detail each) | —          | Yes                  |
+| `search/`        | full-text search                                               | Offset     | Optional filter      |
 
 **Created (38 files):**
+
 - `api/src/catalog/routes.ts` — barrel plugin
 - `api/src/catalog/franchise-scoped.ts` — registers all franchise-scoped sub-plugins
 - `api/src/catalog/shared/pagination.ts` — cursor encode/decode with versioned payload `{ v: 1, name, id }`
@@ -55,6 +58,7 @@ Seven domain modules under `api/src/catalog/`, each with routes, queries, and sc
 - `api/src/catalog/{characters,items,manufacturers,toy-lines,reference,franchises,search}/{routes,queries,schemas}.ts`
 
 **Modified:**
+
 - `api/src/server.ts` — register `catalogRoutes` at `/catalog` prefix
 - `api/src/plugins/docs.ts` — added `catalog` and `catalog-search` OpenAPI tags
 - `api/CLAUDE.md` — added catalog-specific conventions
@@ -63,17 +67,17 @@ Seven domain modules under `api/src/catalog/`, each with routes, queries, and sc
 
 74 new tests across 9 test files:
 
-| Test File | Tests | Type |
-|---|---|---|
-| `shared/pagination.test.ts` | 19 | Unit — cursor encoding, decoding, buildCursorPage, clampLimit |
-| `search/queries.test.ts` | 11 | Unit — buildSearchTsquery prefix matching |
-| `franchises/routes.test.ts` | 4 | Integration — list, detail, 404 |
-| `manufacturers/routes.test.ts` | 3 | Integration — list, detail, 404 |
-| `reference/routes.test.ts` | 11 | Integration — factions, sub-groups, continuity-families |
-| `toy-lines/routes.test.ts` | 3 | Integration — list, detail, 404 |
-| `characters/routes.test.ts` | 10 | Integration — pagination, cursor, detail with sub-groups/appearances |
-| `items/routes.test.ts` | 7 | Integration — pagination, detail with photos, null handling |
-| `search/routes.test.ts` | 6 | Integration — search, franchise filter, pagination, edge cases |
+| Test File                      | Tests | Type                                                                 |
+| ------------------------------ | ----- | -------------------------------------------------------------------- |
+| `shared/pagination.test.ts`    | 19    | Unit — cursor encoding, decoding, buildCursorPage, clampLimit        |
+| `search/queries.test.ts`       | 11    | Unit — buildSearchTsquery prefix matching                            |
+| `franchises/routes.test.ts`    | 4     | Integration — list, detail, 404                                      |
+| `manufacturers/routes.test.ts` | 3     | Integration — list, detail, 404                                      |
+| `reference/routes.test.ts`     | 11    | Integration — factions, sub-groups, continuity-families              |
+| `toy-lines/routes.test.ts`     | 3     | Integration — list, detail, 404                                      |
+| `characters/routes.test.ts`    | 10    | Integration — pagination, cursor, detail with sub-groups/appearances |
+| `items/routes.test.ts`         | 7     | Integration — pagination, detail with photos, null handling          |
+| `search/routes.test.ts`        | 6     | Integration — search, franchise filter, pagination, edge cases       |
 
 ### 4. Documentation
 
@@ -107,6 +111,7 @@ Fastify's parameterized prefix (`{ prefix: '/franchises/:franchise' }`) makes th
 ### Cursor Pagination
 
 Keyset pagination on `(name ASC, id ASC)` with versioned cursor:
+
 ```typescript
 { v: 1, name: string, id: string }  // base64url encoded
 ```
@@ -116,6 +121,7 @@ SQL uses `(name, id) > ($cursor_name, $cursor_id::uuid)` row comparison. Fetch `
 ### Full-Text Search with Prefix Matching
 
 Generated `search_vector` columns avoid expression-matching fragility. Search query builder appends `:*` to the last token for prefix matching:
+
 ```
 "optimus pr" → 'optimus' & 'pr':*
 ```
@@ -165,6 +171,7 @@ Seed:       seed:purge runs clean (all 8 tables populated)
 ## Related Files
 
 **Key files:**
+
 - `docs/decisions/ADR_Catalog_API_Architecture.md` — full architecture decisions
 - `api/src/catalog/routes.ts` — barrel plugin entry point
 - `api/src/catalog/shared/pagination.ts` — cursor pagination utilities
@@ -175,17 +182,17 @@ Seed:       seed:purge runs clean (all 8 tables populated)
 
 ## Summary Statistics
 
-| Metric | Count |
-|---|---|
-| Commits | 7 |
-| Files changed | 47 |
-| Lines added | +3,845 |
-| Lines removed | -127 |
-| New files | 41 |
-| New tests | 74 |
-| Total API tests | 516 |
-| Endpoints | 17 |
-| Migrations | 3 |
+| Metric          | Count  |
+| --------------- | ------ |
+| Commits         | 7      |
+| Files changed   | 47     |
+| Lines added     | +3,845 |
+| Lines removed   | -127   |
+| New files       | 41     |
+| New tests       | 74     |
+| Total API tests | 516    |
+| Endpoints       | 17     |
+| Migrations      | 3      |
 
 ---
 

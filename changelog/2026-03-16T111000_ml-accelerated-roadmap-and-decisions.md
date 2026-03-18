@@ -19,6 +19,7 @@ Formalized the ML-accelerated development roadmap with a web-first strategy that
 Authored the full development roadmap (`docs/plans/Development_Roadmap_v1_0.md`) defining the ML-first phase sequence: 1.4 (Seed) → 1.5 (Catalog API) → 1.5b (Roles) → 1.9 (Photos) → 4.0 (ML) → 2.0 (iOS). This reorders the original plan to deliver ML-powered toy identification before building out collection management features.
 
 **Created:**
+
 - `docs/plans/Development_Roadmap_v1_0.md` — 759-line roadmap with phase definitions, dependencies, and milestones
 
 ### 2. Architectural Decision Records
@@ -26,6 +27,7 @@ Authored the full development roadmap (`docs/plans/Development_Roadmap_v1_0.md`)
 Documented 7 architectural decisions covering the project's core design choices.
 
 **Created:**
+
 - `docs/decisions/2026-03-16_roadmap_session_decisions.md` — Captures decisions on:
   1. ML-accelerated web-first development path
   2. OAuth-only authentication (no email/password)
@@ -36,6 +38,7 @@ Documented 7 architectural decisions covering the project's core design choices.
   7. GitHub project tracking strategy
 
 **Modified:**
+
 - `docs/decisions/Schema_Design_Rationale.md` — Added rationale for roles and photo privacy schema design
 
 ### 3. CLAUDE.md Convention Updates
@@ -43,6 +46,7 @@ Documented 7 architectural decisions covering the project's core design choices.
 Updated all module-level instruction files to reflect the new architectural decisions, ensuring Claude agents follow the ML-first strategy and role/photo conventions.
 
 **Modified:**
+
 - `CLAUDE.md` — Added development strategy, photo domains, user roles, and security guidelines sections
 - `api/CLAUDE.md` — Added role middleware patterns and catalog photo conventions
 - `web/CLAUDE.md` — Added admin route conventions and role-based UI patterns
@@ -54,6 +58,7 @@ Updated all module-level instruction files to reflect the new architectural deci
 Added structured issue templates to standardize how features, bugs, and tasks are created.
 
 **Created:**
+
 - `.github/ISSUE_TEMPLATE/feature.yml` — Feature template with phase dropdown and module selector
 - `.github/ISSUE_TEMPLATE/bug.yml` — Bug report template with reproduction steps
 - `.github/ISSUE_TEMPLATE/task.yml` — Task template with acceptance criteria
@@ -64,6 +69,7 @@ Added structured issue templates to standardize how features, bugs, and tasks ar
 Added planned test scenario entries and doc gate guidance for future phases.
 
 **Modified:**
+
 - `docs/test-scenarios/README.md` — Added scenario mapping entries for upcoming phases
 - `docs/guides/DOC_GATE_REFERENCE.md` — Added guidance notes
 
@@ -78,6 +84,7 @@ The original roadmap followed a linear feature-build approach (schema → API �
 ### Role Model Design
 
 Three roles with additive permissions:
+
 - `user` — browse catalog, manage own collection
 - `curator` — user powers + catalog write operations (items, photos, edits)
 - `admin` — curator powers + user management, role assignment
@@ -97,6 +104,7 @@ Role is embedded in JWT claims to avoid per-request DB lookups.
 ## Related Files
 
 **Created (7):**
+
 - `docs/plans/Development_Roadmap_v1_0.md`
 - `docs/decisions/2026-03-16_roadmap_session_decisions.md`
 - `.github/ISSUE_TEMPLATE/feature.yml`
@@ -106,6 +114,7 @@ Role is embedded in JWT claims to avoid per-request DB lookups.
 - `docs/decisions/Research_for_Toy_Collection_Catalog_and_Pricing_App.md` (minor addition)
 
 **Modified (8):**
+
 - `CLAUDE.md`
 - `api/CLAUDE.md`
 - `web/CLAUDE.md`
@@ -119,14 +128,14 @@ Role is embedded in JWT claims to avoid per-request DB lookups.
 
 ## Summary Statistics
 
-| Metric | Count |
-|--------|-------|
-| Files created | 7 |
-| Files modified | 8 |
-| Lines added | ~1,109 |
-| Architectural decisions documented | 7 |
-| Issue templates added | 3 (+1 config) |
-| CLAUDE.md files updated | 5 |
+| Metric                             | Count         |
+| ---------------------------------- | ------------- |
+| Files created                      | 7             |
+| Files modified                     | 8             |
+| Lines added                        | ~1,109        |
+| Architectural decisions documented | 7             |
+| Issue templates added              | 3 (+1 config) |
+| CLAUDE.md files updated            | 5             |
 
 ---
 

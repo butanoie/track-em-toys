@@ -1,6 +1,6 @@
 name: Feature
 description: Propose a new feature or capability
-labels: ["type:feature"]
+labels: ['type:feature']
 body:
   - type: textarea
     id: summary
@@ -19,20 +19,20 @@ body:
     attributes:
       label: Phase
       options:
-        - "1.4 Seed"
-        - "1.5 Catalog API"
-        - "1.5b Roles & Admin"
-        - "1.7 Catalog UI"
-        - "1.9 Photos"
-        - "1.12 GDPR"
-        - "4.0 ML"
-        - "2.0 iOS"
-        - "1.6 Collection API (post-ML)"
-        - "1.8 Collection UI (post-ML)"
-        - "1.10 CSV Import (post-ML)"
-        - "1.11 Reporting (post-ML)"
-        - "3.0 Pricing (post-ML)"
-        - "5.0 Polish"
+        - '1.4 Seed'
+        - '1.5 Catalog API'
+        - '1.5b Roles & Admin'
+        - '1.7 Catalog UI'
+        - '1.9 Photos'
+        - '1.12 GDPR'
+        - '4.0 ML'
+        - '2.0 iOS'
+        - '1.6 Collection API (post-ML)'
+        - '1.8 Collection UI (post-ML)'
+        - '1.10 CSV Import (post-ML)'
+        - '1.11 Reporting (post-ML)'
+        - '3.0 Pricing (post-ML)'
+        - '5.0 Polish'
   - type: textarea
     id: depends
     attributes:

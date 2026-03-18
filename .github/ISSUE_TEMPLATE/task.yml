@@ -1,6 +1,6 @@
 name: Task
 description: Chore, infrastructure, testing, or documentation task
-labels: ["type:chore"]
+labels: ['type:chore']
 body:
   - type: textarea
     id: summary

@@ -19,19 +19,20 @@ Added 9 shared catalog tables to PostgreSQL via migration 011, establishing the 
 
 9 new tables created in migration 011 (shared catalog layer, no `user_id`, no RLS). Migration 012 subsequently dropped `categories`, added `character_sub_groups`, and enriched `characters` and `users`:
 
-| Table | Purpose | Slug | updated_at | Trigger |
-|---|---|---|---|---|
-| `factions` | Allegiances (Autobot, Decepticon) | Yes | No | No |
-| `sub_groups` | Sub-teams (Dinobots, Constructicons) | Yes | No | No |
-| `characters` | Franchise characters with combiner metadata | Yes | Yes | Yes |
-| `character_sub_groups` | Many-to-many: characters ↔ sub_groups | No | No | No |
-| `manufacturers` | Figure-producing companies | Yes | Yes | Yes |
-| `toy_lines` | Product lines (Masterpiece, Classified) | Yes | Yes | Yes |
-| `items` | Master catalog of figures | Yes | Yes | Yes |
-| `item_photos` | Reference photos for catalog items | No | No | No |
-| `catalog_edits` | Approval queue for community contributions | No | No | No |
+| Table                  | Purpose                                     | Slug | updated_at | Trigger |
+| ---------------------- | ------------------------------------------- | ---- | ---------- | ------- |
+| `factions`             | Allegiances (Autobot, Decepticon)           | Yes  | No         | No      |
+| `sub_groups`           | Sub-teams (Dinobots, Constructicons)        | Yes  | No         | No      |
+| `characters`           | Franchise characters with combiner metadata | Yes  | Yes        | Yes     |
+| `character_sub_groups` | Many-to-many: characters ↔ sub_groups       | No   | No         | No      |
+| `manufacturers`        | Figure-producing companies                  | Yes  | Yes        | Yes     |
+| `toy_lines`            | Product lines (Masterpiece, Classified)     | Yes  | Yes        | Yes     |
+| `items`                | Master catalog of figures                   | Yes  | Yes        | Yes     |
+| `item_photos`          | Reference photos for catalog items          | No   | No         | No      |
+| `catalog_edits`        | Approval queue for community contributions  | No   | No         | No      |
 
 **Created:**
+
 - `api/db/migrations/011_shared_catalog_tables.sql` — 247 lines
 
 ### 2. TypeScript Types
@@ -43,6 +44,7 @@ Added 9 shared catalog tables to PostgreSQL via migration 011, establishing the 
 **Union types:** `DataQuality`, `CatalogEditType`, `CatalogEditStatus`
 
 **Modified:**
+
 - `api/src/types/index.ts` — +124 lines
 
 ### 3. Documentation Updates
@@ -54,9 +56,11 @@ Added 9 shared catalog tables to PostgreSQL via migration 011, establishing the 
 - `docs/decisions/Architecture_Research_*.md` — SQL snippets updated from BIGSERIAL to UUID
 
 **Created:**
+
 - `docs/decisions/Schema_Design_Rationale.md` — 155 lines
 
 **Modified:**
+
 - `CLAUDE.md`, `api/CLAUDE.md`, `docs/diagrams/toy-catalog-database-diagrams.jsx`, `docs/decisions/Architecture_Research_*.md`
 
 ---
@@ -102,16 +106,16 @@ Added 9 shared catalog tables to PostgreSQL via migration 011, establishing the 
 
 ## Related Files
 
-| File | Action |
-|---|---|
-| `api/db/migrations/011_shared_catalog_tables.sql` | Created |
-| `api/db/schema.sql` | Modified (auto-generated) |
-| `api/src/types/index.ts` | Modified |
-| `docs/decisions/Schema_Design_Rationale.md` | Created |
-| `docs/diagrams/toy-catalog-database-diagrams.jsx` | Modified |
-| `docs/decisions/Architecture_Research_*.md` | Modified |
-| `CLAUDE.md` | Modified |
-| `api/CLAUDE.md` | Modified |
+| File                                              | Action                    |
+| ------------------------------------------------- | ------------------------- |
+| `api/db/migrations/011_shared_catalog_tables.sql` | Created                   |
+| `api/db/schema.sql`                               | Modified (auto-generated) |
+| `api/src/types/index.ts`                          | Modified                  |
+| `docs/decisions/Schema_Design_Rationale.md`       | Created                   |
+| `docs/diagrams/toy-catalog-database-diagrams.jsx` | Modified                  |
+| `docs/decisions/Architecture_Research_*.md`       | Modified                  |
+| `CLAUDE.md`                                       | Modified                  |
+| `api/CLAUDE.md`                                   | Modified                  |
 
 ---
 

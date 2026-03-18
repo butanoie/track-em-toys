@@ -2,36 +2,36 @@
 // The access token must never be persisted to localStorage or sessionStorage.
 // Refresh tokens are managed entirely by the server via httpOnly cookie.
 
-let accessToken: string | null = null
-let refreshTimerId: number | null = null
+let accessToken: string | null = null;
+let refreshTimerId: number | null = null;
 
 export const authStore = {
   getToken: (): string | null => accessToken,
   setToken: (token: string): void => {
-    accessToken = token
+    accessToken = token;
   },
   clear: (): void => {
-    accessToken = null
+    accessToken = null;
   },
-}
+};
 
 export const refreshTimer = {
   set: (id: number): void => {
-    refreshTimerId = id
+    refreshTimerId = id;
   },
   cancel: (): void => {
     if (refreshTimerId !== null) {
-      window.clearTimeout(refreshTimerId)
-      refreshTimerId = null
+      window.clearTimeout(refreshTimerId);
+      refreshTimerId = null;
     }
   },
-}
+};
 
 // sessionStorage keys
 export const SESSION_KEYS = {
   user: 'trackem:user',
   appleUserName: 'trackem:apple:user_name',
-} as const
+} as const;
 
 /**
  * localStorage session indicator.
@@ -49,16 +49,16 @@ export const SESSION_KEYS = {
  * POST /auth/refresh call entirely and renders the login page immediately
  * instead of making an unnecessary round-trip that will always return 401.
  */
-const SESSION_FLAG_KEY = 'trackem:has_session'
+const SESSION_FLAG_KEY = 'trackem:has_session';
 
 export const sessionFlag = {
   set: (): void => {
-    localStorage.setItem(SESSION_FLAG_KEY, '1')
+    localStorage.setItem(SESSION_FLAG_KEY, '1');
   },
   clear: (): void => {
-    localStorage.removeItem(SESSION_FLAG_KEY)
+    localStorage.removeItem(SESSION_FLAG_KEY);
   },
   check: (): boolean => {
-    return localStorage.getItem(SESSION_FLAG_KEY) !== null
+    return localStorage.getItem(SESSION_FLAG_KEY) !== null;
   },
-}
+};

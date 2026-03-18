@@ -9,35 +9,35 @@
  * ephemeral EC keys.
  */
 
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest'
-import type { FastifyInstance } from 'fastify'
-import type { OAuthAccount } from '../types/index.js'
-import type { PoolClient } from '../db/pool.js'
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
+import type { FastifyInstance } from 'fastify';
+import type { OAuthAccount } from '../types/index.js';
+import type { PoolClient } from '../db/pool.js';
 
 // ─── Generate ephemeral EC key pair for test JWT signing ──────────────────────
 const { testPrivatePem, testPublicPem, testPrivateKey, testPublicKey } = vi.hoisted(() => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports -- required inside vi.hoisted
-  const nodeCrypto = require('node:crypto') as typeof import('node:crypto')
+  const nodeCrypto = require('node:crypto') as typeof import('node:crypto');
   const { privateKey, publicKey } = nodeCrypto.generateKeyPairSync('ec', {
     namedCurve: 'prime256v1',
-  })
+  });
   return {
     testPrivatePem: privateKey.export({ type: 'pkcs8', format: 'pem' }) as string,
     testPublicPem: publicKey.export({ type: 'spki', format: 'pem' }) as string,
     testPrivateKey: privateKey,
     testPublicKey: publicKey,
-  }
-})
+  };
+});
 
 // ─── A separate "wrong" key pair for invalid signature tests ──────────────────
 const { wrongPrivateKey } = vi.hoisted(() => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports -- required inside vi.hoisted
-  const nodeCrypto = require('node:crypto') as typeof import('node:crypto')
+  const nodeCrypto = require('node:crypto') as typeof import('node:crypto');
   const { privateKey } = nodeCrypto.generateKeyPairSync('ec', {
     namedCurve: 'prime256v1',
-  })
-  return { wrongPrivateKey: privateKey }
-})
+  });
+  return { wrongPrivateKey: privateKey };
+});
 
 // ─── Module mocks — must be declared before any imports ──────────────────────
 
@@ -58,15 +58,21 @@ vi.mock('../config.js', () => ({
       audience: 'track-em-toys-api-test',
       accessTokenExpiry: '15m',
     },
-    apple: { bundleId: 'com.example.app', servicesId: 'com.example.web', teamId: 'TEAM123', keyId: 'KEY123', privateKey: testPrivatePem },
+    apple: {
+      bundleId: 'com.example.app',
+      servicesId: 'com.example.web',
+      teamId: 'TEAM123',
+      keyId: 'KEY123',
+      privateKey: testPrivatePem,
+    },
     google: { webClientId: 'google-web-client-id', iosClientId: undefined },
   },
-}))
+}));
 
 vi.mock('../db/pool.js', () => ({
   withTransaction: vi.fn(),
   pool: { connect: vi.fn(), on: vi.fn(), end: vi.fn() },
-}))
+}));
 
 vi.mock('../db/queries.js', () => ({
   findOAuthAccountWithUser: vi.fn(),
@@ -90,34 +96,32 @@ vi.mock('../db/queries.js', () => ({
   logAuthEvent: vi.fn(),
   deactivateUser: vi.fn(),
   toUserResponse: vi.fn(),
-}))
+}));
 
 vi.mock('./apple.js', () => ({
   verifyAppleToken: vi.fn(),
   isPrivateRelayEmail: vi.fn().mockReturnValue(false),
-}))
+}));
 
 vi.mock('./google.js', () => ({
   verifyGoogleToken: vi.fn(),
-}))
+}));
 
 // Mock jose's createRemoteJWKSet to return a local key set using the test public key
 vi.mock('jose', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('jose')>()
+  const actual = await importOriginal<typeof import('jose')>();
   return {
     ...actual,
-    createRemoteJWKSet: vi.fn().mockReturnValue(
-      async () => testPublicKey,
-    ),
-  }
-})
+    createRemoteJWKSet: vi.fn().mockReturnValue(async () => testPublicKey),
+  };
+});
 
 // ─── Import after mocks are registered ───────────────────────────────────────
 
-import { SignJWT } from 'jose'
-import { buildServer } from '../server.js'
-import * as pool from '../db/pool.js'
-import * as queries from '../db/queries.js'
+import { SignJWT } from 'jose';
+import { buildServer } from '../server.js';
+import * as pool from '../db/pool.js';
+import * as queries from '../db/queries.js';
 
 // ─── Fixture helpers ─────────────────────────────────────────────────────────
 
@@ -130,16 +134,16 @@ const mockAppleOAuthAccount: OAuthAccount = {
   is_private_email: false,
   raw_profile: null,
   created_at: '2026-01-01T00:00:00Z',
-}
+};
 
 /**
  * Make withTransaction() call the provided fn with a fake client.
  */
 function mockTx() {
-  const fakeClient = {} satisfies Pick<PoolClient, never>
+  const fakeClient = {} satisfies Pick<PoolClient, never>;
   vi.mocked(pool.withTransaction).mockImplementation(async (fn) => {
-    return fn(fakeClient as PoolClient)
-  })
+    return fn(fakeClient as PoolClient);
+  });
 }
 
 /**
@@ -150,33 +154,33 @@ function mockTx() {
  */
 async function signTestJWT(
   claims: {
-    events?: string
-    iss?: string
-    aud?: string
+    events?: string;
+    iss?: string;
+    aud?: string;
   },
   options?: {
-    privateKey?: import('node:crypto').KeyObject
-    expiresIn?: string
-  },
+    privateKey?: import('node:crypto').KeyObject;
+    expiresIn?: string;
+  }
 ): Promise<string> {
-  const key = options?.privateKey ?? testPrivateKey
+  const key = options?.privateKey ?? testPrivateKey;
   let builder = new SignJWT(claims.events !== undefined ? { events: claims.events } : {})
     .setProtectedHeader({ alg: 'ES256' })
-    .setIssuedAt()
+    .setIssuedAt();
 
   if (claims.iss !== undefined) {
-    builder = builder.setIssuer(claims.iss)
+    builder = builder.setIssuer(claims.iss);
   }
   if (claims.aud !== undefined) {
-    builder = builder.setAudience(claims.aud)
+    builder = builder.setAudience(claims.aud);
   }
   if (options?.expiresIn) {
-    builder = builder.setExpirationTime(options.expiresIn)
+    builder = builder.setExpirationTime(options.expiresIn);
   } else {
-    builder = builder.setExpirationTime('5m')
+    builder = builder.setExpirationTime('5m');
   }
 
-  return builder.sign(key)
+  return builder.sign(key);
 }
 
 /**
@@ -189,7 +193,7 @@ async function buildConsentRevokedJWT(sub = 'apple-sub-001'): Promise<string> {
     events: JSON.stringify({ type: 'consent-revoked', sub }),
     iss: 'https://appleid.apple.com',
     aud: 'com.example.app',
-  })
+  });
 }
 
 /**
@@ -202,122 +206,109 @@ async function buildAccountDeleteJWT(sub = 'apple-sub-001'): Promise<string> {
     events: JSON.stringify({ type: 'account-delete', sub }),
     iss: 'https://appleid.apple.com',
     aud: 'com.example.app',
-  })
+  });
 }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('Apple webhook — POST /auth/webhooks/apple', () => {
-  let server: FastifyInstance
+  let server: FastifyInstance;
 
   beforeAll(async () => {
-    server = await buildServer()
-  })
+    server = await buildServer();
+  });
 
   afterAll(async () => {
-    await server.close()
-  })
+    await server.close();
+  });
 
   beforeEach(() => {
-    vi.clearAllMocks()
-    vi.mocked(queries.logAuthEvent).mockResolvedValue(undefined)
-    vi.mocked(queries.revokeAllUserRefreshTokens).mockResolvedValue(undefined)
-    vi.mocked(queries.deactivateUser).mockResolvedValue(undefined)
-  })
+    vi.clearAllMocks();
+    vi.mocked(queries.logAuthEvent).mockResolvedValue(undefined);
+    vi.mocked(queries.revokeAllUserRefreshTokens).mockResolvedValue(undefined);
+    vi.mocked(queries.deactivateUser).mockResolvedValue(undefined);
+  });
 
   // ── Happy path: consent-revoked ──────────────────────────────────────────
 
   it('should revoke tokens and log consent_revoked event on consent-revoked', async () => {
-    mockTx()
-    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount)
+    mockTx();
+    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount);
 
-    const jwt = await buildConsentRevokedJWT()
+    const jwt = await buildConsentRevokedJWT();
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json<{ ok: boolean }>().ok).toBe(true)
+    expect(response.statusCode).toBe(200);
+    expect(response.json<{ ok: boolean }>().ok).toBe(true);
 
-    expect(queries.findOAuthAccount).toHaveBeenCalledWith(
-      expect.anything(),
-      'apple',
-      'apple-sub-001',
-    )
-    expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(
-      expect.anything(),
-      mockAppleOAuthAccount.user_id,
-    )
+    expect(queries.findOAuthAccount).toHaveBeenCalledWith(expect.anything(), 'apple', 'apple-sub-001');
+    expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(expect.anything(), mockAppleOAuthAccount.user_id);
     expect(queries.logAuthEvent).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
         user_id: mockAppleOAuthAccount.user_id,
         event_type: 'consent_revoked',
         metadata: { provider: 'apple', apple_event_type: 'consent-revoked' },
-      }),
-    )
+      })
+    );
     // deactivateUser should NOT be called for consent-revoked
-    expect(queries.deactivateUser).not.toHaveBeenCalled()
-  })
+    expect(queries.deactivateUser).not.toHaveBeenCalled();
+  });
 
   // ── Happy path: account-delete ───────────────────────────────────────────
 
   it('should deactivate user, revoke tokens, and log account_deactivated on account-delete', async () => {
-    mockTx()
-    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount)
+    mockTx();
+    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount);
 
-    const jwt = await buildAccountDeleteJWT()
+    const jwt = await buildAccountDeleteJWT();
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json<{ ok: boolean }>().ok).toBe(true)
+    expect(response.statusCode).toBe(200);
+    expect(response.json<{ ok: boolean }>().ok).toBe(true);
 
-    expect(queries.deactivateUser).toHaveBeenCalledWith(
-      expect.anything(),
-      mockAppleOAuthAccount.user_id,
-    )
-    expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(
-      expect.anything(),
-      mockAppleOAuthAccount.user_id,
-    )
+    expect(queries.deactivateUser).toHaveBeenCalledWith(expect.anything(), mockAppleOAuthAccount.user_id);
+    expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(expect.anything(), mockAppleOAuthAccount.user_id);
     expect(queries.logAuthEvent).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
         user_id: mockAppleOAuthAccount.user_id,
         event_type: 'account_deactivated',
         metadata: { provider: 'apple', apple_event_type: 'account-delete' },
-      }),
-    )
-  })
+      })
+    );
+  });
 
   // ── Unknown user returns 200 (idempotent) ────────────────────────────────
 
   it('should return 200 when user is not found (idempotent)', async () => {
-    mockTx()
-    vi.mocked(queries.findOAuthAccount).mockResolvedValue(null)
+    mockTx();
+    vi.mocked(queries.findOAuthAccount).mockResolvedValue(null);
 
-    const jwt = await buildConsentRevokedJWT('unknown-apple-sub')
+    const jwt = await buildConsentRevokedJWT('unknown-apple-sub');
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json<{ ok: boolean }>().ok).toBe(true)
-    expect(queries.revokeAllUserRefreshTokens).not.toHaveBeenCalled()
-    expect(queries.deactivateUser).not.toHaveBeenCalled()
-    expect(queries.logAuthEvent).not.toHaveBeenCalled()
-  })
+    expect(response.statusCode).toBe(200);
+    expect(response.json<{ ok: boolean }>().ok).toBe(true);
+    expect(queries.revokeAllUserRefreshTokens).not.toHaveBeenCalled();
+    expect(queries.deactivateUser).not.toHaveBeenCalled();
+    expect(queries.logAuthEvent).not.toHaveBeenCalled();
+  });
 
   // ── Invalid JWT signature ────────────────────────────────────────────────
 
@@ -328,24 +319,24 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
         iss: 'https://appleid.apple.com',
         aud: 'com.example.app',
       },
-      { privateKey: wrongPrivateKey },
-    )
+      { privateKey: wrongPrivateKey }
+    );
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(401)
-    expect(response.json<{ error: string }>().error).toBe('Invalid webhook token')
-  })
+    expect(response.statusCode).toBe(401);
+    expect(response.json<{ error: string }>().error).toBe('Invalid webhook token');
+  });
 
   // ── Expired JWT ──────────────────────────────────────────────────────────
 
   it('should return 401 for expired JWT', async () => {
     // Build a JWT that expires in the past using a negative time
-    const key = testPrivateKey
+    const key = testPrivateKey;
     const jwt = await new SignJWT({
       events: JSON.stringify({ type: 'consent-revoked', sub: 'apple-sub-001' }),
     })
@@ -354,17 +345,17 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       .setExpirationTime(Math.floor(Date.now() / 1000) - 300)
       .setIssuer('https://appleid.apple.com')
       .setAudience('com.example.app')
-      .sign(key)
+      .sign(key);
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(401)
-    expect(response.json<{ error: string }>().error).toBe('Invalid webhook token')
-  })
+    expect(response.statusCode).toBe(401);
+    expect(response.json<{ error: string }>().error).toBe('Invalid webhook token');
+  });
 
   // ── Wrong issuer ─────────────────────────────────────────────────────────
 
@@ -373,17 +364,17 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       events: JSON.stringify({ type: 'consent-revoked', sub: 'apple-sub-001' }),
       iss: 'https://evil.example.com',
       aud: 'com.example.app',
-    })
+    });
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(401)
-    expect(response.json<{ error: string }>().error).toBe('Invalid webhook token')
-  })
+    expect(response.statusCode).toBe(401);
+    expect(response.json<{ error: string }>().error).toBe('Invalid webhook token');
+  });
 
   // ── Wrong audience ───────────────────────────────────────────────────────
 
@@ -392,17 +383,17 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       events: JSON.stringify({ type: 'consent-revoked', sub: 'apple-sub-001' }),
       iss: 'https://appleid.apple.com',
       aud: 'com.wrong.audience',
-    })
+    });
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(401)
-    expect(response.json<{ error: string }>().error).toBe('Invalid webhook token')
-  })
+    expect(response.statusCode).toBe(401);
+    expect(response.json<{ error: string }>().error).toBe('Invalid webhook token');
+  });
 
   // ── Malformed events claim ───────────────────────────────────────────────
 
@@ -411,39 +402,39 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       events: 'not-valid-json{{{',
       iss: 'https://appleid.apple.com',
       aud: 'com.example.app',
-    })
+    });
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
-    expect(response.json<{ error: string }>().error).toBe('Malformed events claim')
-  })
+    expect(response.statusCode).toBe(400);
+    expect(response.json<{ error: string }>().error).toBe('Malformed events claim');
+  });
 
   // ── Missing events claim ─────────────────────────────────────────────────
 
   it('should return 400 for missing events claim', async () => {
-    const key = testPrivateKey
+    const key = testPrivateKey;
     const jwt = await new SignJWT({})
       .setProtectedHeader({ alg: 'ES256' })
       .setIssuedAt()
       .setExpirationTime('5m')
       .setIssuer('https://appleid.apple.com')
       .setAudience('com.example.app')
-      .sign(key)
+      .sign(key);
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
-    expect(response.json<{ error: string }>().error).toBe('Missing events claim')
-  })
+    expect(response.statusCode).toBe(400);
+    expect(response.json<{ error: string }>().error).toBe('Missing events claim');
+  });
 
   // ── Invalid events structure ─────────────────────────────────────────────
 
@@ -452,114 +443,105 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       events: JSON.stringify({ type: 'consent-revoked' }), // missing sub
       iss: 'https://appleid.apple.com',
       aud: 'com.example.app',
-    })
+    });
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
-    expect(response.json<{ error: string }>().error).toBe('Invalid events structure')
-  })
+    expect(response.statusCode).toBe(400);
+    expect(response.json<{ error: string }>().error).toBe('Invalid events structure');
+  });
 
   // ── Unknown event type → 200 (ignore gracefully) ────────────────────────
 
   it('should return 200 for unknown event type (ignored gracefully)', async () => {
-    mockTx()
-    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount)
+    mockTx();
+    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount);
 
     const jwt = await signTestJWT({
       events: JSON.stringify({ type: 'email-disabled', sub: 'apple-sub-001' }),
       iss: 'https://appleid.apple.com',
       aud: 'com.example.app',
-    })
+    });
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json<{ ok: boolean }>().ok).toBe(true)
-    expect(queries.revokeAllUserRefreshTokens).not.toHaveBeenCalled()
-    expect(queries.deactivateUser).not.toHaveBeenCalled()
-    expect(queries.logAuthEvent).not.toHaveBeenCalled()
-  })
+    expect(response.statusCode).toBe(200);
+    expect(response.json<{ ok: boolean }>().ok).toBe(true);
+    expect(queries.revokeAllUserRefreshTokens).not.toHaveBeenCalled();
+    expect(queries.deactivateUser).not.toHaveBeenCalled();
+    expect(queries.logAuthEvent).not.toHaveBeenCalled();
+  });
 
   // ── Non-fatal audit log failure (consent-revoked) ────────────────────────
 
   it('should return 200 and log.error when audit log fails for consent-revoked', async () => {
-    mockTx()
-    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount)
-    vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('DB audit log write failed'))
+    mockTx();
+    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount);
+    vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('DB audit log write failed'));
 
-    const errorSpy = vi.spyOn(server.log, 'error')
+    const errorSpy = vi.spyOn(server.log, 'error');
 
-    const jwt = await buildConsentRevokedJWT()
+    const jwt = await buildConsentRevokedJWT();
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json<{ ok: boolean }>().ok).toBe(true)
+    expect(response.statusCode).toBe(200);
+    expect(response.json<{ ok: boolean }>().ok).toBe(true);
     // Tokens should still be revoked even though audit log failed
-    expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(
-      expect.anything(),
-      mockAppleOAuthAccount.user_id,
-    )
+    expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(expect.anything(), mockAppleOAuthAccount.user_id);
     // Security event must use log.error, not log.warn
     expect(errorSpy).toHaveBeenCalledWith(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
       expect.objectContaining({ err: expect.any(Error) }),
-      expect.stringContaining('audit log failed for consent_revoked'),
-    )
+      expect.stringContaining('audit log failed for consent_revoked')
+    );
 
-    errorSpy.mockRestore()
-  })
+    errorSpy.mockRestore();
+  });
 
   // ── Non-fatal audit log failure (account-delete) ─────────────────────────
 
   it('should return 200 and log.error when audit log fails for account-delete', async () => {
-    mockTx()
-    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount)
-    vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('DB audit log write failed'))
+    mockTx();
+    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount);
+    vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('DB audit log write failed'));
 
-    const errorSpy = vi.spyOn(server.log, 'error')
+    const errorSpy = vi.spyOn(server.log, 'error');
 
-    const jwt = await buildAccountDeleteJWT()
+    const jwt = await buildAccountDeleteJWT();
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json<{ ok: boolean }>().ok).toBe(true)
+    expect(response.statusCode).toBe(200);
+    expect(response.json<{ ok: boolean }>().ok).toBe(true);
     // User should still be deactivated and tokens revoked
-    expect(queries.deactivateUser).toHaveBeenCalledWith(
-      expect.anything(),
-      mockAppleOAuthAccount.user_id,
-    )
-    expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(
-      expect.anything(),
-      mockAppleOAuthAccount.user_id,
-    )
+    expect(queries.deactivateUser).toHaveBeenCalledWith(expect.anything(), mockAppleOAuthAccount.user_id);
+    expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(expect.anything(), mockAppleOAuthAccount.user_id);
     // Security event must use log.error, not log.warn
     expect(errorSpy).toHaveBeenCalledWith(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
       expect.objectContaining({ err: expect.any(Error) }),
-      expect.stringContaining('audit log failed for account_deactivated'),
-    )
+      expect.stringContaining('audit log failed for account_deactivated')
+    );
 
-    errorSpy.mockRestore()
-  })
+    errorSpy.mockRestore();
+  });
 
   // ── Empty payload ────────────────────────────────────────────────────────
 
@@ -568,50 +550,50 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: '',
-    })
+    });
 
-    expect(response.statusCode).toBe(401)
-    expect(response.json<{ error: string }>().error).toBe('Missing or empty payload')
-  })
+    expect(response.statusCode).toBe(401);
+    expect(response.json<{ error: string }>().error).toBe('Missing or empty payload');
+  });
 
   // ── Services ID audience accepted ────────────────────────────────────────
 
   it('should accept servicesId as valid audience', async () => {
-    mockTx()
-    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount)
+    mockTx();
+    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount);
 
     const jwt = await signTestJWT({
       events: JSON.stringify({ type: 'consent-revoked', sub: 'apple-sub-001' }),
       iss: 'https://appleid.apple.com',
       aud: 'com.example.web', // servicesId
-    })
+    });
 
     const response = await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json<{ ok: boolean }>().ok).toBe(true)
-    expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalled()
-  })
+    expect(response.statusCode).toBe(200);
+    expect(response.json<{ ok: boolean }>().ok).toBe(true);
+    expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalled();
+  });
 
   // ── withTransaction called without userId (unauthenticated) ──────────────
 
   it('should call withTransaction without userId (unauthenticated webhook)', async () => {
-    mockTx()
-    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount)
+    mockTx();
+    vi.mocked(queries.findOAuthAccount).mockResolvedValue(mockAppleOAuthAccount);
 
-    const jwt = await buildConsentRevokedJWT()
+    const jwt = await buildConsentRevokedJWT();
 
     await server.inject({
       method: 'POST',
       url: '/auth/webhooks/apple',
       payload: jwt,
-    })
+    });
 
     // withTransaction should be called with only the callback (no userId)
-    expect(pool.withTransaction).toHaveBeenCalledWith(expect.any(Function))
-  })
-})
+    expect(pool.withTransaction).toHaveBeenCalledWith(expect.any(Function));
+  });
+});

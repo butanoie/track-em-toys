@@ -1,10 +1,10 @@
-export const DEFAULT_PAGE_LIMIT = 20
-export const MAX_PAGE_LIMIT = 100
+export const DEFAULT_PAGE_LIMIT = 20;
+export const MAX_PAGE_LIMIT = 100;
 
 export interface CursorPayload {
-  v: 1
-  name: string
-  id: string
+  v: 1;
+  name: string;
+  id: string;
 }
 
 /**
@@ -15,8 +15,8 @@ export interface CursorPayload {
  * @param id - Last row's UUID
  */
 export function encodeCursor(name: string, id: string): string {
-  const payload: CursorPayload = { v: 1, name, id }
-  return Buffer.from(JSON.stringify(payload)).toString('base64url')
+  const payload: CursorPayload = { v: 1, name, id };
+  return Buffer.from(JSON.stringify(payload)).toString('base64url');
 }
 
 /**
@@ -27,23 +27,17 @@ export function encodeCursor(name: string, id: string): string {
  */
 export function decodeCursor(cursor: string): { name: string; id: string } | null {
   try {
-    const json = Buffer.from(cursor, 'base64url').toString('utf-8')
-    const parsed: unknown = JSON.parse(json)
-    if (
-      typeof parsed !== 'object' ||
-      parsed === null ||
-      !('v' in parsed) ||
-      !('name' in parsed) ||
-      !('id' in parsed)
-    ) {
-      return null
+    const json = Buffer.from(cursor, 'base64url').toString('utf-8');
+    const parsed: unknown = JSON.parse(json);
+    if (typeof parsed !== 'object' || parsed === null || !('v' in parsed) || !('name' in parsed) || !('id' in parsed)) {
+      return null;
     }
-    const obj = parsed as Record<string, unknown>
-    if (obj.v !== 1) return null
-    if (typeof obj.name !== 'string' || typeof obj.id !== 'string') return null
-    return { name: obj.name, id: obj.id }
+    const obj = parsed as Record<string, unknown>;
+    if (obj.v !== 1) return null;
+    if (typeof obj.name !== 'string' || typeof obj.id !== 'string') return null;
+    return { name: obj.name, id: obj.id };
   } catch {
-    return null
+    return null;
   }
 }
 
@@ -57,17 +51,17 @@ export function decodeCursor(cursor: string): { name: string; id: string } | nul
  */
 export function buildCursorPage<T extends { name: string; id: string }>(
   rows: T[],
-  limit: number,
+  limit: number
 ): { data: T[]; next_cursor: string | null } {
   if (rows.length > limit) {
-    const data = rows.slice(0, limit)
-    const last = data[data.length - 1]
+    const data = rows.slice(0, limit);
+    const last = data[data.length - 1];
     return {
       data,
       next_cursor: last ? encodeCursor(last.name, last.id) : null,
-    }
+    };
   }
-  return { data: rows, next_cursor: null }
+  return { data: rows, next_cursor: null };
 }
 
 /**
@@ -76,6 +70,6 @@ export function buildCursorPage<T extends { name: string; id: string }>(
  * @param limit - User-supplied limit value
  */
 export function clampLimit(limit: number | undefined): number {
-  if (limit === undefined) return DEFAULT_PAGE_LIMIT
-  return Math.max(1, Math.min(limit, MAX_PAGE_LIMIT))
+  if (limit === undefined) return DEFAULT_PAGE_LIMIT;
+  return Math.max(1, Math.min(limit, MAX_PAGE_LIMIT));
 }

@@ -1,20 +1,20 @@
-import { pool } from '../db/pool.js'
-import type { QueryOnlyClient } from '../db/queries.js'
-import type { UserRole } from '../types/index.js'
+import { pool } from '../db/pool.js';
+import type { QueryOnlyClient } from '../db/queries.js';
+import type { UserRole } from '../types/index.js';
 
 /** Row shape for admin user list and detail responses. */
 export interface AdminUserRow {
-  id: string
-  email: string | null
-  display_name: string | null
-  avatar_url: string | null
-  role: UserRole
-  deactivated_at: string | null
-  deleted_at: string | null
-  created_at: string
+  id: string;
+  email: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  role: UserRole;
+  deactivated_at: string | null;
+  deleted_at: string | null;
+  created_at: string;
 }
 
-const ADMIN_USER_COLUMNS = 'id, email, display_name, avatar_url, role, deactivated_at, deleted_at, created_at'
+const ADMIN_USER_COLUMNS = 'id, email, display_name, avatar_url, role, deactivated_at, deleted_at, created_at';
 
 /**
  * Escape ILIKE special characters in a search string.
@@ -23,7 +23,7 @@ const ADMIN_USER_COLUMNS = 'id, email, display_name, avatar_url, role, deactivat
  * @param input - Raw search string to escape
  */
 function escapeIlike(input: string): string {
-  return input.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
+  return input.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
 }
 
 /**
@@ -34,41 +34,41 @@ function escapeIlike(input: string): string {
  * @param params - Filter, pagination, and sort options
  */
 export async function listAdminUsers(params: {
-  role?: UserRole
-  email?: string
-  limit: number
-  offset: number
+  role?: UserRole;
+  email?: string;
+  limit: number;
+  offset: number;
 }): Promise<{ rows: AdminUserRow[]; totalCount: number }> {
-  const conditions: string[] = []
-  const values: unknown[] = []
-  let paramIdx = 1
+  const conditions: string[] = [];
+  const values: unknown[] = [];
+  let paramIdx = 1;
 
   if (params.role) {
-    conditions.push(`role = $${paramIdx}`)
-    values.push(params.role)
-    paramIdx++
+    conditions.push(`role = $${paramIdx}`);
+    values.push(params.role);
+    paramIdx++;
   }
 
   if (params.email) {
-    conditions.push(`LOWER(email) LIKE LOWER($${paramIdx})`)
-    values.push(`%${escapeIlike(params.email)}%`)
-    paramIdx++
+    conditions.push(`LOWER(email) LIKE LOWER($${paramIdx})`);
+    values.push(`%${escapeIlike(params.email)}%`);
+    paramIdx++;
   }
 
-  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-  const countQuery = `SELECT COUNT(*)::int AS count FROM users ${where}`
-  const dataQuery = `SELECT ${ADMIN_USER_COLUMNS} FROM users ${where} ORDER BY created_at DESC LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`
+  const countQuery = `SELECT COUNT(*)::int AS count FROM users ${where}`;
+  const dataQuery = `SELECT ${ADMIN_USER_COLUMNS} FROM users ${where} ORDER BY created_at DESC LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`;
 
   const [countResult, dataResult] = await Promise.all([
     pool.query<{ count: number }>(countQuery, values),
     pool.query<AdminUserRow>(dataQuery, [...values, params.limit, params.offset]),
-  ])
+  ]);
 
   return {
     rows: dataResult.rows,
     totalCount: countResult.rows[0]?.count ?? 0,
-  }
+  };
 }
 
 /**
@@ -80,15 +80,12 @@ export async function listAdminUsers(params: {
  * @param client - Database client with transaction
  * @param userId - Target user UUID
  */
-export async function findUserForAdmin(
-  client: QueryOnlyClient,
-  userId: string,
-): Promise<AdminUserRow | null> {
+export async function findUserForAdmin(client: QueryOnlyClient, userId: string): Promise<AdminUserRow | null> {
   const { rows } = await client.query<AdminUserRow>(
     `SELECT ${ADMIN_USER_COLUMNS} FROM users WHERE id = $1 FOR UPDATE`,
-    [userId],
-  )
-  return rows[0] ?? null
+    [userId]
+  );
+  return rows[0] ?? null;
 }
 
 /**
@@ -101,13 +98,13 @@ export async function findUserForAdmin(
 export async function updateUserRole(
   client: QueryOnlyClient,
   userId: string,
-  role: UserRole,
+  role: UserRole
 ): Promise<AdminUserRow | null> {
   const { rows } = await client.query<AdminUserRow>(
     `UPDATE users SET role = $2, updated_at = NOW() WHERE id = $1 RETURNING ${ADMIN_USER_COLUMNS}`,
-    [userId, role],
-  )
-  return rows[0] ?? null
+    [userId, role]
+  );
+  return rows[0] ?? null;
 }
 
 /**
@@ -116,15 +113,12 @@ export async function updateUserRole(
  * @param client - Database client with transaction
  * @param userId - Target user UUID
  */
-export async function reactivateUser(
-  client: QueryOnlyClient,
-  userId: string,
-): Promise<AdminUserRow | null> {
+export async function reactivateUser(client: QueryOnlyClient, userId: string): Promise<AdminUserRow | null> {
   const { rows } = await client.query<AdminUserRow>(
     `UPDATE users SET deactivated_at = NULL, updated_at = NOW() WHERE id = $1 RETURNING ${ADMIN_USER_COLUMNS}`,
-    [userId],
-  )
-  return rows[0] ?? null
+    [userId]
+  );
+  return rows[0] ?? null;
 }
 
 /**
@@ -137,10 +131,7 @@ export async function reactivateUser(
  * @param client - Database client with transaction
  * @param userId - Target user UUID
  */
-export async function gdprPurgeUser(
-  client: QueryOnlyClient,
-  userId: string,
-): Promise<void> {
+export async function gdprPurgeUser(client: QueryOnlyClient, userId: string): Promise<void> {
   // 1. Scrub PII and set tombstone flags on the users row
   await client.query(
     `UPDATE users SET
@@ -151,18 +142,18 @@ export async function gdprPurgeUser(
        deleted_at = NOW(),
        updated_at = NOW()
      WHERE id = $1`,
-    [userId],
-  )
+    [userId]
+  );
 
   // 2. Hard-delete auth data (separate from PII scrub)
-  await client.query('DELETE FROM oauth_accounts WHERE user_id = $1', [userId])
-  await client.query('DELETE FROM refresh_tokens WHERE user_id = $1', [userId])
+  await client.query('DELETE FROM oauth_accounts WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM refresh_tokens WHERE user_id = $1', [userId]);
 
   // 3. Scrub PII from audit events (ip_address and user_agent are personal data under GDPR)
   await client.query(
     'UPDATE auth_events SET ip_address = NULL, user_agent = NULL, metadata = NULL WHERE user_id = $1',
-    [userId],
-  )
+    [userId]
+  );
 }
 
 /**
@@ -171,11 +162,9 @@ export async function gdprPurgeUser(
  *
  * @param client - Database client with transaction
  */
-export async function countActiveAdmins(
-  client: QueryOnlyClient,
-): Promise<number> {
+export async function countActiveAdmins(client: QueryOnlyClient): Promise<number> {
   const { rows } = await client.query<{ count: number }>(
-    "SELECT COUNT(*)::int AS count FROM users WHERE role = 'admin' AND deactivated_at IS NULL AND deleted_at IS NULL",
-  )
-  return rows[0]?.count ?? 0
+    "SELECT COUNT(*)::int AS count FROM users WHERE role = 'admin' AND deactivated_at IS NULL AND deleted_at IS NULL"
+  );
+  return rows[0]?.count ?? 0;
 }

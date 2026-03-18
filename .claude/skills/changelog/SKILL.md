@@ -11,6 +11,7 @@ Generate a changelog entry from recent git activity using the format defined in 
 ## Required Input
 
 Ask the user for:
+
 1. **Scope** — Which commits to include (default: commits since last changelog entry)
 2. **Type** — Phase Completion, Infrastructure, Feature, Configuration, Bug Fix, etc.
 3. **Version** — Semantic version number (e.g., v2.5.0)

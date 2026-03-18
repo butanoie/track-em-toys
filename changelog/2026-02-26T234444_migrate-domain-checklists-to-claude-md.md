@@ -17,19 +17,20 @@ Migrated project-specific pre-submission checklists and code patterns from custo
 
 Extracted domain-specific rules from monolithic agent definitions into focused, directory-scoped instruction files:
 
-| File | Pre-Submission Checks | Key Patterns | Lines |
-|---|---|---|---|
-| `api/CLAUDE.md` | 27 checks | 14 patterns | 402 |
-| `web/CLAUDE.md` | 14 checks | 3 patterns | 194 |
-| `ios/CLAUDE.md` | 8 checks | 3 patterns | ~51 (migrated from ios-dev.md) |
-| `ml/CLAUDE.md` | 6 checks | 2 patterns | 105 |
-| `changelog/CLAUDE.md` | N/A | Template + best practices | 101 |
+| File                  | Pre-Submission Checks | Key Patterns              | Lines                          |
+| --------------------- | --------------------- | ------------------------- | ------------------------------ |
+| `api/CLAUDE.md`       | 27 checks             | 14 patterns               | 402                            |
+| `web/CLAUDE.md`       | 14 checks             | 3 patterns                | 194                            |
+| `ios/CLAUDE.md`       | 8 checks              | 3 patterns                | ~51 (migrated from ios-dev.md) |
+| `ml/CLAUDE.md`        | 6 checks              | 2 patterns                | 105                            |
+| `changelog/CLAUDE.md` | N/A                   | Template + best practices | 101                            |
 
 ### 2. Custom Agents Deleted
 
 Removed 9 agent files and 2 skill files from `.claude/`:
 
 **Agents deleted:**
+
 - `.claude/agents/architect/AGENT.md` — system architecture agent
 - `.claude/agents/backend-dev.md` — Node.js/Fastify backend agent (787 lines)
 - `.claude/agents/code-reviewer.md` — code review agent
@@ -42,6 +43,7 @@ Removed 9 agent files and 2 skill files from `.claude/`:
 - `.claude/agents/ios-dev.md` — migrated to `ios/CLAUDE.md`
 
 **Skills deleted:**
+
 - `.claude/skills/changelog-create/SKILL.md` — changelog creation skill (396 lines)
 - `.claude/skills/code-review/SKILL.md` — code review skill
 
@@ -94,16 +96,16 @@ Claude Code has a built-in inheritance model: when working in a subdirectory (e.
 
 ## Summary Statistics
 
-| Metric | Value |
-|---|---|
-| Files deleted | 11 |
-| Files created | 6 |
-| Files modified | 3 |
-| Total files changed | 21 |
-| Lines added | +1,140 |
-| Lines removed | −2,026 |
-| Net change | −886 lines |
-| Plugins enabled | 17 |
+| Metric                   | Value                 |
+| ------------------------ | --------------------- |
+| Files deleted            | 11                    |
+| Files created            | 6                     |
+| Files modified           | 3                     |
+| Total files changed      | 21                    |
+| Lines added              | +1,140                |
+| Lines removed            | −2,026                |
+| Net change               | −886 lines            |
+| Plugins enabled          | 17                    |
 | Root CLAUDE.md reduction | 37% (285 → 181 lines) |
 
 ---
@@ -119,29 +121,29 @@ Claude Code has a built-in inheritance model: when working in a subdirectory (e.
 
 ## Related Files
 
-| File | Action |
-|---|---|
-| `api/CLAUDE.md` | Created |
-| `web/CLAUDE.md` | Created |
-| `ios/CLAUDE.md` | Created (migrated from `.claude/agents/ios-dev.md`) |
-| `ml/CLAUDE.md` | Created |
-| `changelog/CLAUDE.md` | Created |
-| `docs/Integration_Testing_Strategy_2026.md` | Created |
-| `CLAUDE.md` | Modified — trimmed 37% |
-| `.claude/settings.json` | Modified — 17 plugins enabled |
-| `.gitignore` | Modified — backup dir exclusions |
-| `.mcp.json` | Deleted |
-| `.claude/agents/architect/AGENT.md` | Deleted |
-| `.claude/agents/backend-dev.md` | Deleted |
-| `.claude/agents/code-reviewer.md` | Deleted |
-| `.claude/agents/commit-writer.md` | Deleted |
-| `.claude/agents/diff-summerizer.md` | Deleted |
-| `.claude/agents/linter.md` | Deleted |
-| `.claude/agents/ml-engineer.md` | Deleted |
-| `.claude/agents/react-dev.md` | Deleted |
-| `.claude/agents/researcher.md` | Deleted |
-| `.claude/skills/changelog-create/SKILL.md` | Deleted |
-| `.claude/skills/code-review/SKILL.md` | Deleted |
+| File                                        | Action                                              |
+| ------------------------------------------- | --------------------------------------------------- |
+| `api/CLAUDE.md`                             | Created                                             |
+| `web/CLAUDE.md`                             | Created                                             |
+| `ios/CLAUDE.md`                             | Created (migrated from `.claude/agents/ios-dev.md`) |
+| `ml/CLAUDE.md`                              | Created                                             |
+| `changelog/CLAUDE.md`                       | Created                                             |
+| `docs/Integration_Testing_Strategy_2026.md` | Created                                             |
+| `CLAUDE.md`                                 | Modified — trimmed 37%                              |
+| `.claude/settings.json`                     | Modified — 17 plugins enabled                       |
+| `.gitignore`                                | Modified — backup dir exclusions                    |
+| `.mcp.json`                                 | Deleted                                             |
+| `.claude/agents/architect/AGENT.md`         | Deleted                                             |
+| `.claude/agents/backend-dev.md`             | Deleted                                             |
+| `.claude/agents/code-reviewer.md`           | Deleted                                             |
+| `.claude/agents/commit-writer.md`           | Deleted                                             |
+| `.claude/agents/diff-summerizer.md`         | Deleted                                             |
+| `.claude/agents/linter.md`                  | Deleted                                             |
+| `.claude/agents/ml-engineer.md`             | Deleted                                             |
+| `.claude/agents/react-dev.md`               | Deleted                                             |
+| `.claude/agents/researcher.md`              | Deleted                                             |
+| `.claude/skills/changelog-create/SKILL.md`  | Deleted                                             |
+| `.claude/skills/code-review/SKILL.md`       | Deleted                                             |
 
 ---
 

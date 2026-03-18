@@ -17,6 +17,7 @@ Created Gherkin scenario documents for all authentication E2E tests and updated 
 ### 1. Gherkin Scenario Documents
 
 **Created:**
+
 - `docs/test-scenarios/E2E_AUTHENTICATION.md` — login page rendering scenarios (Apple button, branding, unauthenticated access)
 - `docs/test-scenarios/E2E_PROTECTED_ROUTES.md` — route guard scenarios (redirect to login, return-to param preservation, authenticated access)
 - `docs/test-scenarios/E2E_SESSION.md` — session lifecycle scenarios (persistence across reload, sign out, expired refresh token handling)
@@ -24,6 +25,7 @@ Created Gherkin scenario documents for all authentication E2E tests and updated 
 ### 2. E2E Test Title Updates
 
 **Modified:**
+
 - `web/e2e/login-page.spec.ts` — test title updated to Given/When/Then format
 - `web/e2e/protected-routes.spec.ts` — test titles updated to Given/When/Then format
 - `web/e2e/authenticated-session.spec.ts` — titles updated, JSDoc Gherkin scenarios added to sign-out test
@@ -32,11 +34,13 @@ Created Gherkin scenario documents for all authentication E2E tests and updated 
 ### 3. Scenario-to-Spec Mapping
 
 **Modified:**
+
 - `docs/test-scenarios/README.md` — populated mapping table linking each scenario document to its corresponding spec file
 
 ### 4. TanStack Router Config Fix
 
 **Modified:**
+
 - `web/vite.config.ts` — added `routeFileIgnorePattern` to TanStack Router plugin config to suppress warnings about `src/routes/__tests__/` test files being picked up as route definitions
 
 ---
@@ -77,7 +81,7 @@ test('Given an authenticated session, When the page reloads, Then the session pe
 TanStackRouterVite({
   routeFileIgnorePattern: '__tests__',
   // ...
-})
+});
 ```
 
 This prevents TanStack Router's file-based routing from treating test files under `src/routes/__tests__/` as route modules.
@@ -93,11 +97,13 @@ This prevents TanStack Router's file-based routing from treating test files unde
 ## Related Files
 
 **Created (3 files):**
+
 - `docs/test-scenarios/E2E_AUTHENTICATION.md`
 - `docs/test-scenarios/E2E_PROTECTED_ROUTES.md`
 - `docs/test-scenarios/E2E_SESSION.md`
 
 **Modified (5 files):**
+
 - `docs/test-scenarios/README.md`
 - `web/e2e/authenticated-session.spec.ts`
 - `web/e2e/login-page.spec.ts`

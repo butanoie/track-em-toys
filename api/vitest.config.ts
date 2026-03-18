@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
@@ -11,7 +11,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: [
         'src/**/*.test.ts',
-        'src/types/index.ts',  // type definitions only — no runtime code
+        'src/types/index.ts', // type definitions only — no runtime code
       ],
       thresholds: {
         lines: 80,
@@ -21,4 +21,4 @@ export default defineConfig({
       },
     },
   },
-})
+});

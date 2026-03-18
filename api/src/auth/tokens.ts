@@ -1,20 +1,20 @@
-import crypto from 'node:crypto'
-import type { ClientType } from '../types/index.js'
-import * as queries from '../db/queries.js'
+import crypto from 'node:crypto';
+import type { ClientType } from '../types/index.js';
+import * as queries from '../db/queries.js';
 
 /**
  * Minimal pool client interface required by token operations.
  * Re-exports QueryOnlyClient from queries.ts so tests can use it without
  * importing from queries directly.
  */
-export type { QueryOnlyClient as TokenClient } from '../db/queries.js'
+export type { QueryOnlyClient as TokenClient } from '../db/queries.js';
 
-const REFRESH_TOKEN_BYTES = 32
+const REFRESH_TOKEN_BYTES = 32;
 // NOTE: this value must stay in sync with the SQL-side expiry filter
 // `AND expires_at > NOW()` in findRefreshTokenForRotation (queries.ts).
 // Changing it here without updating the token-rotation query will create
 // a mismatch between what the application considers valid and what the DB returns.
-export const REFRESH_TOKEN_EXPIRY_DAYS = 30
+export const REFRESH_TOKEN_EXPIRY_DAYS = 30;
 
 /**
  * Generate a cryptographically random refresh token as a hex string.
@@ -23,7 +23,7 @@ export const REFRESH_TOKEN_EXPIRY_DAYS = 30
  * its SHA-256 hash (via hashToken) in the database.
  */
 export function generateRefreshToken(): string {
-  return crypto.randomBytes(REFRESH_TOKEN_BYTES).toString('hex')
+  return crypto.randomBytes(REFRESH_TOKEN_BYTES).toString('hex');
 }
 
 /**
@@ -32,7 +32,7 @@ export function generateRefreshToken(): string {
  * @param token - The raw token string
  */
 export function hashToken(token: string): string {
-  return crypto.createHash('sha256').update(token).digest('hex')
+  return crypto.createHash('sha256').update(token).digest('hex');
 }
 
 /**
@@ -48,11 +48,11 @@ export async function createAndStoreRefreshToken(
   client: queries.QueryOnlyClient,
   userId: string,
   deviceInfo: string | null,
-  clientType: ClientType,
+  clientType: ClientType
 ): Promise<string> {
-  const rawToken = generateRefreshToken()
-  const tokenHash = hashToken(rawToken)
-  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+  const rawToken = generateRefreshToken();
+  const tokenHash = hashToken(rawToken);
+  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
 
   await queries.createRefreshToken(client, {
     user_id: userId,
@@ -60,9 +60,9 @@ export async function createAndStoreRefreshToken(
     device_info: deviceInfo,
     expires_at: expiresAt,
     client_type: clientType,
-  })
+  });
 
-  return rawToken
+  return rawToken;
 }
 
 /**
@@ -80,8 +80,8 @@ export async function rotateRefreshToken(
   oldTokenHash: string,
   userId: string,
   deviceInfo: string | null,
-  clientType: ClientType,
+  clientType: ClientType
 ): Promise<string> {
-  await queries.revokeRefreshToken(client, oldTokenHash)
-  return createAndStoreRefreshToken(client, userId, deviceInfo, clientType)
+  await queries.revokeRefreshToken(client, oldTokenHash);
+  return createAndStoreRefreshToken(client, userId, deviceInfo, clientType);
 }

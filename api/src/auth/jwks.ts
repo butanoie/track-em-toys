@@ -1,5 +1,5 @@
-import type { FastifyInstance, FastifyReply } from 'fastify'
-import { getJwks } from './key-store.js'
+import type { FastifyInstance, FastifyReply } from 'fastify';
+import { getJwks } from './key-store.js';
 
 /** JSON Schema for a single JWK entry — whitelists only known safe fields. */
 const jwkKeySchema = {
@@ -15,7 +15,7 @@ const jwkKeySchema = {
   },
   required: ['kty', 'crv', 'x', 'y', 'kid', 'alg', 'use'],
   additionalProperties: false,
-} as const
+} as const;
 
 /**
  * Register the /.well-known/jwks.json route for public key discovery.
@@ -49,8 +49,8 @@ export async function jwksRoute(fastify: FastifyInstance, _opts: object): Promis
       config: { rateLimit: { max: 100, timeWindow: '1 minute' } },
     },
     async (_request, reply: FastifyReply) => {
-      reply.header('Cache-Control', 'public, max-age=3600')
-      return getJwks()
-    },
-  )
+      reply.header('Cache-Control', 'public, max-age=3600');
+      return getJwks();
+    }
+  );
 }

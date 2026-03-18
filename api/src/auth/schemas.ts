@@ -4,7 +4,7 @@ const errorResponse = {
   required: ['error'],
   additionalProperties: false,
   properties: { error: { type: 'string' } },
-} as const
+} as const;
 
 /** Fastify route schema for POST /auth/signin. */
 export const signinSchema = {
@@ -66,7 +66,7 @@ export const signinSchema = {
     // 503: authentication service unavailable (JWKS fetch failure etc.)
     503: errorResponse,
   },
-} as const
+} as const;
 
 /**
  * Fastify route schema for POST /auth/refresh.
@@ -75,7 +75,8 @@ export const signinSchema = {
  * httpOnly cookie; native clients include it in the request body.
  */
 export const refreshSchema = {
-  description: 'Rotate a refresh token and receive a new access token. Web clients send the refresh token via httpOnly cookie; native clients send it in the request body.',
+  description:
+    'Rotate a refresh token and receive a new access token. Web clients send the refresh token via httpOnly cookie; native clients send it in the request body.',
   tags: ['auth'],
   summary: 'Refresh tokens',
   body: {
@@ -110,7 +111,7 @@ export const refreshSchema = {
     // 500: unexpected server error
     500: errorResponse,
   },
-} as const
+} as const;
 
 /**
  * Fastify route schema for POST /auth/logout.
@@ -145,7 +146,7 @@ export const logoutSchema = {
     // 500: unexpected server error
     500: errorResponse,
   },
-} as const
+} as const;
 
 /** Shared 200-response shape for endpoints returning a user with linked accounts. */
 const userWithAccountsResponse = {
@@ -171,7 +172,7 @@ const userWithAccountsResponse = {
       },
     },
   },
-} as const
+} as const;
 
 /** Fastify route schema for GET /auth/me. */
 export const meSchema = {
@@ -186,7 +187,7 @@ export const meSchema = {
     // 500: unexpected server error
     500: errorResponse,
   },
-} as const
+} as const;
 
 /** Fastify route schema for POST /auth/link-account. */
 export const linkAccountSchema = {
@@ -219,7 +220,7 @@ export const linkAccountSchema = {
     // 503: authentication service unavailable (JWKS fetch failure etc.)
     503: errorResponse,
   },
-} as const
+} as const;
 
 /** Fastify route schema for POST /auth/webhooks/apple. */
 export const appleWebhookSchema = {
@@ -242,4 +243,4 @@ export const appleWebhookSchema = {
     // 500: unexpected server error (e.g. DB failure in withTransaction)
     500: errorResponse,
   },
-} as const
+} as const;

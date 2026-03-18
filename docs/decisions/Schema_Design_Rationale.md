@@ -20,6 +20,7 @@ lowercase | hyphens-for-spaces | no-apostrophes | no-periods | no-special-chars
 ```
 
 Examples:
+
 - `optimus-prime`, `megatron`, `spike-witwicky`
 - `dr-arkeville` (title included)
 - `alpha-trion` (no special handling needed)
@@ -104,6 +105,7 @@ characters (
 **`continuity_family_id` replaces the free-text `series` and `continuity` columns** (removed in migration 013). A continuity family is the identity boundary for a character — G1 Megatron and Beast Wars Megatron are different characters in different families, but G1 cartoon Megatron and G1 Marvel comic Megatron are the same character within the G1 family. The unique index is `(lower(name), franchise_id, continuity_family_id)`.
 
 **Why a FK instead of free-text?** The original `continuity` column had a small fixed set of values (`G1 North America`, `G1 Japan`, `G1 Toy-only`). Normalizing into a reference table:
+
 - Prevents typos and value drift across 400+ character records
 - Provides a slug for URL routing (`/continuity-families/g1`)
 - Supports `sort_order` for UI display ordering
@@ -143,6 +145,7 @@ character_appearances (
 ```
 
 **Three-layer model:**
+
 1. **Character** (continuity family level) — "Optimus Prime (G1)" — the canonical identity
 2. **Appearance** (media depiction) — "G1 cartoon Optimus Prime" vs "IDW Optimus Prime"
 3. **Item** (specific toy product) — "MP-10 Optimus Prime" links to character + optionally to an appearance
@@ -182,6 +185,7 @@ id | slug          | name          | sort_order
 **`franchise_id` is NOT NULL on all 5 tables.** Cross-franchise entities (Human, Neutral, Other factions) are assigned to Transformers. When these factions are needed for other franchises, they get duplicated per franchise with globally unique slugs (e.g., `human-gi-joe`).
 
 **Index changes:**
+
 - `idx_characters_name_franchise_cf`: `(lower(name), lower(franchise), continuity_family_id)` → `(lower(name), franchise_id, continuity_family_id)`
 - `idx_sub_groups_name_franchise`: `(lower(name), COALESCE(franchise, ''))` → `(lower(name), franchise_id)` — simplified since franchise_id is NOT NULL
 
@@ -241,17 +245,18 @@ The item slug convention is `{product_code}-{name}` slugified. This ensures uniq
 
 The relational JSON from the FansToys catalog maps cleanly to this new schema:
 
-| JSON field | Target table.column |
-|---|---|
-| `character_name` | `characters.name` (lookup by slug) |
-| `faction` (from character data) | `characters.faction_id` → `factions.id` |
-| `product_code` | `items.product_code` |
-| `name` | `items.name` |
-| `manufacturer` | `items.manufacturer_id` → `manufacturers.id` (lookup by slug) |
-| `sub_brand` | `items.toy_line_id` → `toy_lines.id` (lookup by slug) |
-| `variant_type`, `status`, `scale` | `items.metadata` JSONB |
+| JSON field                        | Target table.column                                           |
+| --------------------------------- | ------------------------------------------------------------- |
+| `character_name`                  | `characters.name` (lookup by slug)                            |
+| `faction` (from character data)   | `characters.faction_id` → `factions.id`                       |
+| `product_code`                    | `items.product_code`                                          |
+| `name`                            | `items.name`                                                  |
+| `manufacturer`                    | `items.manufacturer_id` → `manufacturers.id` (lookup by slug) |
+| `sub_brand`                       | `items.toy_line_id` → `toy_lines.id` (lookup by slug)         |
+| `variant_type`, `status`, `scale` | `items.metadata` JSONB                                        |
 
 The import script should:
+
 1. Seed `continuity_families`, `factions`, and `sub_groups` first
 2. Seed `characters` with slugs and faction/sub_group/continuity_family FKs
 3. Seed `manufacturers` and `toy_lines`
@@ -282,6 +287,7 @@ CREATE INDEX idx_users_role ON users (role);
 The system has two distinct types of photos with different privacy models:
 
 **Catalog photos** (`item_photos` table, migration 011):
+
 - Centrally managed reference images (product shots, box art, alternate angles)
 - Shared across all users — no RLS
 - `uploaded_by` tracks who contributed the photo (attribution, not ownership)
@@ -289,6 +295,7 @@ The system has two distinct types of photos with different privacy models:
 - Upload requires `curator` role
 
 **User collection photos** (future table, deferred to Phase 1.6):
+
 - Private photos of a collector's own items (condition shots, shelf photos)
 - RLS-protected via `user_id` + `(SELECT current_app_user_id())`
 - Not used for ML training unless user explicitly opts in

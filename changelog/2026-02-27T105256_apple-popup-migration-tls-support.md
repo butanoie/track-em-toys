@@ -24,11 +24,13 @@ Replaced the redirect-based Apple OAuth flow with `usePopup: true`. The popup re
 - Added typed interfaces: `AppleSignInAuthorization`, `AppleSignInUser`, `AppleSignInResponse`, `AppleSignInResult`
 
 **Deleted:**
+
 - `web/src/auth/AppleCallback.tsx` — redirect callback component (no longer needed)
 - `web/src/auth/__tests__/AppleCallback.test.tsx` — callback test suite
 - `web/src/routes/auth/apple-callback.tsx` — TanStack Router route definition
 
 **Modified:**
+
 - `web/src/auth/apple-auth.ts` — popup flow, typed SDK responses, simplified nonce
 - `web/src/auth/LoginPage.tsx` — drive Apple sign-in via popup result
 - `web/src/auth/__tests__/LoginPage.test.tsx` — updated for popup flow
@@ -43,6 +45,7 @@ Replaced the redirect-based Apple OAuth flow with `usePopup: true`. The popup re
 Added optional TLS configuration so the API server can terminate HTTPS directly (useful for local dev with mkcert or direct TLS termination in production).
 
 **Modified:**
+
 - `api/src/config.ts` — added `tls.certFile` / `tls.keyFile` optional config fields
 - `api/src/config.test.ts` — tests for both-set, neither-set, and mismatched TLS vars
 - `api/src/server.ts` — read cert/key files and pass HTTPS options to Fastify when configured
@@ -53,6 +56,7 @@ Added optional TLS configuration so the API server can terminate HTTPS directly 
 Configured the Vite dev server to serve over HTTPS using mkcert certificates, bound to `dev.track-em-toys.com`.
 
 **Modified:**
+
 - `web/vite.config.ts` — added `fs` import, `server.https` with cert/key, `host: 'dev.track-em-toys.com'`
 
 ### 4. Infrastructure
@@ -65,14 +69,14 @@ Configured the Vite dev server to serve over HTTPS using mkcert certificates, bo
 
 ### Popup vs Redirect Flow
 
-| Aspect | Before (Redirect) | After (Popup) |
-|---|---|---|
-| OAuth delivery | Full-page redirect → form POST to `/auth/apple-callback` | Popup window → promise resolution |
-| Nonce storage | `sessionStorage` (survives navigation) | Local variable (stays in memory) |
-| State/CSRF | `sessionStorage` round-trip | Local variable comparison |
-| Nonce hashing | Client-side SHA-256 before passing to SDK | Raw hex passed directly (SDK hashes internally) |
-| Route needed | `/auth/apple-callback` route + component | None |
-| Files | 3 extra files (callback component, route, tests) | 0 extra files |
+| Aspect         | Before (Redirect)                                        | After (Popup)                                   |
+| -------------- | -------------------------------------------------------- | ----------------------------------------------- |
+| OAuth delivery | Full-page redirect → form POST to `/auth/apple-callback` | Popup window → promise resolution               |
+| Nonce storage  | `sessionStorage` (survives navigation)                   | Local variable (stays in memory)                |
+| State/CSRF     | `sessionStorage` round-trip                              | Local variable comparison                       |
+| Nonce hashing  | Client-side SHA-256 before passing to SDK                | Raw hex passed directly (SDK hashes internally) |
+| Route needed   | `/auth/apple-callback` route + component                 | None                                            |
+| Files          | 3 extra files (callback component, route, tests)         | 0 extra files                                   |
 
 ### Apple SDK Nonce Flow
 
@@ -92,6 +96,7 @@ The API's `apple-signin-auth` library hashes the nonce it receives before compar
 ## Validation & Testing
 
 ### Test Changes
+
 - Deleted: `AppleCallback.test.tsx` (~150 lines of redirect callback tests)
 - Added: 7 new popup response handling tests in `apple-auth.test.ts` covering:
   - Token + nonce extraction from popup response
@@ -106,6 +111,7 @@ The API's `apple-signin-auth` library hashes the nonce it receives before compar
 - Updated: LoginPage tests for popup-based flow
 
 ### Net File Impact
+
 - 17 files changed, +429 / −585 lines (net −156 lines)
 - 3 files deleted
 
@@ -122,25 +128,25 @@ The API's `apple-signin-auth` library hashes the nonce it receives before compar
 
 ## Related Files
 
-| File | Action |
-|---|---|
-| `web/src/auth/apple-auth.ts` | Modified |
-| `web/src/auth/LoginPage.tsx` | Modified |
-| `web/src/auth/AppleCallback.tsx` | Deleted |
-| `web/src/auth/__tests__/AppleCallback.test.tsx` | Deleted |
-| `web/src/auth/__tests__/LoginPage.test.tsx` | Modified |
-| `web/src/auth/__tests__/apple-auth.test.ts` | Modified |
-| `web/src/lib/auth-store.ts` | Modified |
-| `web/src/lib/__tests__/auth-store.test.ts` | Modified |
-| `web/src/lib/api-client.ts` | Modified |
-| `web/src/routeTree.gen.ts` | Modified |
-| `web/src/routes/auth/apple-callback.tsx` | Deleted |
-| `web/vite.config.ts` | Modified |
-| `api/src/config.ts` | Modified |
-| `api/src/config.test.ts` | Modified |
-| `api/src/server.ts` | Modified |
-| `api/.env.example` | Modified |
-| `.gitignore` | Modified |
+| File                                            | Action   |
+| ----------------------------------------------- | -------- |
+| `web/src/auth/apple-auth.ts`                    | Modified |
+| `web/src/auth/LoginPage.tsx`                    | Modified |
+| `web/src/auth/AppleCallback.tsx`                | Deleted  |
+| `web/src/auth/__tests__/AppleCallback.test.tsx` | Deleted  |
+| `web/src/auth/__tests__/LoginPage.test.tsx`     | Modified |
+| `web/src/auth/__tests__/apple-auth.test.ts`     | Modified |
+| `web/src/lib/auth-store.ts`                     | Modified |
+| `web/src/lib/__tests__/auth-store.test.ts`      | Modified |
+| `web/src/lib/api-client.ts`                     | Modified |
+| `web/src/routeTree.gen.ts`                      | Modified |
+| `web/src/routes/auth/apple-callback.tsx`        | Deleted  |
+| `web/vite.config.ts`                            | Modified |
+| `api/src/config.ts`                             | Modified |
+| `api/src/config.test.ts`                        | Modified |
+| `api/src/server.ts`                             | Modified |
+| `api/.env.example`                              | Modified |
+| `.gitignore`                                    | Modified |
 
 ---
 

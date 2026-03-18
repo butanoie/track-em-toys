@@ -37,6 +37,7 @@ Once the architecture passes review, update documentation to reflect the confirm
 Complete Step 1 (audit) fully before starting Step 2 (documentation). Review each item explicitly. If an item is not applicable (e.g., no new conventions emerged), note it as N/A and move on. The goal is to catch design issues early and ensure documentation reflects a vetted architecture, not an unreviewed draft.
 
 **Common mistakes:**
+
 - Skipping the audit step and jumping straight to documentation — an unreviewed architecture produces documentation that needs rework
 - Skipping this gate because "it's a small feature" — if the feature went through architecture review, it goes through the doc gate
 - Updating only the root CLAUDE.md when the convention is module-specific — use scoped files
@@ -78,6 +79,7 @@ Complete Step 1 (audit) fully before starting Step 2 (documentation). Review eac
 The post-review gate catches the gap between "what we planned" and "what we actually built." Implementation always deviates from architecture — this gate ensures documentation reflects reality, not the plan.
 
 **Common mistakes:**
+
 - Leaving plan docs in "planned" state when the feature is already built — update status fields
 - Not recording workarounds or surprising behavior — these are the most valuable learnings
 - Adding conventions to the wrong scope — a lesson about Fastify cookie handling belongs in `api/CLAUDE.md`, not root

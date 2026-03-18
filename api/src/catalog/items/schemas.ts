@@ -1,13 +1,27 @@
 import {
-  errorResponse, franchiseParam, franchiseSlugParams,
-  paginationQuery, slugNameRef, nullableSlugNameRef, cursorListResponse,
-} from '../shared/schemas.js'
+  errorResponse,
+  franchiseParam,
+  franchiseSlugParams,
+  paginationQuery,
+  slugNameRef,
+  nullableSlugNameRef,
+  cursorListResponse,
+} from '../shared/schemas.js';
 
 const itemListItem = {
   type: 'object',
   required: [
-    'id', 'name', 'slug', 'franchise', 'character', 'manufacturer', 'toy_line',
-    'size_class', 'year_released', 'is_third_party', 'data_quality',
+    'id',
+    'name',
+    'slug',
+    'franchise',
+    'character',
+    'manufacturer',
+    'toy_line',
+    'size_class',
+    'year_released',
+    'is_third_party',
+    'data_quality',
   ],
   additionalProperties: false,
   properties: {
@@ -23,7 +37,7 @@ const itemListItem = {
     is_third_party: { type: 'boolean' },
     data_quality: { type: 'string', enum: ['needs_review', 'verified', 'community_verified'] },
   },
-} as const
+} as const;
 
 const appearanceRef = {
   type: 'object',
@@ -35,7 +49,7 @@ const appearanceRef = {
     source_media: { type: ['string', 'null'] },
     source_name: { type: ['string', 'null'] },
   },
-} as const
+} as const;
 
 const photoItem = {
   type: 'object',
@@ -47,15 +61,31 @@ const photoItem = {
     caption: { type: ['string', 'null'] },
     is_primary: { type: 'boolean' },
   },
-} as const
+} as const;
 
 const itemDetail = {
   type: 'object',
   required: [
-    'id', 'name', 'slug', 'franchise', 'character', 'manufacturer', 'toy_line',
-    'size_class', 'year_released', 'is_third_party', 'data_quality',
-    'appearance', 'description', 'barcode', 'sku', 'product_code',
-    'photos', 'metadata', 'created_at', 'updated_at',
+    'id',
+    'name',
+    'slug',
+    'franchise',
+    'character',
+    'manufacturer',
+    'toy_line',
+    'size_class',
+    'year_released',
+    'is_third_party',
+    'data_quality',
+    'appearance',
+    'description',
+    'barcode',
+    'sku',
+    'product_code',
+    'photos',
+    'metadata',
+    'created_at',
+    'updated_at',
   ],
   additionalProperties: false,
   properties: {
@@ -80,7 +110,7 @@ const itemDetail = {
     created_at: { type: 'string' },
     updated_at: { type: 'string' },
   },
-} as const
+} as const;
 
 export const listItemsSchema = {
   description: 'List items in a franchise with cursor-based pagination.',
@@ -94,7 +124,7 @@ export const listItemsSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;
 
 export const getItemSchema = {
   description: 'Get an item by slug within a franchise, including photos and appearance info.',
@@ -106,4 +136,4 @@ export const getItemSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;

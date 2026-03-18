@@ -17,11 +17,14 @@ cd web && npm run lint        # ESLint
 cd web && npm run lint:fix    # ESLint with auto-fix
 cd web && npm run typecheck   # tsc -b (type-only, no emit)
 cd web && npm run test:e2e    # Playwright e2e tests
+cd web && npm run format      # Prettier format all files
+cd web && npm run format:check # Prettier check (CI mode)
 ```
 
 ## Conventions
 
 ### ESLint
+
 - Flat config at `web/eslint.config.js` using ESLint 9 + typescript-eslint 8
 - Type-checked linting via `recommendedTypeChecked` with `projectService: true`
 - `react-hooks` plugin enforces Rules of Hooks and exhaustive deps
@@ -31,6 +34,7 @@ cd web && npm run test:e2e    # Playwright e2e tests
 - Build/tool config files (`*.config.js`, `*.config.ts`) have `no-unsafe-*` disabled — untyped third-party build plugins
 
 ### TypeScript Typecheck
+
 - `npm run typecheck` runs `tsc -b` — checks all project references (`tsconfig.app.json` + `tsconfig.node.json`) without emitting files
 - `tsconfig.app.json` has `noEmit: true`, so `tsc -b` is purely a type check with no build output
 - Different from `build`: the `build` script runs `tsc -b && vite build` (type check + bundle); `typecheck` is type-only validation
@@ -38,6 +42,7 @@ cd web && npm run test:e2e    # Playwright e2e tests
 - Catches type errors that ESLint type-checked rules may not cover (e.g., missing imports, incorrect generics, declaration emit errors)
 
 ### Type Safety
+
 - `@typescript-eslint/no-explicit-any`: `error` — enforces project no-any policy
 - All `@typescript-eslint/no-unsafe-*` rules are enabled in production source code
 - Test files (`*.test.ts`, `*.test.tsx`) relax `no-unsafe-*`, `no-explicit-any`, `no-floating-promises`, `require-await`, `unbound-method`, `no-unnecessary-type-assertion`, `consistent-type-assertions`, and `no-misused-promises` for mocking flexibility
@@ -45,6 +50,7 @@ cd web && npm run test:e2e    # Playwright e2e tests
 - NEVER use `as unknown as T` in non-test code — write a proper type guard instead
 
 ### Project Conventions
+
 - Path alias `@/*` maps to `./src/*` — configured in both `tsconfig.app.json` and `vite.config.ts`
 - Auth: `@react-oauth/google` for Google Sign-In, custom Apple Sign-In JS SDK integration
 - Access tokens are held in a module-scoped variable (never persisted to storage); `localStorage` stores only a boolean session flag (`trackem:has_session`); `sessionStorage` stores user profile data
@@ -52,12 +58,14 @@ cd web && npm run test:e2e    # Playwright e2e tests
 - `QueryClient` is instantiated inside `RootLayout` via `useState` (stable per render, not shared between test runs) — not a top-level singleton
 
 ### Authentication
+
 - OAuth-only: Apple Sign-In + Google Sign-In (no email/password auth — no password reset flows needed)
 - Account deletion: "Delete Account" button in settings with explicit confirmation dialog ("Type DELETE to confirm")
 - User role is included in the session data (alongside user profile) from `/auth/me` response
 - Shared test fixtures (mock user, fake JWT, response helpers) live in `src/auth/__tests__/auth-test-helpers.tsx` — update there, not per-test file
 
 ### User Roles & Admin UI
+
 - Roles: `user`, `curator`, `admin` — included in JWT claims and `/auth/me` response
 - Admin routes under `/admin/*` are **code-split** via lazy `React.lazy()` imports — admin bundles never ship to regular users
 - Role checks in TanStack Router `beforeLoad` guards: redirect to `/` if insufficient role
@@ -65,6 +73,7 @@ cd web && npm run test:e2e    # Playwright e2e tests
 - Admin pages: user list, role assignment, catalog edit review queue
 
 ### Photo Domains (Web UI)
+
 - Catalog photo gallery on item detail page — shared, visible to all users
 - Photo upload UI (Phase 1.9) requires `curator` role — show/hide upload controls based on user role
 - User collection photos (private, per-item condition shots) are deferred to post-ML Phase 1.6
@@ -72,6 +81,7 @@ cd web && npm run test:e2e    # Playwright e2e tests
 ## Before Writing New Code
 
 Read existing files for patterns before writing anything new:
+
 - New component → read an existing component in the same feature area
 - New API call → read existing TanStack Query hooks in the nearest `hooks/` directory
 - New form → read an existing Zod-validated form component (React Hook Form is not yet installed)
@@ -82,6 +92,7 @@ Match existing patterns exactly. Do not introduce new conventions.
 ## Refactoring Safety (Web-Specific)
 
 In addition to the root CLAUDE.md refactoring rules:
+
 - **Never remove a `useEffect` without understanding its purpose** — it may handle cleanup, state resets on navigation, or edge cases not obvious from reading the code alone
 - **Never remove a TanStack Query `onError`/`onSettled` callback** — it may handle cache invalidation or error recovery
 - **Never simplify auth token refresh logic** without verifying the mutex and retry queue are preserved — race conditions in token refresh caused bugs previously
@@ -215,65 +226,89 @@ Use `npm run test:e2e:ui` for interactive debugging.
 ## Key Patterns
 
 ### Server state with TanStack Query
+
 ```tsx
 // CORRECT
 function ToyList() {
   const { data, isPending, isError } = useQuery({
     queryKey: ['toys'],
     queryFn: () => api.getToys(),
-  })
-  if (isPending) return <Spinner />
-  if (isError) return <ErrorMessage />
-  return <ul>{data.map(toy => <ToyItem key={toy.id} toy={toy} />)}</ul>
+  });
+  if (isPending) return <Spinner />;
+  if (isError) return <ErrorMessage />;
+  return (
+    <ul>
+      {data.map((toy) => (
+        <ToyItem key={toy.id} toy={toy} />
+      ))}
+    </ul>
+  );
 }
 ```
 
 ### Form with React Hook Form + Zod (planned — not yet installed)
+
 > `react-hook-form` and `@hookform/resolvers` are NOT in `package.json` yet.
 > Install them before using this pattern: `npm install react-hook-form @hookform/resolvers`
+
 ```tsx
-const schema = z.object({ name: z.string().min(1), year: z.number().int() })
-type FormData = z.infer<typeof schema>
+const schema = z.object({ name: z.string().min(1), year: z.number().int() });
+type FormData = z.infer<typeof schema>;
 
 function ToyForm() {
-  const form = useForm<FormData>({ resolver: zodResolver(schema) })
-  const mutation = useMutation({ mutationFn: api.createToy })
+  const form = useForm<FormData>({ resolver: zodResolver(schema) });
+  const mutation = useMutation({ mutationFn: api.createToy });
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(data => mutation.mutate(data))}>
-        <FormField control={form.control} name="name" render={({ field }) => (
-          <FormItem><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
+      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))}>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </form>
     </Form>
-  )
+  );
 }
 ```
 
 ### Validated API response
+
 ```typescript
-const toySchema = z.object({ id: z.string().uuid(), name: z.string() })
+const toySchema = z.object({ id: z.string().uuid(), name: z.string() });
 async function getToy(id: string) {
-  const res = await fetch(`/api/toys/${id}`)
-  return toySchema.parse(await res.json())
+  const res = await fetch(`/api/toys/${id}`);
+  return toySchema.parse(await res.json());
 }
 ```
 
 ### Fail-closed security checks
+
 ```typescript
 // CORRECT — missing state is treated as a mismatch
 if (!returnedState || !storedState || returnedState !== storedState) {
-  setError('state mismatch'); return
+  setError('state mismatch');
+  return;
 }
 ```
 
 ### Script injection deduplication
+
 ```typescript
-let sdkLoadPromise: Promise<void> | null = null
+let sdkLoadPromise: Promise<void> | null = null;
 function loadSDK(): Promise<void> {
-  if (window.AppleID) return Promise.resolve()
-  if (sdkLoadPromise) return sdkLoadPromise
-  sdkLoadPromise = new Promise((resolve, reject) => { /* append once */ })
-  return sdkLoadPromise
+  if (window.AppleID) return Promise.resolve();
+  if (sdkLoadPromise) return sdkLoadPromise;
+  sdkLoadPromise = new Promise((resolve, reject) => {
+    /* append once */
+  });
+  return sdkLoadPromise;
 }
 ```

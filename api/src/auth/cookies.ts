@@ -1,13 +1,13 @@
-import type { FastifyReply, FastifyRequest } from 'fastify'
-import { config } from '../config.js'
-import { REFRESH_TOKEN_EXPIRY_DAYS } from './tokens.js'
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import { config } from '../config.js';
+import { REFRESH_TOKEN_EXPIRY_DAYS } from './tokens.js';
 
 /** Name of the signed httpOnly cookie used to store the refresh token for web clients. */
-export const REFRESH_TOKEN_COOKIE = 'refresh_token'
-const REFRESH_TOKEN_MAX_AGE_SECONDS = REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60
+export const REFRESH_TOKEN_COOKIE = 'refresh_token';
+const REFRESH_TOKEN_MAX_AGE_SECONDS = REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60;
 
 /** Narrow reply shape required by cookie helpers — only the methods actually called. */
-export type CookieReply = Pick<FastifyReply, 'setCookie' | 'clearCookie'>
+export type CookieReply = Pick<FastifyReply, 'setCookie' | 'clearCookie'>;
 
 /**
  * Set the refresh token as a signed httpOnly cookie on the response.
@@ -25,7 +25,7 @@ export function setRefreshTokenCookie(reply: CookieReply, token: string): void {
     path: '/auth',
     maxAge: REFRESH_TOKEN_MAX_AGE_SECONDS,
     signed: true,
-  })
+  });
 }
 
 /**
@@ -40,7 +40,7 @@ export function clearRefreshTokenCookie(reply: CookieReply): void {
     sameSite: 'strict',
     path: '/auth',
     signed: true,
-  })
+  });
 }
 
 /**
@@ -53,9 +53,9 @@ export function clearRefreshTokenCookie(reply: CookieReply): void {
  */
 export function readSignedCookie(
   request: FastifyRequest,
-  name: string,
+  name: string
 ): ReturnType<FastifyRequest['unsignCookie']> | null {
   // wire-format value (s:value.hmac) — must ONLY be passed to unsignCookie(), never used directly
-  const wireFormatCookie = request.cookies[name]
-  return wireFormatCookie !== undefined ? request.unsignCookie(wireFormatCookie) : null
+  const wireFormatCookie = request.cookies[name];
+  return wireFormatCookie !== undefined ? request.unsignCookie(wireFormatCookie) : null;
 }

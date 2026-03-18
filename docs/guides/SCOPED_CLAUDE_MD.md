@@ -47,6 +47,7 @@ Best for modules where runtime surprises are frequent — security-sensitive cod
 This is the style used by `api/CLAUDE.md` and `web/CLAUDE.md`. It captures hard-won lessons that prevent regressions.
 
 **Characteristics:**
+
 - Pre-submission checklist with grep-based verification commands
 - "Key Patterns" section with correct vs. incorrect examples
 - "Refactoring Safety" section with module-specific warnings
@@ -59,6 +60,7 @@ Best for directories where developers need fast access to commands and conventio
 This is the style used by `changelog/CLAUDE.md`. It's a concise reference card.
 
 **Characteristics:**
+
 - Stack/tools section
 - Key commands
 - Format rules or templates
@@ -66,17 +68,17 @@ This is the style used by `changelog/CLAUDE.md`. It's a concise reference card.
 
 ### Choosing Between Styles
 
-| Signal | Style |
-|--------|-------|
-| Has a pre-submission checklist with 5+ items | Gotchas |
-| Security-sensitive code | Gotchas |
-| Primarily format/template rules | Quick Reference |
-| New directory, not yet battle-tested | Quick Reference (upgrade to Gotchas as lessons accumulate) |
+| Signal                                       | Style                                                      |
+| -------------------------------------------- | ---------------------------------------------------------- |
+| Has a pre-submission checklist with 5+ items | Gotchas                                                    |
+| Security-sensitive code                      | Gotchas                                                    |
+| Primarily format/template rules              | Quick Reference                                            |
+| New directory, not yet battle-tested         | Quick Reference (upgrade to Gotchas as lessons accumulate) |
 
 ## Writing Tips
 
 - **Lead with commands** — the first thing someone needs is how to build/test/lint
-- **Capture the *why*, not just the *what*** — "Never use `void reply.send()`" is good; adding "it suppresses errors silently" is better
+- **Capture the _why_, not just the _what_** — "Never use `void reply.send()`" is good; adding "it suppresses errors silently" is better
 - **Include correct AND incorrect examples** — showing both makes the gotcha stick
 - **Reference upstream files** — "New route handler → read `src/auth/routes.ts` for handler structure" prevents pattern drift
 - **Keep it additive** — scoped files supplement root, not replace. Start with "> Supplements the root `CLAUDE.md`. Rules here are additive."

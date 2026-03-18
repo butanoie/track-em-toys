@@ -1,0 +1,19 @@
+{
+  "description": "Root tooling host — husky + lint-staged + prettier only. NOT an npm workspace. api/ and web/ are independent modules.",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "prettier": "^3.5.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,css,yaml,yml}": [
+      "prettier --write"
+    ]
+  }
+}

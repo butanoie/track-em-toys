@@ -8,7 +8,7 @@ Templates and conventions for documenting TypeScript code across the API and Web
 
 ## Functions
 
-```typescript
+````typescript
 /**
  * Calculates the final price for a toy listing including condition multiplier.
  *
@@ -29,7 +29,7 @@ function calculateListingPrice(
   condition: ConditionGrade,
   yearProduced: number
 ): number { ... }
-```
+````
 
 ### Rules
 
@@ -63,7 +63,7 @@ interface CatalogToy {
 - Every interface and type alias needs a top-level description
 - Every property needs a `/** doc */` comment
 - Include default values in the description when applicable
-- Document nullability — explain *when* a field is null, not just *that* it can be
+- Document nullability — explain _when_ a field is null, not just _that_ it can be
 
 ---
 
@@ -216,4 +216,4 @@ If you modify a function's behavior, update its TSDoc in the same commit. Stale 
 
 **Don't document internal helpers the same way as exports:**
 
-Internal (non-exported) helper functions don't need full TSDoc. A brief `//` comment explaining *why* is sufficient. Save the ceremony for the public API surface.
+Internal (non-exported) helper functions don't need full TSDoc. A brief `//` comment explaining _why_ is sufficient. Save the ceremony for the public API surface.

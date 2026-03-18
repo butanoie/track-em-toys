@@ -42,7 +42,7 @@ Added `Promise<void>` return type annotations to `main()` and `startup()` — pr
 ### 6. CLAUDE.md Documentation (`CLAUDE.md`)
 
 - Expanded ESLint route-file override documentation (added `react-refresh/only-export-components` note)
-- Replaced vague "relax unsafe-* and assertion rules" with the full list of relaxed rules for test files
+- Replaced vague "relax unsafe-\* and assertion rules" with the full list of relaxed rules for test files
 - Added new **Web Project Conventions** section documenting path aliases, auth strategy, token storage, vitest config separation, and QueryClient instantiation pattern
 
 ---
@@ -54,27 +54,42 @@ Added `Promise<void>` return type annotations to `main()` and `startup()` — pr
 ```typescript
 // Before: two functions with identical logic, different constants
 function getUserAgent(request: FastifyRequest): string | null {
-  const ua = request.headers['user-agent']
-  if (typeof ua !== 'string') return null
-  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_DEVICE_INFO_LENGTH) || null
+  const ua = request.headers['user-agent'];
+  if (typeof ua !== 'string') return null;
+  return (
+    ua
+      .replace(/[\x00-\x1F\x7F]/g, '')
+      .trim()
+      .slice(0, MAX_DEVICE_INFO_LENGTH) || null
+  );
 }
 function getRawUserAgent(request: FastifyRequest): string | null {
-  const ua = request.headers['user-agent']
-  if (typeof ua !== 'string') return null
-  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, MAX_AUDIT_USER_AGENT_LENGTH) || null
+  const ua = request.headers['user-agent'];
+  if (typeof ua !== 'string') return null;
+  return (
+    ua
+      .replace(/[\x00-\x1F\x7F]/g, '')
+      .trim()
+      .slice(0, MAX_AUDIT_USER_AGENT_LENGTH) || null
+  );
 }
 
 // After: single parameterized helper
 function sanitizeUserAgent(request: FastifyRequest, maxLength: number): string | null {
-  const ua = request.headers['user-agent']
-  if (typeof ua !== 'string') return null
-  return ua.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, maxLength) || null
+  const ua = request.headers['user-agent'];
+  if (typeof ua !== 'string') return null;
+  return (
+    ua
+      .replace(/[\x00-\x1F\x7F]/g, '')
+      .trim()
+      .slice(0, maxLength) || null
+  );
 }
 function getUserAgent(request: FastifyRequest): string | null {
-  return sanitizeUserAgent(request, MAX_DEVICE_INFO_LENGTH)
+  return sanitizeUserAgent(request, MAX_DEVICE_INFO_LENGTH);
 }
 function getRawUserAgent(request: FastifyRequest): string | null {
-  return sanitizeUserAgent(request, MAX_AUDIT_USER_AGENT_LENGTH)
+  return sanitizeUserAgent(request, MAX_AUDIT_USER_AGENT_LENGTH);
 }
 ```
 
@@ -103,23 +118,23 @@ poolMax: optionalInt('DB_POOL_MAX', 20, 1, 1000),
 
 ```typescript
 // Before (duplicated in /signin and /link-account):
-let claims: ProviderClaims
+let claims: ProviderClaims;
 try {
-  claims = await verifyProviderToken(provider, id_token, nonce)
+  claims = await verifyProviderToken(provider, id_token, nonce);
 } catch (err) {
   if (err instanceof ProviderVerificationError) {
-    return reply.code(401).send({ error: 'Invalid provider token' })
+    return reply.code(401).send({ error: 'Invalid provider token' });
   }
   if (isNetworkError(err)) {
-    fastify.log.error({ err }, '...')
-    return reply.code(503).send({ error: 'Authentication service unavailable' })
+    fastify.log.error({ err }, '...');
+    return reply.code(503).send({ error: 'Authentication service unavailable' });
   }
-  throw err
+  throw err;
 }
 
 // After:
-const claims = await verifyProviderTokenOrReply(provider, id_token, nonce, fastify.log, reply)
-if (!claims) return
+const claims = await verifyProviderTokenOrReply(provider, id_token, nonce, fastify.log, reply);
+if (!claims) return;
 ```
 
 ---
@@ -142,14 +157,14 @@ if (!claims) return
 
 ## Related Files
 
-| File | Action |
-|---|---|
-| `api/src/auth/routes.ts` | Modified — extracted 3 helpers, simplified extractRefreshToken |
-| `api/src/auth/cookies.ts` | Modified — received readSignedCookie from routes.ts |
-| `api/src/config.ts` | Modified — extracted optionalInt helper |
-| `api/src/config.test.ts` | Modified — updated error message assertions |
-| `api/src/index.ts` | Modified — explicit return types on main/startup |
-| `CLAUDE.md` | Modified — web conventions, ESLint rule details |
+| File                      | Action                                                         |
+| ------------------------- | -------------------------------------------------------------- |
+| `api/src/auth/routes.ts`  | Modified — extracted 3 helpers, simplified extractRefreshToken |
+| `api/src/auth/cookies.ts` | Modified — received readSignedCookie from routes.ts            |
+| `api/src/config.ts`       | Modified — extracted optionalInt helper                        |
+| `api/src/config.test.ts`  | Modified — updated error message assertions                    |
+| `api/src/index.ts`        | Modified — explicit return types on main/startup               |
+| `CLAUDE.md`               | Modified — web conventions, ESLint rule details                |
 
 ---
 

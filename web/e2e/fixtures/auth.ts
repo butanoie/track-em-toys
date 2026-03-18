@@ -1,4 +1,4 @@
-import { type Page } from '@playwright/test'
+import { type Page } from '@playwright/test';
 
 /** Test user matching the UserResponse Zod schema */
 export const validUser = {
@@ -6,7 +6,7 @@ export const validUser = {
   email: 'test@example.com',
   display_name: 'Test User',
   avatar_url: null,
-}
+};
 
 /**
  * Creates a base64-encoded JWT with an `exp` claim.
@@ -14,14 +14,14 @@ export const validUser = {
  * Uses Buffer (Node.js) since this runs in Playwright's Node context.
  */
 export function fakeJwt(expOffsetMs = 3600_000): string {
-  const header = Buffer.from(JSON.stringify({ alg: 'ES256', typ: 'JWT' })).toString('base64')
+  const header = Buffer.from(JSON.stringify({ alg: 'ES256', typ: 'JWT' })).toString('base64');
   const payload = Buffer.from(
     JSON.stringify({
       sub: validUser.id,
       exp: Math.floor((Date.now() + expOffsetMs) / 1000),
-    }),
-  ).toString('base64')
-  return `${header}.${payload}.fakesig`
+    })
+  ).toString('base64');
+  return `${header}.${payload}.fakesig`;
 }
 
 /** Intercept POST /auth/signin → 200 with token + user */
@@ -35,8 +35,8 @@ export async function mockSigninSuccess(page: Page): Promise<void> {
         refresh_token: null,
         user: validUser,
       }),
-    }),
-  )
+    })
+  );
 }
 
 /** Intercept POST /auth/refresh → 200 with new token */
@@ -49,8 +49,8 @@ export async function mockRefreshSuccess(page: Page): Promise<void> {
         access_token: fakeJwt(),
         refresh_token: null,
       }),
-    }),
-  )
+    })
+  );
 }
 
 /** Intercept POST /auth/refresh → 401 */
@@ -60,15 +60,13 @@ export async function mockRefreshFailure(page: Page): Promise<void> {
       status: 401,
       contentType: 'application/json',
       body: JSON.stringify({ error: 'Unauthorized' }),
-    }),
-  )
+    })
+  );
 }
 
 /** Intercept POST /auth/logout → 204 */
 export async function mockLogoutSuccess(page: Page): Promise<void> {
-  await page.route('**/auth/logout', (route) =>
-    route.fulfill({ status: 204, body: '' }),
-  )
+  await page.route('**/auth/logout', (route) => route.fulfill({ status: 204, body: '' }));
 }
 
 /**
@@ -83,17 +81,17 @@ export async function mockLogoutSuccess(page: Page): Promise<void> {
  * and hydrate the user from sessionStorage.
  */
 export async function setupAuthenticated(page: Page): Promise<void> {
-  await mockRefreshSuccess(page)
-  await mockLogoutSuccess(page)
+  await mockRefreshSuccess(page);
+  await mockLogoutSuccess(page);
 
   // addInitScript runs before ANY page JavaScript on every navigation.
   // This ensures localStorage and sessionStorage are populated before
   // React mounts and AuthProvider.init() checks sessionFlag.check().
   await page.addInitScript(
     ({ user, flagKey, userKey }) => {
-      localStorage.setItem(flagKey, '1')
-      sessionStorage.setItem(userKey, JSON.stringify(user))
+      localStorage.setItem(flagKey, '1');
+      sessionStorage.setItem(userKey, JSON.stringify(user));
     },
-    { user: validUser, flagKey: 'trackem:has_session', userKey: 'trackem:user' },
-  )
+    { user: validUser, flagKey: 'trackem:has_session', userKey: 'trackem:user' }
+  );
 }
