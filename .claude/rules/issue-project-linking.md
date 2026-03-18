@@ -1,18 +1,14 @@
 After creating a GitHub issue with `gh issue create`, ALWAYS link it to the project board and populate its fields.
 
-## Step 1: Add to project
+## Step 1: Add to project and get the item ID
 
 ```
-gh project item-add 4 --owner butanoie --url <ISSUE_URL>
+ITEM_ID=$(gh project item-add 4 --owner butanoie --url <ISSUE_URL> --format json | jq -r '.id')
 ```
 
-## Step 2: Get the item ID
+**Important:** Do NOT use `gh project item-list | grep` to find the item ID — it has propagation delays and brittle text parsing. Always capture the ID from the `item-add` response.
 
-```
-gh project item-list 4 --owner butanoie --limit 10 | grep "<ISSUE_NUMBER>"
-```
-
-## Step 3: Set required fields
+## Step 2: Set required fields
 
 Ask the user to confirm values for these fields, then set each one:
 
@@ -65,7 +61,7 @@ Ask the user to confirm values for these fields, then set each one:
 | L (1-2d) | 9eaff376 |
 | XL (3-5d) | a87135ab |
 
-## Step 4: Set each field
+## Step 3: Set each field
 
 ```
 gh project item-edit --project-id PVT_kwHODzcfkc4BR7mS --id <ITEM_ID> \
@@ -80,7 +76,7 @@ Field IDs:
 - Track: `PVTSSF_lAHODzcfkc4BR7mSzg_nPAw`
 - Effort: `PVTSSF_lAHODzcfkc4BR7mSzg_nPAY`
 
-## Step 5: Labels and Milestone
+## Step 4: Labels and Milestone
 
 Also set labels and milestone when creating the issue:
 
