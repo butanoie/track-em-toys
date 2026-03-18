@@ -258,7 +258,7 @@ File envelope:
 {
   "_metadata": {
     "description": "{Source} character catalog — NEW characters only",
-    "generated": "{ISO timestamp from date '+%Y-%m-%dT%H%M%S'}",
+    "generated": "{ISO timestamp from date -u '+%Y-%m-%dT%H%M%SZ'}",
     "total_characters": 0,
     "scope": "{Description of what's included and excluded}",
     "schema_target": "characters table from migration 011_shared_catalog_tables.sql",

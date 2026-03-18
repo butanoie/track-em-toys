@@ -12,7 +12,7 @@ Every changelog entry must include:
 # Title - Brief Description
 
 **Date:** YYYY-MM-DD
-**Time:** HH:MM:SS TZ
+**Time:** HH:MM:SS UTC
 **Type:** [Phase Completion | Infrastructure | Feature | Configuration | etc.]
 **Phase:** [If applicable]
 **Version:** vX.Y.Z
@@ -61,9 +61,9 @@ Every changelog entry must include:
 
 **Examples to Follow:**
 
-- See `2026-01-25T231357_phase1-completion.md` for phase completion example
-- See `2026-01-25T233843_static-analysis-documentation-enforcement.md` for infrastructure example
-- See `2026-01-27T082828_testing-infrastructure-setup.md` for detailed technical example
+- See `2026-02-22T211901Z_phase1-authentication-foundation.md` for phase completion example
+- See `2026-03-18T012712Z_prettier-code-formatting.md` for infrastructure example
+- See `2026-03-17T185450Z_seed-ingestion-integration-tests.md` for detailed technical example
 
 ---
 
@@ -73,7 +73,7 @@ Every changelog entry must include:
 # Title - Brief Description
 
 **Date:** YYYY-MM-DD
-**Time:** HH:MM:SS TZ
+**Time:** HH:MM:SS UTC
 **Type:** [Type]
 **Version:** vX.Y.Z
 

@@ -1,7 +1,7 @@
 # ML-Accelerated Development Roadmap and Architectural Decisions
 
 **Date:** 2026-03-16
-**Time:** 11:10:00 -0700
+**Time:** 18:10:00 UTC
 **Type:** Documentation Standards
 **Phase:** 1.4 (Catalog Schema/Seed)
 **Version:** v0.4.0
