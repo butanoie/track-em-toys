@@ -2,6 +2,7 @@ import net from 'node:net'
 import type pg from 'pg'
 import type {
   User,
+  UserRole,
   OAuthAccount,
   RefreshToken,
   AuthEventType,
@@ -48,7 +49,7 @@ export async function findUserById(
   id: string,
 ): Promise<User | null> {
   const { rows } = await client.query<User>(
-    'SELECT id, email, email_verified, display_name, avatar_url, deactivated_at, created_at, updated_at FROM users WHERE id = $1',
+    'SELECT id, email, email_verified, display_name, avatar_url, role, deactivated_at, deleted_at, created_at, updated_at FROM users WHERE id = $1',
     [id],
   )
   return rows[0] ?? null
@@ -65,7 +66,7 @@ export async function findUserByEmail(
   email: string,
 ): Promise<User | null> {
   const { rows } = await client.query<User>(
-    'SELECT id, email, email_verified, display_name, avatar_url, deactivated_at, created_at, updated_at FROM users WHERE LOWER(email) = LOWER($1) AND email_verified = true',
+    'SELECT id, email, email_verified, display_name, avatar_url, role, deactivated_at, deleted_at, created_at, updated_at FROM users WHERE LOWER(email) = LOWER($1) AND email_verified = true',
     [email],
   )
   return rows[0] ?? null
@@ -92,7 +93,7 @@ export async function createUser(
   const { rows } = await client.query<User>(
     `INSERT INTO users (email, email_verified, display_name, avatar_url)
      VALUES (LOWER($1), $2, $3, $4)
-     RETURNING id, email, email_verified, display_name, avatar_url, deactivated_at, created_at, updated_at`,
+     RETURNING id, email, email_verified, display_name, avatar_url, role, deactivated_at, deleted_at, created_at, updated_at`,
     [params.email, params.email_verified, params.display_name, params.avatar_url],
   )
   const user = rows[0]
@@ -137,25 +138,36 @@ export async function setUserEmailVerified(
   )
 }
 
-export type UserStatus = 'active' | 'deactivated' | 'not_found'
+export type UserAccountStatus = 'active' | 'deactivated' | 'deleted' | 'not_found'
+
+/** Result from getUserStatusAndRole: account status + current role (if user exists). */
+export interface UserStatusAndRole {
+  status: UserAccountStatus
+  role: UserRole | null
+}
 
 /**
- * Get the account status of a user: active, deactivated, or not found.
+ * Get the account status and current role of a user in a single query.
+ * Used during token refresh to check account validity AND embed the up-to-date
+ * role in the new access token. Checks both deactivated_at and deleted_at to
+ * prevent purged users from passing status checks.
  *
  * @param client - Database client
  * @param userId - User UUID
  */
-export async function getUserStatus(
+export async function getUserStatusAndRole(
   client: QueryOnlyClient,
   userId: string,
-): Promise<UserStatus> {
-  const { rows } = await client.query<{ deactivated_at: string | null }>(
-    'SELECT deactivated_at FROM users WHERE id = $1',
+): Promise<UserStatusAndRole> {
+  const { rows } = await client.query<{ role: UserRole; deactivated_at: string | null; deleted_at: string | null }>(
+    'SELECT role, deactivated_at, deleted_at FROM users WHERE id = $1',
     [userId],
   )
   const row = rows[0]
-  if (!row) return 'not_found'
-  return row.deactivated_at !== null ? 'deactivated' : 'active'
+  if (!row) return { status: 'not_found', role: null }
+  if (row.deleted_at !== null) return { status: 'deleted', role: row.role }
+  if (row.deactivated_at !== null) return { status: 'deactivated', role: row.role }
+  return { status: 'active', role: row.role }
 }
 
 /**
@@ -216,6 +228,7 @@ export async function findOAuthAccountWithUser(
     email_verified: boolean
     display_name: string | null
     avatar_url: string | null
+    user_role: UserRole
     deactivated_at: string | null
     deleted_at: string | null
     user_created_at: string
@@ -235,6 +248,7 @@ export async function findOAuthAccountWithUser(
        u.email_verified,
        u.display_name,
        u.avatar_url,
+       u.role                AS user_role,
        u.deactivated_at,
        u.deleted_at,
        u.created_at          AS user_created_at,
@@ -265,6 +279,7 @@ export async function findOAuthAccountWithUser(
     email_verified: row.email_verified,
     display_name: row.display_name,
     avatar_url: row.avatar_url,
+    role: row.user_role,
     deactivated_at: row.deactivated_at,
     deleted_at: row.deleted_at,
     created_at: row.user_created_at,
@@ -404,7 +419,7 @@ export async function findUserWithAccounts(
   // with the user columns (both tables have id, email, created_at, etc.).
   const { rows } = await client.query<UserWithAccountsRow>(
     `SELECT
-       u.id, u.email, u.email_verified, u.display_name, u.avatar_url, u.deactivated_at, u.deleted_at, u.created_at, u.updated_at,
+       u.id, u.email, u.email_verified, u.display_name, u.avatar_url, u.role, u.deactivated_at, u.deleted_at, u.created_at, u.updated_at,
        oa.id                 AS oa_id,
        oa.user_id            AS oa_user_id,
        oa.provider           AS oa_provider,
@@ -427,6 +442,7 @@ export async function findUserWithAccounts(
     email_verified: firstRow.email_verified,
     display_name: firstRow.display_name,
     avatar_url: firstRow.avatar_url,
+    role: firstRow.role,
     deactivated_at: firstRow.deactivated_at,
     deleted_at: firstRow.deleted_at,
     created_at: firstRow.created_at,
@@ -685,5 +701,6 @@ export function toUserResponse(user: User): UserResponse {
     email: user.email,
     display_name: user.display_name,
     avatar_url: user.avatar_url,
+    role: user.role,
   }
 }

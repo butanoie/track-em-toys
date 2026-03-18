@@ -59,7 +59,7 @@ vi.mock('./db/queries.js', () => ({
   findUserById: vi.fn(),
   findUserByEmail: vi.fn(),
   findUserWithAccounts: vi.fn(),
-  getUserStatus: vi.fn(),
+  getUserStatusAndRole: vi.fn(),
   createUser: vi.fn(),
   createOAuthAccount: vi.fn(),
   updateUserDisplayName: vi.fn(),

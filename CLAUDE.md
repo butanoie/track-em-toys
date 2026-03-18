@@ -47,7 +47,8 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - RLS uses (SELECT current_app_user_id()) subselect wrapper for initPlan caching
 - JWT: ES256 asymmetric signing, JWKS discovery, SHA-256 refresh token hashing
 - RLS policies: always use the (SELECT ...) wrapper, never bare function calls
-- Catalog tables use UUID primary keys with a unique `slug` column for stable cross-references and URL-friendly API routes
+- Catalog tables use UUID primary keys with a `slug` column for stable cross-references and URL-friendly API routes
+- Catalog slugs are franchise-scoped: `UNIQUE(slug, franchise_id)` — NOT globally unique. Manufacturers and franchises remain globally unique.
 - Seed data (`api/db/seed/`) uses slug-based FK references — never integer IDs — to avoid fragile positional coupling
 - GDPR user deletion uses tombstone pattern: scrub PII (email, display_name, avatar_url), set `deleted_at`, keep the row so all FKs remain intact. NEVER use `ON DELETE CASCADE` or `ON DELETE SET NULL` on user FKs. App checks `deleted_at IS NOT NULL` to display "Deleted user". Phase 1.12 implements the deletion endpoint + UI.
 
@@ -181,7 +182,7 @@ These gates apply to any non-trivial feature work, whether using `/feature-dev` 
 
 ### Post-Architecture Documentation Gate
 
-**CRITICAL: After the architecture/plan is approved by the user, update documentation BEFORE writing implementation code.** Do NOT skip this step. Treat missing doc updates as a blocker.
+**CRITICAL: After the architecture/plan is approved by the user, first review and audit the design for correctness (consistency, security, data model, edge cases, scope), THEN update documentation BEFORE writing implementation code.** Do NOT skip the audit step. Do NOT skip the doc updates. Treat both as hard blockers.
 
 See [`docs/guides/DOC_GATE_REFERENCE.md`](docs/guides/DOC_GATE_REFERENCE.md) for the full checklist and common mistakes.
 

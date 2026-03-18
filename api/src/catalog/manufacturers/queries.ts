@@ -13,6 +13,9 @@ export interface ManufacturerRow {
   updated_at: string
 }
 
+/**
+ * List all manufacturers ordered by name.
+ */
 export async function listManufacturers(): Promise<ManufacturerRow[]> {
   const { rows } = await pool.query<ManufacturerRow>(
     `SELECT id, name, slug, is_official_licensee, country, website_url,
@@ -23,6 +26,11 @@ export async function listManufacturers(): Promise<ManufacturerRow[]> {
   return rows
 }
 
+/**
+ * Fetch a single manufacturer by slug.
+ *
+ * @param slug - Manufacturer slug to look up
+ */
 export async function getManufacturerBySlug(slug: string): Promise<ManufacturerRow | null> {
   const { rows } = await pool.query<ManufacturerRow>(
     `SELECT id, name, slug, is_official_licensee, country, website_url,

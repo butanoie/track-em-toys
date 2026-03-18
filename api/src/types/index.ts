@@ -1,9 +1,12 @@
+export type UserRole = 'user' | 'curator' | 'admin'
+
 export interface User {
   id: string
   email: string | null
   email_verified: boolean
   display_name: string | null
   avatar_url: string | null
+  role: UserRole
   deactivated_at: string | null
   deleted_at: string | null
   created_at: string
@@ -54,11 +57,15 @@ export type AuthEventType =
   | 'token_reuse_detected'
   | 'account_deactivated'
   | 'consent_revoked'
+  | 'role_changed'
+  | 'account_reactivated'
+  | 'user_purged'
 
 export type OAuthProvider = 'apple' | 'google'
 
 export interface TokenPayload {
   sub: string
+  role: UserRole
   iss: string
   aud: string
   iat: number
@@ -106,6 +113,7 @@ export interface UserResponse {
   email: string | null
   display_name: string | null
   avatar_url: string | null
+  role: UserRole
 }
 
 export interface ProviderClaims {

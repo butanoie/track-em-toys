@@ -59,6 +59,11 @@ export interface ListCharactersParams {
   cursor: { name: string; id: string } | null
 }
 
+/**
+ * List characters for a franchise with cursor pagination.
+ *
+ * @param params - Cursor-paginated list parameters
+ */
 export async function listCharacters(
   params: ListCharactersParams,
 ): Promise<{ rows: CharacterListRow[]; totalCount: number }> {
@@ -113,6 +118,12 @@ export interface CharacterDetail {
   appearances: AppearanceRow[]
 }
 
+/**
+ * Fetch a single character by franchise and slug.
+ *
+ * @param franchiseSlug - Franchise slug filter
+ * @param characterSlug - Character slug to look up
+ */
 export async function getCharacterBySlug(
   franchiseSlug: string,
   characterSlug: string,

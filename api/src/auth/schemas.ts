@@ -41,13 +41,14 @@ export const signinSchema = {
         refresh_token: { type: ['string', 'null'] },
         user: {
           type: 'object',
-          required: ['id', 'email', 'display_name', 'avatar_url'],
+          required: ['id', 'email', 'display_name', 'avatar_url', 'role'],
           additionalProperties: false,
           properties: {
             id: { type: 'string' },
             email: { type: ['string', 'null'] },
             display_name: { type: ['string', 'null'] },
             avatar_url: { type: ['string', 'null'] },
+            role: { type: 'string', enum: ['user', 'curator', 'admin'] },
           },
         },
       },
@@ -149,13 +150,14 @@ export const logoutSchema = {
 /** Shared 200-response shape for endpoints returning a user with linked accounts. */
 const userWithAccountsResponse = {
   type: 'object',
-  required: ['id', 'email', 'display_name', 'avatar_url', 'linked_accounts'],
+  required: ['id', 'email', 'display_name', 'avatar_url', 'role', 'linked_accounts'],
   additionalProperties: false,
   properties: {
     id: { type: 'string' },
     email: { type: ['string', 'null'] },
     display_name: { type: ['string', 'null'] },
     avatar_url: { type: ['string', 'null'] },
+    role: { type: 'string', enum: ['user', 'curator', 'admin'] },
     linked_accounts: {
       type: 'array',
       items: {

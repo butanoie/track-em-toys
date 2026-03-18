@@ -2,6 +2,12 @@ import type { FastifyInstance } from 'fastify'
 import { listFranchises, getFranchiseBySlug } from './queries.js'
 import { listFranchisesSchema, getFranchiseSchema } from './schemas.js'
 
+/**
+ * Register franchise catalog routes.
+ *
+ * @param fastify - Fastify instance
+ * @param _opts - Fastify plugin options (unused)
+ */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function franchiseRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   fastify.get(

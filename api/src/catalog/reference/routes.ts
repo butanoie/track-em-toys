@@ -14,6 +14,11 @@ import {
 interface FranchiseParams { franchise: string }
 interface FranchiseSlugParams { franchise: string; slug: string }
 
+/**
+ * Format a sub-group row for responses.
+ *
+ * @param row - Database row to format
+ */
 function formatSubGroup(row: SubGroupRow) {
   return {
     id: row.id,
@@ -27,6 +32,12 @@ function formatSubGroup(row: SubGroupRow) {
 
 const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const
 
+/**
+ * Register reference data routes (factions, sub-groups, continuity families).
+ *
+ * @param fastify - Fastify instance
+ * @param _opts - Fastify plugin options (unused)
+ */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function referenceRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   // ─── Factions ─────────────────────────────────────────────────────────

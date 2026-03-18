@@ -9,7 +9,22 @@ Standalone reference for the mandatory documentation gates in the feature develo
 **Trigger:** Architecture/plan has been approved by the user.
 **Blocks:** Implementation cannot start until this gate passes.
 
-### Checklist
+### Step 1: Architecture Review & Audit
+
+Before writing any documentation, review and audit the architecture design for correctness and completeness:
+
+- [ ] **Consistency check** — Verify the design aligns with existing patterns, conventions, and constraints documented in CLAUDE.md and module-specific CLAUDE.md files
+- [ ] **Security review** — Check for auth/role enforcement gaps, missing RLS policies, input validation, and OWASP concerns relevant to the design
+- [ ] **Data model audit** — Confirm schema changes respect existing FK conventions, slug scoping rules, naming patterns, and migration ordering
+- [ ] **Dependency check** — Identify interactions with existing modules; verify the design doesn't break or duplicate existing functionality
+- [ ] **Edge case analysis** — Walk through error paths, empty states, concurrent access, and boundary conditions the design should handle
+- [ ] **Scope validation** — Confirm the design doesn't include deferred/out-of-scope work (e.g., collection features, user photos) and that all planned work is actually needed
+
+If the audit surfaces issues, resolve them with the user before proceeding to documentation.
+
+### Step 2: Documentation
+
+Once the architecture passes review, update documentation to reflect the confirmed design:
 
 - [ ] **Design docs** (`docs/plans/` or `docs/decisions/`) — Update or create with confirmed decisions, refined scope, and technical constraints
 - [ ] **Test scenarios** (`docs/test-scenarios/`) — Write Gherkin scenario documents covering happy path, error cases, and edge cases for the planned feature. Update the mapping table in `docs/test-scenarios/README.md`. See `docs/guides/TESTING_SCENARIOS.md` for format.
@@ -19,9 +34,10 @@ Standalone reference for the mandatory documentation gates in the feature develo
 
 ### How to Apply
 
-Review each item explicitly. If an item is not applicable (e.g., no new conventions emerged), note it as N/A and move on. The goal is to ensure no documentation debt accumulates before code is written.
+Complete Step 1 (audit) fully before starting Step 2 (documentation). Review each item explicitly. If an item is not applicable (e.g., no new conventions emerged), note it as N/A and move on. The goal is to catch design issues early and ensure documentation reflects a vetted architecture, not an unreviewed draft.
 
 **Common mistakes:**
+- Skipping the audit step and jumping straight to documentation — an unreviewed architecture produces documentation that needs rework
 - Skipping this gate because "it's a small feature" — if the feature went through architecture review, it goes through the doc gate
 - Updating only the root CLAUDE.md when the convention is module-specific — use scoped files
 - Writing vague plan docs — include specific file paths, function signatures, and data flow descriptions

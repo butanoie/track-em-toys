@@ -61,7 +61,7 @@ vi.mock('../db/queries.js', () => ({
   userHasProvider: vi.fn(),
   findOAuthAccountsByUserId: vi.fn(),
   findUserWithAccounts: vi.fn(),
-  getUserStatus: vi.fn(),
+  getUserStatusAndRole: vi.fn(),
   findRefreshTokenByHash: vi.fn(),
   findRefreshTokenForRotation: vi.fn(),
   createRefreshToken: vi.fn(),

@@ -26,6 +26,7 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - NEVER use `void` before a synchronous method call — it suppresses errors silently
 
 ### Database
+- PostgreSQL auto-names inline FK constraints as `{table}_{column}_fkey` — use this pattern when dropping/recreating constraints in migrations
 - NEVER use `SELECT *` or `RETURNING *` — always list explicit columns matching the TypeScript interface
 - Column lists must stay in sync with the corresponding TypeScript type in `src/types/index.ts`
 - ALL DB changes via migration files in `api/db/migrations/`, never direct schema edits
@@ -39,6 +40,7 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - Seed FK naming: JSON uses `{table}_slug` (e.g. `franchise_slug`, `faction_slug`), DB column is `{table}_id` (UUID FK). Ingest script resolves slugs to UUIDs via `resolveSlug()` maps
 - Reference tables follow the pattern: `id UUID PK, slug TEXT UNIQUE, name TEXT, sort_order INT, notes TEXT, created_at TIMESTAMPTZ` (no `updated_at`)
 - When adding a column to a reference table: add to seed JSON, record interface in `ingest.ts`, TypeScript interface in `types/index.ts`, and validation tests in `seed-validation.test.ts`
+- When changing a UNIQUE constraint, grep `ON CONFLICT` in `db/seed/ingest.ts` — the conflict target must match the new constraint exactly
 
 ### GDPR / User Deletion (Tombstone Pattern)
 - User "deletion" = scrub PII (`email`, `display_name`, `avatar_url`) + set `deleted_at` — the `users` row is preserved as a tombstone so all FKs remain intact
@@ -46,18 +48,31 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - User FKs keep their original nullability — `NOT NULL` FKs like `catalog_edits.editor_id` stay `NOT NULL` because the referenced user row always exists
 - App checks `u.deleted_at IS NOT NULL` on JOINs to display "Deleted user" instead of the scrubbed fields
 - Auth data (`refresh_tokens`, `oauth_accounts`) is hard-deleted during scrub — no need for tombstone on auth tables
+- GDPR purge must also scrub `auth_events` PII (`ip_address`, `user_agent`, `metadata`) — IP addresses and user agents are personal data under GDPR
+- `oauth_accounts` and `refresh_tokens` use `ON DELETE RESTRICT` (fixed in migration 021 from legacy CASCADE)
 - When adding a new table with a user FK, no special ON DELETE clause is needed (default RESTRICT is correct)
 
 ### User Roles & Authorization
 - `users.role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'curator', 'admin'))`
 - Role is included in JWT access token claims — no DB lookup needed per request
 - `requireRole(role)` Fastify preHandler middleware enforces role checks; returns 403 if insufficient
+- Role hierarchy: `user (0) < curator (1) < admin (2)` — `requireRole('curator')` grants access to curators AND admins
+- Role infrastructure lives in `src/auth/role.ts` — `ROLE_HIERARCHY`, `hasRequiredRole()`, `isRolePayload()`, `requireRole()` factory
+- `requireRole` must ALWAYS follow `fastify.authenticate` in the `preHandler` array — `authenticate` populates `request.user`
 - Catalog read routes: no role required (public)
 - Catalog write routes (photo upload, item edits): require `curator` or `admin`
 - Admin routes (user management, role assignment): require `admin`
 - When adding a new route with write operations on catalog data, always add `requireRole('curator')` preHandler
 - Admin routes live in `src/admin/routes.ts`, separate from catalog routes
-- First admin user bootstrapped via CLI command: `npx trackem set-role <email> admin`
+- Admin mutations use `withTransaction` (unlike catalog reads which use `pool.query()` directly) — this is an intentional deviation
+- Admin mutation routes must reject GDPR-purged users (`deleted_at IS NOT NULL` → 409)
+- Admin mutation routes must block self-modification (`params.id === request.user.sub` → 403)
+- All `:id` path params must have `format: 'uuid'` in the route schema to prevent 500 from invalid UUIDs
+- Admin audit events logged to `auth_events`: `role_changed`, `account_deactivated`, `account_reactivated`, `user_purged`
+- Any function that gates user access (signin, refresh, admin mutations) must check BOTH `deactivated_at` AND `deleted_at` — never assume one implies the other
+- `getUserStatusAndRole()` is the canonical function for this — returns `{ status: 'active' | 'deactivated' | 'deleted' | 'not_found', role }` in a single DB query
+- `findUserForAdmin()` uses `FOR UPDATE` to serialize concurrent mutations (critical for last-admin protection)
+- First admin user bootstrapped via CLI command: `npm run set-role -- <email> admin`
 
 ### Photo Domains
 Two distinct photo types:
@@ -98,7 +113,7 @@ Two distinct photo types:
 - Cursor pagination encodes `{ v: 1, name, id }` as base64url — always include version field
 - Cursor UUID comparison uses `$N::uuid`, not text cast
 - Error responses use `reply.code(N).send({ error: '...' })` — no HttpError (no transactions)
-- All declared schema properties MUST appear in `required` arrays — Fastify's serializer silently strips unrequired null fields from responses
+- CRITICAL: Every property in a response schema's `properties` MUST appear in `required` — Fastify's fast-json-stringify silently DROPS unrequired null fields from the response body, so clients never see them
 - Count queries must have identical JOINs as data queries (minus cursor/LIMIT) to avoid inflated total_count
 - Migrations that depend on columns added by other migrations must be ordered accordingly — do not create indexes on columns that don't exist yet
 - See `docs/decisions/ADR_Catalog_API_Architecture.md` for full architecture
@@ -232,6 +247,8 @@ For any new field returned in a response:
 - Add it to the Fastify response schema with correct type (including `| null` if nullable)
 - Add it to the corresponding TypeScript interface in `src/types/index.ts`
 - Add it to `required: [...]` if always present
+- Add it to the web Zod schema in `web/src/lib/zod-schemas.ts` — Zod strips unknown keys by default, so a missing field silently disappears from the web client
+- Update all mock `User` objects in test files — search for the interface name across `*.test.ts` files
 
 ### 12. DB CHECK constraints match TypeScript unions
 
@@ -503,6 +520,8 @@ const { myFn } = await import('./module.js')
 vi.doUnmock('../config.js')
 vi.resetModules()
 ```
+
+When adding a new exported function to a module that is `vi.mock()`'d in tests, you MUST add it to every mock definition for that module — otherwise tests get `No "funcName" export is defined on the mock` runtime errors. Search: `vi.mock.*module-path` across test files.
 
 ### URL sanitization for storage
 ```typescript

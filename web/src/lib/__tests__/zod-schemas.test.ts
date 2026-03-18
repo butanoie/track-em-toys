@@ -14,6 +14,7 @@ describe('UserResponseSchema', () => {
       email: 'test@example.com',
       display_name: 'Test User',
       avatar_url: 'https://example.com/avatar.png',
+      role: 'user',
     }
     const result = UserResponseSchema.parse(input)
     expect(result).toEqual(input)
@@ -25,6 +26,7 @@ describe('UserResponseSchema', () => {
       email: null,
       display_name: null,
       avatar_url: null,
+      role: 'user' as const,
     }
     const result = UserResponseSchema.parse(input)
     expect(result).toEqual(input)
@@ -37,6 +39,7 @@ describe('UserResponseSchema', () => {
         email: null,
         display_name: null,
         avatar_url: null,
+        role: 'user',
       })
     ).toThrow()
   })
@@ -48,6 +51,7 @@ describe('UserResponseSchema', () => {
         email: 'not-an-email',
         display_name: null,
         avatar_url: null,
+        role: 'user',
       })
     ).toThrow()
   })
@@ -59,6 +63,7 @@ describe('UserResponseSchema', () => {
         email: null,
         display_name: null,
         avatar_url: 'not-a-url',
+        role: 'user',
       })
     ).toThrow()
   })
@@ -74,6 +79,7 @@ describe('AuthResponseSchema', () => {
         email: 'test@example.com',
         display_name: 'Test User',
         avatar_url: null,
+        role: 'user',
       },
     }
     const result = AuthResponseSchema.parse(input)
@@ -92,6 +98,7 @@ describe('AuthResponseSchema', () => {
           email: null,
           display_name: null,
           avatar_url: null,
+          role: 'user',
         },
       })
     ).toThrow()
@@ -107,6 +114,7 @@ describe('AuthResponseSchema', () => {
           email: null,
           display_name: null,
           avatar_url: null,
+          role: 'user',
         },
       })
     ).toThrow()
@@ -135,6 +143,7 @@ describe('LinkAccountResponseSchema', () => {
       email: 'test@example.com',
       display_name: 'Test',
       avatar_url: null,
+      role: 'user' as const,
       linked_accounts: [
         { provider: 'google' as const, email: 'test@example.com' },
         { provider: 'apple' as const, email: null },
@@ -151,6 +160,7 @@ describe('LinkAccountResponseSchema', () => {
         email: null,
         display_name: null,
         avatar_url: null,
+        role: 'user',
         linked_accounts: [{ provider: 'facebook', email: null }],
       })
     ).toThrow()

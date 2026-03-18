@@ -10,6 +10,9 @@ export interface CursorPayload {
 /**
  * Encode a cursor from the last row's name and id.
  * Uses base64url to avoid URL-unsafe characters.
+ *
+ * @param name - Last row's name value
+ * @param id - Last row's UUID
  */
 export function encodeCursor(name: string, id: string): string {
   const payload: CursorPayload = { v: 1, name, id }
@@ -19,6 +22,8 @@ export function encodeCursor(name: string, id: string): string {
 /**
  * Decode a cursor string back to { name, id }.
  * Returns null if the cursor is malformed, wrong version, or not valid JSON.
+ *
+ * @param cursor - Base64url-encoded cursor string
  */
 export function decodeCursor(cursor: string): { name: string; id: string } | null {
   try {
@@ -46,6 +51,9 @@ export function decodeCursor(cursor: string): { name: string; id: string } | nul
  * Build a cursor-paginated page from limit+1 rows.
  * If more rows than `limit` were returned, the extra row is removed and
  * its name/id are encoded as the next_cursor.
+ *
+ * @param rows - Rows fetched (limit+1 for peek)
+ * @param limit - Requested page size
  */
 export function buildCursorPage<T extends { name: string; id: string }>(
   rows: T[],
@@ -64,6 +72,8 @@ export function buildCursorPage<T extends { name: string; id: string }>(
 
 /**
  * Clamp a user-supplied limit to valid range.
+ *
+ * @param limit - User-supplied limit value
  */
 export function clampLimit(limit: number | undefined): number {
   if (limit === undefined) return DEFAULT_PAGE_LIMIT

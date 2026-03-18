@@ -10,6 +10,11 @@ interface SearchQuery {
   limit?: number
 }
 
+/**
+ * Format a search result row for responses.
+ *
+ * @param row - Database row to format
+ */
 function formatResult(row: SearchResultRow) {
   return {
     entity_type: row.entity_type,
@@ -20,6 +25,12 @@ function formatResult(row: SearchResultRow) {
   }
 }
 
+/**
+ * Register catalog search routes.
+ *
+ * @param fastify - Fastify instance
+ * @param _opts - Fastify plugin options (unused)
+ */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function searchRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   fastify.get<{ Querystring: SearchQuery }>(

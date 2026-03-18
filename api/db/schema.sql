@@ -77,7 +77,7 @@ CREATE TABLE public.auth_events (
     user_agent character varying(512),
     metadata jsonb,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT auth_events_event_type_check CHECK (((event_type)::text = ANY ((ARRAY['signin'::character varying, 'refresh'::character varying, 'logout'::character varying, 'link_account'::character varying, 'provider_auto_linked'::character varying, 'token_reuse_detected'::character varying, 'account_deactivated'::character varying, 'consent_revoked'::character varying])::text[])))
+    CONSTRAINT auth_events_event_type_check CHECK (((event_type)::text = ANY ((ARRAY['signin'::character varying, 'refresh'::character varying, 'logout'::character varying, 'link_account'::character varying, 'provider_auto_linked'::character varying, 'token_reuse_detected'::character varying, 'account_deactivated'::character varying, 'consent_revoked'::character varying, 'role_changed'::character varying, 'account_reactivated'::character varying, 'user_purged'::character varying])::text[])))
 );
 
 
@@ -85,7 +85,7 @@ CREATE TABLE public.auth_events (
 -- Name: COLUMN auth_events.event_type; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.auth_events.event_type IS 'signin | refresh | logout | link_account | provider_auto_linked | token_reuse_detected | account_deactivated | consent_revoked';
+COMMENT ON COLUMN public.auth_events.event_type IS 'signin | refresh | logout | link_account | provider_auto_linked | token_reuse_detected | account_deactivated | consent_revoked | role_changed | account_reactivated | user_purged';
 
 
 --
@@ -561,7 +561,9 @@ CREATE TABLE public.users (
     deactivated_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    deleted_at timestamp with time zone
+    deleted_at timestamp with time zone,
+    role text DEFAULT 'user'::text NOT NULL,
+    CONSTRAINT users_role_check CHECK ((role = ANY (ARRAY['user'::text, 'curator'::text, 'admin'::text])))
 );
 
 
@@ -570,6 +572,13 @@ CREATE TABLE public.users (
 --
 
 COMMENT ON COLUMN public.users.deleted_at IS 'GDPR tombstone. When set, PII columns (email, display_name, avatar_url) have been scrubbed. The row is preserved so foreign keys from items, catalog_edits, item_photos remain intact. App displays "Deleted user" when deleted_at IS NOT NULL.';
+
+
+--
+-- Name: COLUMN users.role; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.users.role IS 'Authorization role: user | curator | admin. Included in JWT claims.';
 
 
 --
@@ -1321,7 +1330,7 @@ ALTER TABLE ONLY public.items
 --
 
 ALTER TABLE ONLY public.oauth_accounts
-    ADD CONSTRAINT oauth_accounts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+    ADD CONSTRAINT oauth_accounts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
 
 
 --
@@ -1329,7 +1338,7 @@ ALTER TABLE ONLY public.oauth_accounts
 --
 
 ALTER TABLE ONLY public.refresh_tokens
-    ADD CONSTRAINT refresh_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+    ADD CONSTRAINT refresh_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
 
 
 --
@@ -1393,4 +1402,7 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('015'),
     ('016'),
     ('017'),
-    ('018');
+    ('018'),
+    ('019'),
+    ('020'),
+    ('021');

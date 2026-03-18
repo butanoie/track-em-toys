@@ -2,6 +2,12 @@ import type { FastifyInstance } from 'fastify'
 import { listManufacturers, getManufacturerBySlug } from './queries.js'
 import { listManufacturersSchema, getManufacturerSchema } from './schemas.js'
 
+/**
+ * Register manufacturer catalog routes.
+ *
+ * @param fastify - Fastify instance
+ * @param _opts - Fastify plugin options (unused)
+ */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function manufacturerRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   fastify.get(
