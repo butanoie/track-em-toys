@@ -20,7 +20,7 @@ Ask the user for:
 
 ### 1. Gather context
 
-- Run `date '+%Y-%m-%dT%H%M%S'` for the filename timestamp
+- Run `date -u '+%Y-%m-%dT%H%M%SZ'` for the filename timestamp (always UTC)
 - Run `git log --oneline` since the last changelog entry (check `ls changelog/` for the most recent)
 - Run `git diff --stat` against the base of those commits to understand scope
 - Count files changed, lines added/removed

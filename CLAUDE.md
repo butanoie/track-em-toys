@@ -251,8 +251,8 @@ Create a changelog entry for:
 
 ### Changelog Format
 
-**Location:** `changelog/` directory at project root. Filename: `YYYY-MM-DDTHHMMSS_descriptive-name.md`
+**Location:** `changelog/` directory at project root. Filename: `YYYY-MM-DDTHHMMSSZ_descriptive-name.md`
 
-**Generate timestamp:** `date '+%Y-%m-%dT%H%M%S'`
+**Generate timestamp:** `date -u '+%Y-%m-%dT%H%M%SZ'`
 
 See `changelog/CLAUDE.md` for required sections, template structure, and best practices.

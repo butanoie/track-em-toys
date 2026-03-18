@@ -1,7 +1,7 @@
 # FansToys Slug-Based FKs and Item Validation Tests
 
 **Date:** 2026-03-16
-**Time:** 10:45:24 -0700
+**Time:** 17:45:24 UTC
 **Type:** Feature / Configuration
 **Phase:** 1.4 (Catalog Schema/Seed)
 **Version:** v0.4.0

@@ -1,7 +1,7 @@
 # Apple Sign-In Popup Migration & TLS Support
 
 **Date:** 2026-02-27
-**Time:** 10:52:56 PST
+**Time:** 18:52:56 UTC
 **Type:** Feature / Refactor
 **Phase:** 1.3 — Web SPA Authentication
 

@@ -1,7 +1,7 @@
 # Normalize Franchise TEXT to Reference Table
 
-**Date:** 2026-03-17
-**Time:** 19:31:27 -0700
+**Date:** 2026-03-18
+**Time:** 03:03:37 UTC
 **Type:** Feature
 **Phase:** 1.4 (Catalog Schema/Seed)
 **Version:** v0.4.2

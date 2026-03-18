@@ -1,7 +1,7 @@
 # Apple Server-to-Server Webhooks for Sign in with Apple Compliance
 
 **Date:** 2026-03-10
-**Time:** 14:17:14 AEDT
+**Time:** 03:17:14 UTC
 **Type:** Feature Addition
 **Phase:** Phase 5 — Account Linking, Webhooks, and Hardening
 **Version:** v0.5.0
