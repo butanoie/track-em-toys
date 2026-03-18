@@ -5,6 +5,7 @@ export const UserResponseSchema = z.object({
   email: z.string().email().nullable(),
   display_name: z.string().nullable(),
   avatar_url: z.string().url().nullable(),
+  role: z.enum(['user', 'curator', 'admin']),
 })
 
 // Web clients receive refresh_token: null (token is in httpOnly cookie)

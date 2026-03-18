@@ -154,11 +154,15 @@ Read-only REST API for the shared catalog. No auth required for reads.
 
 **Decision:** Hybrid approach (Option 3) — role column + admin routes in same web app, code-split. Can extract to a separate admin app later if security requirements tighten. Chosen over a separate admin app because this is currently a personal/small-team tool, not a public SaaS.
 
-**Migration 014b:**
+**Migration 019** (add role column) + **Migration 020** (admin audit event types):
 ```sql
+-- 019
 ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'
   CHECK (role IN ('user', 'curator', 'admin'));
-CREATE INDEX idx_users_role ON users (role);
+-- No index: low-cardinality column on small table
+
+-- 020: extends auth_events.event_type CHECK constraint
+-- Adds: role_changed, account_reactivated, user_purged
 ```
 
 **Roles:**
@@ -187,10 +191,16 @@ CREATE INDEX idx_users_role ON users (role);
 - `npx trackem set-role <email> admin` utility command
 
 **New files:**
-- `api/src/middleware/require-role.ts` — Role enforcement preHandler
+- `api/src/auth/role.ts` — Role hierarchy, `requireRole()` factory, `isRolePayload()` guard
+- `api/src/auth/role.test.ts` — Unit tests for role utilities
 - `api/src/admin/routes.ts` — Admin-only routes (user management)
+- `api/src/admin/queries.ts` — Admin-specific DB queries
+- `api/src/admin/schemas.ts` — Fastify route schemas for admin routes
 - `api/src/admin/routes.test.ts` — Integration tests (role enforcement, 403 scenarios)
-- `web/src/routes/admin/` — Admin pages (lazy-loaded)
+- `api/scripts/set-role.ts` — CLI for bootstrapping first admin user
+- `web/src/routes/admin/` — Admin pages (lazy-loaded) — **deferred to separate issue**
+
+**Architecture decision record:** See `docs/decisions/ADR_User_Roles_Admin.md` for full design details, guards, GDPR purge sequence, and audit logging strategy.
 
 ---
 
@@ -718,7 +728,7 @@ Three templates in `.github/ISSUE_TEMPLATE/`:
 3. Migration 014: full-text search indexes
 4. First catalog route: `GET /catalog/characters` (establishes all patterns)
 5. Remaining catalog routes (iterative)
-6. Migration 014b: role column on users
+6. Migration 019: role column on users + Migration 020: admin event types
 7. `requireRole()` middleware + role in JWT claims
 8. Bootstrap admin user (project owner)
 

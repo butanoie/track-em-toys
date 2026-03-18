@@ -9,6 +9,7 @@ import { isNetworkError, ProviderVerificationError, HttpError } from './errors.j
 import type { FastifyInstance, FastifyRequest, FastifyReply, FastifyBaseLogger } from 'fastify'
 import type {
   User,
+  UserRole,
   SigninRequest,
   RefreshRequest,
   LogoutRequest,
@@ -197,8 +198,8 @@ function sanitizeAvatarUrl(url: string | null | undefined): string | null {
  *
  * @param user - User record loaded from a concurrent-insert re-fetch
  */
-function assertNotDeactivated(user: Pick<User, 'deactivated_at'>): void {
-  if (user.deactivated_at) {
+function assertAccountActive(user: Pick<User, 'deactivated_at' | 'deleted_at'>): void {
+  if (user.deleted_at || user.deactivated_at) {
     throw new HttpError(403, { error: 'Account deactivated' })
   }
 }
@@ -223,7 +224,7 @@ async function handleOAuthConflict(
 
   const user = await queries.findUserById(client, oauthAccount.user_id)
   if (!user) throw new Error('User not found for oauth account')
-  assertNotDeactivated(user)
+  assertAccountActive(user)
 
   return { user, oauthAccount }
 }
@@ -269,7 +270,7 @@ async function resolveOrCreateUser(
   if (existingWithUser) {
     const { oauthAccount: existingOAuthAccount } = existingWithUser
     let existingUser = existingWithUser.user
-    assertNotDeactivated(existingUser)
+    assertAccountActive(existingUser)
 
     // Upgrade email_verified if the provider now asserts it is true but stored value is false
     if (claims.email_verified && !existingUser.email_verified) {
@@ -303,7 +304,7 @@ async function resolveOrCreateUser(
     const existingUser = await queries.findUserByEmail(client, claims.email)
 
     if (existingUser) {
-      assertNotDeactivated(existingUser)
+      assertAccountActive(existingUser)
 
       const oauthAccount = await queries.createOAuthAccount(client, {
         user_id: existingUser.id,
@@ -432,17 +433,19 @@ function extractRefreshToken(
  *
  * @param reply - Fastify reply (carries the jwtSign method)
  * @param userId - The user's UUID to embed as `sub`
+ * @param role - The user's role to embed in claims (fetched fresh from DB on refresh)
  * @param log - Logger for recording signing failures
  * @param operation - Human-readable label for the log message (e.g. "signin", "refresh")
  */
 async function signAccessToken(
   reply: FastifyReply,
   userId: string,
+  role: UserRole,
   log: FastifyBaseLogger,
   operation: string,
 ): Promise<string> {
   try {
-    return await reply.jwtSign({ sub: userId })
+    return await reply.jwtSign({ sub: userId, role })
   } catch (signErr) {
     log.error({ err: signErr }, `JWT signing failed after successful ${operation}`)
     throw new Error('Token signing failed', { cause: signErr })
@@ -529,7 +532,7 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
       })
 
       // JWT signing happens after transaction COMMIT — decoupled from DB lifecycle
-      const accessToken = await signAccessToken(reply, txResult.userId, fastify.log, 'signin')
+      const accessToken = await signAccessToken(reply, txResult.userId, txResult.user.role, fastify.log, 'signin')
 
       if (clientType === 'native') {
         // Native clients (iOS/Android): token in body, no cookie
@@ -623,13 +626,14 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
           return { type: 'reuse_detected' as const, userId: token.user_id }
         }
 
-        // NOTE: getUserStatus has no row lock. This is safe only if account deactivation
+        // NOTE: getUserStatusAndRole has no row lock. This is safe only if account deactivation
         // atomically revokes all refresh tokens. If that invariant is ever broken, a narrow
         // race exists between token lock acquisition and this deactivation check.
-        // Check user is not deactivated
-        const userStatus = await queries.getUserStatus(client, token.user_id)
-        // Both 'not_found' and 'deactivated' return the same message to prevent user enumeration
-        if (userStatus === 'not_found' || userStatus === 'deactivated') {
+        // Single query fetches both account status and current role — role may have
+        // changed since the original signin, so it's fetched fresh from DB.
+        const { status: userStatus, role } = await queries.getUserStatusAndRole(client, token.user_id)
+        // 'not_found', 'deactivated', and 'deleted' all return the same message to prevent user enumeration
+        if (userStatus !== 'active' || !role) {
           throw new HttpError(403, { error: 'Account deactivated' })
         }
 
@@ -657,6 +661,7 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
         return {
           type: 'rotated' as const,
           userId: token.user_id,
+          role,
           refreshToken: newRefreshToken,
           clientType: token.client_type,
         }
@@ -669,7 +674,7 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
       }
 
       // JWT signing happens after transaction COMMIT — decoupled from DB lifecycle
-      const accessToken = await signAccessToken(reply, txResult.userId, fastify.log, 'refresh')
+      const accessToken = await signAccessToken(reply, txResult.userId, txResult.role, fastify.log, 'refresh')
 
       if (txResult.clientType === 'native') {
         // Native clients: token in body, no cookie

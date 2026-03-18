@@ -12,6 +12,7 @@
     "lint:fix": "eslint src/ --fix",
     "test": "vitest run && eslint src/ --max-warnings 0",
     "test:watch": "vitest",
+    "set-role": "tsx scripts/set-role.ts",
     "seed": "tsx db/seed/ingest.ts",
     "seed:purge": "tsx db/seed/ingest.ts --purge --confirm",
     "typecheck:seed": "tsc -p tsconfig.seed.json --noEmit"

@@ -53,12 +53,22 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - `users.role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'curator', 'admin'))`
 - Role is included in JWT access token claims — no DB lookup needed per request
 - `requireRole(role)` Fastify preHandler middleware enforces role checks; returns 403 if insufficient
+- Role hierarchy: `user (0) < curator (1) < admin (2)` — `requireRole('curator')` grants access to curators AND admins
+- Role infrastructure lives in `src/auth/role.ts` — `ROLE_HIERARCHY`, `hasRequiredRole()`, `isRolePayload()`, `requireRole()` factory
+- `requireRole` must ALWAYS follow `fastify.authenticate` in the `preHandler` array — `authenticate` populates `request.user`
 - Catalog read routes: no role required (public)
 - Catalog write routes (photo upload, item edits): require `curator` or `admin`
 - Admin routes (user management, role assignment): require `admin`
 - When adding a new route with write operations on catalog data, always add `requireRole('curator')` preHandler
 - Admin routes live in `src/admin/routes.ts`, separate from catalog routes
-- First admin user bootstrapped via CLI command: `npx trackem set-role <email> admin`
+- Admin mutations use `withTransaction` (unlike catalog reads which use `pool.query()` directly) — this is an intentional deviation
+- Admin mutation routes must reject GDPR-purged users (`deleted_at IS NOT NULL` → 409)
+- Admin mutation routes must block self-modification (`params.id === request.user.sub` → 403)
+- All `:id` path params must have `format: 'uuid'` in the route schema to prevent 500 from invalid UUIDs
+- Admin audit events logged to `auth_events`: `role_changed`, `account_deactivated`, `account_reactivated`, `user_purged`
+- `getUserStatusAndRole()` checks both `deactivated_at` AND `deleted_at` — returns `{ status: 'active' | 'deactivated' | 'deleted' | 'not_found', role }` in a single DB query
+- `findUserForAdmin()` uses `FOR UPDATE` to serialize concurrent mutations (critical for last-admin protection)
+- First admin user bootstrapped via CLI command: `npm run set-role -- <email> admin`
 
 ### Photo Domains
 Two distinct photo types:

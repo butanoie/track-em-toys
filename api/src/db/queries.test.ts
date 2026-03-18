@@ -25,7 +25,7 @@ import {
   createUser,
   updateUserDisplayName,
   setUserEmailVerified,
-  getUserStatus,
+  getUserStatusAndRole,
   findOAuthAccountWithUser,
   findOAuthAccount,
   createOAuthAccount,
@@ -54,6 +54,7 @@ const mockUser: User = {
   email_verified: true,
   display_name: 'Test User',
   avatar_url: 'https://example.com/avatar.jpg',
+  role: 'user',
   deactivated_at: null,
   deleted_at: null,
   created_at: '2026-01-01T00:00:00Z',
@@ -101,6 +102,7 @@ describe('queries', () => {
         email: 'test@example.com',
         display_name: 'Test User',
         avatar_url: 'https://example.com/avatar.jpg',
+        role: 'user',
       })
     })
 
@@ -139,7 +141,7 @@ describe('queries', () => {
 
       expect(result).toEqual(mockUser)
       expect(client.query).toHaveBeenCalledWith(
-        'SELECT id, email, email_verified, display_name, avatar_url, deactivated_at, created_at, updated_at FROM users WHERE id = $1',
+        'SELECT id, email, email_verified, display_name, avatar_url, role, deactivated_at, deleted_at, created_at, updated_at FROM users WHERE id = $1',
         ['user-1'],
       )
     })
@@ -162,7 +164,7 @@ describe('queries', () => {
 
       expect(result).toEqual(mockUser)
       expect(client.query).toHaveBeenCalledWith(
-        'SELECT id, email, email_verified, display_name, avatar_url, deactivated_at, created_at, updated_at FROM users WHERE LOWER(email) = LOWER($1) AND email_verified = true',
+        'SELECT id, email, email_verified, display_name, avatar_url, role, deactivated_at, deleted_at, created_at, updated_at FROM users WHERE LOWER(email) = LOWER($1) AND email_verified = true',
         ['Test@Example.com'],
       )
     })
@@ -264,29 +266,37 @@ describe('queries', () => {
     })
   })
 
-  describe('getUserStatus', () => {
-    it('should return active for non-deactivated user', async () => {
+  describe('getUserStatusAndRole', () => {
+    it('should return active status and role for non-deactivated, non-deleted user', async () => {
       // safe: mockResolvedValue is typed for the query's return shape
-      vi.mocked(client.query).mockResolvedValue(mockQueryResult([{ deactivated_at: null }], 1))
+      vi.mocked(client.query).mockResolvedValue(mockQueryResult([{ role: 'user', deactivated_at: null, deleted_at: null }], 1))
 
-      const result = await getUserStatus(client, 'user-1')
-      expect(result).toBe('active')
+      const result = await getUserStatusAndRole(client, 'user-1')
+      expect(result).toEqual({ status: 'active', role: 'user' })
     })
 
-    it('should return deactivated for deactivated user', async () => {
+    it('should return deactivated status and role for deactivated user', async () => {
       // safe: mockResolvedValue is typed for the query's return shape
-      vi.mocked(client.query).mockResolvedValue(mockQueryResult([{ deactivated_at: '2026-01-15T00:00:00Z' }], 1))
+      vi.mocked(client.query).mockResolvedValue(mockQueryResult([{ role: 'curator', deactivated_at: '2026-01-15T00:00:00Z', deleted_at: null }], 1))
 
-      const result = await getUserStatus(client, 'user-1')
-      expect(result).toBe('deactivated')
+      const result = await getUserStatusAndRole(client, 'user-1')
+      expect(result).toEqual({ status: 'deactivated', role: 'curator' })
     })
 
-    it('should return not_found when user does not exist', async () => {
+    it('should return deleted status and role for GDPR-purged user', async () => {
+      // safe: mockResolvedValue is typed for the query's return shape
+      vi.mocked(client.query).mockResolvedValue(mockQueryResult([{ role: 'user', deactivated_at: null, deleted_at: '2026-01-20T00:00:00Z' }], 1))
+
+      const result = await getUserStatusAndRole(client, 'user-1')
+      expect(result).toEqual({ status: 'deleted', role: 'user' })
+    })
+
+    it('should return not_found status and null role when user does not exist', async () => {
       // safe: mockResolvedValue is typed for the query's return shape
       vi.mocked(client.query).mockResolvedValue(mockQueryResult<pg.QueryResultRow>([], 0))
 
-      const result = await getUserStatus(client, 'nonexistent')
-      expect(result).toBe('not_found')
+      const result = await getUserStatusAndRole(client, 'nonexistent')
+      expect(result).toEqual({ status: 'not_found', role: null })
     })
   })
 

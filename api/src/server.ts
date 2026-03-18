@@ -14,6 +14,9 @@ import { appleWebhookRoute } from './auth/webhooks.js'
 import { HttpError } from './auth/errors.js'
 import { docsPlugin } from './plugins/docs.js'
 import { catalogRoutes } from './catalog/routes.js'
+import { adminRoutes } from './admin/routes.js'
+import { requireRole } from './auth/role.js'
+import type { UserRole } from './types/index.js'
 
 // ─── Fastify type augmentation ─────────────────────────────────────────────
 
@@ -23,15 +26,18 @@ declare module 'fastify' {
       request: FastifyRequest,
       reply: FastifyReply,
     ) => Promise<void>
+    requireRole: (
+      minRole: UserRole,
+    ) => (request: FastifyRequest, reply: FastifyReply) => Promise<void>
   }
 }
 
-// Augment @fastify/jwt to type request.user as { sub: string } project-wide,
+// Augment @fastify/jwt to type request.user as { sub, role } project-wide,
 // avoiding unsafe casts in route handlers.
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    payload: { sub: string }
-    user: { sub: string }
+    payload: { sub: string; role: UserRole }
+    user: { sub: string; role: UserRole }
   }
 }
 
@@ -164,6 +170,12 @@ export async function buildServer(): Promise<FastifyInstance> {
     },
   )
 
+  // ─── Role decorator ──────────────────────────────────────────────────
+  // Factory function: returns a preHandler that checks the JWT role claim
+  // against the required minimum. Must be used AFTER authenticate.
+
+  fastify.decorate('requireRole', requireRole)
+
   // ─── API Documentation (non-production only) ────────────────────────────
 
   if (config.nodeEnv !== 'production') {
@@ -215,6 +227,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   // ─── Catalog routes ────────────────────────────────────────────────────
 
   await fastify.register(catalogRoutes, { prefix: '/catalog' })
+
+  // ─── Admin routes ───────────────────────────────────────────────────────
+
+  await fastify.register(adminRoutes, { prefix: '/admin' })
 
   // NOTE: RLS context (app.user_id) is set inside withTransaction() on the
   // same connection that executes business logic, not via a global hook.

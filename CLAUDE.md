@@ -182,7 +182,7 @@ These gates apply to any non-trivial feature work, whether using `/feature-dev` 
 
 ### Post-Architecture Documentation Gate
 
-**CRITICAL: After the architecture/plan is approved by the user, update documentation BEFORE writing implementation code.** Do NOT skip this step. Treat missing doc updates as a blocker.
+**CRITICAL: After the architecture/plan is approved by the user, first review and audit the design for correctness (consistency, security, data model, edge cases, scope), THEN update documentation BEFORE writing implementation code.** Do NOT skip the audit step. Do NOT skip the doc updates. Treat both as hard blockers.
 
 See [`docs/guides/DOC_GATE_REFERENCE.md`](docs/guides/DOC_GATE_REFERENCE.md) for the full checklist and common mistakes.
 

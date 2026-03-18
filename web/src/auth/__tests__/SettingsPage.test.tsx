@@ -53,6 +53,7 @@ const mockUser = {
   email: 'test@example.com',
   display_name: 'Test User',
   avatar_url: null,
+  role: 'user' as const,
 }
 
 function makeAuthContext(overrides: Partial<AuthContextValue> = {}): AuthContextValue {

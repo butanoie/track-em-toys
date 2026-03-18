@@ -72,7 +72,7 @@ vi.mock('../db/queries.js', () => ({
   userHasProvider: vi.fn(),
   findOAuthAccountsByUserId: vi.fn(),
   findUserWithAccounts: vi.fn(),
-  getUserStatus: vi.fn(),
+  getUserStatusAndRole: vi.fn(),
   findRefreshTokenByHash: vi.fn(),
   findRefreshTokenForRotation: vi.fn(),
   // createRefreshToken is used by tokens.ts (createAndStoreRefreshToken / rotateRefreshToken)
@@ -87,6 +87,7 @@ vi.mock('../db/queries.js', () => ({
     email: u.email,
     display_name: u.display_name,
     avatar_url: u.avatar_url,
+    role: u.role,
   })),
 }))
 
@@ -116,6 +117,7 @@ const mockUser: User = {
   email_verified: true,
   display_name: 'Test User',
   avatar_url: null,
+  role: 'user',
   deactivated_at: null,
   deleted_at: null,
   created_at: '2026-01-01T00:00:00Z',
@@ -213,6 +215,7 @@ describe('auth routes', () => {
       email: u.email,
       display_name: u.display_name,
       avatar_url: u.avatar_url,
+      role: u.role,
     }))
     vi.mocked(queries.logAuthEvent).mockResolvedValue(undefined)
     vi.mocked(queries.revokeRefreshToken).mockResolvedValue(undefined)
@@ -333,6 +336,7 @@ describe('auth routes', () => {
           email: u.email,
           display_name: u.display_name,
           avatar_url: u.avatar_url,
+          role: u.role,
         }))
 
         const response = await server.inject({
@@ -1210,7 +1214,7 @@ describe('auth routes', () => {
         token_hash: tokenHash,
         client_type: 'web',
       })
-      vi.mocked(queries.getUserStatus).mockResolvedValue('active')
+      vi.mocked(queries.getUserStatusAndRole).mockResolvedValue({ status: 'active', role: 'user' })
       vi.mocked(queries.revokeRefreshToken).mockResolvedValue(undefined)
 
       const response = await server.inject({
@@ -1277,7 +1281,7 @@ describe('auth routes', () => {
         token_hash: crypto.createHash('sha256').update(rawToken).digest('hex'),
         client_type: 'native', // stored in DB — determines response delivery
       })
-      vi.mocked(queries.getUserStatus).mockResolvedValue('active')
+      vi.mocked(queries.getUserStatusAndRole).mockResolvedValue({ status: 'active', role: 'user' })
       // rotateRefreshToken calls revokeRefreshToken + createRefreshToken via queries
       vi.mocked(queries.revokeRefreshToken).mockResolvedValue(undefined)
       vi.mocked(queries.findRefreshTokenByHash).mockResolvedValue(mockRefreshToken)
@@ -1306,7 +1310,7 @@ describe('auth routes', () => {
         token_hash: crypto.createHash('sha256').update(rawToken).digest('hex'),
         client_type: 'web', // stored as web — must NOT be overridden by header
       })
-      vi.mocked(queries.getUserStatus).mockResolvedValue('active')
+      vi.mocked(queries.getUserStatusAndRole).mockResolvedValue({ status: 'active', role: 'user' })
       vi.mocked(queries.revokeRefreshToken).mockResolvedValue(undefined)
 
       const response = await server.inject({
@@ -1334,7 +1338,7 @@ describe('auth routes', () => {
         token_hash: crypto.createHash('sha256').update(rawToken).digest('hex'),
         client_type: 'web',
       })
-      vi.mocked(queries.getUserStatus).mockResolvedValue('active')
+      vi.mocked(queries.getUserStatusAndRole).mockResolvedValue({ status: 'active', role: 'user' })
       vi.mocked(queries.revokeRefreshToken).mockResolvedValue(undefined)
 
       const response = await server.inject({
@@ -1455,7 +1459,7 @@ describe('auth routes', () => {
         token_hash: crypto.createHash('sha256').update(rawToken).digest('hex'),
         client_type: 'web',
       })
-      vi.mocked(queries.getUserStatus).mockResolvedValue('deactivated')
+      vi.mocked(queries.getUserStatusAndRole).mockResolvedValue({ status: 'deactivated', role: 'user' })
 
       const response = await server.inject({
         method: 'POST',
@@ -1483,8 +1487,8 @@ describe('auth routes', () => {
       expect(response.statusCode).toBe(401)
     })
 
-    // [T1] getUserStatus returning 'not_found' → 403 (same as 'deactivated' → 403)
-    it('should return 403 when getUserStatus returns not_found', async () => {
+    // [T1] getUserStatusAndRole returning 'not_found' → 403 (same as 'deactivated' → 403)
+    it('should return 403 when getUserStatusAndRole returns not_found', async () => {
       const rawToken = crypto.randomBytes(32).toString('hex')
       mockTx()
       vi.mocked(queries.findRefreshTokenForRotation).mockResolvedValue({
@@ -1492,7 +1496,7 @@ describe('auth routes', () => {
         token_hash: crypto.createHash('sha256').update(rawToken).digest('hex'),
         client_type: 'web',
       })
-      vi.mocked(queries.getUserStatus).mockResolvedValue('not_found')
+      vi.mocked(queries.getUserStatusAndRole).mockResolvedValue({ status: 'not_found', role: null })
 
       const response = await server.inject({
         method: 'POST',
@@ -1518,7 +1522,7 @@ describe('auth routes', () => {
         client_type: 'web',
         revoked_at: null,
       })
-      vi.mocked(queries.getUserStatus).mockResolvedValue('active')
+      vi.mocked(queries.getUserStatusAndRole).mockResolvedValue({ status: 'active', role: 'user' })
       vi.mocked(queries.revokeRefreshToken).mockResolvedValue(undefined)
       vi.mocked(queries.createRefreshToken).mockResolvedValue(mockRefreshToken)
       vi.mocked(queries.logAuthEvent).mockRejectedValue(new Error('audit db down'))
@@ -1631,7 +1635,7 @@ describe('auth routes', () => {
           return null
         },
       )
-      vi.mocked(queries.getUserStatus).mockResolvedValue('active')
+      vi.mocked(queries.getUserStatusAndRole).mockResolvedValue({ status: 'active', role: 'user' })
       vi.mocked(queries.revokeRefreshToken).mockResolvedValue(undefined)
 
       const response = await server.inject({
@@ -1668,7 +1672,7 @@ describe('auth routes', () => {
   describe('POST /auth/logout', () => {
     function getValidAccessToken(): string {
       // Sign a token the same way the server does (jwt.sign is synchronous)
-      return server.jwt.sign({ sub: mockUser.id })
+      return server.jwt.sign({ sub: mockUser.id, role: 'user' })
     }
 
     it('should revoke token via signed cookie and return 204', async () => {
@@ -1943,7 +1947,7 @@ describe('auth routes', () => {
 
   describe('GET /auth/me', () => {
     function getValidAccessToken(): string {
-      return server.jwt.sign({ sub: mockUser.id })
+      return server.jwt.sign({ sub: mockUser.id, role: 'user' })
     }
 
     it('should return user profile with linked accounts', async () => {
@@ -2031,7 +2035,7 @@ describe('auth routes', () => {
     })
 
     it('should return 401 when JWT sub is not a valid UUID', async () => {
-      const badSubToken = server.jwt.sign({ sub: 'not-a-uuid' })
+      const badSubToken = server.jwt.sign({ sub: 'not-a-uuid', role: 'user' })
 
       const response = await server.inject({
         method: 'GET',
@@ -2059,7 +2063,7 @@ describe('auth routes', () => {
 
     function getValidAccessToken(): string {
       // server.jwt.sign is synchronous
-      return server.jwt.sign({ sub: mockUser.id })
+      return server.jwt.sign({ sub: mockUser.id, role: 'user' })
     }
 
     it('should link a new provider and return updated user with linked accounts', async () => {
@@ -2333,7 +2337,7 @@ describe('auth routes', () => {
   describe('branch coverage: non-HttpError re-throws and sub validation', () => {
     // [TC-B1] logout — non-HttpError thrown inside the transaction propagates as 500
     it('should propagate non-HttpError from logout transaction as 500', async () => {
-      const accessToken = server.jwt.sign({ sub: mockUser.id })
+      const accessToken = server.jwt.sign({ sub: mockUser.id, role: 'user' })
       const rawToken = crypto.randomBytes(32).toString('hex')
       mockTx()
       // Throw a plain Error (not HttpError) inside the transaction
@@ -2355,7 +2359,7 @@ describe('auth routes', () => {
 
     // [TC-B2] link-account — non-HttpError thrown inside the transaction propagates as 500
     it('should propagate non-HttpError from link-account transaction as 500', async () => {
-      const accessToken = server.jwt.sign({ sub: mockUser.id })
+      const accessToken = server.jwt.sign({ sub: mockUser.id, role: 'user' })
       vi.mocked(verifyAppleToken).mockResolvedValue(appleClaims)
       mockTx()
       vi.mocked(queries.findOAuthAccount).mockRejectedValue(new Error('unexpected db failure'))
@@ -2381,7 +2385,7 @@ describe('auth routes', () => {
     // [TC-B3a] logout — sub claim that is not a valid UUID triggers 401
     it('should return 401 for logout when JWT sub is not a valid UUID', async () => {
       // Sign a token with a non-UUID sub
-      const badSubToken = server.jwt.sign({ sub: 'not-a-uuid' })
+      const badSubToken = server.jwt.sign({ sub: 'not-a-uuid', role: 'user' })
       const rawToken = crypto.randomBytes(32).toString('hex')
 
       const response = await server.inject({
@@ -2402,7 +2406,7 @@ describe('auth routes', () => {
     // [TC-B3] link-account — sub claim that is not a valid UUID triggers 401
     it('should return 401 for link-account when JWT sub is not a valid UUID', async () => {
       // Sign a token with a non-UUID sub
-      const badSubToken = server.jwt.sign({ sub: 'not-a-uuid' })
+      const badSubToken = server.jwt.sign({ sub: 'not-a-uuid', role: 'user' })
 
       const response = await server.inject({
         method: 'POST',
@@ -2426,7 +2430,7 @@ describe('auth routes', () => {
     // [TC-B4] link-account audit log failure is non-fatal — business transaction still returns 200
     // link_account is a security event (identity linking), so the catch block uses log.error
     it('should still return 200 for link-account when logAuthEvent throws (non-fatal audit log)', async () => {
-      const accessToken = server.jwt.sign({ sub: mockUser.id })
+      const accessToken = server.jwt.sign({ sub: mockUser.id, role: 'user' })
       const appleOAuthAccount: OAuthAccount = {
         ...mockOAuthAccount,
         id: 'oauth-apple-audit-test',
@@ -2850,7 +2854,7 @@ describe('auth routes', () => {
 
     // [TC2] /auth/logout must reject non-JSON content-type with 415
     it('should return 415 for /auth/logout with wrong content-type', async () => {
-      const accessToken = server.jwt.sign({ sub: mockUser.id })
+      const accessToken = server.jwt.sign({ sub: mockUser.id, role: 'user' })
 
       const response = await server.inject({
         method: 'POST',
@@ -2883,7 +2887,7 @@ describe('auth routes', () => {
 
     // [F13] A zero-body POST to /auth/logout with no Content-Type header must NOT return 415.
     it('should not return 415 for /auth/logout with no Content-Type header and no body', async () => {
-      const accessToken = server.jwt.sign({ sub: mockUser.id })
+      const accessToken = server.jwt.sign({ sub: mockUser.id, role: 'user' })
 
       // No token provided — expect 401 (missing token), NOT 415 (wrong content-type).
       // Logout requires a valid Bearer token to pass the authenticate preHandler, so
@@ -3130,7 +3134,7 @@ describe('auth routes', () => {
     })
 
     it('should return 503 for /auth/link-account when verifyProviderToken throws a network error', async () => {
-      const accessToken = server.jwt.sign({ sub: mockUser.id })
+      const accessToken = server.jwt.sign({ sub: mockUser.id, role: 'user' })
       vi.mocked(verifyAppleToken).mockRejectedValue(makeNetworkError('ENOTFOUND'))
 
       const response = await server.inject({
@@ -3155,7 +3159,7 @@ describe('auth routes', () => {
 
     // [M-2] Google network error on /auth/link-account → 503
     it('should return 503 for /auth/link-account when verifyGoogleToken throws a network error (Google provider)', async () => {
-      const accessToken = server.jwt.sign({ sub: mockUser.id })
+      const accessToken = server.jwt.sign({ sub: mockUser.id, role: 'user' })
       vi.mocked(verifyGoogleToken).mockRejectedValue(makeNetworkError('ECONNRESET'))
 
       const response = await server.inject({
