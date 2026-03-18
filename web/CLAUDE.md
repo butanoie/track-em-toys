@@ -84,6 +84,20 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `throwApiError(response)` in `api-client.ts` — shared error extraction for void-response endpoints (DELETE 204)
 - `UserRole` type derived from `AdminUserRowSchema.shape.role` — single source of truth for role enum
 
+### Shadcn/ui CLI
+
+- `components.json` aliases must use `src/` paths (e.g., `"ui": "src/components/ui"`), NOT `@/` paths — the CLI resolves them as literal directories, not TypeScript path aliases
+- Install components via `npx shadcn@latest add <name>` — the CLI handles Radix dependencies automatically
+- CLI-generated components may differ stylistically from hand-written ones (forwardRef patterns, data-slot) — this is fine, both work
+
+### Playwright E2E
+
+- E2E tests mock API responses via `page.route()` — they don't hit the real API server
+- When mocking API paths that collide with SPA routes (e.g., `/admin/users` is both a page and an API path), filter by `resourceType`: `if (route.request().resourceType() === 'document') return route.continue()`
+- Prefer `getByRole('cell', { name: /.../ })` over `getByText()` for table data — text appears in both cell content and row accessible names, causing ambiguity
+- Admin E2E auth: use `page.addInitScript()` to set `sessionStorage` with user including `role` field before page JS runs
+- All E2E auth fixtures in `e2e/fixtures/auth.ts` — `validUser` must include `role` field to match `UserResponseSchema`
+
 ### Photo Domains (Web UI)
 
 - Catalog photo gallery on item detail page — shared, visible to all users
