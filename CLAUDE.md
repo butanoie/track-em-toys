@@ -9,8 +9,13 @@ These rules are ABSOLUTE:
 - NEVER publish passwords, API keys, tokens to git/npm/docker
 - Before ANY commit: verify no secrets included
 
-### NEVER Commit .env Files
+### NEVER Read or Modify .env Files
 
+- NEVER read, grep, search, or modify `.env` files — they contain secrets
+- NEVER use `Grep`, `Bash`, `sed`, or any other tool to access `.env` file contents
+- Only `.env.example` files may be read or modified directly
+- When `.env` values are needed: **ask the user**
+- When `.env` changes are needed: **provide instructions for the user** to make the changes
 - NEVER commit `.env` to git
 - ALWAYS verify `.env` is in `.gitignore`
 
