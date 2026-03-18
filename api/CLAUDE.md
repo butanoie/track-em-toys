@@ -98,6 +98,9 @@ Two distinct photo types:
 - Cursor pagination encodes `{ v: 1, name, id }` as base64url — always include version field
 - Cursor UUID comparison uses `$N::uuid`, not text cast
 - Error responses use `reply.code(N).send({ error: '...' })` — no HttpError (no transactions)
+- All declared schema properties MUST appear in `required` arrays — Fastify's serializer silently strips unrequired null fields from responses
+- Count queries must have identical JOINs as data queries (minus cursor/LIMIT) to avoid inflated total_count
+- Migrations that depend on columns added by other migrations must be ordered accordingly — do not create indexes on columns that don't exist yet
 - See `docs/decisions/ADR_Catalog_API_Architecture.md` for full architecture
 
 ## Before Writing New Code

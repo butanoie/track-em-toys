@@ -203,13 +203,15 @@ Three separate migrations following established single-responsibility convention
 - Add composite B-tree indexes for cursor pagination: `(franchise_id, name, id)` on characters and items
 - Use `DROP CONSTRAINT IF EXISTS` / `DROP INDEX IF EXISTS` for safety
 
-### Migration 017: Items Franchise ID
+### Migration 017: Items Franchise ID + Slug Scoping
 
 - Add `franchise_id UUID` to items (nullable)
 - Populate from `toy_lines.franchise_id` via UPDATE+JOIN
 - SET NOT NULL + FK constraint (ON DELETE RESTRICT)
 - Add performance index `idx_items_franchise`
-- Add BEFORE INSERT trigger: auto-populate `franchise_id` from `toy_line_id` when NULL (prevents ingest breakage and denormalization drift)
+- Create `UNIQUE (slug, franchise_id)` index on items (deferred from 016 because the column must exist first)
+- Create cursor pagination indexes `(name, id)` and `(franchise_id, name, id)` on items
+- Add BEFORE INSERT OR UPDATE trigger: auto-populate `franchise_id` from `toy_line_id` when NULL on INSERT or when `toy_line_id` changes on UPDATE (prevents ingest breakage and denormalization drift)
 
 ### Migration 018: FTS Generated Columns + GIN Indexes
 
