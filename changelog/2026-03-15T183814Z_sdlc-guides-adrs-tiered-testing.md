@@ -1,7 +1,7 @@
 # SDLC Guides, ADRs, Tiered Testing, and Secrets Hook
 
 **Date:** 2026-03-15
-**Time:** 11:38:14 PDT
+**Time:** 18:38:14 UTC
 **Type:** Documentation Standards
 **Phase:** Phase 5 — Account Linking, Webhooks, and Hardening
 **Version:** v0.5.1

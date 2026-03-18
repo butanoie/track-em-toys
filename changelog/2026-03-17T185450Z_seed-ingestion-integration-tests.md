@@ -1,7 +1,7 @@
 # Seed Ingestion Integration Tests
 
 **Date:** 2026-03-17
-**Time:** 11:54:50 -0700
+**Time:** 18:54:50 UTC
 **Type:** Feature
 **Phase:** 1.4 (Catalog Schema/Seed)
 **Version:** v0.4.1

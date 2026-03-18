@@ -1,7 +1,7 @@
 # iOS Xcode Project Setup & Native Auth Fixes
 
 **Date:** 2026-03-02
-**Time:** 11:52:00 AEDT
+**Time:** 00:52:00 UTC
 **Type:** Feature Addition
 **Phase:** Phase 4 — iOS Native Client
 **Version:** v0.4.0
