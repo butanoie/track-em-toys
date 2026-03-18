@@ -14,10 +14,23 @@ export class ApiError extends Error {
   }
 }
 
-// Shared refresh mutex — prevents multiple simultaneous refresh calls
+// Shared refresh mutex — prevents multiple simultaneous refresh calls.
+// Used by both attemptRefresh (React Strict Mode double-mount) and the
+// apiFetch 401 interceptor. Without this, concurrent calls send duplicate
+// POST /auth/refresh requests that trigger server-side token reuse detection,
+// which revokes ALL refresh tokens for the user.
 let refreshPromise: Promise<boolean> | null = null;
 
 export async function attemptRefresh(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = doRefresh().finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+}
+
+async function doRefresh(): Promise<boolean> {
   try {
     const response = await fetch(`${API_BASE}/auth/refresh`, {
       method: 'POST',
@@ -79,13 +92,7 @@ export async function apiFetch(url: string, init?: RequestInit): Promise<Respons
 
   // Handle 401 with refresh — but not for /auth/refresh itself (avoid infinite loop)
   if (response.status === 401 && !fullUrl.includes('/auth/refresh')) {
-    if (!refreshPromise) {
-      refreshPromise = attemptRefresh().finally(() => {
-        refreshPromise = null;
-      });
-    }
-
-    const refreshed = await refreshPromise;
+    const refreshed = await attemptRefresh();
     if (refreshed) {
       return baseFetch(fullUrl, init);
     }

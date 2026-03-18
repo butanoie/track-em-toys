@@ -60,6 +60,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 ### Authentication
 
 - OAuth-only: Apple Sign-In + Google Sign-In (no email/password auth — no password reset flows needed)
+- Dev environment: `VITE_API_URL` must use the same hostname as the web app (e.g., both on `dev.track-em-toys.com`) — the refresh token cookie uses `SameSite=Strict`, which requires same-site origins. Safari ITP blocks all cross-site cookies regardless of `SameSite` setting.
 - Account deletion: "Delete Account" button in settings with explicit confirmation dialog ("Type DELETE to confirm")
 - User role is included in the session data (alongside user profile) from `/auth/me` response
 - Shared test fixtures (mock user, fake JWT, response helpers) live in `src/auth/__tests__/auth-test-helpers.tsx` — update there, not per-test file
@@ -209,11 +210,16 @@ grep -rn "POST.*auth/refresh\|/auth/refresh" src/ --include="*.ts" --include="*.
 
 Must return exactly one non-test result (in `api-client.ts`). Token refresh must live in a
 single shared function with a refresh mutex.
+`attemptRefresh()` must deduplicate concurrent calls via a shared in-flight promise —
+React Strict Mode double-mount sends two simultaneous refresh requests that trigger
+server-side token reuse detection and revoke all user sessions.
 
 ### 11. Redirect params must be relative paths
 
-`location.href` is absolute and fails `startsWith('/')` validators. Always use
-`location.pathname + location.search`. Validators must reject `//` prefixes with `/^\/[^/]/`.
+TanStack Router's `location.href` is already relative (no origin) — safe to use with
+`startsWith('/')` validators. Do NOT use `window.location.href` (absolute). Do NOT use
+`location.pathname + location.search` — `location.search` is a parsed object in TanStack
+Router, not a string. Validators must reject `//` prefixes with `/^\/[^/]/`.
 
 ### 12. Security tokens cleared after success only
 

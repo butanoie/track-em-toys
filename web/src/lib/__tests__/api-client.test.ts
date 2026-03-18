@@ -73,6 +73,29 @@ describe('attemptRefresh', () => {
     const callArgs = mockFetch.mock.calls[0] as [string, RequestInit | undefined];
     expect(callArgs[1]).toMatchObject({ credentials: 'include' });
   });
+
+  it('deduplicates concurrent calls (mutex prevents token reuse detection)', async () => {
+    mockFetch.mockResolvedValueOnce(makeResponse({ access_token: 'tok', refresh_token: null }));
+
+    // Simulate React Strict Mode double-mount: two concurrent calls
+    const [r1, r2] = await Promise.all([attemptRefresh(), attemptRefresh()]);
+
+    expect(r1).toBe(true);
+    expect(r2).toBe(true);
+    // Only ONE fetch call should have been made — the second call reuses the in-flight promise
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows a new request after the previous one completes', async () => {
+    mockFetch.mockResolvedValueOnce(makeResponse({ access_token: 'tok1', refresh_token: null }));
+    await attemptRefresh();
+
+    mockFetch.mockResolvedValueOnce(makeResponse({ access_token: 'tok2', refresh_token: null }));
+    await attemptRefresh();
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(authStore.getToken()).toBe('tok2');
+  });
 });
 
 describe('apiFetch', () => {
