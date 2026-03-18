@@ -14,10 +14,23 @@ export class ApiError extends Error {
   }
 }
 
-// Shared refresh mutex — prevents multiple simultaneous refresh calls
+// Shared refresh mutex — prevents multiple simultaneous refresh calls.
+// Used by both attemptRefresh (React Strict Mode double-mount) and the
+// apiFetch 401 interceptor. Without this, concurrent calls send duplicate
+// POST /auth/refresh requests that trigger server-side token reuse detection,
+// which revokes ALL refresh tokens for the user.
 let refreshPromise: Promise<boolean> | null = null;
 
 export async function attemptRefresh(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = doRefresh().finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+}
+
+async function doRefresh(): Promise<boolean> {
   try {
     const response = await fetch(`${API_BASE}/auth/refresh`, {
       method: 'POST',
@@ -79,13 +92,7 @@ export async function apiFetch(url: string, init?: RequestInit): Promise<Respons
 
   // Handle 401 with refresh — but not for /auth/refresh itself (avoid infinite loop)
   if (response.status === 401 && !fullUrl.includes('/auth/refresh')) {
-    if (!refreshPromise) {
-      refreshPromise = attemptRefresh().finally(() => {
-        refreshPromise = null;
-      });
-    }
-
-    const refreshed = await refreshPromise;
+    const refreshed = await attemptRefresh();
     if (refreshed) {
       return baseFetch(fullUrl, init);
     }
@@ -102,21 +109,27 @@ export async function apiFetch(url: string, init?: RequestInit): Promise<Respons
   return response;
 }
 
+// Extract and throw a structured ApiError from a non-2xx response.
+// Shared by apiFetchJson and callers handling void responses (e.g., 204 DELETE).
+export async function throwApiError(response: Response): Promise<never> {
+  let body: { error: string };
+  try {
+    const raw: unknown = await response.json();
+    const parsed = ApiErrorSchema.safeParse(raw);
+    body = parsed.success ? parsed.data : { error: `HTTP ${response.status}` };
+  } catch {
+    body = { error: `HTTP ${response.status}` };
+  }
+  throw new ApiError(response.status, body);
+}
+
 // Convenience method that throws ApiError on non-2xx responses.
 // Requires a Zod schema to validate the response body before returning.
 export async function apiFetchJson<T>(url: string, schema: z.ZodType<T>, init?: RequestInit): Promise<T> {
   const response = await apiFetch(url, init);
 
   if (!response.ok) {
-    let body: { error: string };
-    try {
-      const raw: unknown = await response.json();
-      const parsed = ApiErrorSchema.safeParse(raw);
-      body = parsed.success ? parsed.data : { error: `HTTP ${response.status}` };
-    } catch {
-      body = { error: `HTTP ${response.status}` };
-    }
-    throw new ApiError(response.status, body);
+    await throwApiError(response);
   }
 
   const json: unknown = await response.json();

@@ -34,8 +34,30 @@ export const ApiErrorSchema = z.object({
   error: z.string(),
 });
 
+// Admin API schemas
+export const AdminUserRowSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().nullable(),
+  display_name: z.string().nullable(),
+  avatar_url: z.string().nullable(),
+  role: z.enum(['user', 'curator', 'admin']),
+  deactivated_at: z.string().nullable(),
+  deleted_at: z.string().nullable(),
+  created_at: z.string(),
+});
+
+export const AdminUsersListSchema = z.object({
+  data: z.array(AdminUserRowSchema),
+  total_count: z.number().int(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+});
+
 export type UserResponse = z.infer<typeof UserResponseSchema>;
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 export type TokenResponse = z.infer<typeof TokenResponseSchema>;
 export type LinkAccountResponse = z.infer<typeof LinkAccountResponseSchema>;
 export type ApiErrorBody = z.infer<typeof ApiErrorSchema>;
+export type AdminUserRow = z.infer<typeof AdminUserRowSchema>;
+export type AdminUsersList = z.infer<typeof AdminUsersListSchema>;
+export type UserRole = AdminUserRow['role'];

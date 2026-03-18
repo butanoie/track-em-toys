@@ -6,6 +6,7 @@ export const validUser = {
   email: 'test@example.com',
   display_name: 'Test User',
   avatar_url: null,
+  role: 'user',
 };
 
 /**

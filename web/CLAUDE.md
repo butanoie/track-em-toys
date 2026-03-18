@@ -60,6 +60,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 ### Authentication
 
 - OAuth-only: Apple Sign-In + Google Sign-In (no email/password auth — no password reset flows needed)
+- Dev environment: `VITE_API_URL` must use the same hostname as the web app (e.g., both on `dev.track-em-toys.com`) — the refresh token cookie uses `SameSite=Strict`, which requires same-site origins. Safari ITP blocks all cross-site cookies regardless of `SameSite` setting.
 - Account deletion: "Delete Account" button in settings with explicit confirmation dialog ("Type DELETE to confirm")
 - User role is included in the session data (alongside user profile) from `/auth/me` response
 - Shared test fixtures (mock user, fake JWT, response helpers) live in `src/auth/__tests__/auth-test-helpers.tsx` — update there, not per-test file
@@ -67,10 +68,45 @@ cd web && npm run format:check # Prettier check (CI mode)
 ### User Roles & Admin UI
 
 - Roles: `user`, `curator`, `admin` — included in JWT claims and `/auth/me` response
-- Admin routes under `/admin/*` are **code-split** via lazy `React.lazy()` imports — admin bundles never ship to regular users
-- Role checks in TanStack Router `beforeLoad` guards: redirect to `/` if insufficient role
-- Role-aware navigation: curators see "Manage Catalog" link; admins see "Admin" section
-- Admin pages: user list, role assignment, catalog edit review queue
+- Admin routes under `/admin/*` are **automatically code-split** by TanStack Router's `autoCodeSplitting: true` in `vite.config.ts` — admin bundles never ship to regular users. Do NOT use manual `React.lazy()`.
+- Admin layout uses a **component-level role guard** (not `beforeLoad`) — consistent with `_authenticated.tsx`. On cold load, `authStore.getToken()` is null until silent refresh completes; a `beforeLoad` guard would incorrectly redirect valid admins.
+- Role-aware navigation: admins see "Admin" link in the shared `AppHeader`
+- Admin pages live in `src/admin/` with sub-directories per entity (`users/`, future `catalog/`)
+- Admin API hooks: `src/admin/hooks/` for shared hooks, entity-specific code in `src/admin/users/`
+- Admin test fixtures: `src/admin/__tests__/admin-test-helpers.tsx` — separate from auth test helpers (`.tsx` because it contains JSX wrapper components)
+- Shared `AppHeader` component (`src/components/AppHeader.tsx`) replaces duplicate header code in Dashboard and Settings
+- Admin data table uses `placeholderData: keepPreviousData` for smooth pagination (no skeleton flash between pages)
+- URL search params (not React state) for admin filter/pagination state — bookmarkable, survives refresh
+- `ConfirmDialog` pattern for destructive actions: generic component in `src/admin/components/`, reusable for deactivation, purge, and future catalog deletes
+- GDPR-purged users (tombstones): show "Deleted user" for email, "—" for name, disable all action buttons
+- Self-action guard: disable role/deactivate/purge controls when `row.id === currentUser.id`
+- Role changes also go through `ConfirmDialog` (simple "Are you sure?" — no type-to-confirm since reversible)
+- `LoadingSpinner` shared component at `src/components/LoadingSpinner.tsx` — accepts `className` for contextual sizing
+- `throwApiError(response)` in `api-client.ts` — shared error extraction for void-response endpoints (DELETE 204)
+- `UserRole` type derived from `AdminUserRowSchema.shape.role` — single source of truth for role enum
+
+### Tailwind CSS 4 Theming
+
+- Theme colors use `oklch()` values in CSS custom properties (`src/index.css`)
+- `@theme inline` block maps `--color-*` tokens to `var(--*)` — this is what makes `bg-popover`, `text-foreground`, etc. work as Tailwind utility classes
+- When adding a new semantic color: define it in `:root` and `.dark` as `oklch(...)`, then add `--color-name: var(--name)` to the `@theme inline` block
+- NEVER use raw HSL channel values (e.g., `0 0% 100%`) — Tailwind v4 passes variables through as-is, so they must be complete CSS colors
+- Dark mode uses `@custom-variant dark (&:is(.dark *))` — class-based, not `prefers-color-scheme`
+
+### Shadcn/ui CLI
+
+- `components.json` aliases must use `src/` paths (e.g., `"ui": "src/components/ui"`), NOT `@/` paths — the CLI resolves them as literal directories, not TypeScript path aliases
+- Install components via `npx shadcn@latest add <name>` — the CLI handles Radix dependencies automatically
+- CLI-generated components may differ stylistically from hand-written ones (forwardRef patterns, data-slot) — this is fine, both work
+- CLI may generate components with v3-style HSL variables — convert any raw HSL channel values to `oklch()` after installation
+
+### Playwright E2E
+
+- E2E tests mock API responses via `page.route()` — they don't hit the real API server
+- When mocking API paths that collide with SPA routes (e.g., `/admin/users` is both a page and an API path), filter by `resourceType`: `if (route.request().resourceType() === 'document') return route.continue()`
+- Prefer `getByRole('cell', { name: /.../ })` over `getByText()` for table data — text appears in both cell content and row accessible names, causing ambiguity
+- Admin E2E auth: use `page.addInitScript()` to set `sessionStorage` with user including `role` field before page JS runs
+- All E2E auth fixtures in `e2e/fixtures/auth.ts` — `validUser` must include `role` field to match `UserResponseSchema`
 
 ### Photo Domains (Web UI)
 
@@ -84,7 +120,7 @@ Read existing files for patterns before writing anything new:
 
 - New component → read an existing component in the same feature area
 - New API call → read existing TanStack Query hooks in the nearest `hooks/` directory
-- New form → read an existing Zod-validated form component (React Hook Form is not yet installed)
+- New form → read an existing Zod-validated form component (`react-hook-form` + `@hookform/resolvers` are installed)
 - New route → read the router configuration file first
 
 Match existing patterns exactly. Do not introduce new conventions.
@@ -183,11 +219,16 @@ grep -rn "POST.*auth/refresh\|/auth/refresh" src/ --include="*.ts" --include="*.
 
 Must return exactly one non-test result (in `api-client.ts`). Token refresh must live in a
 single shared function with a refresh mutex.
+`attemptRefresh()` must deduplicate concurrent calls via a shared in-flight promise —
+React Strict Mode double-mount sends two simultaneous refresh requests that trigger
+server-side token reuse detection and revoke all user sessions.
 
 ### 11. Redirect params must be relative paths
 
-`location.href` is absolute and fails `startsWith('/')` validators. Always use
-`location.pathname + location.search`. Validators must reject `//` prefixes with `/^\/[^/]/`.
+TanStack Router's `location.href` is already relative (no origin) — safe to use with
+`startsWith('/')` validators. Do NOT use `window.location.href` (absolute). Do NOT use
+`location.pathname + location.search` — `location.search` is a parsed object in TanStack
+Router, not a string. Validators must reject `//` prefixes with `/^\/[^/]/`.
 
 ### 12. Security tokens cleared after success only
 
