@@ -5,6 +5,7 @@ import { useMe } from './hooks/useMe';
 import { useLinkAccount } from './hooks/useLinkAccount';
 import { useAuth } from './useAuth';
 import { ApiError } from '@/lib/api-client';
+import { AppHeader } from '@/components/AppHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +18,7 @@ function providerLabel(provider: string): string {
 }
 
 export function SettingsPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { data: me, isPending, isError } = useMe();
   const linkAccount = useLinkAccount();
   const [error, setError] = useState<string | null>(null);
@@ -69,25 +70,7 @@ export function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-foreground">Settings</h1>
-          <div className="flex items-center gap-4">
-            {user && (
-              <span className="text-sm text-muted-foreground">{user.display_name ?? user.email ?? 'Collector'}</span>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                void logout();
-              }}
-            >
-              Sign out
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Settings" />
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {error && (

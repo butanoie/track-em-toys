@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -6,6 +7,15 @@ import { SettingsPage } from '../SettingsPage';
 import { AuthContext, type AuthContextValue } from '../AuthProvider';
 import { ApiError } from '@/lib/api-client';
 import type { AppleSignInResult } from '../apple-auth';
+
+// Mock TanStack Router — AppHeader uses Link
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to, ...props }: { children: React.ReactNode; to: string; className?: string }) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 // Mock @react-oauth/google
 vi.mock('@react-oauth/google', () => ({
@@ -96,7 +106,7 @@ describe('SettingsPage', () => {
     renderSettingsPage(makeAuthContext());
     expect(screen.getByText('Profile')).toBeInTheDocument();
     expect(screen.getByText('Your account information')).toBeInTheDocument();
-    // User info appears in both header and profile card
+    // User info appears in AppHeader and profile card
     expect(screen.getAllByText('Test User')).toHaveLength(2);
   });
 
