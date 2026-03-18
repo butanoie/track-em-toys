@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest'
 import type { FastifyInstance } from 'fastify'
 import { mockQuery, setupCatalogTest } from '../shared/test-setup.js'
-import { encodeCursor } from '../shared/pagination.js'
 
 const { buildServer } = await setupCatalogTest()
 

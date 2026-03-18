@@ -25,7 +25,7 @@ describe('toy-line routes (franchise-scoped)', () => {
         method: 'GET', url: '/catalog/franchises/transformers/toy-lines',
       })
       expect(res.statusCode).toBe(200)
-      const body = res.json<{ data: Array<{ franchise: { slug: string } }> }>()
+      const body = res.json<{ data: Array<{ franchise: { slug: string }; manufacturer: { slug: string; name: string } }> }>()
       expect(body.data).toHaveLength(1)
       expect(body.data[0]?.franchise.slug).toBe('transformers')
       expect(body.data[0]?.manufacturer).toEqual({ slug: 'takara-tomy', name: 'Takara Tomy' })
