@@ -83,6 +83,9 @@ export async function listItems(
     SELECT COUNT(*)::int AS total_count
       FROM items i
       JOIN franchises fr ON fr.id = i.franchise_id
+      JOIN characters ch ON ch.id = i.character_id
+      LEFT JOIN manufacturers mfr ON mfr.id = i.manufacturer_id
+      JOIN toy_lines tl ON tl.id = i.toy_line_id
      WHERE fr.slug = $1`
 
   const [dataResult, countResult] = await Promise.all([

@@ -65,12 +65,11 @@ CREATE UNIQUE INDEX idx_toy_lines_slug_franchise
     ON public.toy_lines (slug, franchise_id);
 
 -- ─── 6. Items: slug scoping ──────────────────────────────────────────────────
+-- NOTE: items.franchise_id does not exist yet (added in migration 017).
+-- Items slug scoping index is created in migration 017 after the column is added.
 
 ALTER TABLE public.items
     DROP CONSTRAINT IF EXISTS items_slug_key;
-
-CREATE UNIQUE INDEX idx_items_slug_franchise
-    ON public.items (slug, franchise_id);
 
 -- ─── 7. Character appearances: slug scoped to character ──────────────────────
 
@@ -91,19 +90,14 @@ CREATE INDEX idx_characters_name_id
 CREATE INDEX idx_characters_franchise_name_id
     ON public.characters (franchise_id, name, id);
 
-CREATE INDEX idx_items_name_id
-    ON public.items (name, id);
-
-CREATE INDEX idx_items_franchise_name_id
-    ON public.items (franchise_id, name, id);
+-- Items pagination indexes (idx_items_name_id, idx_items_franchise_name_id)
+-- are created in migration 017 after items.franchise_id is added.
 
 -- migrate:down
 
 -- ─── Reverse: restore global slug uniqueness ─────────────────────────────────
 -- WARNING: This will fail if duplicate slugs exist across franchises.
 
-DROP INDEX IF EXISTS idx_items_franchise_name_id;
-DROP INDEX IF EXISTS idx_items_name_id;
 DROP INDEX IF EXISTS idx_characters_franchise_name_id;
 DROP INDEX IF EXISTS idx_characters_name_id;
 
@@ -111,7 +105,7 @@ DROP INDEX IF EXISTS idx_character_appearances_slug_character;
 ALTER TABLE public.character_appearances
     ADD CONSTRAINT character_appearances_slug_key UNIQUE (slug);
 
-DROP INDEX IF EXISTS idx_items_slug_franchise;
+-- Items slug scoping reversal is in migration 017's down section.
 ALTER TABLE public.items
     ADD CONSTRAINT items_slug_key UNIQUE (slug);
 

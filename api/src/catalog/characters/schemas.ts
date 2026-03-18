@@ -5,7 +5,7 @@ import {
 
 const characterListItem = {
   type: 'object',
-  required: ['id', 'name', 'slug', 'franchise', 'continuity_family', 'is_combined_form'],
+  required: ['id', 'name', 'slug', 'franchise', 'faction', 'continuity_family', 'character_type', 'alt_mode', 'is_combined_form'],
   additionalProperties: false,
   properties: {
     id: { type: 'string' },
@@ -39,7 +39,8 @@ const appearanceItem = {
 const characterDetail = {
   type: 'object',
   required: [
-    'id', 'name', 'slug', 'franchise', 'continuity_family', 'is_combined_form',
+    'id', 'name', 'slug', 'franchise', 'faction', 'continuity_family',
+    'character_type', 'alt_mode', 'is_combined_form', 'combiner_role', 'combined_form',
     'sub_groups', 'appearances', 'metadata', 'created_at', 'updated_at',
   ],
   additionalProperties: false,

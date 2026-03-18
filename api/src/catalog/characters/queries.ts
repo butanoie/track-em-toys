@@ -83,6 +83,8 @@ export async function listCharacters(
     SELECT COUNT(*)::int AS total_count
       FROM characters c
       JOIN franchises fr ON fr.id = c.franchise_id
+      LEFT JOIN factions fa ON fa.id = c.faction_id
+      JOIN continuity_families cf ON cf.id = c.continuity_family_id
      WHERE fr.slug = $1`
 
   const [dataResult, countResult] = await Promise.all([

@@ -30,7 +30,8 @@ export function buildSearchTsquery(input: string): string | null {
   const tokens = input
     .trim()
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
+    .replace(/-/g, ' ')
+    .replace(/[^\w\s]/g, '')
     .split(/\s+/)
     .filter((t) => t.length > 0)
 

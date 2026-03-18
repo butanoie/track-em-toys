@@ -6,8 +6,8 @@ import {
 const itemListItem = {
   type: 'object',
   required: [
-    'id', 'name', 'slug', 'franchise', 'character', 'toy_line',
-    'is_third_party', 'data_quality',
+    'id', 'name', 'slug', 'franchise', 'character', 'manufacturer', 'toy_line',
+    'size_class', 'year_released', 'is_third_party', 'data_quality',
   ],
   additionalProperties: false,
   properties: {
@@ -52,8 +52,10 @@ const photoItem = {
 const itemDetail = {
   type: 'object',
   required: [
-    'id', 'name', 'slug', 'franchise', 'character', 'toy_line',
-    'is_third_party', 'data_quality', 'photos', 'metadata', 'created_at', 'updated_at',
+    'id', 'name', 'slug', 'franchise', 'character', 'manufacturer', 'toy_line',
+    'size_class', 'year_released', 'is_third_party', 'data_quality',
+    'appearance', 'description', 'barcode', 'sku', 'product_code',
+    'photos', 'metadata', 'created_at', 'updated_at',
   ],
   additionalProperties: false,
   properties: {

@@ -18,8 +18,8 @@ describe('buildSearchTsquery', () => {
     expect(buildSearchTsquery('optimus!!!')).toBe("'optimus':*")
   })
 
-  it('preserves hyphens (product codes like FT-44)', () => {
-    expect(buildSearchTsquery('FT-44')).toBe("'ft-44':*")
+  it('splits hyphens into separate tokens (product codes like FT-44)', () => {
+    expect(buildSearchTsquery('FT-44')).toBe("'ft' & '44':*")
   })
 
   it('lowercases input', () => {
