@@ -13,6 +13,7 @@ import { authRoutes } from './auth/routes.js'
 import { appleWebhookRoute } from './auth/webhooks.js'
 import { HttpError } from './auth/errors.js'
 import { docsPlugin } from './plugins/docs.js'
+import { catalogRoutes } from './catalog/routes.js'
 
 // ─── Fastify type augmentation ─────────────────────────────────────────────
 
@@ -210,6 +211,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   // brittle URL-prefix string matching on the root instance.
 
   await fastify.register(authRoutes, { prefix: '/auth' })
+
+  // ─── Catalog routes ────────────────────────────────────────────────────
+
+  await fastify.register(catalogRoutes, { prefix: '/catalog' })
 
   // NOTE: RLS context (app.user_id) is set inside withTransaction() on the
   // same connection that executes business logic, not via a global hook.

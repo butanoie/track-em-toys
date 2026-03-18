@@ -86,13 +86,27 @@ Two distinct photo types:
 - Response schema nullability must match the actual return type (e.g. `string | null`, not `string`)
 - Provider claim types that may be `string | string[]` must be handled for both shapes
 
+### Catalog API (Phase 1.5+)
+- Catalog routes live in `src/catalog/` with domain-scoped modules (characters/, items/, etc.)
+- Catalog queries colocate with routes (`src/catalog/characters/queries.ts`), NOT in `src/db/queries.ts`
+- Catalog reads use `pool.query()` directly — no `withTransaction`, no RLS context
+- Franchise-scoped routes live under `/catalog/franchises/:franchise/...` — the `:franchise` param is inherited by all child plugins
+- Slug uniqueness is franchise-scoped: `UNIQUE (slug, franchise_id)` on characters, factions, sub_groups, continuity_families, toy_lines, items
+- Detail lookups always validate franchise ownership: `WHERE slug = $1 AND fr.slug = $2`
+- Manufacturers stay globally unique slugs (franchise-agnostic)
+- FTS uses generated `search_vector tsvector STORED` columns — queries use `WHERE search_vector @@ ...`, never recompute the tsvector expression inline
+- Cursor pagination encodes `{ v: 1, name, id }` as base64url — always include version field
+- Cursor UUID comparison uses `$N::uuid`, not text cast
+- Error responses use `reply.code(N).send({ error: '...' })` — no HttpError (no transactions)
+- See `docs/decisions/ADR_Catalog_API_Architecture.md` for full architecture
+
 ## Before Writing New Code
 
 Read existing files for patterns before writing anything new:
-- New route handler → read `src/auth/routes.ts` for handler structure
-- New query function → read `src/db/queries.ts` for query patterns and column lists
+- New route handler → read `src/auth/routes.ts` for handler structure, `src/catalog/characters/routes.ts` for catalog patterns
+- New query function → read `src/db/queries.ts` for auth query patterns, `src/catalog/characters/queries.ts` for catalog patterns
 - New test file → read `src/auth/routes.test.ts` for test patterns
-- New schema → read `src/auth/schemas.ts` for schema patterns
+- New schema → read `src/auth/schemas.ts` for schema patterns, `src/catalog/shared/schemas.ts` for shared catalog fragments
 - New type → read `src/types/index.ts` for type conventions
 - New migration → read existing files in `db/migrations/` for naming and format
 

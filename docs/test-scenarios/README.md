@@ -24,7 +24,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 
 | Scenario Document | Phase | Status |
 |---|---|---|
-| INT_CATALOG_API.md | 1.5 Catalog API | Not started |
+| [INT_CATALOG_API.md](INT_CATALOG_API.md) | 1.5 Catalog API | Scenarios written |
 | INT_USER_ROLES.md | 1.5b User Roles & Admin | Not started |
 | E2E_CATALOG_BROWSING.md | 1.7 Web Catalog UI | Not started |
 | E2E_PHOTO_UPLOAD.md | 1.9 Photo Management (curator role) | Not started |

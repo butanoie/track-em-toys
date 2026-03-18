@@ -231,6 +231,7 @@ export interface Item {
   id: string
   name: string
   slug: string
+  franchise_id: string
   manufacturer_id: string | null
   character_id: string
   toy_line_id: string
