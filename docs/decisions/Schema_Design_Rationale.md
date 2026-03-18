@@ -37,20 +37,20 @@ Instead of storing faction as a TEXT column or a CHECK constraint enum on `chara
 **`factions`** — Autobot, Decepticon, Quintesson, Human, Junkion, Nebulan, Lithone, Neutral, etc.
 
 ```
-id | name         | slug         | franchise
-1  | Autobot      | autobot      | Transformers
-2  | Decepticon   | decepticon   | Transformers
-3  | Human        | human        | NULL
-4  | Quintesson   | quintesson   | Transformers
-5  | Junkion      | junkion      | Transformers
-6  | Nebulan      | nebulan      | Transformers
-7  | Lithone      | lithone      | Transformers
-8  | Neutral      | neutral      | NULL
-9  | Cobra        | cobra        | G.I. Joe
-10 | G.I. Joe     | gi-joe       | G.I. Joe
+id | name         | slug         | franchise_id
+1  | Autobot      | autobot      | → transformers
+2  | Decepticon   | decepticon   | → transformers
+3  | Human        | human        | → transformers
+4  | Quintesson   | quintesson   | → transformers
+5  | Junkion      | junkion      | → transformers
+6  | Nebulan      | nebulan      | → transformers
+7  | Lithone      | lithone      | → transformers
+8  | Neutral      | neutral      | → transformers
+9  | Cobra        | cobra        | → gi-joe
+10 | G.I. Joe     | gi-joe       | → gi-joe
 ```
 
-**Why normalize?** Adding a new faction (say, for a Japanese series expansion or a G.I. Joe rollout) is an INSERT, not a schema migration. The `franchise` column on factions lets you scope faction dropdowns in the UI by franchise.
+**Why normalize?** Adding a new faction (say, for a Japanese series expansion or a G.I. Joe rollout) is an INSERT, not a schema migration. The `franchise_id` FK on factions lets you scope faction dropdowns in the UI by franchise.
 
 **`sub_groups`** — Dinobots, Constructicons, Aerialbots, Insecticons, Cassettes, Female Autobots, etc.
 
@@ -66,7 +66,7 @@ id | name           | slug            | faction_id
 
 The optional `faction_id` FK lets you associate a sub-group with a faction when it's unambiguous (Dinobots → Autobot) but leave it NULL when the group spans factions (Cassettes exist on both sides, Headmasters exist on both sides).
 
-**`sub_groups.name` uniqueness** is scoped to `(name, franchise)` rather than globally unique, allowing the same sub-group name in different franchises. The `slug` column remains globally unique for URL routing.
+**`sub_groups.name` uniqueness** is scoped to `(name, franchise_id)` rather than globally unique, allowing the same sub-group name in different franchises. The `slug` column remains globally unique for URL routing.
 
 **Characters → sub_groups is many-to-many** via the `character_sub_groups` junction table (added in migration 012). A character can belong to multiple sub-groups (e.g., Apeface is both a Headmaster and a Horrorcon; the Coneheads are Seekers). The junction table uses `ON DELETE CASCADE` on both FKs — deleting a character or sub-group removes the associations.
 
@@ -78,7 +78,8 @@ The characters table after all three catalog migrations:
 
 ```sql
 characters (
-    id, name, slug, franchise,
+    id, name, slug,
+    franchise_id,           -- FK → franchises (RESTRICT) NOT NULL
     faction_id,             -- FK → factions (SET NULL)
     character_type,         -- 'Transformer', 'Human', 'Pretender', 'Godmaster', etc.
     alt_mode,               -- 'semi-truck', 'F-15 jet', etc.
@@ -100,7 +101,7 @@ characters (
 
 **Why `character_type` is TEXT, not an enum or FK?** The set of character types includes both species (`Transformer`, `Human`, `Nebulan`) and gimmick types (`Pretender`, `Godmaster`, `Brainmaster`, `Micromaster`). TEXT keeps the migration simple — new gimmick types from future series are just new values, not schema changes.
 
-**`continuity_family_id` replaces the free-text `series` and `continuity` columns** (removed in migration 013). A continuity family is the identity boundary for a character — G1 Megatron and Beast Wars Megatron are different characters in different families, but G1 cartoon Megatron and G1 Marvel comic Megatron are the same character within the G1 family. The unique index is `(lower(name), lower(franchise), continuity_family_id)`.
+**`continuity_family_id` replaces the free-text `series` and `continuity` columns** (removed in migration 013). A continuity family is the identity boundary for a character — G1 Megatron and Beast Wars Megatron are different characters in different families, but G1 cartoon Megatron and G1 Marvel comic Megatron are the same character within the G1 family. The unique index is `(lower(name), franchise_id, continuity_family_id)`.
 
 **Why a FK instead of free-text?** The original `continuity` column had a small fixed set of values (`G1 North America`, `G1 Japan`, `G1 Toy-only`). Normalizing into a reference table:
 - Prevents typos and value drift across 400+ character records
@@ -115,7 +116,7 @@ characters (
 The `continuity_families` reference table follows the same pattern as `factions` — normalized reference data with slugs for stable external keys.
 
 ```sql
-continuity_families (id, slug, name, franchise, sort_order, notes, created_at)
+continuity_families (id, slug, name, franchise_id, sort_order, notes, created_at)
 ```
 
 Current families (10): Generation 1, Beast Era, Robots in Disguise (2001), Unicron Trilogy, Live-Action Movies, Transformers Animated, Aligned/Prime, Cyberverse, EarthSpark, Transformers One.
@@ -156,7 +157,39 @@ Migration 013 adds `size_class TEXT` (nullable) to the `items` table. Standard T
 
 ---
 
-### 4. GDPR user deletion: tombstone pattern
+### 4. Franchise normalization (migration 015)
+
+The `franchise` column was originally a free TEXT field on 5 tables (characters, factions, sub_groups, continuity_families, toy_lines). Migration 015 normalizes it into a proper `franchises` reference table with UUID FK.
+
+**`franchises`** — Transformers, G.I. Joe, Star Wars, Macross
+
+```
+id | slug          | name          | sort_order
+1  | transformers  | Transformers  | 1
+2  | gi-joe        | G.I. Joe      | 2
+3  | star-wars     | Star Wars     | 3
+4  | macross       | Macross       | 4
+```
+
+**Why normalize?**
+
+- **Consistency enforcement**: FK prevents "Transformers" vs "transformers" vs "TF" — only valid franchise UUIDs allowed
+- **Slug-based filtering**: API `?franchise=transformers` uses `fr.slug = $1` JOIN (consistent with all other slug filters)
+- **Metadata support**: Display names, sort order, notes — franchise is a first-class entity
+- **FK enforcement**: Typos in seed data fail at insert time, not silently
+- **Discoverability**: `GET /catalog/franchises` queries the table directly instead of `SELECT DISTINCT`
+
+**`franchise_id` is NOT NULL on all 5 tables.** Cross-franchise entities (Human, Neutral, Other factions) are assigned to Transformers. When these factions are needed for other franchises, they get duplicated per franchise with globally unique slugs (e.g., `human-gi-joe`).
+
+**Index changes:**
+- `idx_characters_name_franchise_cf`: `(lower(name), lower(franchise), continuity_family_id)` → `(lower(name), franchise_id, continuity_family_id)`
+- `idx_sub_groups_name_franchise`: `(lower(name), COALESCE(franchise, ''))` → `(lower(name), franchise_id)` — simplified since franchise_id is NOT NULL
+
+See `docs/decisions/ADR_Franchise_Normalization.md` for the full rationale and alternatives considered.
+
+---
+
+### 5. GDPR user deletion: tombstone pattern
 
 User "deletion" uses a tombstone pattern rather than actually deleting the `users` row.
 
@@ -190,7 +223,7 @@ DELETE FROM oauth_accounts WHERE user_id = $1;
 
 ---
 
-### 5. Slugs on `items` table
+### 6. Slugs on `items` table
 
 The items table now has a slug column for URL routing:
 
@@ -204,7 +237,7 @@ The item slug convention is `{product_code}-{name}` slugified. This ensures uniq
 
 ---
 
-### 6. Impact on existing FansToys JSON import
+### 7. Impact on existing FansToys JSON import
 
 The relational JSON from the FansToys catalog maps cleanly to this new schema:
 
@@ -226,7 +259,7 @@ The import script should:
 
 ---
 
-### 7. User roles
+### 8. User roles
 
 Migration 014b adds a `role` column to the `users` table:
 
@@ -244,7 +277,7 @@ CREATE INDEX idx_users_role ON users (role);
 
 ---
 
-### 8. Two photo domains
+### 9. Two photo domains
 
 The system has two distinct types of photos with different privacy models:
 
@@ -264,7 +297,7 @@ The system has two distinct types of photos with different privacy models:
 
 ---
 
-### 9. Migration numbers
+### 10. Migration numbers
 
 Core catalog tables were created in migration `011_shared_catalog_tables.sql`. Schema enrichment (series, continuity, combiners, GDPR tombstone) happened in `012_enrich_characters_table.sql`. Continuity families, character appearances, and size class were added in `013_continuity_families_and_appearances.sql`.
 

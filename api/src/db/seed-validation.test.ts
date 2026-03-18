@@ -37,7 +37,7 @@ interface ReferenceFile<T extends ReferenceRecord = ReferenceRecord> {
 interface CharacterRecord {
   name: string
   slug: string
-  franchise: string
+  franchise_slug: string
   continuity_family_slug: string
   character_type: string
   is_combined_form: boolean
@@ -112,6 +112,7 @@ function loadAppearanceFile(relPath: string): AppearanceFile {
 
 // ─── Load all seed data at module scope ──────────────────────────────────────
 
+const franchises = loadRef('reference/franchises.json')
 const continuityFamilies = loadRef('reference/continuity_families.json')
 const factions = loadRef('reference/factions.json')
 const subGroups = loadRef<SubGroupRecord>('reference/sub_groups.json')
@@ -153,6 +154,7 @@ const appearanceFiles = APPEARANCE_FILES.map((f) => ({
 
 // ─── Derived lookup sets ─────────────────────────────────────────────────────
 
+const franchiseSlugs = new Set(franchises.data.map((r) => r.slug))
 const continuityFamilySlugs = new Set(continuityFamilies.data.map((r) => r.slug))
 const factionSlugs = new Set(factions.data.map((r) => r.slug))
 const subGroupSlugs = new Set(subGroups.data.map((r) => r.slug))
@@ -174,7 +176,7 @@ const VALID_COMBINER_ROLES = new Set([
 ])
 
 const REQUIRED_CHAR_FIELDS = [
-  'name', 'slug', 'franchise', 'continuity_family_slug',
+  'name', 'slug', 'franchise_slug', 'continuity_family_slug',
   'character_type', 'is_combined_form',
 ] as const
 
@@ -193,6 +195,7 @@ describe('seed data validation', () => {
 
   describe('metadata counts', () => {
     it.each([
+      { label: 'franchises', total: franchises._metadata.total, actual: franchises.data.length },
       { label: 'continuity_families', total: continuityFamilies._metadata.total, actual: continuityFamilies.data.length },
       { label: 'factions', total: factions._metadata.total, actual: factions.data.length },
       { label: 'sub_groups', total: subGroups._metadata.total, actual: subGroups.data.length },
@@ -217,6 +220,7 @@ describe('seed data validation', () => {
 
   describe('slug format', () => {
     it.each([
+      { label: 'franchises', records: franchises.data },
       { label: 'continuity_families', records: continuityFamilies.data },
       { label: 'factions', records: factions.data },
       { label: 'sub_groups', records: subGroups.data },
@@ -242,6 +246,7 @@ describe('seed data validation', () => {
 
   describe('no duplicate slugs', () => {
     it.each([
+      { label: 'franchises', records: franchises.data },
       { label: 'continuity_families', records: continuityFamilies.data },
       { label: 'factions', records: factions.data },
       { label: 'sub_groups', records: subGroups.data },
@@ -284,6 +289,46 @@ describe('seed data validation', () => {
   // ── 4. FK referential integrity ────────────────────────────────────────
 
   describe('FK referential integrity', () => {
+    it('factions: franchise_slug resolves to franchises', () => {
+      for (const f of factions.data) {
+        const franchiseSlug = (f as Record<string, unknown>)['franchise_slug'] as string
+        expect(
+          franchiseSlugs.has(franchiseSlug),
+          `factions > "${f.slug}": unknown franchise_slug "${franchiseSlug}"`,
+        ).toBe(true)
+      }
+    })
+
+    it('sub_groups: franchise_slug resolves to franchises', () => {
+      for (const sg of subGroups.data) {
+        const franchiseSlug = (sg as Record<string, unknown>)['franchise_slug'] as string
+        expect(
+          franchiseSlugs.has(franchiseSlug),
+          `sub_groups > "${sg.slug}": unknown franchise_slug "${franchiseSlug}"`,
+        ).toBe(true)
+      }
+    })
+
+    it('continuity_families: franchise_slug resolves to franchises', () => {
+      for (const cf of continuityFamilies.data) {
+        const franchiseSlug = (cf as Record<string, unknown>)['franchise_slug'] as string
+        expect(
+          franchiseSlugs.has(franchiseSlug),
+          `continuity_families > "${cf.slug}": unknown franchise_slug "${franchiseSlug}"`,
+        ).toBe(true)
+      }
+    })
+
+    it('toy_lines: franchise_slug resolves to franchises', () => {
+      for (const tl of toyLines.data) {
+        const franchiseSlug = (tl as Record<string, unknown>)['franchise_slug'] as string
+        expect(
+          franchiseSlugs.has(franchiseSlug),
+          `toy_lines > "${tl.slug}": unknown franchise_slug "${franchiseSlug}"`,
+        ).toBe(true)
+      }
+    })
+
     it('sub_groups: faction_slug resolves to factions', () => {
       for (const sg of subGroups.data) {
         if (sg.faction_slug === null) continue
@@ -362,6 +407,18 @@ describe('seed data validation', () => {
           expect(
             continuityFamilySlugs.has(c.continuity_family_slug),
             `${file} > "${c.name}" (${c.slug}): unknown continuity_family_slug "${c.continuity_family_slug}"`,
+          ).toBe(true)
+        }
+      },
+    )
+
+    it.each(charFiles)(
+      '$file: franchise_slug resolves to franchises',
+      ({ file, characters }) => {
+        for (const c of characters) {
+          expect(
+            franchiseSlugs.has(c.franchise_slug),
+            `${file} > "${c.name}" (${c.slug}): unknown franchise_slug "${c.franchise_slug}"`,
           ).toBe(true)
         }
       },
@@ -448,16 +505,16 @@ describe('seed data validation', () => {
 
   // ── 7. Name + franchise + continuity_family_slug uniqueness ─────────────
 
-  describe('name + franchise + continuity_family_slug uniqueness', () => {
-    it('no two characters share the same (name, franchise, continuity_family_slug)', () => {
+  describe('name + franchise_slug + continuity_family_slug uniqueness', () => {
+    it('no two characters share the same (name, franchise_slug, continuity_family_slug)', () => {
       const seen = new Map<string, string>()
       for (const { file, characters } of charFiles) {
         for (const c of characters) {
-          const key = `${c.name.toLowerCase()}|||${c.franchise.toLowerCase()}|||${c.continuity_family_slug}`
+          const key = `${c.name.toLowerCase()}|||${c.franchise_slug}|||${c.continuity_family_slug}`
           const existing = seen.get(key)
           expect(
             existing,
-            `Duplicate: "${c.name}" / "${c.franchise}" / "${c.continuity_family_slug}" in "${file}" — already in "${existing}"`,
+            `Duplicate: "${c.name}" / "${c.franchise_slug}" / "${c.continuity_family_slug}" in "${file}" — already in "${existing}"`,
           ).toBeUndefined()
           seen.set(key, `${file} > ${c.slug}`)
         }

@@ -121,11 +121,20 @@ export interface ProviderClaims {
 // Shared Catalog — reference tables
 // ---------------------------------------------------------------------------
 
+export interface Franchise {
+  id: string
+  slug: string
+  name: string
+  sort_order: number | null
+  notes: string | null
+  created_at: string
+}
+
 export interface Faction {
   id: string
   name: string
   slug: string
-  franchise: string | null
+  franchise_id: string
   notes: string | null
   created_at: string
 }
@@ -135,7 +144,7 @@ export interface SubGroup {
   name: string
   slug: string
   faction_id: string | null
-  franchise: string | null
+  franchise_id: string
   notes: string | null
   created_at: string
 }
@@ -144,7 +153,7 @@ export interface ContinuityFamily {
   id: string
   slug: string
   name: string
-  franchise: string | null
+  franchise_id: string
   sort_order: number | null
   notes: string | null
   created_at: string
@@ -158,7 +167,7 @@ export interface Character {
   id: string
   name: string
   slug: string
-  franchise: string
+  franchise_id: string
   faction_id: string | null
   character_type: string | null
   alt_mode: string | null
@@ -208,7 +217,7 @@ export interface ToyLine {
   id: string
   name: string
   slug: string
-  franchise: string | null
+  franchise_id: string
   manufacturer_id: string
   scale: string | null
   description: string | null

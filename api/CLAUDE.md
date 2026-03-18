@@ -31,10 +31,14 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - ALL DB changes via migration files in `api/db/migrations/`, never direct schema edits
 - Migrations must be additive (add columns/tables) by default — destructive changes (drop column, drop table) require explicit user instruction
 - Migration filenames follow `NNN_description.sql` sequential numbering with no gaps
+- TEXT→FK column migration pattern: (1) add nullable FK column, (2) populate from existing data via UPDATE+JOIN, (3) SET NOT NULL, (4) add FK constraint, (5) drop old indexes + create new, (6) drop old TEXT column. Always include `migrate:down`.
 - Catalog tables use UUID PKs with a unique `slug` column (e.g. `"optimus-prime"`) for stable references and URL-friendly routes
 - Seed data in `api/db/seed/` uses slug-based FK references between entities — NEVER integer IDs (integer IDs are positional and break when data is reordered or regenerated)
 - Seed data organization: see `api/db/seed/README.md` for directory structure, import order, and column mapping
 - Seed `_metadata.total` must always equal the actual array length — recount after any addition or removal, never increment/decrement manually
+- Seed FK naming: JSON uses `{table}_slug` (e.g. `franchise_slug`, `faction_slug`), DB column is `{table}_id` (UUID FK). Ingest script resolves slugs to UUIDs via `resolveSlug()` maps
+- Reference tables follow the pattern: `id UUID PK, slug TEXT UNIQUE, name TEXT, sort_order INT, notes TEXT, created_at TIMESTAMPTZ` (no `updated_at`)
+- When adding a column to a reference table: add to seed JSON, record interface in `ingest.ts`, TypeScript interface in `types/index.ts`, and validation tests in `seed-validation.test.ts`
 
 ### GDPR / User Deletion (Tombstone Pattern)
 - User "deletion" = scrub PII (`email`, `display_name`, `avatar_url`) + set `deleted_at` — the `users` row is preserved as a tombstone so all FKs remain intact
