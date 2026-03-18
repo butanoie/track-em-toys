@@ -22,14 +22,14 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 
 ### Planned Scenarios (ML-Accelerated Roadmap)
 
-| Scenario Document                        | Phase                                                       | Status         |
-| ---------------------------------------- | ----------------------------------------------------------- | -------------- |
-| [INT_CATALOG_API.md](INT_CATALOG_API.md) | `api/src/catalog/*/routes.test.ts`                          | ✅ Implemented |
-| [INT_USER_ROLES.md](INT_USER_ROLES.md)   | `api/src/auth/role.test.ts`, `api/src/admin/routes.test.ts` | ✅ Implemented |
-| E2E_CATALOG_BROWSING.md                  | 1.7 Web Catalog UI                                          | Not started    |
-| E2E_PHOTO_UPLOAD.md                      | 1.9 Photo Management (curator role)                         | Not started    |
-| E2E_ADMIN_DASHBOARD.md                   | 1.5b Admin UI                                               | Not started    |
-| E2E_GDPR_DELETION.md                     | 1.12 Account Deletion                                       | Not started    |
+| Scenario Document                                | Phase                                                               | Status            |
+| ------------------------------------------------ | ------------------------------------------------------------------- | ----------------- |
+| [INT_CATALOG_API.md](INT_CATALOG_API.md)         | `api/src/catalog/*/routes.test.ts`                                  | ✅ Implemented    |
+| [INT_USER_ROLES.md](INT_USER_ROLES.md)           | `api/src/auth/role.test.ts`, `api/src/admin/routes.test.ts`         | ✅ Implemented    |
+| E2E_CATALOG_BROWSING.md                          | 1.7 Web Catalog UI                                                  | Not started       |
+| E2E_PHOTO_UPLOAD.md                              | 1.9 Photo Management (curator role)                                 | Not started       |
+| [E2E_ADMIN_DASHBOARD.md](E2E_ADMIN_DASHBOARD.md) | `web/src/admin/__tests__/*.test.tsx`, `web/e2e/admin-users.spec.ts` | Scenarios written |
+| E2E_GDPR_DELETION.md                             | 1.12 Account Deletion                                               | Not started       |
 
 ## Creating a New Scenario
 

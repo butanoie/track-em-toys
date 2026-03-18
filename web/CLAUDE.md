@@ -67,10 +67,18 @@ cd web && npm run format:check # Prettier check (CI mode)
 ### User Roles & Admin UI
 
 - Roles: `user`, `curator`, `admin` — included in JWT claims and `/auth/me` response
-- Admin routes under `/admin/*` are **code-split** via lazy `React.lazy()` imports — admin bundles never ship to regular users
-- Role checks in TanStack Router `beforeLoad` guards: redirect to `/` if insufficient role
-- Role-aware navigation: curators see "Manage Catalog" link; admins see "Admin" section
-- Admin pages: user list, role assignment, catalog edit review queue
+- Admin routes under `/admin/*` are **automatically code-split** by TanStack Router's `autoCodeSplitting: true` in `vite.config.ts` — admin bundles never ship to regular users. Do NOT use manual `React.lazy()`.
+- Admin layout uses a **component-level role guard** (not `beforeLoad`) — consistent with `_authenticated.tsx`. On cold load, `authStore.getToken()` is null until silent refresh completes; a `beforeLoad` guard would incorrectly redirect valid admins.
+- Role-aware navigation: admins see "Admin" link in the shared `AppHeader`
+- Admin pages live in `src/admin/` with sub-directories per entity (`users/`, future `catalog/`)
+- Admin API hooks: `src/admin/hooks/` for shared hooks, entity-specific code in `src/admin/users/`
+- Admin test fixtures: `src/admin/__tests__/admin-test-helpers.ts` — separate from auth test helpers
+- Shared `AppHeader` component (`src/components/AppHeader.tsx`) replaces duplicate header code in Dashboard and Settings
+- Admin data table uses `placeholderData: keepPreviousData` for smooth pagination (no skeleton flash between pages)
+- URL search params (not React state) for admin filter/pagination state — bookmarkable, survives refresh
+- `ConfirmDialog` pattern for destructive actions: generic component in `src/admin/components/`, reusable for deactivation, purge, and future catalog deletes
+- GDPR-purged users (tombstones): show "Deleted user" for email, "—" for name, disable all action buttons
+- Self-action guard: disable role/deactivate/purge controls when `row.id === currentUser.id`
 
 ### Photo Domains (Web UI)
 
@@ -84,7 +92,7 @@ Read existing files for patterns before writing anything new:
 
 - New component → read an existing component in the same feature area
 - New API call → read existing TanStack Query hooks in the nearest `hooks/` directory
-- New form → read an existing Zod-validated form component (React Hook Form is not yet installed)
+- New form → read an existing Zod-validated form component (`react-hook-form` + `@hookform/resolvers` are installed)
 - New route → read the router configuration file first
 
 Match existing patterns exactly. Do not introduce new conventions.

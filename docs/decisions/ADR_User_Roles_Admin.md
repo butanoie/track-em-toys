@@ -98,15 +98,37 @@ Merged the separate `getUserAccountStatus` + `getUserRoleForRefresh` queries int
 
 `npm run set-role -- <email> <role>` — standalone tsx script at `scripts/set-role.ts`. Follows `npm run seed` pattern. Warns if target user is deactivated. GDPR-purged users have `email=NULL` so the `WHERE LOWER(email) = LOWER($1)` naturally excludes them.
 
-### Admin Web UI
+### Admin Web UI (Phase 1.5b-UI — Issue #49)
 
-**Deferred to a separate issue.** This phase builds the backend foundation only. The web `UserResponseSchema` is updated to include `role` so the data is available when the UI is built.
+Code-split admin section within the same SPA under `/admin/*` routes. Admin JS bundles never ship to regular users.
+
+**Routing:**
+
+- Layout route: `_authenticated/admin.tsx` — component-level role guard (redirects non-admins to `/`), sidebar, admin header
+- Index route: `_authenticated/admin/index.tsx` — redirects to `/admin/users`
+- Users page: `_authenticated/admin/users.tsx` — data table with filters/pagination
+
+**Why component-level guard (not `beforeLoad`):** The parent `_authenticated` route uses a component-level guard because auth loading state can't be checked in `beforeLoad`. On cold page load, `authStore.getToken()` is null until the silent refresh completes. A `beforeLoad` guard on the admin route would incorrectly redirect valid admins during this window. Consistent with the existing auth pattern.
+
+**Code splitting:** TanStack Router's `autoCodeSplitting: true` (in `vite.config.ts`) automatically lazy-loads route components. No manual `React.lazy()` needed.
+
+**Navigation:**
+
+- Shared `AppHeader` component (extracted from Dashboard and Settings duplicate headers)
+- Role-aware nav: admins see "Admin" link in the header
+- Admin layout has its own header with "Back to App" link + sidebar
+- Admin sidebar: Users (active), Catalog (future placeholder), System (future placeholder)
+
+**Data flow:** URL search params for filter/pagination state via TanStack Router `validateSearch`. `placeholderData: keepPreviousData` in TanStack Query for smooth pagination.
+
+**UI components:** Shadcn/ui Table, Select, AlertDialog, Input added via CLI (`npx shadcn@latest add`). Confirm dialog pattern for destructive actions with "type DELETE" safeguard.
+
+**Dependencies added:** `react-hook-form`, `@hookform/resolvers` (installed for future catalog editing forms, not used in admin MVP).
 
 ### Scope NOT Included
 
 - No changes to existing catalog read routes (all stay public)
 - No `requireRole()` on catalog routes yet (deferred to Phase 1.9 write routes)
-- No admin web UI (separate issue)
 - No permissions-based access control (RBAC is sufficient)
 - No multi-role support (single role column)
 
