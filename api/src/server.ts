@@ -62,6 +62,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   await fastify.register(cors, {
     origin: config.corsOrigin,
     credentials: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
   });
 
   // ─── Cookies (for refresh token httpOnly cookies) ──────────────────────

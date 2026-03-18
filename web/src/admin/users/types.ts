@@ -5,10 +5,13 @@ export type PendingAction =
   | { type: 'deactivate' | 'reactivate' | 'purge'; user: AdminUserRow }
   | { type: 'role_change'; user: AdminUserRow; newRole: UserRole };
 
+export function isBannerError(err: unknown): err is ApiError {
+  return err instanceof ApiError && [400, 403, 404, 409].includes(err.status);
+}
+
 export function getMutationErrorMessage(err: unknown): string {
-  if (err instanceof ApiError) {
-    if (err.status === 409 || err.status === 403) return err.body.error;
-    if (err.status === 404) return 'User not found.';
+  if (isBannerError(err)) {
+    return err.body.error;
   }
   return 'An unexpected error occurred. Please try again.';
 }

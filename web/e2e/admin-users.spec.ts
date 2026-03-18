@@ -211,3 +211,172 @@ test.describe('GDPR purge', () => {
     await expect(confirmButton).toBeEnabled();
   });
 });
+
+// --- Mutation Happy Paths ---
+
+test.describe('Mutation happy paths', () => {
+  test('Given admin changes role, When confirmed, Then success toast is shown', async ({ page }) => {
+    await setupAdminSession(page);
+    await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
+    await page.goto('/admin/users');
+    await expect(page.getByRole('cell', { name: /Alice/ })).toBeVisible();
+
+    // Mock the PATCH role endpoint
+    await page.route('**/admin/users/*/role', (route) => {
+      if (route.request().method() === 'PATCH') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ ...mockUsers[0]!, role: 'curator' }),
+        });
+      }
+      return route.continue();
+    });
+
+    // Open role select and change to curator (disambiguate from filter combobox)
+    await page.getByRole('combobox', { name: /Change role for alice/i }).click();
+    await page.getByRole('option', { name: 'Curator' }).click();
+
+    // Confirm dialog appears and click confirm
+    await expect(page.getByText('Change User Role')).toBeVisible();
+    await page.getByRole('button', { name: 'Confirm' }).click();
+
+    // Success toast appears
+    const toast = page.locator('[data-sonner-toast]').filter({ hasText: /Role updated to curator/i });
+    await expect(toast).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('Given admin deactivates user, When confirmed, Then success toast is shown', async ({ page }) => {
+    await setupAdminSession(page);
+    await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
+    await page.goto('/admin/users');
+    await expect(page.getByRole('cell', { name: /Alice/ })).toBeVisible();
+
+    // Mock the deactivate endpoint
+    await page.route('**/admin/users/*/deactivate', (route) => {
+      if (route.request().method() === 'POST') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ ...mockUsers[0]!, deactivated_at: '2026-03-18T00:00:00.000Z' }),
+        });
+      }
+      return route.continue();
+    });
+
+    await page.getByRole('button', { name: 'Deactivate' }).click();
+    await expect(page.getByText('Deactivate User')).toBeVisible();
+    await page.getByRole('button', { name: 'Confirm' }).click();
+
+    const toast = page.locator('[data-sonner-toast]').filter({ hasText: /alice@example\.com deactivated/i });
+    await expect(toast).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('Given admin reactivates user, When confirmed, Then success toast is shown', async ({ page }) => {
+    await setupAdminSession(page);
+    await mockAdminUsersEndpoint(page, [mockUsers[2]!]);
+    await page.goto('/admin/users');
+    await expect(page.getByRole('cell', { name: /Deactivated User/ })).toBeVisible();
+
+    // Mock the reactivate endpoint
+    await page.route('**/admin/users/*/reactivate', (route) => {
+      if (route.request().method() === 'POST') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ ...mockUsers[2]!, deactivated_at: null }),
+        });
+      }
+      return route.continue();
+    });
+
+    await page.getByRole('button', { name: 'Reactivate' }).click();
+    await expect(page.getByText('Reactivate User')).toBeVisible();
+    await page.getByRole('button', { name: 'Confirm' }).click();
+
+    const toast = page.locator('[data-sonner-toast]').filter({ hasText: /deactivated@example\.com reactivated/i });
+    await expect(toast).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('Given admin purges user, When confirmed with DELETE, Then success toast is shown', async ({ page }) => {
+    await setupAdminSession(page);
+    await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
+    await page.goto('/admin/users');
+    await expect(page.getByRole('cell', { name: /Alice/ })).toBeVisible();
+
+    // Mock the DELETE endpoint — match UUID path segment only
+    await page.route(/\/admin\/users\/[0-9a-f-]{36}$/, (route) => {
+      if (route.request().method() === 'DELETE') {
+        return route.fulfill({ status: 204, body: '' });
+      }
+      return route.continue();
+    });
+
+    await page.getByRole('button', { name: 'Purge' }).click();
+    await expect(page.getByText('GDPR Purge')).toBeVisible();
+    await page.getByRole('textbox').fill('DELETE');
+    await page.getByRole('button', { name: 'Purge User' }).click();
+
+    const toast = page.locator('[data-sonner-toast]').filter({ hasText: /User data purged permanently/i });
+    await expect(toast).toBeVisible({ timeout: 5_000 });
+  });
+});
+
+// --- Server Error Handling ---
+
+test.describe('Server error handling', () => {
+  test('Given server returns 403, When mutation attempted, Then ErrorBanner is shown (not toast)', async ({ page }) => {
+    await setupAdminSession(page);
+    await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
+    await page.goto('/admin/users');
+    await expect(page.getByRole('cell', { name: /Alice/ })).toBeVisible();
+
+    // Mock deactivate to return 403
+    await page.route('**/admin/users/*/deactivate', (route) => {
+      if (route.request().method() === 'POST') {
+        return route.fulfill({
+          status: 403,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'Cannot perform this action on your own account' }),
+        });
+      }
+      return route.continue();
+    });
+
+    await page.getByRole('button', { name: 'Deactivate' }).click();
+    await page.getByRole('button', { name: 'Confirm' }).click();
+
+    // ErrorBanner should appear
+    await expect(page.getByRole('alert')).toContainText('Cannot perform this action on your own account');
+
+    // No toast should be visible
+    await expect(page.locator('[data-sonner-toast]')).not.toBeVisible();
+  });
+
+  test('Given server returns 409, When mutation attempted, Then ErrorBanner is shown (not toast)', async ({ page }) => {
+    await setupAdminSession(page);
+    await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
+    await page.goto('/admin/users');
+    await expect(page.getByRole('cell', { name: /Alice/ })).toBeVisible();
+
+    // Mock role change to return 409
+    await page.route('**/admin/users/*/role', (route) => {
+      if (route.request().method() === 'PATCH') {
+        return route.fulfill({
+          status: 409,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'Cannot demote the last admin' }),
+        });
+      }
+      return route.continue();
+    });
+
+    await page.getByRole('combobox', { name: /Change role for alice/i }).click();
+    await page.getByRole('option', { name: 'Curator' }).click();
+    await expect(page.getByText('Change User Role')).toBeVisible();
+    await page.getByRole('button', { name: 'Confirm' }).click();
+
+    await expect(page.getByRole('alert')).toContainText('Cannot demote the last admin');
+    await expect(page.locator('[data-sonner-toast]')).not.toBeVisible();
+  });
+});

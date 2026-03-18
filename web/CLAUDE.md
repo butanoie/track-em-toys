@@ -83,6 +83,8 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Role changes also go through `ConfirmDialog` (simple "Are you sure?" — no type-to-confirm since reversible)
 - `LoadingSpinner` shared component at `src/components/LoadingSpinner.tsx` — accepts `className` for contextual sizing
 - `throwApiError(response)` in `api-client.ts` — shared error extraction for void-response endpoints (DELETE 204)
+- `buildHeaders()` only sets `Content-Type: application/json` when `init.body` is present — bodyless POST/PATCH requests must NOT send Content-Type or Fastify's JSON parser rejects the empty body with 400
+- When adding a new API function with no request body, omit the body entirely — do NOT pass `body: JSON.stringify({})` as a workaround
 - `UserRole` type derived from `AdminUserRowSchema.shape.role` — single source of truth for role enum
 
 ### Tailwind CSS 4 Theming
@@ -99,6 +101,17 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Install components via `npx shadcn@latest add <name>` — the CLI handles Radix dependencies automatically
 - CLI-generated components may differ stylistically from hand-written ones (forwardRef patterns, data-slot) — this is fine, both work
 - CLI may generate components with v3-style HSL variables — convert any raw HSL channel values to `oklch()` after installation
+- CLI-generated components may import `next-themes` or `"use client"` directives — remove these for Vite projects
+- After `npx shadcn@latest add <component>`, check for unwanted dependencies in `package.json` and uninstall (e.g., `next-themes`)
+- Verify generated imports are correct — the CLI has generated circular self-imports (e.g., Sonner importing from its own path instead of the `sonner` package)
+
+### Toast Notifications (Sonner)
+
+- `<Toaster />` mounted in `__root.tsx` inside `AuthProvider`, sibling of `ErrorBoundary` — survives page-level error boundaries
+- Import `toast` from `sonner` (the package), `Toaster` from `@/components/ui/sonner` (the wrapper)
+- Sonner uses a singleton event bus, not React context — placement relative to providers is irrelevant
+- E2E toast assertions: use `page.locator('[data-sonner-toast]').filter({ hasText: /.../ })` — never bare `getByText` (false positives from table content)
+- Unit test mock: `vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))` — named export, not default
 
 ### Playwright E2E
 
@@ -107,6 +120,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Prefer `getByRole('cell', { name: /.../ })` over `getByText()` for table data — text appears in both cell content and row accessible names, causing ambiguity
 - Admin E2E auth: use `page.addInitScript()` to set `sessionStorage` with user including `role` field before page JS runs
 - All E2E auth fixtures in `e2e/fixtures/auth.ts` — `validUser` must include `role` field to match `UserResponseSchema`
+- When a page has multiple Radix `Select` components (e.g., filter + per-row role selector), `getByRole('combobox')` fails Playwright strict mode — disambiguate with `getByRole('combobox', { name: /aria-label pattern/ })`
 
 ### Photo Domains (Web UI)
 

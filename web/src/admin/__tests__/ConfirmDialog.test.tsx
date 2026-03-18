@@ -87,4 +87,56 @@ describe('ConfirmDialog', () => {
     );
     expect(screen.queryByText('Hidden')).not.toBeInTheDocument();
   });
+
+  it('resets confirmText input when dialog reopens', async () => {
+    const { rerender } = render(
+      <ConfirmDialog
+        open={true}
+        onOpenChange={vi.fn()}
+        title="Purge"
+        description="Confirm"
+        confirmText="DELETE"
+        onConfirm={vi.fn()}
+      />
+    );
+    await userEvent.type(screen.getByRole('textbox'), 'DELETE');
+    expect(screen.getByRole('textbox')).toHaveValue('DELETE');
+
+    // Close and reopen — input should reset
+    rerender(
+      <ConfirmDialog
+        open={false}
+        onOpenChange={vi.fn()}
+        title="Purge"
+        description="Confirm"
+        confirmText="DELETE"
+        onConfirm={vi.fn()}
+      />
+    );
+    rerender(
+      <ConfirmDialog
+        open={true}
+        onOpenChange={vi.fn()}
+        title="Purge"
+        description="Confirm"
+        confirmText="DELETE"
+        onConfirm={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('textbox')).toHaveValue('');
+  });
+
+  it('uses custom confirmLabel', () => {
+    render(
+      <ConfirmDialog
+        open={true}
+        onOpenChange={vi.fn()}
+        title="Test"
+        description="Test"
+        confirmLabel="Delete Forever"
+        onConfirm={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Delete Forever' })).toBeInTheDocument();
+  });
 });

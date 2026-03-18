@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { AuthProvider } from '@/auth/AuthProvider';
 import { ApiError } from '@/lib/api-client';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { Toaster } from '@/components/ui/sonner';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
 
@@ -36,6 +37,7 @@ function RootLayout() {
           <ErrorBoundary>
             <Outlet />
           </ErrorBoundary>
+          <Toaster />
         </AuthProvider>
       </GoogleOAuthProvider>
     </QueryClientProvider>

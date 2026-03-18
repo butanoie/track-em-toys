@@ -161,18 +161,31 @@ Scenario: Admin changes a user's role to curator
   Given the admin is viewing the user list
   And there is a user with role "user"
   When the admin selects "curator" from that user's role dropdown
-  Then the role dropdown shows the new role
+  And confirms the action in the dialog
+  Then a success toast shows "Role updated to curator for <email>"
   And the user list refetches to show updated data
 ```
 
-#### Error: Cannot demote the last admin
+#### Error: Cannot demote the last admin (409)
 
 ```gherkin
 Scenario: Admin tries to demote the only admin
   Given there is exactly one admin user
-  When the admin selects "user" from their own role dropdown
-  Then the role change is rejected
-  And an error message is shown: "Cannot perform this action on your own account"
+  When the admin changes another admin's role to "user"
+  And confirms the action in the dialog
+  Then an ErrorBanner is shown with the server's 409 message
+  And no toast notification appears
+```
+
+#### Error: Insufficient permissions (403)
+
+```gherkin
+Scenario: Server rejects role change with 403
+  Given the admin attempts a role change
+  And the server returns 403
+  When the mutation completes
+  Then an ErrorBanner is shown with the server's 403 message
+  And no toast notification appears
 ```
 
 #### Guard: Cannot modify own role
@@ -193,7 +206,8 @@ Scenario: Admin deactivates a user account
   Given a user with status "Active"
   When the admin clicks "Deactivate" on that user's row
   And confirms the action in the dialog
-  Then the user's status changes to "Deactivated"
+  Then a success toast shows "<email> deactivated"
+  And the user's status changes to "Deactivated"
   And the button changes to "Reactivate"
 ```
 
@@ -204,7 +218,8 @@ Scenario: Admin reactivates a deactivated user
   Given a user with status "Deactivated"
   When the admin clicks "Reactivate" on that user's row
   And confirms the action in the dialog
-  Then the user's status changes to "Active"
+  Then a success toast shows "<email> reactivated"
+  And the user's status changes to "Active"
   And the button changes to "Deactivate"
 ```
 
@@ -221,7 +236,7 @@ Scenario: Admin performs GDPR purge on a user
   When the admin types "DELETE" in the confirmation input
   Then the confirm button becomes enabled
   When the admin clicks the confirm button
-  Then the user's data is purged
+  Then a success toast shows "User data purged permanently"
   And the user list refetches
   And the purged user shows status "Purged" with scrubbed data
 ```
@@ -243,6 +258,52 @@ Scenario: Typing wrong text does not enable confirm button
 Scenario: Purge button disabled for tombstone users
   Given a user has already been GDPR-purged
   Then the "Purge" button on their row is disabled
+```
+
+#### Edge Case: Purge dialog stays open on transient error
+
+```gherkin
+Scenario: Network error during purge does not close the dialog
+  Given the GDPR purge confirmation dialog is open
+  And the admin has typed "DELETE"
+  When the server returns a transient error (e.g., 500)
+  Then an error toast shows "Action failed. Please try again."
+  And the purge dialog remains open
+  And the typed "DELETE" confirmation is preserved
+```
+
+### Mutation Feedback
+
+#### Display: Success toast after any mutation
+
+```gherkin
+Scenario: All successful mutations show a toast notification
+  Given the admin completes any mutation (role change, deactivate, reactivate, purge)
+  When the server returns a success response
+  Then a success toast appears with a descriptive message
+  And the confirmation dialog closes
+  And the user list refetches
+```
+
+#### Display: Business-logic errors show ErrorBanner
+
+```gherkin
+Scenario: Server 400/403/404/409 errors show persistent ErrorBanner
+  Given the admin attempts any mutation
+  When the server returns 400, 403, 404, or 409
+  Then an ErrorBanner appears above the table with the server's error message
+  And no toast notification appears
+  And the confirmation dialog closes
+```
+
+#### Display: Transient errors show toast
+
+```gherkin
+Scenario: Network or 500 errors show toast notification
+  Given the admin attempts a non-purge mutation
+  When the server returns a transient error (500, network failure)
+  Then an error toast shows "Action failed. Please try again."
+  And the confirmation dialog closes
 ```
 
 ### Status Display

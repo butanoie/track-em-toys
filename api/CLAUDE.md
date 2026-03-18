@@ -28,6 +28,11 @@ cd api && npm run format:check # Prettier check (CI mode)
 - Array item schemas also need `additionalProperties: false` and `required`
 - NEVER use `void` before a synchronous method call — it suppresses errors silently
 
+### CORS
+
+- `@fastify/cors` v11 defaults to `methods: 'GET,HEAD,POST'` only — PATCH, PUT, DELETE are NOT included by default
+- Explicit `methods` array is set in `server.ts` — when adding a new HTTP method, verify it is listed there
+
 ### Database
 
 - PostgreSQL auto-names inline FK constraints as `{table}_{column}_fkey` — use this pattern when dropping/recreating constraints in migrations

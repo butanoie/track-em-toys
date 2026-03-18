@@ -43,12 +43,8 @@ export function ConfirmDialog({
 
   const isConfirmEnabled = confirmText ? inputValue === confirmText : true;
 
-  function handleOpenChange(nextOpen: boolean) {
-    onOpenChange(nextOpen);
-  }
-
   return (
-    <AlertDialog open={open} onOpenChange={handleOpenChange}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
