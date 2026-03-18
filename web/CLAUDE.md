@@ -55,6 +55,7 @@ cd web && npm run test:e2e    # Playwright e2e tests
 - OAuth-only: Apple Sign-In + Google Sign-In (no email/password auth — no password reset flows needed)
 - Account deletion: "Delete Account" button in settings with explicit confirmation dialog ("Type DELETE to confirm")
 - User role is included in the session data (alongside user profile) from `/auth/me` response
+- Shared test fixtures (mock user, fake JWT, response helpers) live in `src/auth/__tests__/auth-test-helpers.tsx` — update there, not per-test file
 
 ### User Roles & Admin UI
 - Roles: `user`, `curator`, `admin` — included in JWT claims and `/auth/me` response

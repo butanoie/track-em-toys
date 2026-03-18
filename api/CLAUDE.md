@@ -26,6 +26,7 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - NEVER use `void` before a synchronous method call — it suppresses errors silently
 
 ### Database
+- PostgreSQL auto-names inline FK constraints as `{table}_{column}_fkey` — use this pattern when dropping/recreating constraints in migrations
 - NEVER use `SELECT *` or `RETURNING *` — always list explicit columns matching the TypeScript interface
 - Column lists must stay in sync with the corresponding TypeScript type in `src/types/index.ts`
 - ALL DB changes via migration files in `api/db/migrations/`, never direct schema edits
@@ -519,6 +520,8 @@ const { myFn } = await import('./module.js')
 vi.doUnmock('../config.js')
 vi.resetModules()
 ```
+
+When adding a new exported function to a module that is `vi.mock()`'d in tests, you MUST add it to every mock definition for that module — otherwise tests get `No "funcName" export is defined on the mock` runtime errors. Search: `vi.mock.*module-path` across test files.
 
 ### URL sanitization for storage
 ```typescript
