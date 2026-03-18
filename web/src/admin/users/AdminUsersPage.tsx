@@ -7,7 +7,8 @@ import { ConfirmDialog } from '@/admin/components/ConfirmDialog';
 import { Pagination } from '@/admin/components/Pagination';
 import { UserFilters } from './UserFilters';
 import { UserRowActions } from './UserRowActions';
-import { type PendingAction, getMutationErrorMessage } from './types';
+import { type PendingAction, getMutationErrorMessage, isBannerError } from './types';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { AdminUserRow } from '@/lib/zod-schemas';
@@ -115,7 +116,6 @@ export function AdminUsersPage() {
         to: '/admin/users',
         search: (prev) => {
           const next = { ...prev, ...updates };
-          // Remove empty/undefined values
           for (const [key, value] of Object.entries(next)) {
             if (value === '' || value === undefined) {
               delete (next as Record<string, unknown>)[key];
@@ -144,11 +144,35 @@ export function AdminUsersPage() {
     if (!pendingAction) return;
     setActionError(null);
 
-    const onError = (err: Error) => {
-      setActionError(getMutationErrorMessage(err));
-    };
+    const name = pendingAction.user.email ?? pendingAction.user.display_name ?? 'User';
+
     const onSuccess = () => {
       setPendingAction(null);
+      switch (pendingAction.type) {
+        case 'role_change':
+          toast.success(`Role updated to ${pendingAction.newRole} for ${name}`);
+          break;
+        case 'deactivate':
+          toast.success(`${name} deactivated`);
+          break;
+        case 'reactivate':
+          toast.success(`${name} reactivated`);
+          break;
+        case 'purge':
+          toast.success(`User data purged permanently`);
+          break;
+      }
+    };
+
+    const onError = (err: Error) => {
+      if (isBannerError(err)) {
+        setActionError(getMutationErrorMessage(err));
+        setPendingAction(null);
+      } else {
+        toast.error('Action failed. Please try again.');
+        // Keep purge dialog open on transient errors to preserve typed confirmation
+        setPendingAction((prev) => (prev?.type === 'purge' ? prev : null));
+      }
     };
 
     switch (pendingAction.type) {

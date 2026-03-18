@@ -1,11 +1,21 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AdminUsersPage } from '../users/AdminUsersPage';
 import { makeAdminAuthContext, mockRegularUser, mockDeactivatedUser, mockPurgedUser } from './admin-test-helpers';
 import { AuthContext } from '@/auth/AuthProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ApiError } from '@/lib/api-client';
+
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
+import { toast } from 'sonner';
 
 // Mock TanStack Router
 const mockNavigate = vi.fn();
@@ -150,5 +160,148 @@ describe('AdminUsersPage', () => {
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.getByText('Deactivated')).toBeInTheDocument();
     expect(screen.getByText('Purged')).toBeInTheDocument();
+  });
+
+  describe('mutation outcomes', () => {
+    function setupWithData() {
+      mockUseAdminUsers.mockReturnValue({
+        data: { data: [mockRegularUser, mockDeactivatedUser], total_count: 2, limit: 20, offset: 0 },
+        isPending: false,
+        isError: false,
+        error: null,
+      });
+    }
+
+    function simulateMutationSuccess(mutationKey: 'patchRole' | 'deactivate' | 'reactivate' | 'purge') {
+      const mutateCall = mockMutations[mutationKey].mutate.mock.calls[0] as [unknown, { onSuccess: () => void }];
+      expect(mutateCall).toBeDefined();
+      act(() => {
+        mutateCall[1].onSuccess();
+      });
+    }
+
+    function simulateMutationError(mutationKey: 'patchRole' | 'deactivate' | 'reactivate' | 'purge', err: Error) {
+      const mutateCall = mockMutations[mutationKey].mutate.mock.calls[0] as [unknown, { onError: (e: Error) => void }];
+      expect(mutateCall).toBeDefined();
+      act(() => {
+        mutateCall[1].onError(err);
+      });
+    }
+
+    it('shows success toast on deactivate', async () => {
+      setupWithData();
+      renderPage();
+      await userEvent.click(screen.getByRole('button', { name: 'Deactivate' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      simulateMutationSuccess('deactivate');
+      expect(toast.success).toHaveBeenCalledWith('user@example.com deactivated');
+    });
+
+    it('shows success toast on reactivate', async () => {
+      setupWithData();
+      renderPage();
+      await userEvent.click(screen.getByRole('button', { name: 'Reactivate' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      simulateMutationSuccess('reactivate');
+      expect(toast.success).toHaveBeenCalledWith('deactivated@example.com reactivated');
+    });
+
+    it('shows success toast on purge', async () => {
+      setupWithData();
+      renderPage();
+      // Click the first Purge button (for mockRegularUser)
+      await userEvent.click(screen.getAllByRole('button', { name: 'Purge' })[0]!);
+      await userEvent.type(screen.getByRole('textbox'), 'DELETE');
+      await userEvent.click(screen.getByRole('button', { name: 'Purge User' }));
+      simulateMutationSuccess('purge');
+      expect(toast.success).toHaveBeenCalledWith('User data purged permanently');
+    });
+
+    it('shows ErrorBanner for 403 business-logic error', async () => {
+      setupWithData();
+      renderPage();
+      await userEvent.click(screen.getByRole('button', { name: 'Deactivate' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      simulateMutationError(
+        'deactivate',
+        new ApiError(403, { error: 'Cannot perform this action on your own account' })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toHaveTextContent('Cannot perform this action on your own account');
+      });
+      expect(toast.error).not.toHaveBeenCalled();
+    });
+
+    it('shows ErrorBanner for 409 conflict error', async () => {
+      setupWithData();
+      renderPage();
+      await userEvent.click(screen.getByRole('button', { name: 'Deactivate' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      simulateMutationError('deactivate', new ApiError(409, { error: 'Cannot demote the last admin' }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toHaveTextContent('Cannot demote the last admin');
+      });
+      expect(toast.error).not.toHaveBeenCalled();
+    });
+
+    it('shows error toast for transient network error', async () => {
+      setupWithData();
+      renderPage();
+      await userEvent.click(screen.getByRole('button', { name: 'Deactivate' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      simulateMutationError('deactivate', new Error('fetch failed'));
+      expect(toast.error).toHaveBeenCalledWith('Action failed. Please try again.');
+    });
+
+    it('closes dialog on success', async () => {
+      setupWithData();
+      renderPage();
+      await userEvent.click(screen.getByRole('button', { name: 'Deactivate' }));
+      expect(screen.getByText('Deactivate User')).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      simulateMutationSuccess('deactivate');
+      await waitFor(() => {
+        expect(screen.queryByText('Deactivate User')).not.toBeInTheDocument();
+      });
+    });
+
+    it('closes dialog on banner error', async () => {
+      setupWithData();
+      renderPage();
+      await userEvent.click(screen.getByRole('button', { name: 'Deactivate' }));
+      expect(screen.getByText('Deactivate User')).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      simulateMutationError('deactivate', new ApiError(409, { error: 'Conflict' }));
+      await waitFor(() => {
+        expect(screen.queryByText('Deactivate User')).not.toBeInTheDocument();
+      });
+    });
+
+    it('closes dialog on transient error for non-purge action', async () => {
+      setupWithData();
+      renderPage();
+      await userEvent.click(screen.getByRole('button', { name: 'Deactivate' }));
+      expect(screen.getByText('Deactivate User')).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      simulateMutationError('deactivate', new Error('network timeout'));
+      await waitFor(() => {
+        expect(screen.queryByText('Deactivate User')).not.toBeInTheDocument();
+      });
+    });
+
+    it('keeps purge dialog open on transient error to preserve typed confirmation', async () => {
+      setupWithData();
+      renderPage();
+      await userEvent.click(screen.getAllByRole('button', { name: 'Purge' })[0]!);
+      expect(screen.getByText('GDPR Purge — Permanent Deletion')).toBeInTheDocument();
+      await userEvent.type(screen.getByRole('textbox'), 'DELETE');
+      await userEvent.click(screen.getByRole('button', { name: 'Purge User' }));
+      simulateMutationError('purge', new Error('network timeout'));
+      // Dialog stays open
+      expect(screen.getByText('GDPR Purge — Permanent Deletion')).toBeInTheDocument();
+      expect(toast.error).toHaveBeenCalledWith('Action failed. Please try again.');
+    });
   });
 });

@@ -60,8 +60,13 @@ async function doRefresh(): Promise<boolean> {
 function buildHeaders(url: string, init?: RequestInit): Headers {
   const headers = new Headers(init?.headers);
 
-  // Set Content-Type on POST/PUT/PATCH requests
-  if (init?.method && ['POST', 'PUT', 'PATCH'].includes(init.method.toUpperCase()) && !headers.has('Content-Type')) {
+  // Set Content-Type on POST/PUT/PATCH requests only when a body is present
+  if (
+    init?.method &&
+    ['POST', 'PUT', 'PATCH'].includes(init.method.toUpperCase()) &&
+    init.body !== undefined &&
+    !headers.has('Content-Type')
+  ) {
     headers.set('Content-Type', 'application/json');
   }
 
