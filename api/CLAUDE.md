@@ -48,7 +48,7 @@ cd api && npm run lint:fix    # ESLint with auto-fix
 - App checks `u.deleted_at IS NOT NULL` on JOINs to display "Deleted user" instead of the scrubbed fields
 - Auth data (`refresh_tokens`, `oauth_accounts`) is hard-deleted during scrub — no need for tombstone on auth tables
 - GDPR purge must also scrub `auth_events` PII (`ip_address`, `user_agent`, `metadata`) — IP addresses and user agents are personal data under GDPR
-- **Known tech debt:** `oauth_accounts` and `refresh_tokens` have `ON DELETE CASCADE` from migrations 002/003 (pre-tombstone). These never fire since the users row is never deleted. Should be changed to `ON DELETE RESTRICT` in a future migration.
+- `oauth_accounts` and `refresh_tokens` use `ON DELETE RESTRICT` (fixed in migration 021 from legacy CASCADE)
 - When adding a new table with a user FK, no special ON DELETE clause is needed (default RESTRICT is correct)
 
 ### User Roles & Authorization

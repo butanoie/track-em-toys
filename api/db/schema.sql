@@ -1330,7 +1330,7 @@ ALTER TABLE ONLY public.items
 --
 
 ALTER TABLE ONLY public.oauth_accounts
-    ADD CONSTRAINT oauth_accounts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+    ADD CONSTRAINT oauth_accounts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
 
 
 --
@@ -1338,7 +1338,7 @@ ALTER TABLE ONLY public.oauth_accounts
 --
 
 ALTER TABLE ONLY public.refresh_tokens
-    ADD CONSTRAINT refresh_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+    ADD CONSTRAINT refresh_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
 
 
 --
@@ -1404,4 +1404,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('017'),
     ('018'),
     ('019'),
-    ('020');
+    ('020'),
+    ('021');

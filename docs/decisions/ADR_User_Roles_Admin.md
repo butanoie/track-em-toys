@@ -79,7 +79,7 @@ All routes require `preHandler: [fastify.authenticate, fastify.requireRole('admi
 5. `UPDATE auth_events SET ip_address=NULL, user_agent=NULL, metadata=NULL WHERE user_id = $1`
 6. Log `user_purged` audit event with actor in metadata
 
-Note: `ON DELETE CASCADE` on `oauth_accounts` and `refresh_tokens` is legacy — never fires since users row is preserved as tombstone. Explicit DELETEs are required.
+Note: `oauth_accounts` and `refresh_tokens` use `ON DELETE RESTRICT` (migration 021 fixed legacy CASCADE). Explicit DELETEs in the purge transaction are required.
 
 ### Admin Audit Events
 
@@ -118,5 +118,5 @@ Merged the separate `getUserAccountStatus` + `getUserRoleForRefresh` queries int
 
 ## Known Tech Debt
 
-- `oauth_accounts` and `refresh_tokens` have `ON DELETE CASCADE` on `user_id` FK — this never fires (tombstone pattern). Should be changed to `ON DELETE RESTRICT` in a future migration.
+- `oauth_accounts` and `refresh_tokens` legacy `ON DELETE CASCADE` fixed to `ON DELETE RESTRICT` in migration 021.
 - Post-refresh web cache staleness: `sessionStorage` may show stale role until next sign-in. Acceptable since server-side JWT is always fresh.
