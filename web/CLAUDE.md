@@ -72,7 +72,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Role-aware navigation: admins see "Admin" link in the shared `AppHeader`
 - Admin pages live in `src/admin/` with sub-directories per entity (`users/`, future `catalog/`)
 - Admin API hooks: `src/admin/hooks/` for shared hooks, entity-specific code in `src/admin/users/`
-- Admin test fixtures: `src/admin/__tests__/admin-test-helpers.ts` — separate from auth test helpers
+- Admin test fixtures: `src/admin/__tests__/admin-test-helpers.tsx` — separate from auth test helpers (`.tsx` because it contains JSX wrapper components)
 - Shared `AppHeader` component (`src/components/AppHeader.tsx`) replaces duplicate header code in Dashboard and Settings
 - Admin data table uses `placeholderData: keepPreviousData` for smooth pagination (no skeleton flash between pages)
 - URL search params (not React state) for admin filter/pagination state — bookmarkable, survives refresh

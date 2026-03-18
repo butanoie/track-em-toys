@@ -62,8 +62,7 @@ function formatDate(iso: string): string {
   }
 }
 
-function pendingActionTitle(action: PendingAction | null): string {
-  if (!action) return '';
+function pendingActionTitle(action: PendingAction): string {
   switch (action.type) {
     case 'role_change':
       return 'Change User Role';
@@ -76,8 +75,7 @@ function pendingActionTitle(action: PendingAction | null): string {
   }
 }
 
-function pendingActionDescription(action: PendingAction | null): string {
-  if (!action) return '';
+function pendingActionDescription(action: PendingAction): string {
   const name = action.user.email ?? action.user.display_name ?? 'this user';
   switch (action.type) {
     case 'role_change':
@@ -97,19 +95,16 @@ export function AdminUsersPage() {
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const filters = {
-    email: search.email ?? '',
-    role: search.role ?? '',
-    limit: search.limit ?? DEFAULT_LIMIT,
-    offset: search.offset ?? 0,
-  };
+  const limit = search.limit ?? DEFAULT_LIMIT;
+  const offset = search.offset ?? 0;
+  const emailFilter = search.email ?? '';
+  const roleFilter = search.role ?? '';
 
-  const roleParam = search.role;
   const { data, isPending, isError, error } = useAdminUsers({
-    role: roleParam,
-    email: filters.email || undefined,
-    limit: filters.limit,
-    offset: filters.offset,
+    role: search.role,
+    email: search.email || undefined,
+    limit,
+    offset,
   });
 
   const mutations = useAdminUserMutations();
@@ -189,8 +184,8 @@ export function AdminUsersPage() {
         {actionError && <ErrorBanner message={actionError} />}
 
         <UserFilters
-          email={filters.email}
-          role={filters.role}
+          email={emailFilter}
+          role={roleFilter}
           onEmailChange={handleEmailChange}
           onRoleChange={handleRoleChange}
         />
@@ -272,19 +267,21 @@ export function AdminUsersPage() {
         )}
       </div>
 
-      <ConfirmDialog
-        open={pendingAction !== null}
-        onOpenChange={(open) => {
-          if (!open) setPendingAction(null);
-        }}
-        title={pendingActionTitle(pendingAction)}
-        description={pendingActionDescription(pendingAction)}
-        confirmText={pendingAction?.type === 'purge' ? 'DELETE' : undefined}
-        confirmLabel={pendingAction?.type === 'purge' ? 'Purge User' : 'Confirm'}
-        variant={pendingAction?.type === 'purge' ? 'destructive' : 'default'}
-        onConfirm={handleConfirm}
-        isPending={isActionPending}
-      />
+      {pendingAction && (
+        <ConfirmDialog
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) setPendingAction(null);
+          }}
+          title={pendingActionTitle(pendingAction)}
+          description={pendingActionDescription(pendingAction)}
+          confirmText={pendingAction.type === 'purge' ? 'DELETE' : undefined}
+          confirmLabel={pendingAction.type === 'purge' ? 'Purge User' : 'Confirm'}
+          variant={pendingAction.type === 'purge' ? 'destructive' : 'default'}
+          onConfirm={handleConfirm}
+          isPending={isActionPending}
+        />
+      )}
     </>
   );
 }

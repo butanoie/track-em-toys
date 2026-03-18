@@ -1,8 +1,7 @@
-import { apiFetch, apiFetchJson, ApiError } from '@/lib/api-client';
+import { apiFetch, apiFetchJson, throwApiError } from '@/lib/api-client';
 import {
   AdminUsersListSchema,
   AdminUserRowSchema,
-  ApiErrorSchema,
   type AdminUsersList,
   type AdminUserRow,
   type UserRole,
@@ -45,18 +44,6 @@ export async function reactivateUser(id: string): Promise<AdminUserRow> {
 }
 
 export async function gdprPurgeUser(id: string): Promise<void> {
-  const response = await apiFetch(`/admin/users/${id}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) {
-    let body: { error: string };
-    try {
-      const raw: unknown = await response.json();
-      const parsed = ApiErrorSchema.safeParse(raw);
-      body = parsed.success ? parsed.data : { error: `HTTP ${response.status}` };
-    } catch {
-      body = { error: `HTTP ${response.status}` };
-    }
-    throw new ApiError(response.status, body);
-  }
+  const response = await apiFetch(`/admin/users/${id}`, { method: 'DELETE' });
+  if (!response.ok) await throwApiError(response);
 }

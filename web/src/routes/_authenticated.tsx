@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@/auth/useAuth';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: () => {
@@ -9,18 +10,6 @@ export const Route = createFileRoute('/_authenticated')({
   },
   component: AuthenticatedLayout,
 });
-
-function LoadingSpinner() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div
-        role="status"
-        aria-label="Loading"
-        className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
-      />
-    </div>
-  );
-}
 
 function AuthenticatedLayout() {
   const { isAuthenticated, isLoading } = useAuth();

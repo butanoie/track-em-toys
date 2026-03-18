@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -36,10 +36,14 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const [inputValue, setInputValue] = useState('');
 
+  // Reset input when dialog opens or closes (safe for both mount/unmount and persistent patterns)
+  useEffect(() => {
+    setInputValue('');
+  }, [open]);
+
   const isConfirmEnabled = confirmText ? inputValue === confirmText : true;
 
   function handleOpenChange(nextOpen: boolean) {
-    setInputValue('');
     onOpenChange(nextOpen);
   }
 

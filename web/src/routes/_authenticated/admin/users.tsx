@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { AdminUsersPage } from '@/admin/users/AdminUsersPage';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 const adminUsersSearchSchema = z.object({
   role: z.enum(['user', 'curator', 'admin']).optional().catch(undefined),
@@ -11,18 +12,6 @@ const adminUsersSearchSchema = z.object({
 
 export const Route = createFileRoute('/_authenticated/admin/users')({
   validateSearch: adminUsersSearchSchema,
-  pendingComponent: AdminUsersPending,
+  pendingComponent: () => <LoadingSpinner className="py-16" />,
   component: AdminUsersPage,
 });
-
-function AdminUsersPending() {
-  return (
-    <div className="flex items-center justify-center py-16">
-      <div
-        role="status"
-        aria-label="Loading"
-        className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
-      />
-    </div>
-  );
-}

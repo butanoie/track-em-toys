@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, Link, useRouterState } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@/auth/useAuth';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Users, ArrowLeft } from 'lucide-react';
@@ -15,21 +16,9 @@ const NAV_ITEMS = [
   // Future: { to: '/admin/system', label: 'System', icon: Settings },
 ] as const;
 
-function LoadingSpinner() {
-  return (
-    <div className="flex-1 flex items-center justify-center">
-      <div
-        role="status"
-        aria-label="Loading"
-        className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
-      />
-    </div>
-  );
-}
-
 function AdminLayout() {
   const { user, isLoading, logout } = useAuth();
-  const location = useRouterState({ select: (s) => s.location });
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
 
   const navigateRef = useRef(navigate);
@@ -41,7 +30,7 @@ function AdminLayout() {
     }
   }, [isLoading, user]);
 
-  if (isLoading || !user || user.role !== 'admin') return <LoadingSpinner />;
+  if (isLoading || !user || user.role !== 'admin') return <LoadingSpinner className="flex-1" />;
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -53,7 +42,7 @@ function AdminLayout() {
         <Separator />
         <nav className="flex-1 p-2 space-y-1" aria-label="Admin navigation">
           {NAV_ITEMS.map((item) => {
-            const isActive = location.pathname.startsWith(item.to);
+            const isActive = pathname.startsWith(item.to);
             const Icon = item.icon;
             return (
               <Link

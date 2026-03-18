@@ -1,8 +1,7 @@
-import { z } from 'zod';
 import { useAuth } from '@/auth/useAuth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import type { AdminUserRow } from '@/lib/zod-schemas';
+import { AdminUserRowSchema, type AdminUserRow } from '@/lib/zod-schemas';
 import type { AdminUserMutations } from '@/admin/hooks/useAdminUserMutations';
 import type { PendingAction } from './types';
 
@@ -12,7 +11,7 @@ interface UserRowActionsProps {
   onAction: (action: PendingAction) => void;
 }
 
-const roleSchema = z.enum(['user', 'curator', 'admin']);
+const roleSchema = AdminUserRowSchema.shape.role;
 
 export function UserRowActions({ row, mutations, onAction }: UserRowActionsProps) {
   const { user: currentUser } = useAuth();
