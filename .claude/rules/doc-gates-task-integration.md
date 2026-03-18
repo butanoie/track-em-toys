@@ -1,6 +1,7 @@
 When creating a task list for non-trivial feature development (via /feature-dev or manual tracking), documentation gates MUST appear as explicit tasks in the task list — not just as behavioral reminders.
 
 Required gate tasks:
+
 1. **"Architecture Review & Audit"** — after Architecture Design, before documentation. Blocks documentation. Review the design for consistency, security, data model correctness, dependency conflicts, edge cases, and scope creep.
 2. **"Post-Architecture Documentation Gate"** — after Architecture Review & Audit passes, before Implementation. Blocks implementation.
 3. **"Verification Gate: run /run-checks"** — after Implementation, before Quality Review.

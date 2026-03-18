@@ -20,6 +20,7 @@ ml/
 ## Training Script Requirements
 
 Every training script must include a header comment documenting:
+
 - **Model name**: What the trained model will be called
 - **Input format**: Expected image dimensions, color space, folder structure
 - **Output**: Model filename and output directory (`models/`)

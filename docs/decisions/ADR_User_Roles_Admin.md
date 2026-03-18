@@ -18,11 +18,11 @@ The app needs role-based access control to gate catalog write operations (Phase 
 
 Simple hierarchical RBAC with 3 roles stored as a single `TEXT` column:
 
-| Role | Hierarchy | Capabilities |
-|------|-----------|-------------|
-| `user` | 0 | Browse catalog (read-only) |
-| `curator` | 1 | + catalog write operations (items, photos, edits) |
-| `admin` | 2 | + user management, role assignment, deactivation, GDPR purge |
+| Role      | Hierarchy | Capabilities                                                 |
+| --------- | --------- | ------------------------------------------------------------ |
+| `user`    | 0         | Browse catalog (read-only)                                   |
+| `curator` | 1         | + catalog write operations (items, photos, edits)            |
+| `admin`   | 2         | + user management, role assignment, deactivation, GDPR purge |
 
 `requireRole('curator')` grants access to curators AND admins (hierarchy comparison). Single-role model — no multi-role join table.
 
@@ -53,13 +53,13 @@ Simple hierarchical RBAC with 3 roles stored as a single `TEXT` column:
 
 All routes require `preHandler: [fastify.authenticate, fastify.requireRole('admin')]`.
 
-| Method | Path | Purpose | Rate Limit |
-|--------|------|---------|------------|
-| GET | `/admin/users` | Paginated user list, filterable by role/email | 30/min |
-| PATCH | `/admin/users/:id/role` | Role assignment | 20/min |
-| POST | `/admin/users/:id/deactivate` | Deactivate user + revoke tokens | 20/min |
-| POST | `/admin/users/:id/reactivate` | Reactivate user | 20/min |
-| DELETE | `/admin/users/:id` | GDPR purge (tombstone) | 5/min |
+| Method | Path                          | Purpose                                       | Rate Limit |
+| ------ | ----------------------------- | --------------------------------------------- | ---------- |
+| GET    | `/admin/users`                | Paginated user list, filterable by role/email | 30/min     |
+| PATCH  | `/admin/users/:id/role`       | Role assignment                               | 20/min     |
+| POST   | `/admin/users/:id/deactivate` | Deactivate user + revoke tokens               | 20/min     |
+| POST   | `/admin/users/:id/reactivate` | Reactivate user                               | 20/min     |
+| DELETE | `/admin/users/:id`            | GDPR purge (tombstone)                        | 5/min      |
 
 ### Guards
 
@@ -84,6 +84,7 @@ Note: `oauth_accounts` and `refresh_tokens` use `ON DELETE RESTRICT` (migration 
 ### Admin Audit Events
 
 Admin mutations log to `auth_events`:
+
 - Role change → `role_changed` (metadata: `{ initiated_by, old_role, new_role }`)
 - Reactivation → `account_reactivated` (metadata: `{ initiated_by }`)
 - GDPR purge → `user_purged` (metadata: `{ initiated_by }`)

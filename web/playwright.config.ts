@@ -1,8 +1,8 @@
-import { defineConfig, devices } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test';
 
 // Vite preview inherits HTTPS from the dev server config (self-signed certs).
 // Playwright must connect via HTTPS and ignore certificate errors.
-const baseURL = 'https://localhost:4173'
+const baseURL = 'https://localhost:4173';
 
 export default defineConfig({
   testDir: './e2e',
@@ -28,4 +28,4 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     ignoreHTTPSErrors: true,
   },
-})
+});

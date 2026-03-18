@@ -9,47 +9,56 @@
  *   import { mockQuery, setupCatalogTest } from '../shared/test-setup.js'
  *   const { buildServer } = await setupCatalogTest()
  */
-import { vi } from 'vitest'
+import { vi } from 'vitest';
 
 const { testPrivatePem, testPublicPem } = vi.hoisted(() => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports -- required inside vi.hoisted
-  const nodeCrypto = require('node:crypto') as typeof import('node:crypto')
-  const { privateKey, publicKey } = nodeCrypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' })
+  const nodeCrypto = require('node:crypto') as typeof import('node:crypto');
+  const { privateKey, publicKey } = nodeCrypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
   return {
     testPrivatePem: privateKey.export({ type: 'pkcs8', format: 'pem' }) as string,
     testPublicPem: publicKey.export({ type: 'spki', format: 'pem' }) as string,
-  }
-})
+  };
+});
 
 vi.mock('../../config.js', () => ({
   config: {
-    port: 3000, corsOrigin: '*', trustProxy: false, secureCookies: false,
+    port: 3000,
+    corsOrigin: '*',
+    trustProxy: false,
+    secureCookies: false,
     cookieSecret: 'test-cookie-secret-32-bytes-long!!',
-    logLevel: 'silent', nodeEnv: 'test',
+    logLevel: 'silent',
+    nodeEnv: 'test',
     database: { url: 'postgresql://test:test@localhost/test', poolMax: 2 },
     jwt: {
-      privateKey: testPrivatePem, publicKey: testPublicPem,
-      keyId: 'test-kid', issuer: 'test', audience: 'test', accessTokenExpiry: '15m',
+      privateKey: testPrivatePem,
+      publicKey: testPublicPem,
+      keyId: 'test-kid',
+      issuer: 'test',
+      audience: 'test',
+      accessTokenExpiry: '15m',
     },
-    apple: { bundleId: 'com.test' }, google: { webClientId: 'test' },
+    apple: { bundleId: 'com.test' },
+    google: { webClientId: 'test' },
   },
-}))
+}));
 
-export const mockQuery = vi.fn()
+export const mockQuery = vi.fn();
 vi.mock('../../db/pool.js', () => ({
   pool: { query: mockQuery, connect: vi.fn(), on: vi.fn(), end: vi.fn() },
   withTransaction: vi.fn(),
-}))
+}));
 
 vi.mock('../../auth/key-store.js', () => ({
   initKeyStore: vi.fn(),
   getCurrentKid: vi.fn().mockReturnValue('test-kid'),
   getPublicKeyPem: vi.fn().mockReturnValue(testPublicPem),
-}))
+}));
 
 /**
  * Import the server module with mocked dependencies.
  */
 export async function setupCatalogTest() {
-  return import('../../server.js')
+  return import('../../server.js');
 }

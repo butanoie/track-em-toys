@@ -1,82 +1,82 @@
-import { SESSION_KEYS } from '@/lib/auth-store'
+import { SESSION_KEYS } from '@/lib/auth-store';
 
 // Apple JS SDK type declarations (loaded dynamically via <script> tag)
 
 interface AppleSignInAuthorization {
-  code: string
-  id_token: string
-  state: string
+  code: string;
+  id_token: string;
+  state: string;
 }
 
 interface AppleSignInUser {
-  email: string
+  email: string;
   name: {
-    firstName: string
-    lastName: string
-  }
+    firstName: string;
+    lastName: string;
+  };
 }
 
 interface AppleSignInResponse {
-  authorization: AppleSignInAuthorization
-  user?: AppleSignInUser
+  authorization: AppleSignInAuthorization;
+  user?: AppleSignInUser;
 }
 
 declare global {
   interface Window {
     AppleID?: {
       auth: {
-        init: (config: AppleIDAuthConfig) => void
-        signIn: () => Promise<AppleSignInResponse>
-      }
-    }
+        init: (config: AppleIDAuthConfig) => void;
+        signIn: () => Promise<AppleSignInResponse>;
+      };
+    };
   }
 }
 
 interface AppleIDAuthConfig {
-  clientId: string
-  scope: string
-  redirectURI: string
-  state: string
-  nonce: string
-  usePopup: boolean
+  clientId: string;
+  scope: string;
+  redirectURI: string;
+  state: string;
+  nonce: string;
+  usePopup: boolean;
 }
 
 export interface AppleSignInResult {
-  idToken: string
-  rawNonce: string
-  userName?: string
+  idToken: string;
+  rawNonce: string;
+  userName?: string;
 }
 
-const APPLE_SDK_URL = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js'
+const APPLE_SDK_URL = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
 
 // Tracks the in-flight SDK load so concurrent calls share the same promise
 // and only one <script> element is ever appended.
-let sdkLoadPromise: Promise<void> | null = null
+let sdkLoadPromise: Promise<void> | null = null;
 
 function loadAppleSDK(): Promise<void> {
-  if (window.AppleID) return Promise.resolve()
-  if (sdkLoadPromise) return sdkLoadPromise   // deduplicate concurrent calls
+  if (window.AppleID) return Promise.resolve();
+  if (sdkLoadPromise) return sdkLoadPromise; // deduplicate concurrent calls
   sdkLoadPromise = new Promise<void>((resolve, reject) => {
-    const script = document.createElement('script')
-    script.src = APPLE_SDK_URL
-    script.async = true
+    const script = document.createElement('script');
+    script.src = APPLE_SDK_URL;
+    script.async = true;
     // Apple does not publish versioned SRI hashes for their JS SDK, so a full
     // `integrity` attribute is not possible. The recommended mitigation is a
     // strict CSP: script-src 'self' https://appleid.cdn-apple.com
-    script.crossOrigin = 'anonymous'
-    script.onload = () => resolve()
+    script.crossOrigin = 'anonymous';
+    script.onload = () => resolve();
     script.onerror = () => {
-      sdkLoadPromise = null  // allow retry on load failure
-      reject(new Error('Failed to load Apple Sign-In SDK'))
-    }
-    document.head.appendChild(script)
-  })
-  return sdkLoadPromise
+      sdkLoadPromise = null; // allow retry on load failure
+      reject(new Error('Failed to load Apple Sign-In SDK'));
+    };
+    document.head.appendChild(script);
+  });
+  return sdkLoadPromise;
 }
 
 function generateNonce(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(32))
-  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 /**
@@ -88,21 +88,19 @@ function generateNonce(): string {
  * local variables (no sessionStorage needed for CSRF tokens).
  */
 export async function initiateAppleSignIn(): Promise<AppleSignInResult> {
-  const clientId: string | undefined = import.meta.env.VITE_APPLE_SERVICES_ID || undefined
-  const redirectURI: string | undefined = import.meta.env.VITE_APPLE_REDIRECT_URI || undefined
+  const clientId: string | undefined = import.meta.env.VITE_APPLE_SERVICES_ID || undefined;
+  const redirectURI: string | undefined = import.meta.env.VITE_APPLE_REDIRECT_URI || undefined;
   if (!clientId || !redirectURI) {
-    throw new Error(
-      'Apple Sign-In is not configured. Set VITE_APPLE_SERVICES_ID and VITE_APPLE_REDIRECT_URI.'
-    )
+    throw new Error('Apple Sign-In is not configured. Set VITE_APPLE_SERVICES_ID and VITE_APPLE_REDIRECT_URI.');
   }
 
-  await loadAppleSDK()
+  await loadAppleSDK();
 
-  const raw = generateNonce()
-  const state = crypto.randomUUID()
+  const raw = generateNonce();
+  const state = crypto.randomUUID();
 
   if (!window.AppleID) {
-    throw new Error('Apple JS SDK not loaded')
+    throw new Error('Apple JS SDK not loaded');
   }
 
   // Pass the raw nonce — Apple's JS SDK hashes it (SHA-256) before embedding
@@ -115,35 +113,35 @@ export async function initiateAppleSignIn(): Promise<AppleSignInResult> {
     state,
     nonce: raw,
     usePopup: true,
-  })
+  });
 
-  const response = await window.AppleID.auth.signIn()
+  const response = await window.AppleID.auth.signIn();
 
   // CSRF state validation — fail-closed: reject when either value is absent or mismatched
   if (!response.authorization.state || response.authorization.state !== state) {
-    throw new Error('Security check failed: state mismatch.')
+    throw new Error('Security check failed: state mismatch.');
   }
 
   // Extract user name (Apple only provides this on the first authorization)
-  let userName: string | undefined
+  let userName: string | undefined;
   if (response.user?.name) {
-    const { firstName, lastName } = response.user.name
-    const parts = [firstName, lastName].filter(Boolean)
+    const { firstName, lastName } = response.user.name;
+    const parts = [firstName, lastName].filter(Boolean);
     if (parts.length > 0) {
-      userName = parts.join(' ')
+      userName = parts.join(' ');
       // Cache for retry — Apple won't send the name again on subsequent sign-ins
-      sessionStorage.setItem(SESSION_KEYS.appleUserName, userName)
+      sessionStorage.setItem(SESSION_KEYS.appleUserName, userName);
     }
   }
 
   // Fall back to previously cached name if Apple didn't provide it this time
   if (!userName) {
-    userName = sessionStorage.getItem(SESSION_KEYS.appleUserName) ?? undefined
+    userName = sessionStorage.getItem(SESSION_KEYS.appleUserName) ?? undefined;
   }
 
   return {
     idToken: response.authorization.id_token,
     rawNonce: raw,
     userName,
-  }
+  };
 }

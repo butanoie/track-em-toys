@@ -56,4 +56,3 @@ cd web && npm run test:e2e    # Playwright e2e tests
 - Seed data uses slug-based FK references — never integer IDs
 - OAuth-only authentication (Apple + Google Sign-In)
 - Tests are mandatory for all code changes
-

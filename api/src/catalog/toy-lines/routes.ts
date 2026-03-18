@@ -1,10 +1,15 @@
-import type { FastifyInstance } from 'fastify'
-import { listToyLines, getToyLineBySlug } from './queries.js'
-import type { ToyLineRow } from './queries.js'
-import { listToyLinesSchema, getToyLineSchema } from './schemas.js'
+import type { FastifyInstance } from 'fastify';
+import { listToyLines, getToyLineBySlug } from './queries.js';
+import type { ToyLineRow } from './queries.js';
+import { listToyLinesSchema, getToyLineSchema } from './schemas.js';
 
-interface FranchiseParams { franchise: string }
-interface FranchiseSlugParams { franchise: string; slug: string }
+interface FranchiseParams {
+  franchise: string;
+}
+interface FranchiseSlugParams {
+  franchise: string;
+  slug: string;
+}
 
 /**
  * Format a toy line row for responses.
@@ -22,10 +27,10 @@ function formatToyLine(row: ToyLineRow) {
     description: row.description,
     created_at: row.created_at,
     updated_at: row.updated_at,
-  }
+  };
 }
 
-const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const
+const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const;
 
 /**
  * Register toy line catalog routes.
@@ -39,18 +44,18 @@ export async function toyLineRoutes(fastify: FastifyInstance, _opts: object): Pr
     '/',
     { schema: listToyLinesSchema, config: rateLimitConfig },
     async (request) => {
-      const rows = await listToyLines(request.params.franchise)
-      return { data: rows.map(formatToyLine) }
-    },
-  )
+      const rows = await listToyLines(request.params.franchise);
+      return { data: rows.map(formatToyLine) };
+    }
+  );
 
   fastify.get<{ Params: FranchiseSlugParams }>(
     '/:slug',
     { schema: getToyLineSchema, config: rateLimitConfig },
     async (request, reply) => {
-      const row = await getToyLineBySlug(request.params.franchise, request.params.slug)
-      if (!row) return reply.code(404).send({ error: 'Toy line not found' })
-      return formatToyLine(row)
-    },
-  )
+      const row = await getToyLineBySlug(request.params.franchise, request.params.slug);
+      if (!row) return reply.code(404).send({ error: 'Toy line not found' });
+      return formatToyLine(row);
+    }
+  );
 }

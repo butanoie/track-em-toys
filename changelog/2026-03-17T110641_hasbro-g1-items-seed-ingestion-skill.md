@@ -19,9 +19,11 @@ Major catalog data expansion: consolidated G1 character files into a single 439-
 Merged 10 per-season/per-source character files into a single `g1-characters.json` with 439 characters. This simplifies the seed directory structure and eliminates cross-file duplication.
 
 **Created:**
+
 - `api/db/seed/characters/g1-characters.json` — 439 characters across NA cartoon, toy-only, JP Headmasters, Masterforce, Victory, and Zone (7,132 lines)
 
 **Deleted (10 files):**
+
 - `api/db/seed/characters/g1-season1.json`
 - `api/db/seed/characters/g1-season2.json`
 - `api/db/seed/characters/g1-season3.json`
@@ -34,6 +36,7 @@ Merged 10 per-season/per-source character files into a single `g1-characters.jso
 - `api/db/seed/characters/jp-zone.json`
 
 Notable additions:
+
 - **Jetfire** — split from Skyfire as a separate character (cartoon vs Macross-licensed toy are distinct entities in the collector market)
 - **Guardian Robot** — previously missing, referenced by FansToys FT-20G
 
@@ -42,6 +45,7 @@ Notable additions:
 Created `g1-appearances.json` with 439+ appearances providing 1:1 character coverage across all G1 media sources, plus specialized toy-deco appearances.
 
 **Created:**
+
 - `api/db/seed/appearances/g1-appearances.json` — 5,596 lines covering:
   - NA cartoon appearances (TV)
   - Toy-only characters with no media appearance
@@ -56,6 +60,7 @@ Created `g1-appearances.json` with 439+ appearances providing 1:1 character cove
 Seeded the complete Hasbro G1 toy line across 7 years with product codes sourced from TFArchive's Hasbro item number database.
 
 **Created:**
+
 - `api/db/seed/items/hasbro/g1-items.json` — 277 items (5,310 lines)
 
 **Coverage by year:**
@@ -72,6 +77,7 @@ Seeded the complete Hasbro G1 toy line across 7 years with product codes sourced
 **Flagship items:** Fortress Maximus, Scorponok, Trypticon, combiner giftsets (Predaking, Bruticus, Abominus, Piranacon)
 
 **Modeling decisions:**
+
 - Cassette 2-packs modeled as single items with primary character FK
 - Toy-specific appearance slugs used where toy and cartoon designs diverge
 - `character_appearance_slug` FK links each item to its specific visual representation
@@ -81,6 +87,7 @@ Seeded the complete Hasbro G1 toy line across 7 years with product codes sourced
 Renamed `api/db/seed/manufacturers/` → `api/db/seed/items/` to better reflect content semantics (items organized by manufacturer, not manufacturer data).
 
 **Moved:**
+
 - `api/db/seed/manufacturers/fanstoys/fanstoys.json` → `api/db/seed/items/fanstoys/fanstoys.json` (118 items updated with `character_appearance_slug`)
 
 ### 5. Seed Ingestion Script
@@ -88,6 +95,7 @@ Renamed `api/db/seed/manufacturers/` → `api/db/seed/items/` to better reflect 
 Built the complete seed-to-database pipeline that resolves slug-based FK references to UUIDs and upserts data into PostgreSQL.
 
 **Created:**
+
 - `api/db/seed/ingest.ts` — 695-line TypeScript script with:
   - **Slug resolution**: `buildSlugMap()` loads all existing slugs from DB, `resolveSlug()` / `resolveOptionalSlug()` map slug strings to UUIDs at insert time
   - **Dependency-ordered upserts**: continuity families → factions → sub-groups → manufacturers → toy lines → characters (pass 1) → character sub-groups → characters (pass 2 for cross-refs) → appearances → items
@@ -99,6 +107,7 @@ Built the complete seed-to-database pipeline that resolves slug-based FK referen
 - `api/tsconfig.seed.json` — Dedicated TypeScript config for type-checking the ingest script separately from the main API
 
 **npm scripts added:**
+
 - `npm run seed` — Run ingest script (upsert mode)
 - `npm run seed:purge` — Truncate + re-seed (requires `--confirm`)
 - `npm run typecheck:seed` — Type-check ingest script independently
@@ -108,9 +117,11 @@ Built the complete seed-to-database pipeline that resolves slug-based FK referen
 Added a database-level CHECK constraint on `character_appearances.source_media` to enforce valid values. Merged "Comic" and "Manga" into a single "Comic/Manga" value.
 
 **Created:**
+
 - `api/db/migrations/014_add_source_media_check.sql` — Adds CHECK constraint: `TV`, `Comic/Manga`, `Movie`, `OVA`, `Toy-only`, `Video Game`
 
 **Modified:**
+
 - `api/db/schema.sql` — Updated schema dump to reflect new constraint
 
 ### 7. Research-Catalog Skill
@@ -118,6 +129,7 @@ Added a database-level CHECK constraint on `character_appearances.source_media` 
 Created a Claude Code skill for researching Transformers toy and character data from web sources and generating seed JSON files.
 
 **Created:**
+
 - `.claude/skills/research-catalog/SKILL.md` — 649-line skill document covering:
   - TFArchive as primary source for Hasbro product codes
   - Appearance slug selection table (when to use toy vs cartoon appearance)
@@ -130,11 +142,13 @@ Created a Claude Code skill for researching Transformers toy and character data 
 Extracted three behavioral rules from CLAUDE.md into dedicated `.claude/rules/` files for better enforcement by Claude Code.
 
 **Created:**
+
 - `.claude/rules/commit-discipline.md` — Never commit without explicit instruction
 - `.claude/rules/doc-gates-task-integration.md` — Documentation gates must appear as explicit tasks
 - `.claude/rules/gh-issues-no-auto-close.md` — Never auto-close GitHub issues
 
 **Modified:**
+
 - `CLAUDE.md` — Consolidated documentation accuracy section, removed rules now in dedicated files
 
 ---
@@ -162,6 +176,7 @@ Items reference a specific `character_appearance_slug` to indicate which visual 
 ## Validation & Testing
 
 **Modified:**
+
 - `api/src/db/seed-validation.test.ts` — Updated to reflect:
   - Consolidated character file (single `g1-characters.json` replaces 10 files)
   - New appearance validation checks
@@ -183,6 +198,7 @@ Items reference a specific `character_appearance_slug` to indicate which visual 
 ## Related Files
 
 **Created (8):**
+
 - `api/db/seed/characters/g1-characters.json`
 - `api/db/seed/appearances/g1-appearances.json`
 - `api/db/seed/items/hasbro/g1-items.json`
@@ -193,6 +209,7 @@ Items reference a specific `character_appearance_slug` to indicate which visual 
 - `.claude/rules/commit-discipline.md`, `doc-gates-task-integration.md`, `gh-issues-no-auto-close.md`
 
 **Modified (5):**
+
 - `api/db/seed/items/fanstoys/fanstoys.json` (moved from `manufacturers/`, added appearance slugs)
 - `api/db/seed/README.md`
 - `api/db/schema.sql`
@@ -201,6 +218,7 @@ Items reference a specific `character_appearance_slug` to indicate which visual 
 - `CLAUDE.md`
 
 **Deleted (10):**
+
 - `api/db/seed/characters/g1-season1.json` through `g1-season4.json`
 - `api/db/seed/characters/g1-movie.json`, `g1-toy-only.json`
 - `api/db/seed/characters/jp-headmasters.json`, `jp-masterforce.json`, `jp-victory.json`, `jp-zone.json`
@@ -209,23 +227,23 @@ Items reference a specific `character_appearance_slug` to indicate which visual 
 
 ## Summary Statistics
 
-| Metric | Count |
-|--------|-------|
-| Files created | 11 |
-| Files modified | 6 |
-| Files deleted | 10 |
-| Lines added | ~19,758 |
-| Lines removed | ~9,219 |
-| Net lines added | ~10,539 |
-| Characters consolidated | 439 |
-| Appearances added | 439+ |
-| Hasbro G1 items seeded | 277 |
-| FansToys items updated | 118 |
-| Total catalog items | 395 |
-| Ingestion script lines | 695 |
-| Migration added | 1 (014) |
-| npm scripts added | 3 |
-| Claude rules extracted | 3 |
+| Metric                  | Count   |
+| ----------------------- | ------- |
+| Files created           | 11      |
+| Files modified          | 6       |
+| Files deleted           | 10      |
+| Lines added             | ~19,758 |
+| Lines removed           | ~9,219  |
+| Net lines added         | ~10,539 |
+| Characters consolidated | 439     |
+| Appearances added       | 439+    |
+| Hasbro G1 items seeded  | 277     |
+| FansToys items updated  | 118     |
+| Total catalog items     | 395     |
+| Ingestion script lines  | 695     |
+| Migration added         | 1 (014) |
+| npm scripts added       | 3       |
+| Claude rules extracted  | 3       |
 
 ---
 

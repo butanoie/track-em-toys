@@ -50,6 +50,7 @@ Scenario: Expired refresh token redirects to login
 ```
 
 **Specs:**
+
 - `web/e2e/authenticated-session.spec.ts` — Dashboard identity, sign out
 - `web/e2e/session-persistence.spec.ts` — Reload survival, expired refresh
 

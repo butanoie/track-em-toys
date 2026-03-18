@@ -13,12 +13,12 @@ pass `api/src/db/seed-validation.test.ts` without modification.
 Read the user's request and determine which category applies. A single request may
 span multiple categories (e.g., "add Beast Wars characters and their appearances").
 
-| Category | Trigger phrases | Target files |
-|---|---|---|
-| **characters** | "add X characters", "add the Stunticons", "add Beast Wars cast" | `api/db/seed/characters/{file}.json` |
-| **items** | "add X-Transbots items", "add FansToys", "add Hasbro G1 items" | `api/db/seed/items/{mfr}/{continuity-family}.json` |
-| **reference** | "add faction", "add sub-group", "add continuity family", "add manufacturer", "add toy line" | `api/db/seed/reference/{table}.json` |
-| **appearances** | "add appearances", "add character appearances", explicit "appearances" | `api/db/seed/appearances/{source}.json` |
+| Category        | Trigger phrases                                                                             | Target files                                       |
+| --------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| **characters**  | "add X characters", "add the Stunticons", "add Beast Wars cast"                             | `api/db/seed/characters/{file}.json`               |
+| **items**       | "add X-Transbots items", "add FansToys", "add Hasbro G1 items"                              | `api/db/seed/items/{mfr}/{continuity-family}.json` |
+| **reference**   | "add faction", "add sub-group", "add continuity family", "add manufacturer", "add toy line" | `api/db/seed/reference/{table}.json`               |
+| **appearances** | "add appearances", "add character appearances", explicit "appearances"                      | `api/db/seed/appearances/{source}.json`            |
 
 When the request includes characters, also generate appearances for those characters unless
 the user says otherwise.
@@ -48,6 +48,7 @@ ls /Users/buta/Repos/track-em-toys/api/db/seed/characters/
 For **appearance-only** requests targeting a specific character file, read only that file
 (you need the full character records for descriptions). For all other requests, read every
 character file listed. Build these sets in working memory:
+
 - `existingCharacterSlugs` — all slugs across all character files
 - `existingCharacterKeys` — `name.toLowerCase() + "|||" + franchise.toLowerCase() + "|||" + continuity_family_slug` for each character
 
@@ -129,12 +130,14 @@ For disambiguation pages, append the continuity family abbreviation in parenthes
 `https://tfwiki.net/wiki/Megatron_(BW)`.
 
 **URL caveats (from smoke testing):**
+
 - Subpage paths like `/cartoon`, `/toys` return 404 — use only the main page URL.
 - TFWiki articles are narrative-focused (plot summaries), not visual-description-focused.
   Visual design info is in images, not text. Do not rely on TFWiki for appearance
   descriptions — use the character's alt_mode and faction to compose descriptions instead.
 
 Extract from tfwiki pages:
+
 - **Characters**: faction, alt mode, first appearance episode/issue, sub-group membership,
   combiner role, combined form, continuity family, character type
 - **Items**: product code, release year, size class, character depicted, toy line
@@ -145,6 +148,7 @@ Do NOT use TFWiki as a source for Hasbro item/stock numbers.
 #### Primary source: TFArchive (Hasbro product codes)
 
 For Hasbro item/stock numbers, fetch:
+
 ```
 https://www.tfarchive.com/toys/references/product_code_numbers.php
 ```
@@ -153,6 +157,7 @@ This page has comprehensive Hasbro 5-digit product codes organized by year (1984
 Extract the product codes for the specific years you need.
 
 **TFArchive caveats:**
+
 - Sections are organized by product code assignment year, which may not match retail
   availability (e.g., Blaster cassettes coded in 1985 but shipped in 1986).
 - Some items only have assortment-level codes (shared by multiple characters in a shipping
@@ -165,6 +170,7 @@ Extract the product codes for the specific years you need.
 #### Fallback: web search
 
 If a tfwiki page is missing or sparse, run a web search:
+
 - Characters: `"{CharacterName}" Transformers {continuity} character faction alt-mode site:tfwiki.net`
 - Items: `"{ManufacturerName}" "{ProductCode}" third party Transformers masterpiece`
 - For manufacturer items, also search the manufacturer's official product page and fan
@@ -197,6 +203,7 @@ For 1-2 entities, fetch inline without spawning sub-agents.
 ### 4a — Slug generation rules
 
 Slugs MUST match `/^[a-z0-9]+(?:-[a-z0-9]+)*$/`:
+
 - Lowercase, kebab-case
 - Strip apostrophes, periods, parentheses, special characters
 - For characters: use the character name (e.g., `optimus-prime`)
@@ -213,6 +220,7 @@ before use. If a collision is found, flag it and ask the user how to resolve.
 Target file: `api/db/seed/characters/{continuity-source}.json`
 
 File naming convention — one file per continuity family:
+
 - G1: `g1-characters.json` (all NA cartoon, movie, toy-only, and JP series characters)
 - Beast Era: `beast-era-characters.json`
 - Other continuities: `{continuity-slug}-characters.json` (e.g., `animated-characters.json`)
@@ -222,6 +230,7 @@ S3 → S4 → toy-only → JP series). New characters are appended at the approp
 chronological position, not at the end of the array.
 
 Each character record:
+
 ```json
 {
   "name": "Optimus Primal",
@@ -244,6 +253,7 @@ Each character record:
 ```
 
 File envelope:
+
 ```json
 {
   "_metadata": {
@@ -266,6 +276,7 @@ File envelope:
 ```
 
 Rules:
+
 - `faction_slug` MUST resolve to `existingFactionSlugs`. If not, generate reference data first (Step 4e).
 - `continuity_family_slug` MUST resolve to `existingContinuityFamilySlugs`. Same rule.
 - Every slug in `sub_group_slugs` MUST resolve to `existingSubGroupSlugs`.
@@ -288,6 +299,7 @@ Rules:
 Target file: `api/db/seed/items/{manufacturer-slug}/{continuity-family}.json`
 
 Each item record:
+
 ```json
 {
   "product_code": "FT-03",
@@ -311,6 +323,7 @@ Each item record:
 ```
 
 Rules:
+
 - `character_slug` MUST resolve to `existingCharacterSlugs`. If not, add to
   `_metadata.unresolved_characters` and flag for the user.
 - `character_appearance_slug` is optional (nullable). When set, MUST resolve to
@@ -326,18 +339,19 @@ Rules:
 
 Choose the appearance that best matches what the physical toy depicts:
 
-| Item type | Appearance to use |
-|---|---|
-| Third-party standard (cartoon-accurate MP) | `{char}-g1-cartoon` |
-| Third-party "Toy Deco" variant | `{char}-g1-toy` |
-| Original Hasbro G1 toy (1984-1990) | `{char}-g1-toy` if it exists (livery/design divergence), else `{char}-g1-cartoon` |
-| Action Masters (non-transforming, cartoon design) | `{char}-g1-cartoon` (always, even though they're 1990 items) |
-| Legends / simplified reissues | `{char}-g1-cartoon` (depict simplified cartoon designs) |
-| Targetmaster/Powermaster reissues | Same as base item (toy is identical with added partner) |
-| Characters only animated in JP series | `{char}-jp-headmasters`, `{char}-jp-masterforce`, or `{char}-jp-victory` |
+| Item type                                         | Appearance to use                                                                 |
+| ------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Third-party standard (cartoon-accurate MP)        | `{char}-g1-cartoon`                                                               |
+| Third-party "Toy Deco" variant                    | `{char}-g1-toy`                                                                   |
+| Original Hasbro G1 toy (1984-1990)                | `{char}-g1-toy` if it exists (livery/design divergence), else `{char}-g1-cartoon` |
+| Action Masters (non-transforming, cartoon design) | `{char}-g1-cartoon` (always, even though they're 1990 items)                      |
+| Legends / simplified reissues                     | `{char}-g1-cartoon` (depict simplified cartoon designs)                           |
+| Targetmaster/Powermaster reissues                 | Same as base item (toy is identical with added partner)                           |
+| Characters only animated in JP series             | `{char}-jp-headmasters`, `{char}-jp-masterforce`, or `{char}-jp-victory`          |
 
 **Key characters with significant toy-vs-cartoon livery differences** (always use `-g1-toy`
 for original Hasbro items):
+
 - Jazz (Martini racing livery), Smokescreen (#38 racing), Mirage (Gitanes F1 livery),
   Wheeljack (Alitalia livery), Prowl (police markings), Hound (military markings),
   Tracks (flame decals), Red Alert (fire chief markings), Inferno (fire dept markings)
@@ -362,6 +376,7 @@ products (cassette 2-packs, combiner giftsets):
 ### Official (first-party) Hasbro/Takara items
 
 For vintage Hasbro G1 items (1984-1990):
+
 - `is_third_party`: always `false`
 - `size_class`: `null` (vintage G1 predated modern size classes)
 - `manufacturer_slug`: `"hasbro"` for US-market items
@@ -401,6 +416,7 @@ json.dump(data, open(..., 'w'), indent=2)
 ```
 
 This approach:
+
 1. Validates all FKs before writing (catches errors early)
 2. Handles metadata count updates automatically
 3. Inserts appearances at the right position (after cartoon counterpart)
@@ -415,6 +431,7 @@ This approach:
 Target file: `api/db/seed/appearances/{source-slug}.json`
 
 File naming convention — one file per media source grouping:
+
 - G1 cartoon: `g1-cartoon.json` (all NA cartoon S1-S4 + Movie appearances)
 - G1 comics: `g1-comics.json` (Marvel US/UK, IDW, etc.)
 - Beast Era cartoon: `beast-era-cartoon.json`
@@ -423,6 +440,7 @@ File naming convention — one file per media source grouping:
 Appearances within a file are ordered to match their character file's chronological order.
 
 Each appearance record:
+
 ```json
 {
   "slug": "optimus-prime-g1-cartoon",
@@ -438,6 +456,7 @@ Each appearance record:
 ```
 
 File envelope:
+
 ```json
 {
   "_metadata": {
@@ -446,15 +465,14 @@ File envelope:
     "generated": "{ISO timestamp}",
     "total": 0,
     "import_order": 5.5,
-    "references": [
-      "characters (via character_slug)"
-    ]
+    "references": ["characters (via character_slug)"]
   },
   "data": []
 }
 ```
 
 Rules:
+
 - `character_slug` MUST resolve to `existingCharacterSlugs`.
 - `source_media` MUST be one of: `TV`, `Comic/Manga`, `Movie`, `OVA`, `Toy-only`, `Video Game`.
 - Slug follows `{character-slug}-{source-descriptor}` convention (migration 013 comment).
@@ -486,6 +504,7 @@ Before writing anything, verify:
 5. **Uncertain data**: List every `UNCERTAIN:` note.
 
 Report format:
+
 ```
 Pre-write check:
 - Slugs: N new, 0 collisions
@@ -562,6 +581,7 @@ cd /Users/buta/Repos/track-em-toys/api && npx vitest run src/db/seed-validation.
 **If validation passes:** Report "Validation passed" with test count and list of written files.
 
 **If validation fails:**
+
 1. Show the failing test names and error messages.
 2. Diagnose which generated entries caused the failure.
 3. Fix the entries in the file(s).
@@ -586,18 +606,18 @@ Do NOT consider the task complete until validation passes.
 
 ### Continuity family slug mapping (for common request terms)
 
-| User says | continuity_family_slug |
-|---|---|
-| G1, Generation 1, Season 1-4, The Movie | `g1` |
-| Beast Wars, Beast Machines | `beast-era` |
-| Armada, Energon, Cybertron | `unicron-trilogy` |
-| Bay movies, live-action | `movieverse` |
-| Animated | `animated` |
-| Prime, War for Cybertron, Rescue Bots | `aligned` |
-| Cyberverse | `cyberverse` |
-| EarthSpark | `earthspark` |
-| Transformers One | `one` |
-| RiD 2001, Car Robots | `robots-in-disguise-2001` |
+| User says                               | continuity_family_slug    |
+| --------------------------------------- | ------------------------- |
+| G1, Generation 1, Season 1-4, The Movie | `g1`                      |
+| Beast Wars, Beast Machines              | `beast-era`               |
+| Armada, Energon, Cybertron              | `unicron-trilogy`         |
+| Bay movies, live-action                 | `movieverse`              |
+| Animated                                | `animated`                |
+| Prime, War for Cybertron, Rescue Bots   | `aligned`                 |
+| Cyberverse                              | `cyberverse`              |
+| EarthSpark                              | `earthspark`              |
+| Transformers One                        | `one`                     |
+| RiD 2001, Car Robots                    | `robots-in-disguise-2001` |
 
 ### Slug disambiguation for cross-continuity characters
 

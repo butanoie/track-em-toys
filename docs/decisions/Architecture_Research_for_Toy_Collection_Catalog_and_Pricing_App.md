@@ -297,7 +297,7 @@ GitHub integration provides **automatic deploys on push** and ephemeral **PR pre
 
 ### SPA frontend is better served elsewhere
 
-While Railway *can* host a React/Vue SPA (using Caddy as a static file server in a separate service), **the recommended production architecture deploys the frontend on Vercel, Netlify, or Cloudflare Pages**. These platforms provide global CDN edge delivery, automatic builds, and generous free tiers — capabilities Railway doesn't match since it serves from containers in specific regions, not a CDN edge network.
+While Railway _can_ host a React/Vue SPA (using Caddy as a static file server in a separate service), **the recommended production architecture deploys the frontend on Vercel, Netlify, or Cloudflare Pages**. These platforms provide global CDN edge delivery, automatic builds, and generous free tiers — capabilities Railway doesn't match since it serves from containers in specific regions, not a CDN edge network.
 
 If keeping everything on Railway, use a separate service with a Caddyfile that handles SPA routing (`try_files {path} /index.html`). Railway's Railpack beta is adding static site detection for Vite and CRA projects, but this isn't production-stable yet.
 
@@ -318,12 +318,12 @@ Railway services within a project communicate over **private networking** via in
 
 ### Projected monthly costs
 
-| Component | Estimated Cost |
-|-----------|---------------|
-| PostgreSQL (512MB RAM, 5GB storage) | $2–4/month |
-| API server (512MB–1GB RAM) | $3–7/month |
-| Frontend on Railway (Caddy, minimal) | $1–3/month |
-| Storage Buckets (Pro plan, included) | $0 additional |
+| Component                                   | Estimated Cost   |
+| ------------------------------------------- | ---------------- |
+| PostgreSQL (512MB RAM, 5GB storage)         | $2–4/month       |
+| API server (512MB–1GB RAM)                  | $3–7/month       |
+| Frontend on Railway (Caddy, minimal)        | $1–3/month       |
+| Storage Buckets (Pro plan, included)        | $0 additional    |
 | **Total on Pro plan ($20/mo subscription)** | **$10–20/month** |
 
 A lightweight deployment fits within the **$5 Hobby plan credit**. Most small-to-medium apps on the **$20 Pro plan** stay within the included credit. Billing is per-minute, so idle services cost very little. Set **hard usage limits** in Railway to prevent surprise bills. Volume storage is charged even when services are stopped.

@@ -17,9 +17,11 @@ Implemented the Apple server-to-server webhook endpoint (`POST /auth/webhooks/ap
 ### 1. Webhook Endpoint
 
 **Created:**
+
 - `api/src/auth/webhooks.ts` — Fastify plugin implementing `POST /auth/webhooks/apple`
 
 **Key behaviors:**
+
 - Accepts raw JWT string body (not JSON) via custom content-type parser
 - Verifies JWT signature against Apple's JWKS (`https://appleid.apple.com/auth/keys`)
 - Validates issuer (`https://appleid.apple.com`) and audience (bundle ID or services ID)
@@ -29,37 +31,42 @@ Implemented the Apple server-to-server webhook endpoint (`POST /auth/webhooks/ap
 
 **Event types handled:**
 
-| Event | Action | Audit Event Type |
-|-------|--------|-----------------|
-| `consent-revoked` | Revoke all user refresh tokens | `consent_revoked` |
-| `account-delete` | Deactivate user + revoke all refresh tokens | `account_deactivated` |
+| Event             | Action                                      | Audit Event Type      |
+| ----------------- | ------------------------------------------- | --------------------- |
+| `consent-revoked` | Revoke all user refresh tokens              | `consent_revoked`     |
+| `account-delete`  | Deactivate user + revoke all refresh tokens | `account_deactivated` |
 
 Unknown event types are logged at debug level and ignored (returns 200).
 
 ### 2. Database Migration
 
 **Created:**
+
 - `api/db/migrations/010_add_consent_revoked_event_type.sql` — Adds `consent_revoked` to the `auth_events.event_type` CHECK constraint (with rollback)
 
 ### 3. Query Functions
 
 **Modified:**
+
 - `api/src/db/queries.ts` — Added `deactivateUser(client, userId)` function that sets `users.deactivated_at = NOW()`
 
 ### 4. Schema & Types
 
 **Modified:**
+
 - `api/src/auth/schemas.ts` — Added `appleWebhookSchema` with response schemas for 200 and 401
 - `api/src/types/index.ts` — Added `'consent_revoked'` to `AuthEventType` union
 
 ### 5. Server Integration
 
 **Modified:**
+
 - `api/src/server.ts` — Mounted `appleWebhookRoute` at `/auth/webhooks/apple` as a separate plugin, registered before `authRoutes` to avoid the JSON content-type enforcement hook
 
 ### 6. Integration Tests
 
 **Created:**
+
 - `api/src/auth/webhooks.test.ts` — 16 integration tests (598 lines)
 
 ---
@@ -73,6 +80,7 @@ The main `authRoutes` plugin enforces `Content-Type: application/json` via a `pr
 ### Idempotent 200 Responses
 
 Apple retries failed webhook deliveries aggressively. The endpoint always returns `{ ok: true }` with status 200, even when:
+
 - The user doesn't exist (Apple `sub` not found in `oauth_accounts`)
 - An unexpected error occurs during JWT verification (e.g., JWKS fetch failure)
 - An unknown event type is received
@@ -97,16 +105,16 @@ Audit logging (`logAuthEvent`) is wrapped in try/catch within the transaction. I
 
 ### Test Coverage (16 tests)
 
-| Category | Tests | Details |
-|----------|-------|---------|
-| Happy path | 2 | consent-revoked and account-delete with full assertion chain |
-| JWT validation | 6 | Invalid signature, expired, wrong issuer, wrong audience (×2), malformed events |
-| Event structure | 2 | Missing type/sub fields, non-string events claim |
-| Unknown user | 1 | Returns 200 when Apple sub not found (idempotent) |
-| Unknown event | 1 | Returns 200, no side effects |
-| Audit resilience | 2 | Non-fatal audit log failure for each event type |
-| Transaction | 1 | Verifies withTransaction called without userId |
-| Edge cases | 2 | Empty payload rejection, services ID as valid audience |
+| Category         | Tests | Details                                                                         |
+| ---------------- | ----- | ------------------------------------------------------------------------------- |
+| Happy path       | 2     | consent-revoked and account-delete with full assertion chain                    |
+| JWT validation   | 6     | Invalid signature, expired, wrong issuer, wrong audience (×2), malformed events |
+| Event structure  | 2     | Missing type/sub fields, non-string events claim                                |
+| Unknown user     | 1     | Returns 200 when Apple sub not found (idempotent)                               |
+| Unknown event    | 1     | Returns 200, no side effects                                                    |
+| Audit resilience | 2     | Non-fatal audit log failure for each event type                                 |
+| Transaction      | 1     | Verifies withTransaction called without userId                                  |
+| Edge cases       | 2     | Empty payload rejection, services ID as valid audience                          |
 
 ### Test Strategy
 
@@ -129,10 +137,12 @@ Audit logging (`logAuthEvent`) is wrapped in try/catch within the transaction. I
 ## Related Files
 
 **Created (2 files):**
+
 - `api/src/auth/webhooks.ts` (168 lines)
 - `api/src/auth/webhooks.test.ts` (598 lines)
 
 **Modified (5 files):**
+
 - `api/src/auth/schemas.ts` — webhook response schema
 - `api/src/db/queries.ts` — `deactivateUser` function
 - `api/src/types/index.ts` — `consent_revoked` event type
@@ -140,20 +150,21 @@ Audit logging (`logAuthEvent`) is wrapped in try/catch within the transaction. I
 - `api/db/schema.sql` — updated CHECK constraint
 
 **Migration (1 file):**
+
 - `api/db/migrations/010_add_consent_revoked_event_type.sql`
 
 ---
 
 ## Summary Statistics
 
-| Metric | Value |
-|--------|-------|
-| Files created | 2 |
-| Files modified | 5 |
-| Migration files | 1 |
-| Total lines added | ~846 |
-| Integration tests | 16 |
-| Test lines | 598 |
+| Metric              | Value                               |
+| ------------------- | ----------------------------------- |
+| Files created       | 2                                   |
+| Files modified      | 5                                   |
+| Migration files     | 1                                   |
+| Total lines added   | ~846                                |
+| Integration tests   | 16                                  |
+| Test lines          | 598                                 |
 | Event types handled | 2 (consent-revoked, account-delete) |
 
 ---

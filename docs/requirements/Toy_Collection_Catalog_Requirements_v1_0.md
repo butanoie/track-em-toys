@@ -6,7 +6,7 @@ Version 1.0 --- February 22, 2026
 
 Status: Draft
 
-*CONFIDENTIAL*
+_CONFIDENTIAL_
 
 Table of Contents
 
@@ -36,49 +36,51 @@ in future iterations.
 The initial release will focus on two primary toy lines with distinct
 cataloging requirements:
 
--   Transformers --- Including official Hasbro/Takara Tomy releases and
-    unlicensed third-party figures (e.g., FansToys, MakeToys,
-    XTransbots, Iron Factory, Magic Square, NewAge, etc.). Third-party
-    figures require tracking of manufacturer, product/release line, and
-    the official character the figure represents or is inspired by.
+- Transformers --- Including official Hasbro/Takara Tomy releases and
+  unlicensed third-party figures (e.g., FansToys, MakeToys,
+  XTransbots, Iron Factory, Magic Square, NewAge, etc.). Third-party
+  figures require tracking of manufacturer, product/release line, and
+  the official character the figure represents or is inspired by.
 
--   G.I. Joe --- Including vintage (1964--1978), A Real American Hero
-    (1982--1994), modern era, and Classified Series releases. Requires
-    tracking of figure scale, accessory completeness, and card/packaging
-    condition where applicable.
+- G.I. Joe --- Including vintage (1964--1978), A Real American Hero
+  (1982--1994), modern era, and Classified Series releases. Requires
+  tracking of figure scale, accessory completeness, and card/packaging
+  condition where applicable.
 
 The data model should be extensible to accommodate additional toy lines
 (e.g., Star Wars, MOTU, Marvel Legends) without schema changes.
 
 1.4 Definitions and Abbreviations
 
-  --------------------- -------------------------------------------------
-  **Term**              **Definition**
+---
 
-  MSRP                  Manufacturer's Suggested Retail Price
+**Term** **Definition**
 
-  3P / Third-Party      Unlicensed figures produced by independent
-                        companies, typically representing characters from
-                        official franchises
+MSRP Manufacturer's Suggested Retail Price
 
-  MIB / MISB            Mint In Box / Mint In Sealed Box --- item
-                        condition designations
+3P / Third-Party Unlicensed figures produced by independent
+companies, typically representing characters from
+official franchises
 
-  UPC                   Universal Product Code --- barcode standard on
-                        retail packaging
+MIB / MISB Mint In Box / Mint In Sealed Box --- item
+condition designations
 
-  SKU                   Stock Keeping Unit --- retailer or manufacturer
-                        item identifier
+UPC Universal Product Code --- barcode standard on
+retail packaging
 
-  Transfer Learning     ML technique that reuses a pre-trained model as a
-                        starting point for a new classification task
+SKU Stock Keeping Unit --- retailer or manufacturer
+item identifier
 
-  Core ML               Apple's framework for running machine learning
-                        models on-device
+Transfer Learning ML technique that reuses a pre-trained model as a
+starting point for a new classification task
 
-  Create ML             Apple's tool for training machine learning models
-                        on macOS
-  --------------------- -------------------------------------------------
+Core ML Apple's framework for running machine learning
+models on-device
+
+Create ML Apple's tool for training machine learning models
+on macOS
+
+---
 
 2\. System Architecture Overview
 
@@ -87,62 +89,64 @@ The data model should be extensible to accommodate additional toy lines
 The system follows a three-tier architecture with clean separation of
 concerns:
 
--   Presentation Tier --- Web front end (responsive SPA) and native iOS
-    mobile app
+- Presentation Tier --- Web front end (responsive SPA) and native iOS
+  mobile app
 
--   Application Tier --- RESTful API server handling business logic,
-    authentication, image processing, and price-lookup orchestration
+- Application Tier --- RESTful API server handling business logic,
+  authentication, image processing, and price-lookup orchestration
 
--   Data Tier --- SQL relational database for structured collection
-    data, plus object/file storage for photographs
+- Data Tier --- SQL relational database for structured collection
+  data, plus object/file storage for photographs
 
-2.2 Proposed Technology Stack
+  2.2 Proposed Technology Stack
 
-  --------------- ------------------------ ---------------------------------
-  **Component**   **Recommended            **Rationale**
-                  Technology**             
+---
 
-  Database        PostgreSQL               Robust relational model, JSONB
-                                           for flexible metadata, full-text
-                                           search, strong ecosystem
+**Component** **Recommended **Rationale**
+Technology**
 
-  API Server      Node.js                  Rapid development, extensive
-                  (Express/Fastify) or     library ecosystem for web
-                  Python (FastAPI)         scraping and data processing
+Database PostgreSQL Robust relational model, JSONB
+for flexible metadata, full-text
+search, strong ecosystem
 
-  Web Front End   React or Vue.js (SPA)    Component-based architecture,
-                                           rich ecosystem, responsive design
-                                           support
+API Server Node.js Rapid development, extensive
+(Express/Fastify) or library ecosystem for web
+Python (FastAPI) scraping and data processing
 
-  Mobile App      Native iOS               Required for Core ML integration,
-                  (Swift/SwiftUI)          camera/barcode APIs, Neural
-                                           Engine access
+Web Front End React or Vue.js (SPA) Component-based architecture,
+rich ecosystem, responsive design
+support
 
-  Image Storage   Local filesystem or      Scalable photo storage with CDN
-                  S3-compatible object     potential; keeps DB lean
-                  store                    
+Mobile App Native iOS Required for Core ML integration,
+(Swift/SwiftUI) camera/barcode APIs, Neural
+Engine access
 
-  ML Model        Core ML + Create ML      On-device inference, \~7 MB
-                  (transfer learning)      models, no network calls, Apple
-                                           Neural Engine optimized
+Image Storage Local filesystem or Scalable photo storage with CDN
+S3-compatible object potential; keeps DB lean
+store
 
-  Barcode         AVFoundation (iOS) / Web Native platform APIs for UPC/EAN
-  Scanning        Barcode Detection API    barcode reading
-  --------------- ------------------------ ---------------------------------
+ML Model Core ML + Create ML On-device inference, \~7 MB
+(transfer learning) models, no network calls, Apple
+Neural Engine optimized
+
+Barcode AVFoundation (iOS) / Web Native platform APIs for UPC/EAN
+Scanning Barcode Detection API barcode reading
+
+---
 
 2.3 Deployment Options
 
 The system should support flexible deployment to accommodate a personal
 collector's infrastructure preferences:
 
--   Self-hosted --- Docker Compose stack running on a local NAS,
-    Raspberry Pi, or home server (lowest cost, full data ownership)
+- Self-hosted --- Docker Compose stack running on a local NAS,
+  Raspberry Pi, or home server (lowest cost, full data ownership)
 
--   Cloud-hosted --- Small VPS (e.g., DigitalOcean, Linode) or managed
-    services (e.g., Railway, Render) for always-on accessibility
+- Cloud-hosted --- Small VPS (e.g., DigitalOcean, Linode) or managed
+  services (e.g., Railway, Render) for always-on accessibility
 
--   Hybrid --- Cloud API + database with local image storage synced via
-    S3-compatible protocol
+- Hybrid --- Cloud API + database with local image storage synced via
+  S3-compatible protocol
 
 3\. Data Model
 
@@ -154,173 +158,183 @@ updated_at, created_by).
 
 3.1.1 Collection Item (Primary Entity)
 
-  -------------------- ---------------- -------------------------------------
-  **Field**            **Type**         **Description**
+---
 
-  id                   UUID / SERIAL PK Unique item identifier
+**Field** **Type** **Description**
 
-  name                 VARCHAR(255)     Manufacturer's product name (e.g.,
-                                        "Optimus Prime" for official,
-                                        "Phoenix" for third-party)
+id UUID / SERIAL PK Unique item identifier
 
-  franchise            VARCHAR(100)     Top-level franchise (Transformers,
-                                        G.I. Joe, etc.)
+name VARCHAR(255) Manufacturer's product name (e.g.,
+"Optimus Prime" for official,
+"Phoenix" for third-party)
 
-  toy_line_id          FK → toy_lines   Reference to the product line /
-                                        series
+franchise VARCHAR(100) Top-level franchise (Transformers,
+G.I. Joe, etc.)
 
-  manufacturer_id      FK →             Hasbro, Takara Tomy, FansToys, etc.
-                       manufacturers    
+toy_line_id FK → toy_lines Reference to the product line /
+series
 
-  is_third_party       BOOLEAN          Flag for unlicensed / third-party
-                                        figures
+manufacturer_id FK → Hasbro, Takara Tomy, FansToys, etc.
+manufacturers
 
-  character_name       VARCHAR(255)     Character the figure represents
-                                        (official name)
+is_third_party BOOLEAN Flag for unlicensed / third-party
+figures
 
-  third_party_homage   VARCHAR(255)     Official character this 3P figure is
-                                        based on (nullable)
+character_name VARCHAR(255) Character the figure represents
+(official name)
 
-  year_released        SMALLINT         Year of original release
+third_party_homage VARCHAR(255) Official character this 3P figure is
+based on (nullable)
 
-  upc_barcode          VARCHAR(50)      UPC/EAN barcode value from packaging
+year_released SMALLINT Year of original release
 
-  sku                  VARCHAR(100)     Manufacturer or retailer SKU
+upc_barcode VARCHAR(50) UPC/EAN barcode value from packaging
 
-  product_code         VARCHAR(100)     User-definable item identifier /
-                                        designation (e.g., "MP-44", "FT-44",
-                                        "CS-01"). Typically the
-                                        manufacturer's product code.
+sku VARCHAR(100) Manufacturer or retailer SKU
 
-  condition            ENUM             MISB, MIB, Loose Complete, Loose
-                                        Incomplete, Damaged
+product_code VARCHAR(100) User-definable item identifier /
+designation (e.g., "MP-44", "FT-44",
+"CS-01"). Typically the
+manufacturer's product code.
 
-  completeness_notes   TEXT             Missing accessories, damage details,
-                                        etc.
+condition ENUM MISB, MIB, Loose Complete, Loose
+Incomplete, Damaged
 
-  acquisition_date     DATE             Date acquired by collector
+completeness_notes TEXT Missing accessories, damage details,
+etc.
 
-  acquisition_price    DECIMAL(10,2)    Price paid by collector
+acquisition_date DATE Date acquired by collector
 
-  acquisition_source   VARCHAR(255)     Where acquired (store name, seller,
-                                        convention, etc.)
+acquisition_price DECIMAL(10,2) Price paid by collector
 
-  notes                TEXT             Free-form collector notes
+acquisition_source VARCHAR(255) Where acquired (store name, seller,
+convention, etc.)
 
-  metadata_json        JSONB            Extensible key-value metadata (scale,
-                                        material, edition, etc.)
-  -------------------- ---------------- -------------------------------------
+notes TEXT Free-form collector notes
+
+metadata_json JSONB Extensible key-value metadata (scale,
+material, edition, etc.)
+
+---
 
 3.1.2 Manufacturer
 
-  ---------------------- ---------------- -------------------------------------
-  **Field**              **Type**         **Description**
+---
 
-  id                     SERIAL PK        Unique manufacturer identifier
+**Field** **Type** **Description**
 
-  name                   VARCHAR(255)     Company name (e.g., "FansToys",
-                                          "Hasbro")
+id SERIAL PK Unique manufacturer identifier
 
-  is_official_licensee   BOOLEAN          Whether this manufacturer holds an
-                                          official license
+name VARCHAR(255) Company name (e.g., "FansToys",
+"Hasbro")
 
-  country                VARCHAR(100)     Country of origin
+is_official_licensee BOOLEAN Whether this manufacturer holds an
+official license
 
-  website_url            VARCHAR(500)     Official website (if known)
+country VARCHAR(100) Country of origin
 
-  aliases                TEXT\[\]         Alternative names / abbreviations
-                                          (e.g., \[\"FT\", \"Fans Toys\"\])
+website_url VARCHAR(500) Official website (if known)
 
-  notes                  TEXT             Collector notes about this
-                                          manufacturer
-  ---------------------- ---------------- -------------------------------------
+aliases TEXT\[\] Alternative names / abbreviations
+(e.g., \[\"FT\", \"Fans Toys\"\])
+
+notes TEXT Collector notes about this
+manufacturer
+
+---
 
 3.1.3 Toy Line / Product Series
 
-  ----------------- ---------------- -------------------------------------
-  **Field**         **Type**         **Description**
+---
 
-  id                SERIAL PK        Unique line identifier
+**Field** **Type** **Description**
 
-  name              VARCHAR(255)     Line name (e.g., "Masterpiece",
-                                     "Classified Series")
+id SERIAL PK Unique line identifier
 
-  franchise         VARCHAR(100)     Parent franchise
+name VARCHAR(255) Line name (e.g., "Masterpiece",
+"Classified Series")
 
-  manufacturer_id   FK →             Producing manufacturer
-                    manufacturers    
+franchise VARCHAR(100) Parent franchise
 
-  year_started      SMALLINT         Year line launched
+manufacturer_id FK → Producing manufacturer
+manufacturers
 
-  year_ended        SMALLINT         Year line discontinued (nullable if
-                                     active)
+year_started SMALLINT Year line launched
 
-  scale             VARCHAR(50)      Figure scale if consistent (e.g.,
-                                     "1:6", "Chug-scale")
+year_ended SMALLINT Year line discontinued (nullable if
+active)
 
-  description       TEXT             Line description and notable
-                                     characteristics
-  ----------------- ---------------- -------------------------------------
+scale VARCHAR(50) Figure scale if consistent (e.g.,
+"1:6", "Chug-scale")
+
+description TEXT Line description and notable
+characteristics
+
+---
 
 3.1.4 Item Photos
 
-  ------------------- ------------------ -------------------------------------
-  **Field**           **Type**           **Description**
+---
 
-  id                  UUID PK            Unique photo identifier
+**Field** **Type** **Description**
 
-  item_id             FK →               Parent item
-                      collection_items   
+id UUID PK Unique photo identifier
 
-  file_path           VARCHAR(500)       Path/URL to stored image file
+item_id FK → Parent item
+collection_items
 
-  thumbnail_path      VARCHAR(500)       Path to generated thumbnail
+file_path VARCHAR(500) Path/URL to stored image file
 
-  photo_type          ENUM               Front, Back, Side, Box Art,
-                                         Accessory, Damage, Other
+thumbnail_path VARCHAR(500) Path to generated thumbnail
 
-  is_primary          BOOLEAN            Whether this is the primary display
-                                         photo
+photo_type ENUM Front, Back, Side, Box Art,
+Accessory, Damage, Other
 
-  capture_date        TIMESTAMP          When photo was taken
+is_primary BOOLEAN Whether this is the primary display
+photo
 
-  ml_classification   JSONB              ML model classification results
-                                         (label, confidence)
-  ------------------- ------------------ -------------------------------------
+capture_date TIMESTAMP When photo was taken
+
+ml_classification JSONB ML model classification results
+(label, confidence)
+
+---
 
 3.1.5 Price Records
 
-  ----------------- ------------------ -------------------------------------
-  **Field**         **Type**           **Description**
+---
 
-  id                SERIAL PK          Unique price record identifier
+**Field** **Type** **Description**
 
-  item_id           FK →               Parent item
-                    collection_items   
+id SERIAL PK Unique price record identifier
 
-  price_type        ENUM               MSRP, Resale_Listing, Resale_Sold,
-                                       Appraisal, Insurance_Value
+item_id FK → Parent item
+collection_items
 
-  amount            DECIMAL(10,2)      Price amount
+price_type ENUM MSRP, Resale_Listing, Resale_Sold,
+Appraisal, Insurance_Value
 
-  currency          CHAR(3)            ISO 4217 currency code (e.g., USD,
-                                       CAD)
+amount DECIMAL(10,2) Price amount
 
-  source_platform   VARCHAR(100)       eBay, Craigslist, Facebook
-                                       Marketplace, Amazon, retail store,
-                                       etc.
+currency CHAR(3) ISO 4217 currency code (e.g., USD,
+CAD)
 
-  source_url        VARCHAR(1000)      URL of listing (if applicable)
+source_platform VARCHAR(100) eBay, Craigslist, Facebook
+Marketplace, Amazon, retail store,
+etc.
 
-  listing_date      DATE               Date the price was observed or
-                                       listing was active
+source_url VARCHAR(1000) URL of listing (if applicable)
 
-  is_sold           BOOLEAN            Whether this was a completed sale vs.
-                                       asking price
+listing_date DATE Date the price was observed or
+listing was active
 
-  notes             TEXT               Condition notes, lot details,
-                                       shipping included, etc.
-  ----------------- ------------------ -------------------------------------
+is_sold BOOLEAN Whether this was a completed sale vs.
+asking price
+
+notes TEXT Condition notes, lot details,
+shipping included, etc.
+
+---
 
 3.1.6 Tags and Custom Fields
 
@@ -442,36 +456,38 @@ A critical requirement is that all price data sourcing must comply with
 the terms of service of each platform. The following outlines the
 approach per marketplace:
 
-  -------------- ------------------------------------- -------------------
-  **Platform**   **Approach**                          **TOS Status**
+---
 
-  eBay           Use official eBay Browse API or       Compliant ---
-                 Partner Network API to search         official API
-                 sold/completed listings. Requires     
-                 eBay developer account and API key.   
+**Platform** **Approach** **TOS Status**
 
-  Amazon         Use Amazon Product Advertising API    Compliant ---
-                 (requires Associates account) for     official API
-                 current retail pricing. Affiliate     
-                 program provides TOS-compliant        
-                 access.                               
+eBay Use official eBay Browse API or Compliant ---
+Partner Network API to search official API
+sold/completed listings. Requires  
+ eBay developer account and API key.
 
-  Facebook       No public API. Manual price entry     Compliant --- no
-  Marketplace    only. User copies listing details     scraping
-                 into the app manually.                
+Amazon Use Amazon Product Advertising API Compliant ---
+(requires Associates account) for official API
+current retail pricing. Affiliate  
+ program provides TOS-compliant  
+ access.
 
-  Craigslist     No public API; TOS explicitly         Compliant --- no
-                 prohibits scraping. Manual price      scraping
-                 entry only.                           
+Facebook No public API. Manual price entry Compliant --- no
+Marketplace only. User copies listing details scraping
+into the app manually.
 
-  Mercari        No public API for sold prices. Manual Compliant --- no
-                 price entry only.                     scraping
+Craigslist No public API; TOS explicitly Compliant --- no
+prohibits scraping. Manual price scraping
+entry only.
 
-  Price Charting Evaluate whether these                Research required
-  / Hobbydb      collector-focused databases offer     
-                 APIs or data partnerships. Some offer 
-                 embeddable price data.                
-  -------------- ------------------------------------- -------------------
+Mercari No public API for sold prices. Manual Compliant --- no
+price entry only. scraping
+
+Price Charting Evaluate whether these Research required
+/ Hobbydb collector-focused databases offer  
+ APIs or data partnerships. Some offer
+embeddable price data.
+
+---
 
 The guiding principle is: if a platform offers an official API, use it.
 If not, the user enters data manually. The system will never scrape,
@@ -523,12 +539,12 @@ authorization.
     external classification services.
 
 7b. GDPR compliance: Users must be able to request full account deletion
-    (right to erasure, Article 17). Uses tombstone pattern: PII is scrubbed
-    (email, display_name, avatar_url) and deleted_at is set, but the users
-    row is preserved so all foreign key references remain intact. Auth data
-    (refresh tokens, OAuth accounts) is hard-deleted. Records previously
-    attributed to the deleted user display "Deleted user" in the UI — the
-    content is preserved, the identity is erased.
+(right to erasure, Article 17). Uses tombstone pattern: PII is scrubbed
+(email, display_name, avatar_url) and deleted_at is set, but the users
+row is preserved so all foreign key references remain intact. Auth data
+(refresh tokens, OAuth accounts) is hard-deleted. Records previously
+attributed to the deleted user display "Deleted user" in the UI — the
+content is preserved, the identity is erased.
 
 5.3 Reliability & Data Integrity
 
@@ -570,28 +586,30 @@ Use Create ML Image Classification with transfer learning as the primary
 identification method. This approach offers the best balance of
 accuracy, model size, and integration with the iOS ecosystem.
 
-  --------------------- -------------------------------------------------
-  **Attribute**         **Details**
+---
 
-  Training Tool         Create ML app on macOS (GUI, no code) or
-                        MLImageClassifier API
+**Attribute** **Details**
 
-  Training Data         \~80--200 photos per item class, organized in
-                        labeled folders
+Training Tool Create ML app on macOS (GUI, no code) or
+MLImageClassifier API
 
-  Model Technique       Transfer learning on Apple's pre-trained backbone
+Training Data \~80--200 photos per item class, organized in
+labeled folders
 
-  Model Size            \~7 MB (transfer learning) vs. \~65 MB (full
-                        network)
+Model Technique Transfer learning on Apple's pre-trained backbone
 
-  Inference Speed       Real-time on Neural Engine (iPhone 15 Pro+)
+Model Size \~7 MB (transfer learning) vs. \~65 MB (full
+network)
 
-  Network Required      No --- fully on-device inference
+Inference Speed Real-time on Neural Engine (iPhone 15 Pro+)
 
-  Output                Top-N labels with confidence scores
+Network Required No --- fully on-device inference
 
-  iOS Minimum           iOS 26.2+
-  --------------------- -------------------------------------------------
+Output Top-N labels with confidence scores
+
+iOS Minimum iOS 26.2+
+
+---
 
 6.2 Pre-Filter with Vision Framework
 
@@ -616,17 +634,17 @@ back into the training pipeline. This creates a virtuous cycle: the more
 items cataloged, the better the ML model becomes at identifying new
 additions.
 
--   Phase 1: Manual cataloging with barcode + manual entry builds
-    initial photo corpus
+- Phase 1: Manual cataloging with barcode + manual entry builds
+  initial photo corpus
 
--   Phase 2: Train initial model once 80+ images exist per class for the
-    most common items
+- Phase 2: Train initial model once 80+ images exist per class for the
+  most common items
 
--   Phase 3: ML-assisted entry --- snap a photo, model suggests
-    identity, user confirms or corrects
+- Phase 3: ML-assisted entry --- snap a photo, model suggests
+  identity, user confirms or corrects
 
--   Phase 4: Corrections feed back into retraining for continuous
-    improvement
+- Phase 4: Corrections feed back into retraining for continuous
+  improvement
 
 7\. Third-Party Figure Tracking
 
@@ -639,28 +657,28 @@ purpose-built data fields and workflows.
 
 7.1 Required Data Fields for Third-Party Figures
 
--   Manufacturer Name --- The producing company (e.g., FansToys,
-    XTransbots, Magic Square)
+- Manufacturer Name --- The producing company (e.g., FansToys,
+  XTransbots, Magic Square)
 
--   Manufacturer Aliases --- Some companies operate under multiple names
-    or abbreviations
+- Manufacturer Aliases --- Some companies operate under multiple names
+  or abbreviations
 
--   Product Line / Series --- The manufacturer's product line (e.g.,
-    FansToys "Masterpiece" scale, Iron Factory "Legends" scale)
+- Product Line / Series --- The manufacturer's product line (e.g.,
+  FansToys "Masterpiece" scale, Iron Factory "Legends" scale)
 
--   Item Designation --- The manufacturer's product code (e.g., "FT-44",
-    "IF EX-36")
+- Item Designation --- The manufacturer's product code (e.g., "FT-44",
+  "IF EX-36")
 
--   Third-Party Homage Character --- The official Transformers character
-    this figure represents or is inspired by
+- Third-Party Homage Character --- The official Transformers character
+  this figure represents or is inspired by
 
--   Scale / Size Class --- MP (Masterpiece), Legends,
-    Voyager-equivalent, etc.
+- Scale / Size Class --- MP (Masterpiece), Legends,
+  Voyager-equivalent, etc.
 
--   Release Version --- Many 3P figures have multiple releases (v1, v2,
-    reissue, metallic version)
+- Release Version --- Many 3P figures have multiple releases (v1, v2,
+  reissue, metallic version)
 
-7.2 Third-Party Manufacturer Database
+  7.2 Third-Party Manufacturer Database
 
 Maintain a curated table of known third-party manufacturers with their
 product lines and naming conventions. This assists in data entry by
@@ -679,93 +697,95 @@ character across official and unofficial releases side by side.
 
 8.1 Web Application
 
--   Dashboard --- Collection summary, total value, recent additions,
-    value trends chart
+- Dashboard --- Collection summary, total value, recent additions,
+  value trends chart
 
--   Catalog Browser --- Grid and list views with filterable sidebar
-    (franchise, line, manufacturer, condition, tags)
+- Catalog Browser --- Grid and list views with filterable sidebar
+  (franchise, line, manufacturer, condition, tags)
 
--   Item Detail View --- Full item record with photo gallery, price
-    history chart, edit capabilities
+- Item Detail View --- Full item record with photo gallery, price
+  history chart, edit capabilities
 
--   Search --- Global search bar with instant results and advanced
-    filter panel
+- Search --- Global search bar with instant results and advanced
+  filter panel
 
--   Reports --- Insurance report generator, value breakdown by category,
-    CSV/Excel export
+- Reports --- Insurance report generator, value breakdown by category,
+  CSV/Excel export
 
--   Settings --- Manufacturer management, toy line management, tag
-    management, user preferences
+- Settings --- Manufacturer management, toy line management, tag
+  management, user preferences
 
--   Bulk Operations --- Multi-select items for batch tagging, condition
-    updates, or export
+- Bulk Operations --- Multi-select items for batch tagging, condition
+  updates, or export
 
-8.2 Mobile Application (iOS)
+  8.2 Mobile Application (iOS)
 
--   Quick Add Flow --- Streamlined workflow: Scan barcode → Snap photo →
-    Review auto-populated fields → Edit → Save
+- Quick Add Flow --- Streamlined workflow: Scan barcode → Snap photo →
+  Review auto-populated fields → Edit → Save
 
--   Camera Integration --- In-app camera with barcode overlay mode and
-    photo capture mode
+- Camera Integration --- In-app camera with barcode overlay mode and
+  photo capture mode
 
--   ML Identification --- Point camera at figure, receive identification
-    suggestions in real-time
+- ML Identification --- Point camera at figure, receive identification
+  suggestions in real-time
 
--   Collection Browser --- Scrollable grid with search, optimized for
-    mobile interaction
+- Collection Browser --- Scrollable grid with search, optimized for
+  mobile interaction
 
--   Offline Mode --- Full data entry capability when offline. Queue
-    syncs when connectivity returns.
+- Offline Mode --- Full data entry capability when offline. Queue
+  syncs when connectivity returns.
 
--   Item Detail --- View and edit item details, swipe through photos,
-    view price history
+- Item Detail --- View and edit item details, swipe through photos,
+  view price history
 
 9\. Risks, Assumptions, and Open Questions
 
 9.1 Risks
 
-  ---------------------- ------------ ----------------------------------------
-  **Risk**               **Impact**   **Mitigation**
+---
 
-  ML model accuracy may  High         Start with broad categories
-  be low for                          (character-level) rather than
-  similar-looking 3P                  version-level. Refine as training data
-  figures                             grows.
+**Risk** **Impact** **Mitigation**
 
-  Third-party APIs       Medium       Abstract API integrations behind a
-  (eBay, Amazon) may                  service layer. Fall back to manual entry
-  change terms or rate                if APIs become unavailable.
-  limits                              
+ML model accuracy may High Start with broad categories
+be low for (character-level) rather than
+similar-looking 3P version-level. Refine as training data
+figures grows.
 
-  Third-party            Medium       Build a community-sourced manufacturer
-  manufacturer data is                database. Allow the collector to curate
-  fragmented and                      and correct data.
-  inconsistent                        
+Third-party APIs Medium Abstract API integrations behind a
+(eBay, Amazon) may service layer. Fall back to manual entry
+change terms or rate if APIs become unavailable.
+limits
 
-  Photo storage costs    Low          Use compression, thumbnail optimization,
-  may grow significantly              and tiered storage. Self-hosted option
-  for large collections               keeps costs fixed.
-  ---------------------- ------------ ----------------------------------------
+Third-party Medium Build a community-sourced manufacturer
+manufacturer data is database. Allow the collector to curate
+fragmented and and correct data.
+inconsistent
+
+Photo storage costs Low Use compression, thumbnail optimization,
+may grow significantly and tiered storage. Self-hosted option
+for large collections keeps costs fixed.
+
+---
 
 9.2 Open Questions
 
--   Should the system support a shared community database of
-    items/prices in future, or remain strictly personal?
+- Should the system support a shared community database of
+  items/prices in future, or remain strictly personal?
 
--   What is the target collection size at launch? This affects initial
-    performance tuning and storage provisioning decisions.
+- What is the target collection size at launch? This affects initial
+  performance tuning and storage provisioning decisions.
 
--   Is Android support required in Phase 1, or can it be deferred?
-    (Affects technology choices for ML and barcode scanning.)
+- Is Android support required in Phase 1, or can it be deferred?
+  (Affects technology choices for ML and barcode scanning.)
 
--   Should the app support tracking items on a wishlist or want-list,
-    with price alerts from eBay?
+- Should the app support tracking items on a wishlist or want-list,
+  with price alerts from eBay?
 
--   Is there a need to track accessories separately from figures (e.g.,
-    an accessory pack with 15 items)?
+- Is there a need to track accessories separately from figures (e.g.,
+  an accessory pack with 15 items)?
 
--   What level of insurance reporting detail does the collector's
-    insurance provider require?
+- What level of insurance reporting detail does the collector's
+  insurance provider require?
 
 10\. Implementation Phases
 
@@ -802,16 +822,18 @@ consideration. Advanced reporting and analytics.
 
 Appendix A: Related Research Documents
 
--   iOS APIs for Image-Based Object Recognition
-    (ios-image-recognition-research.md) --- Detailed technical analysis
-    of Vision, Core ML, Create ML, and Google ML Kit approaches for
-    on-device image classification
+- iOS APIs for Image-Based Object Recognition
+  (ios-image-recognition-research.md) --- Detailed technical analysis
+  of Vision, Core ML, Create ML, and Google ML Kit approaches for
+  on-device image classification
 
 Appendix B: Revision History
 
-  ------------- ---------------- ---------------- ----------------------------
-  **Version**   **Date**         **Author**       **Description**
+---
 
-  1.0           February 22,     ---              Initial draft
-                2026                              
-  ------------- ---------------- ---------------- ----------------------------
+**Version** **Date** **Author** **Description**
+
+1.0 February 22, --- Initial draft
+2026
+
+---

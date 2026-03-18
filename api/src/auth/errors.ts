@@ -16,10 +16,10 @@ export class HttpError extends Error {
    */
   constructor(
     public readonly statusCode: number,
-    public readonly body: Record<string, unknown>,
+    public readonly body: Record<string, unknown>
   ) {
-    super(JSON.stringify(body))
-    this.name = 'HttpError'
+    super(JSON.stringify(body));
+    this.name = 'HttpError';
   }
 }
 
@@ -39,8 +39,8 @@ export class ProviderVerificationError extends Error {
    * @param message - Human-readable description of the validation failure
    */
   constructor(message: string) {
-    super(message)
-    this.name = 'ProviderVerificationError'
+    super(message);
+    this.name = 'ProviderVerificationError';
   }
 }
 
@@ -60,7 +60,7 @@ const NETWORK_ERROR_CODES = new Set([
   'ENETUNREACH',
   'EHOSTDOWN',
   'ENETDOWN',
-])
+]);
 
 /**
  * Returns true if the error is a Node.js network-level infrastructure error,
@@ -70,8 +70,8 @@ const NETWORK_ERROR_CODES = new Set([
  * @param err - The error to check
  */
 export function isNetworkError(err: unknown): err is Error {
-  if (!(err instanceof Error)) return false
+  if (!(err instanceof Error)) return false;
   // instanceof Error confirmed above; NodeJS.ErrnoException adds only optional .code — cast is safe
-  const code = (err as NodeJS.ErrnoException).code
-  return code !== undefined && NETWORK_ERROR_CODES.has(code)
+  const code = (err as NodeJS.ErrnoException).code;
+  return code !== undefined && NETWORK_ERROR_CODES.has(code);
 }

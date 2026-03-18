@@ -19,6 +19,7 @@ Converted all 118 FansToys seed items from integer ID references to slug-based f
 Rewrote all 118 item entries in the FansToys seed file to follow the project's slug-based FK convention.
 
 **Before (integer IDs):**
+
 ```json
 {
   "manufacturer_id": 1,
@@ -31,6 +32,7 @@ Rewrote all 118 item entries in the FansToys seed file to follow the project's s
 ```
 
 **After (slug-based FKs):**
+
 ```json
 {
   "manufacturer_slug": "fanstoys",
@@ -46,6 +48,7 @@ Rewrote all 118 item entries in the FansToys seed file to follow the project's s
 ```
 
 **Changes applied to each item:**
+
 - `manufacturer_id` → `manufacturer_slug`
 - `toy_line_id` → `toy_line_slug`
 - Removed `character_faction_id` and `character_sub_group_id` (denormalized convenience fields — canonical source is the characters table)
@@ -53,6 +56,7 @@ Rewrote all 118 item entries in the FansToys seed file to follow the project's s
 - Updated `_metadata` import instructions to reflect the slug resolution workflow
 
 **Modified:**
+
 - `api/db/seed/manufacturers/fanstoys/fanstoys.json` — Full rewrite of 118 items (+2,133 / −2,250 lines from format changes)
 
 ### 2. Guardian Robot Character Addition
@@ -60,6 +64,7 @@ Rewrote all 118 item entries in the FansToys seed file to follow the project's s
 Added Guardian Robot to the G1 Season 1 character file to resolve an unresolved `character_slug` reference from the FT-20G item.
 
 **Modified:**
+
 - `api/db/seed/characters/g1-season1.json` — Added Guardian Robot character entry (+22 lines)
 
 ### 3. Item Seed Validation Tests
@@ -79,6 +84,7 @@ Extended the existing seed validation test suite with a new `item seed files` se
 | `no integer ID fields (must use slugs)` | Guardrail against regression to old convention |
 
 **Modified:**
+
 - `api/src/db/seed-validation.test.ts` — Added `ItemRecord`/`ItemFile` interfaces, `loadItemFile` loader, derived lookup sets, and 8 test cases (+135 lines)
 
 ---
@@ -88,6 +94,7 @@ Extended the existing seed validation test suite with a new `item seed files` se
 ### Why Slug-Based FKs Over Integer IDs
 
 Integer ID references in seed data create fragile positional coupling:
+
 - They depend on insertion order — reseeding or adding a row shifts all downstream IDs
 - They're opaque in code review — `"manufacturer_id": 1` conveys no meaning
 - They break when migrating between environments with different seed histories
@@ -109,6 +116,7 @@ Fields like `status`, `variant_type`, `sub_brand`, and `notes` are item-level at
 498 tests passing after changes.
 
 **New test coverage (+135 lines):**
+
 - 8 parameterized test cases via `it.each(itemFiles)` covering all item seed files
 - FK integrity checks cross-reference against loaded manufacturer, toy line, and character seed data
 - Duplicate detection uses a `Set` accumulator per file
@@ -127,6 +135,7 @@ Fields like `status`, `variant_type`, `sub_brand`, and `notes` are item-level at
 ## Related Files
 
 **Modified (3):**
+
 - `api/db/seed/manufacturers/fanstoys/fanstoys.json`
 - `api/db/seed/characters/g1-season1.json`
 - `api/src/db/seed-validation.test.ts`
@@ -135,15 +144,15 @@ Fields like `status`, `variant_type`, `sub_brand`, and `notes` are item-level at
 
 ## Summary Statistics
 
-| Metric | Count |
-|--------|-------|
-| Files modified | 3 |
-| Lines added | ~1,226 |
-| Lines removed | ~1,203 |
-| Items converted | 118 |
-| Validation tests added | 8 |
-| Total tests passing | 498 |
-| Characters added | 1 (Guardian Robot) |
+| Metric                 | Count              |
+| ---------------------- | ------------------ |
+| Files modified         | 3                  |
+| Lines added            | ~1,226             |
+| Lines removed          | ~1,203             |
+| Items converted        | 118                |
+| Validation tests added | 8                  |
+| Total tests passing    | 498                |
+| Characters added       | 1 (Guardian Robot) |
 
 ---
 

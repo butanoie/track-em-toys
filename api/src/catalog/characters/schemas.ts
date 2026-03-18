@@ -1,11 +1,26 @@
 import {
-  errorResponse, franchiseParam, franchiseSlugParams,
-  paginationQuery, slugNameRef, nullableSlugNameRef, cursorListResponse,
-} from '../shared/schemas.js'
+  errorResponse,
+  franchiseParam,
+  franchiseSlugParams,
+  paginationQuery,
+  slugNameRef,
+  nullableSlugNameRef,
+  cursorListResponse,
+} from '../shared/schemas.js';
 
 const characterListItem = {
   type: 'object',
-  required: ['id', 'name', 'slug', 'franchise', 'faction', 'continuity_family', 'character_type', 'alt_mode', 'is_combined_form'],
+  required: [
+    'id',
+    'name',
+    'slug',
+    'franchise',
+    'faction',
+    'continuity_family',
+    'character_type',
+    'alt_mode',
+    'is_combined_form',
+  ],
   additionalProperties: false,
   properties: {
     id: { type: 'string' },
@@ -18,7 +33,7 @@ const characterListItem = {
     alt_mode: { type: ['string', 'null'] },
     is_combined_form: { type: 'boolean' },
   },
-} as const
+} as const;
 
 const appearanceItem = {
   type: 'object',
@@ -34,14 +49,27 @@ const appearanceItem = {
     year_end: { type: ['integer', 'null'] },
     description: { type: ['string', 'null'] },
   },
-} as const
+} as const;
 
 const characterDetail = {
   type: 'object',
   required: [
-    'id', 'name', 'slug', 'franchise', 'faction', 'continuity_family',
-    'character_type', 'alt_mode', 'is_combined_form', 'combiner_role', 'combined_form',
-    'sub_groups', 'appearances', 'metadata', 'created_at', 'updated_at',
+    'id',
+    'name',
+    'slug',
+    'franchise',
+    'faction',
+    'continuity_family',
+    'character_type',
+    'alt_mode',
+    'is_combined_form',
+    'combiner_role',
+    'combined_form',
+    'sub_groups',
+    'appearances',
+    'metadata',
+    'created_at',
+    'updated_at',
   ],
   additionalProperties: false,
   properties: {
@@ -62,7 +90,7 @@ const characterDetail = {
     created_at: { type: 'string' },
     updated_at: { type: 'string' },
   },
-} as const
+} as const;
 
 export const listCharactersSchema = {
   description: 'List characters in a franchise with cursor-based pagination.',
@@ -76,7 +104,7 @@ export const listCharactersSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;
 
 export const getCharacterSchema = {
   description: 'Get a character by slug within a franchise, including sub-groups, appearances, and combiner info.',
@@ -88,4 +116,4 @@ export const getCharacterSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;

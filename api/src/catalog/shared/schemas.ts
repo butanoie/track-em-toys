@@ -4,7 +4,7 @@ export const errorResponse = {
   required: ['error'],
   additionalProperties: false,
   properties: { error: { type: 'string' } },
-} as const
+} as const;
 
 /** Params schema for franchise-scoped routes: { franchise: string }. */
 export const franchiseParam = {
@@ -14,7 +14,7 @@ export const franchiseParam = {
   properties: {
     franchise: { type: 'string', minLength: 1, maxLength: 120 },
   },
-} as const
+} as const;
 
 /** Params schema for detail routes: { franchise: string, slug: string }. */
 export const franchiseSlugParams = {
@@ -25,7 +25,7 @@ export const franchiseSlugParams = {
     franchise: { type: 'string', minLength: 1, maxLength: 120 },
     slug: { type: 'string', minLength: 1, maxLength: 120 },
   },
-} as const
+} as const;
 
 /** Params schema for unscoped detail routes: { slug: string }. */
 export const slugParam = {
@@ -35,7 +35,7 @@ export const slugParam = {
   properties: {
     slug: { type: 'string', minLength: 1, maxLength: 120 },
   },
-} as const
+} as const;
 
 /** Querystring schema for cursor-paginated list endpoints. */
 export const paginationQuery = {
@@ -45,7 +45,7 @@ export const paginationQuery = {
     limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
     cursor: { type: 'string', maxLength: 512 },
   },
-} as const
+} as const;
 
 /** Shared { slug, name } reference shape used in joined responses. */
 export const slugNameRef = {
@@ -56,12 +56,12 @@ export const slugNameRef = {
     slug: { type: 'string' },
     name: { type: 'string' },
   },
-} as const
+} as const;
 
 /** Nullable slug+name reference: either the object or null. */
 export const nullableSlugNameRef = {
   oneOf: [slugNameRef, { type: 'null' }],
-} as const
+} as const;
 
 /**
  * Cursor-paginated list response wrapper.
@@ -78,5 +78,5 @@ export function cursorListResponse(itemSchema: object) {
       next_cursor: { type: ['string', 'null'] },
       total_count: { type: 'integer' },
     },
-  } as const
+  } as const;
 }

@@ -1,7 +1,7 @@
-import path from 'path'
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
+import path from 'path';
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [tailwindcss(), react()],
@@ -17,4 +17,4 @@ export default defineConfig({
     css: false,
     exclude: ['e2e/**', 'node_modules/**'],
   },
-})
+});

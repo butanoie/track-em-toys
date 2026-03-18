@@ -16,6 +16,7 @@ Implemented comprehensive static analysis tooling for the web project, including
 ### 1. ESLint Configuration
 
 **Packages Installed:**
+
 - `eslint@^9.39.3`
 - `@eslint/js@^9.39.3`
 - `typescript-eslint@^8.56.1`
@@ -25,6 +26,7 @@ Implemented comprehensive static analysis tooling for the web project, including
 **Config File Created:** `web/eslint.config.js`
 
 ESLint 9 flat config with the following structure:
+
 - Extends `recommendedTypeChecked` for type-aware linting
 - React Hooks plugin for React best practices
 - React Refresh plugin for HMR development
@@ -39,6 +41,7 @@ ESLint 9 flat config with the following structure:
 **Script Added:** `"typecheck": "tsc -b"`
 
 Executes TypeScript compiler in build mode (project references) without emitting files:
+
 - Validates all project references: `tsconfig.app.json` (main application) and `tsconfig.node.json` (build config)
 - Pure type validation, no code generation
 - Complements `build` script which runs `tsc -b && vite build`
@@ -48,6 +51,7 @@ Executes TypeScript compiler in build mode (project references) without emitting
 **Modified:** `package.json` scripts section
 
 **Scripts Updated/Added:**
+
 - ✅ `"lint": "eslint ."` — Already existed, verified working
 - ✅ `"lint:fix": "eslint . --fix"` — NEW: Auto-fix ESLint violations
 - ✅ `"typecheck": "tsc -b"` — NEW: Type-only validation
@@ -57,14 +61,17 @@ Executes TypeScript compiler in build mode (project references) without emitting
 Applied ESLint fixes to non-compliant source files:
 
 **`src/pages/LoginPage.tsx`**
+
 - Wrapped async event handlers with `void` keyword to handle promises from event listeners
 - Pattern: `onClick={() => void handleSignIn()}` — suppresses "floating promise" warnings
 
 **`src/routes/_authenticated/index.tsx`**
+
 - Wrapped async event handlers with `void` keyword
 - Ensures event handler promises don't create unhandled promise rejections
 
 **`src/routes/apple/AppleCallback.tsx`**
+
 - Removed unnecessary type assertion `as T`
 - Replaced with proper type inference or explicit typing where needed
 
@@ -75,11 +82,13 @@ Applied ESLint fixes to non-compliant source files:
 Added comprehensive web project guidelines:
 
 **New Section: Web**
+
 - **ESLint** — Configuration format, key rules, overrides for routes/config/tests
 - **TypeScript Typecheck** — Script usage, difference from build, validation purpose
 - **Web Type Safety** — Best practices for type assertions, strict mode requirements
 
 **Updated Section: Build Commands**
+
 - Added `"lint": "eslint ."` — ESLint validation
 - Added `"lint:fix": "eslint . --fix"` — Auto-fix violations
 - Added `"typecheck": "tsc -b"` — Type-only validation
@@ -94,22 +103,18 @@ Added comprehensive web project guidelines:
 File: `web/eslint.config.js`
 
 ```javascript
-import js from "@eslint/js";
-import tsEslint from "typescript-eslint";
-import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
+import js from '@eslint/js';
+import tsEslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default tsEslint.config(
   {
-    ignores: [
-      "dist",
-      ".react-router",
-      "src/routeTree.gen.ts",
-    ],
+    ignores: ['dist', '.react-router', 'src/routeTree.gen.ts'],
   },
   // Shared base config for all files
   {
-    files: ["**/*.{js,ts,jsx,tsx}"],
+    files: ['**/*.{js,ts,jsx,tsx}'],
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -117,64 +122,61 @@ export default tsEslint.config(
       },
     },
     plugins: {
-      "react-hooks": reactHooks,
-      "react-refresh": reactRefresh,
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
     },
   },
   // Base JavaScript rules
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
+    files: ['**/*.{js,jsx,ts,tsx}'],
     rules: js.configs.recommended.rules,
   },
   // Type-checked linting for TypeScript files
   {
-    files: ["**/*.ts", "**/*.tsx"],
-    extends: [
-      tsEslint.configs.recommendedTypeChecked,
-      tsEslint.configs.stylisticTypeChecked,
-    ],
+    files: ['**/*.ts', '**/*.tsx'],
+    extends: [tsEslint.configs.recommendedTypeChecked, tsEslint.configs.stylisticTypeChecked],
     rules: {
-      "no-explicit-any": "error",
-      "@typescript-eslint/no-unsafe-argument": "error",
-      "@typescript-eslint/no-unsafe-assignment": "error",
-      "@typescript-eslint/no-unsafe-call": "error",
-      "@typescript-eslint/no-unsafe-member-access": "error",
-      "@typescript-eslint/no-unsafe-return": "error",
-      "react-hooks/rules-of-hooks": "error",
-      "react-refresh/only-export-components": "warn",
+      'no-explicit-any': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-refresh/only-export-components': 'warn',
     },
   },
   // Routes override: disable only-throw-error for TanStack Router pattern
   {
-    files: ["src/routes/**/*.{ts,tsx}"],
+    files: ['src/routes/**/*.{ts,tsx}'],
     rules: {
-      "@typescript-eslint/only-throw-error": "off",
+      '@typescript-eslint/only-throw-error': 'off',
     },
   },
   // Config files: relax unsafe rules for build configuration
   {
-    files: ["*.config.js", "*.config.ts"],
+    files: ['*.config.js', '*.config.ts'],
     rules: {
-      "@typescript-eslint/no-unsafe-argument": "off",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unsafe-return": "off",
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
     },
   },
   // Test files: relax unsafe and assertion rules
   {
-    files: ["**/*.test.ts", "**/*.test.tsx"],
+    files: ['**/*.test.ts', '**/*.test.tsx'],
     rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unsafe-argument": "off",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unsafe-return": "off",
-      "@typescript-eslint/no-unnecessary-condition": "off",
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
     },
-  },
+  }
 );
 ```
 
@@ -198,6 +200,7 @@ $ npm run typecheck
 ```
 
 **Result:** Exit code 0
+
 - Zero type errors across all project references
 - `tsconfig.app.json` validation: ✅ PASS
 - `tsconfig.node.json` validation: ✅ PASS
@@ -209,6 +212,7 @@ $ npm run lint
 ```
 
 **Result:** Exit code 0
+
 - No errors
 - No warnings
 - All 9 source files validated
@@ -222,6 +226,7 @@ $ npm run lint:fix
 ```
 
 **Result:** Exit code 0
+
 - All violations auto-fixed
 - No remaining errors or warnings
 - Source files updated with `void` wrappers for async handlers
@@ -234,6 +239,7 @@ $ npm run test
 ```
 
 **Result:** Exit code 0
+
 - 9 test files executed
 - 72 tests passed
 - 0 tests failed
@@ -246,6 +252,7 @@ $ npm run build
 ```
 
 **Result:** Exit code 0
+
 - TypeScript compilation successful
 - Vite bundling successful
 - All type checks passed during build
@@ -284,10 +291,12 @@ $ npm run build
 ## Related Files
 
 ### Created Files
+
 - `/Users/buta/Repos/track-em-toys/web/eslint.config.js` — ESLint 9 flat config
 - `/Users/buta/Repos/track-em-toys/changelog/2026-02-26T061855_web-eslint-typecheck-setup.md` — This changelog entry
 
 ### Modified Files
+
 - `/Users/buta/Repos/track-em-toys/web/package.json` — Added dependencies, new scripts
 - `/Users/buta/Repos/track-em-toys/web/src/pages/LoginPage.tsx` — Async event handler fixes
 - `/Users/buta/Repos/track-em-toys/web/src/routes/_authenticated/index.tsx` — Async event handler fixes
@@ -295,6 +304,7 @@ $ npm run build
 - `/Users/buta/Repos/track-em-toys/CLAUDE.md` — Added Web section and updated Build Commands
 
 ### Generated/Excluded Files
+
 - `/Users/buta/Repos/track-em-toys/web/src/routeTree.gen.ts` — Auto-generated by TanStack Router (excluded from ESLint)
 
 ---

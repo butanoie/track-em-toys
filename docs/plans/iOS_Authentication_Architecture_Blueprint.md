@@ -10,6 +10,7 @@
 The API already fully supports native iOS client authentication. This blueprint designs the iOS authentication layer from scratch, mirroring the web auth patterns adapted for Swift 6, SwiftUI, and Apple platform idioms.
 
 **Key API Facts (no API changes required):**
+
 - `APPLE_BUNDLE_ID` is already required in `api/src/config.ts:125` and in the audience list at `api/src/auth/apple.ts:16`
 - `GOOGLE_IOS_CLIENT_ID` is already required in `api/src/config.ts:134` and in the audience list at `api/src/auth/google.ts:16`
 - `client_type = 'native'` is derived from the `aud` claim — causes the API to return `refresh_token` in the JSON body (`api/src/auth/routes.ts:534-539`)
@@ -24,14 +25,14 @@ The API already fully supports native iOS client authentication. This blueprint 
 
 The iOS auth layer mirrors the web's `AuthProvider` + `authStore` split, adapted for Swift 6 and Apple platform idioms:
 
-| Component | iOS | Web Equivalent |
-|-----------|-----|----------------|
-| `AuthManager` | `@MainActor @Observable` — single source of truth | `AuthProvider.tsx` |
-| `APIClient` | Swift `actor` — in-memory token + refresh mutex | `api-client.ts` |
-| `KeychainService` | Secure durable storage for refresh token | `auth-store.ts` (localStorage flag) |
-| `AppleSignInCoordinator` | `ASAuthorizationController` delegate bridge | `apple-auth.ts` |
-| `GoogleSignInCoordinator` | `GIDSignIn` async wrapper | `google-auth.ts` |
-| `NetworkModels` | `Codable` structs | Zod schemas |
+| Component                 | iOS                                               | Web Equivalent                      |
+| ------------------------- | ------------------------------------------------- | ----------------------------------- |
+| `AuthManager`             | `@MainActor @Observable` — single source of truth | `AuthProvider.tsx`                  |
+| `APIClient`               | Swift `actor` — in-memory token + refresh mutex   | `api-client.ts`                     |
+| `KeychainService`         | Secure durable storage for refresh token          | `auth-store.ts` (localStorage flag) |
+| `AppleSignInCoordinator`  | `ASAuthorizationController` delegate bridge       | `apple-auth.ts`                     |
+| `GoogleSignInCoordinator` | `GIDSignIn` async wrapper                         | `google-auth.ts`                    |
+| `NetworkModels`           | `Codable` structs                                 | Zod schemas                         |
 
 **Trade-off rationale**: A single `AuthManager` owned at the app level (injected via the SwiftUI environment) gives SwiftUI views a single, observable source of truth without requiring TanStack Query equivalents for auth state. All network calls are async/await, matching the mandatory project convention.
 
@@ -80,6 +81,7 @@ ios/track-em-toysTests/
 **Type**: `actor APIClient` (actor for Sendable conformance and safe concurrent access to the in-memory token and mutex)
 
 **Core interface**:
+
 ```swift
 actor APIClient {
     private var accessToken: String?
@@ -99,11 +101,13 @@ actor APIClient {
 ```
 
 **Key behaviors**:
+
 - Access token is stored in an actor-isolated `var accessToken: String?` (in-memory only, never persisted).
 - `refreshTask` is the Swift equivalent of the web's `refreshPromise` mutex. When multiple concurrent requests get 401, all await the same `Task<Bool, Never>` — only one actual refresh call is made.
 - After a successful refresh, retry the original request once. If refresh fails, throw `APIError.sessionExpired` so `AuthManager` can clear state and navigate to `AuthView`.
 
 **Endpoint model**:
+
 ```swift
 struct Endpoint {
     let path: String
@@ -124,6 +128,7 @@ struct Endpoint {
 **Responsibility**: Typed Swift functions for each API auth call. No logic — only request construction and response decoding.
 
 **Functions**:
+
 ```swift
 func signIn(provider: OAuthProvider, idToken: String, nonce: String?,
             userInfo: UserInfo?, using client: APIClient) async throws -> AuthResponse
@@ -134,6 +139,7 @@ func logout(refreshToken: String, using client: APIClient) async throws
 ```
 
 **Key details**:
+
 - `POST /auth/signin` body: `{ provider, id_token, nonce?, user_info? }` — matches `api/src/types/index.ts:65-72`
 - `POST /auth/refresh` body: `{ refresh_token }` — native clients send in body
 - `POST /auth/logout` body: `{ refresh_token }` — requires `Authorization: Bearer` header (handled by `APIClient`)
@@ -199,6 +205,7 @@ struct APIErrorResponse: Decodable {
 **Type**: `enum KeychainService` (namespace of static functions — no state, all calls go to the OS)
 
 **Keys**:
+
 ```swift
 private static let refreshTokenKey = "com.trackem.toys.refreshToken"
 private static let userProfileKey = "com.trackem.toys.userProfile"
@@ -206,6 +213,7 @@ private static let appleDisplayNameKey = "com.trackem.toys.appleDisplayName"
 ```
 
 **Interface**:
+
 ```swift
 enum KeychainService {
     // Refresh token
@@ -226,6 +234,7 @@ enum KeychainService {
 ```
 
 **Security**:
+
 - Refresh token + user profile: `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` — allows background refresh, does not sync to iCloud Keychain
 - Apple display name: `kSecAttrAccessibleWhenUnlocked` — only needed during active sign-in
 - `kSecAttrSynchronizable` is **never** set to `true` — each device has its own session
@@ -241,6 +250,7 @@ enum KeychainService {
 **Type**: `@MainActor @Observable final class AuthManager`
 
 **State**:
+
 ```swift
 @MainActor
 @Observable
@@ -255,6 +265,7 @@ final class AuthManager {
 ```
 
 **Interface**:
+
 ```swift
 func initialize() async
 func signInWithApple(_ result: AppleSignInResult) async throws
@@ -265,6 +276,7 @@ func onForeground() async  // called on ScenePhase.active
 ```
 
 **Initialization flow**:
+
 1. Check for refresh token in Keychain
 2. If none: `isLoading = false`, show `AuthView`
 3. If found: call `POST /auth/refresh`
@@ -272,11 +284,13 @@ func onForeground() async  // called on ScenePhase.active
 5. On failure (401/network): delete Keychain entries, show `AuthView`
 
 **Proactive refresh timer**:
+
 - Decode JWT `exp` claim (base64url decode payload)
 - Schedule `Task` that sleeps until 60 seconds before expiry
 - On app foreground resume: check if token expired, refresh immediately if needed
 
 **Error type**:
+
 ```swift
 enum AuthError: LocalizedError {
     case providerSignInCancelled
@@ -297,6 +311,7 @@ enum AuthError: LocalizedError {
 **Type**: `final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding`
 
 **Result type**:
+
 ```swift
 struct AppleSignInResult {
     let idToken: String
@@ -307,6 +322,7 @@ struct AppleSignInResult {
 ```
 
 **Nonce generation** (must match API contract):
+
 1. Generate 32 random bytes using `SecRandomCopyBytes`
 2. Hex-encode → `rawNonce` (64 hex characters)
 3. SHA-256 hash using `CryptoKit.SHA256.hash(data:)` → hex-encode → `hashedNonce`
@@ -314,6 +330,7 @@ struct AppleSignInResult {
 5. Pass `rawNonce` to `POST /auth/signin` (API re-hashes and compares)
 
 **Interface**:
+
 ```swift
 func performSignIn(in window: UIWindow) async throws -> AppleSignInResult
 ```
@@ -331,6 +348,7 @@ Uses `withCheckedThrowingContinuation` to bridge delegate callbacks into async/a
 **Type**: `final class GoogleSignInCoordinator`
 
 **Interface**:
+
 ```swift
 func signIn(presenting viewController: UIViewController) async throws -> String
 ```
@@ -350,6 +368,7 @@ Extracts `result.user.idToken?.tokenString`. Throws `GoogleSignInError.missingTo
 **Layout**: Centered logo + app name + two sign-in buttons stacked vertically.
 
 **Buttons**:
+
 - Apple: `SignInWithAppleButton` from `AuthenticationServices` (required by Apple HIG)
 - Google: Custom `Button` with Google "G" branding or `GIDSignInButton`
 
@@ -360,6 +379,7 @@ Extracts `result.user.idToken?.tokenString`. Throws `GoogleSignInError.missingTo
 ### 9. `TrackEmToysApp.swift` (modify)
 
 **Pattern**:
+
 ```swift
 @main
 struct TrackEmToysApp: App {
@@ -501,11 +521,11 @@ Auth has **zero interaction** with CloudKit:
 
 ## SPM Dependencies
 
-| Package | Source | Notes |
-|---------|--------|-------|
-| `GoogleSignIn-iOS` | `https://github.com/google/GoogleSignIn-iOS` | Add via Xcode SPM package editor |
-| `CryptoKit` | Built-in SDK | SHA-256 for Apple nonce |
-| `AuthenticationServices` | Built-in SDK | Apple Sign-In |
+| Package                  | Source                                       | Notes                            |
+| ------------------------ | -------------------------------------------- | -------------------------------- |
+| `GoogleSignIn-iOS`       | `https://github.com/google/GoogleSignIn-iOS` | Add via Xcode SPM package editor |
+| `CryptoKit`              | Built-in SDK                                 | SHA-256 for Apple nonce          |
+| `AuthenticationServices` | Built-in SDK                                 | Apple Sign-In                    |
 
 ---
 

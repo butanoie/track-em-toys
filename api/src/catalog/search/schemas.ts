@@ -1,4 +1,4 @@
-import { errorResponse, slugNameRef } from '../shared/schemas.js'
+import { errorResponse, slugNameRef } from '../shared/schemas.js';
 
 const searchResultItem = {
   type: 'object',
@@ -11,7 +11,7 @@ const searchResultItem = {
     slug: { type: 'string' },
     franchise: slugNameRef,
   },
-} as const
+} as const;
 
 export const searchSchema = {
   description: 'Full-text search across characters and items. Supports prefix matching on the last word.',
@@ -43,4 +43,4 @@ export const searchSchema = {
     400: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;

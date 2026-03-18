@@ -1,4 +1,4 @@
-import { errorResponse, franchiseParam, franchiseSlugParams, slugNameRef } from '../shared/schemas.js'
+import { errorResponse, franchiseParam, franchiseSlugParams, slugNameRef } from '../shared/schemas.js';
 
 const toyLineItem = {
   type: 'object',
@@ -15,7 +15,7 @@ const toyLineItem = {
     created_at: { type: 'string' },
     updated_at: { type: 'string' },
   },
-} as const
+} as const;
 
 export const listToyLinesSchema = {
   description: 'List toy lines in a franchise.',
@@ -32,7 +32,7 @@ export const listToyLinesSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;
 
 export const getToyLineSchema = {
   description: 'Get a toy line by slug within a franchise.',
@@ -44,4 +44,4 @@ export const getToyLineSchema = {
     404: errorResponse,
     500: errorResponse,
   },
-} as const
+} as const;

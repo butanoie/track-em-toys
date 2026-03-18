@@ -1,22 +1,22 @@
-import { pool } from '../../db/pool.js'
+import { pool } from '../../db/pool.js';
 
 // ---------------------------------------------------------------------------
 // List query row type (flat JOIN result)
 // ---------------------------------------------------------------------------
 
 export interface CharacterListRow {
-  id: string
-  name: string
-  slug: string
-  franchise_slug: string
-  franchise_name: string
-  faction_slug: string | null
-  faction_name: string | null
-  continuity_family_slug: string
-  continuity_family_name: string
-  character_type: string | null
-  alt_mode: string | null
-  is_combined_form: boolean
+  id: string;
+  name: string;
+  slug: string;
+  franchise_slug: string;
+  franchise_name: string;
+  faction_slug: string | null;
+  faction_name: string | null;
+  continuity_family_slug: string;
+  continuity_family_name: string;
+  character_type: string | null;
+  alt_mode: string | null;
+  is_combined_form: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -24,29 +24,29 @@ export interface CharacterListRow {
 // ---------------------------------------------------------------------------
 
 export interface CharacterBaseRow extends CharacterListRow {
-  combiner_role: string | null
-  combined_form_id: string | null
-  combined_form_slug: string | null
-  combined_form_name: string | null
-  metadata: Record<string, unknown>
-  created_at: string
-  updated_at: string
+  combiner_role: string | null;
+  combined_form_id: string | null;
+  combined_form_slug: string | null;
+  combined_form_name: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface SubGroupRef {
-  slug: string
-  name: string
+  slug: string;
+  name: string;
 }
 
 export interface AppearanceRow {
-  id: string
-  slug: string
-  name: string
-  source_media: string | null
-  source_name: string | null
-  year_start: number | null
-  year_end: number | null
-  description: string | null
+  id: string;
+  slug: string;
+  name: string;
+  source_media: string | null;
+  source_name: string | null;
+  year_start: number | null;
+  year_end: number | null;
+  description: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -54,9 +54,9 @@ export interface AppearanceRow {
 // ---------------------------------------------------------------------------
 
 export interface ListCharactersParams {
-  franchiseSlug: string
-  limit: number
-  cursor: { name: string; id: string } | null
+  franchiseSlug: string;
+  limit: number;
+  cursor: { name: string; id: string } | null;
 }
 
 /**
@@ -65,9 +65,9 @@ export interface ListCharactersParams {
  * @param params - Cursor-paginated list parameters
  */
 export async function listCharacters(
-  params: ListCharactersParams,
+  params: ListCharactersParams
 ): Promise<{ rows: CharacterListRow[]; totalCount: number }> {
-  const { franchiseSlug, limit, cursor } = params
+  const { franchiseSlug, limit, cursor } = params;
 
   const dataQuery = `
     SELECT c.id, c.name, c.slug,
@@ -82,7 +82,7 @@ export async function listCharacters(
      WHERE fr.slug = $1
        AND ($2::text IS NULL OR (c.name, c.id) > ($2, $3::uuid))
      ORDER BY c.name ASC, c.id ASC
-     LIMIT $4`
+     LIMIT $4`;
 
   const countQuery = `
     SELECT COUNT(*)::int AS total_count
@@ -90,22 +90,17 @@ export async function listCharacters(
       JOIN franchises fr ON fr.id = c.franchise_id
       LEFT JOIN factions fa ON fa.id = c.faction_id
       JOIN continuity_families cf ON cf.id = c.continuity_family_id
-     WHERE fr.slug = $1`
+     WHERE fr.slug = $1`;
 
   const [dataResult, countResult] = await Promise.all([
-    pool.query<CharacterListRow>(dataQuery, [
-      franchiseSlug,
-      cursor?.name ?? null,
-      cursor?.id ?? null,
-      limit + 1,
-    ]),
+    pool.query<CharacterListRow>(dataQuery, [franchiseSlug, cursor?.name ?? null, cursor?.id ?? null, limit + 1]),
     pool.query<{ total_count: number }>(countQuery, [franchiseSlug]),
-  ])
+  ]);
 
   return {
     rows: dataResult.rows,
     totalCount: countResult.rows[0]?.total_count ?? 0,
-  }
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -113,9 +108,9 @@ export async function listCharacters(
 // ---------------------------------------------------------------------------
 
 export interface CharacterDetail {
-  base: CharacterBaseRow
-  subGroups: SubGroupRef[]
-  appearances: AppearanceRow[]
+  base: CharacterBaseRow;
+  subGroups: SubGroupRef[];
+  appearances: AppearanceRow[];
 }
 
 /**
@@ -126,7 +121,7 @@ export interface CharacterDetail {
  */
 export async function getCharacterBySlug(
   franchiseSlug: string,
-  characterSlug: string,
+  characterSlug: string
 ): Promise<CharacterDetail | null> {
   const baseQuery = `
     SELECT c.id, c.name, c.slug,
@@ -143,14 +138,11 @@ export async function getCharacterBySlug(
       LEFT JOIN factions fa ON fa.id = c.faction_id
       JOIN continuity_families cf ON cf.id = c.continuity_family_id
       LEFT JOIN characters cform ON cform.id = c.combined_form_id
-     WHERE fr.slug = $1 AND c.slug = $2`
+     WHERE fr.slug = $1 AND c.slug = $2`;
 
-  const { rows: baseRows } = await pool.query<CharacterBaseRow>(baseQuery, [
-    franchiseSlug,
-    characterSlug,
-  ])
-  const base = baseRows[0]
-  if (!base) return null
+  const { rows: baseRows } = await pool.query<CharacterBaseRow>(baseQuery, [franchiseSlug, characterSlug]);
+  const base = baseRows[0];
+  if (!base) return null;
 
   const [subGroupResult, appearanceResult] = await Promise.all([
     pool.query<SubGroupRef>(
@@ -159,7 +151,7 @@ export async function getCharacterBySlug(
          JOIN sub_groups sg ON sg.id = csg.sub_group_id
         WHERE csg.character_id = $1
         ORDER BY sg.name ASC`,
-      [base.id],
+      [base.id]
     ),
     pool.query<AppearanceRow>(
       `SELECT id, slug, name, source_media, source_name,
@@ -167,13 +159,13 @@ export async function getCharacterBySlug(
          FROM character_appearances
         WHERE character_id = $1
         ORDER BY year_start ASC NULLS LAST, name ASC`,
-      [base.id],
+      [base.id]
     ),
-  ])
+  ]);
 
   return {
     base,
     subGroups: subGroupResult.rows,
     appearances: appearanceResult.rows,
-  }
+  };
 }

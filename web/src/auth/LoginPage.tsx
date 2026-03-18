@@ -1,51 +1,51 @@
-import { GoogleLogin, type CredentialResponse } from '@react-oauth/google'
-import { extractGoogleCredential } from './google-auth'
-import { initiateAppleSignIn } from './apple-auth'
-import { useAuth } from './useAuth'
-import { Button } from '@/components/ui/button'
-import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { Route } from '@/routes/login'
+import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
+import { extractGoogleCredential } from './google-auth';
+import { initiateAppleSignIn } from './apple-auth';
+import { useAuth } from './useAuth';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import { Route } from '@/routes/login';
 
 export function LoginPage() {
-  const { signInWithGoogle, signInWithApple } = useAuth()
-  const [error, setError] = useState<string | null>(null)
-  const [isAppleLoading, setIsAppleLoading] = useState(false)
-  const navigate = useNavigate()
-  const { redirect: redirectTo } = Route.useSearch()
+  const { signInWithGoogle, signInWithApple } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
+  const navigate = useNavigate();
+  const { redirect: redirectTo } = Route.useSearch();
 
   async function handleGoogleSuccess(response: CredentialResponse) {
-    setError(null)
-    const credential = extractGoogleCredential(response)
+    setError(null);
+    const credential = extractGoogleCredential(response);
     if (!credential) {
-      setError('Google sign-in failed: no credential received.')
-      return
+      setError('Google sign-in failed: no credential received.');
+      return;
     }
     try {
-      await signInWithGoogle(credential)
-      await navigate({ to: redirectTo ?? '/' })
+      await signInWithGoogle(credential);
+      await navigate({ to: redirectTo ?? '/' });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Google sign-in failed.'
-      setError(message)
+      const message = err instanceof Error ? err.message : 'Google sign-in failed.';
+      setError(message);
     }
   }
 
   function handleGoogleError() {
-    setError('Google sign-in failed. Please try again.')
+    setError('Google sign-in failed. Please try again.');
   }
 
   async function handleAppleSignIn() {
-    setError(null)
-    setIsAppleLoading(true)
+    setError(null);
+    setIsAppleLoading(true);
     try {
-      const result = await initiateAppleSignIn()
-      await signInWithApple(result.idToken, result.rawNonce, result.userName)
-      await navigate({ to: redirectTo ?? '/' })
+      const result = await initiateAppleSignIn();
+      await signInWithApple(result.idToken, result.rawNonce, result.userName);
+      await navigate({ to: redirectTo ?? '/' });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Apple sign-in failed.'
-      setError(message)
+      const message = err instanceof Error ? err.message : 'Apple sign-in failed.';
+      setError(message);
     } finally {
-      setIsAppleLoading(false)
+      setIsAppleLoading(false);
     }
   }
 
@@ -53,12 +53,8 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-sm space-y-8 p-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Track&apos;em Toys
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to manage your toy collection
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Track&apos;em Toys</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Sign in to manage your toy collection</p>
         </div>
 
         {error && (
@@ -73,7 +69,9 @@ export function LoginPage() {
         <div className="space-y-4">
           <div className="flex justify-center">
             <GoogleLogin
-              onSuccess={(response) => { void handleGoogleSuccess(response) }}
+              onSuccess={(response) => {
+                void handleGoogleSuccess(response);
+              }}
               onError={handleGoogleError}
               useOneTap={false}
               shape="rectangular"
@@ -85,7 +83,9 @@ export function LoginPage() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => { void handleAppleSignIn() }}
+            onClick={() => {
+              void handleAppleSignIn();
+            }}
             disabled={isAppleLoading}
             aria-label="Sign in with Apple"
           >
@@ -94,5 +94,5 @@ export function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

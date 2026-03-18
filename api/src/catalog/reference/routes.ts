@@ -1,18 +1,29 @@
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify';
 import {
-  listFactions, getFactionBySlug,
-  listSubGroups, getSubGroupBySlug,
-  listContinuityFamilies, getContinuityFamilyBySlug,
-} from './queries.js'
-import type { SubGroupRow } from './queries.js'
+  listFactions,
+  getFactionBySlug,
+  listSubGroups,
+  getSubGroupBySlug,
+  listContinuityFamilies,
+  getContinuityFamilyBySlug,
+} from './queries.js';
+import type { SubGroupRow } from './queries.js';
 import {
-  listFactionsSchema, getFactionSchema,
-  listSubGroupsSchema, getSubGroupSchema,
-  listContinuityFamiliesSchema, getContinuityFamilySchema,
-} from './schemas.js'
+  listFactionsSchema,
+  getFactionSchema,
+  listSubGroupsSchema,
+  getSubGroupSchema,
+  listContinuityFamiliesSchema,
+  getContinuityFamilySchema,
+} from './schemas.js';
 
-interface FranchiseParams { franchise: string }
-interface FranchiseSlugParams { franchise: string; slug: string }
+interface FranchiseParams {
+  franchise: string;
+}
+interface FranchiseSlugParams {
+  franchise: string;
+  slug: string;
+}
 
 /**
  * Format a sub-group row for responses.
@@ -27,10 +38,10 @@ function formatSubGroup(row: SubGroupRow) {
     faction: row.faction_slug ? { slug: row.faction_slug, name: row.faction_name! } : null,
     notes: row.notes,
     created_at: row.created_at,
-  }
+  };
 }
 
-const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const
+const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const;
 
 /**
  * Register reference data routes (factions, sub-groups, continuity families).
@@ -46,20 +57,20 @@ export async function referenceRoutes(fastify: FastifyInstance, _opts: object): 
     '/factions',
     { schema: listFactionsSchema, config: rateLimitConfig },
     async (request) => {
-      const data = await listFactions(request.params.franchise)
-      return { data }
-    },
-  )
+      const data = await listFactions(request.params.franchise);
+      return { data };
+    }
+  );
 
   fastify.get<{ Params: FranchiseSlugParams }>(
     '/factions/:slug',
     { schema: getFactionSchema, config: rateLimitConfig },
     async (request, reply) => {
-      const faction = await getFactionBySlug(request.params.franchise, request.params.slug)
-      if (!faction) return reply.code(404).send({ error: 'Faction not found' })
-      return faction
-    },
-  )
+      const faction = await getFactionBySlug(request.params.franchise, request.params.slug);
+      if (!faction) return reply.code(404).send({ error: 'Faction not found' });
+      return faction;
+    }
+  );
 
   // ─── Sub-Groups ───────────────────────────────────────────────────────
 
@@ -67,20 +78,20 @@ export async function referenceRoutes(fastify: FastifyInstance, _opts: object): 
     '/sub-groups',
     { schema: listSubGroupsSchema, config: rateLimitConfig },
     async (request) => {
-      const rows = await listSubGroups(request.params.franchise)
-      return { data: rows.map(formatSubGroup) }
-    },
-  )
+      const rows = await listSubGroups(request.params.franchise);
+      return { data: rows.map(formatSubGroup) };
+    }
+  );
 
   fastify.get<{ Params: FranchiseSlugParams }>(
     '/sub-groups/:slug',
     { schema: getSubGroupSchema, config: rateLimitConfig },
     async (request, reply) => {
-      const row = await getSubGroupBySlug(request.params.franchise, request.params.slug)
-      if (!row) return reply.code(404).send({ error: 'Sub-group not found' })
-      return formatSubGroup(row)
-    },
-  )
+      const row = await getSubGroupBySlug(request.params.franchise, request.params.slug);
+      if (!row) return reply.code(404).send({ error: 'Sub-group not found' });
+      return formatSubGroup(row);
+    }
+  );
 
   // ─── Continuity Families ──────────────────────────────────────────────
 
@@ -88,18 +99,18 @@ export async function referenceRoutes(fastify: FastifyInstance, _opts: object): 
     '/continuity-families',
     { schema: listContinuityFamiliesSchema, config: rateLimitConfig },
     async (request) => {
-      const data = await listContinuityFamilies(request.params.franchise)
-      return { data }
-    },
-  )
+      const data = await listContinuityFamilies(request.params.franchise);
+      return { data };
+    }
+  );
 
   fastify.get<{ Params: FranchiseSlugParams }>(
     '/continuity-families/:slug',
     { schema: getContinuityFamilySchema, config: rateLimitConfig },
     async (request, reply) => {
-      const cf = await getContinuityFamilyBySlug(request.params.franchise, request.params.slug)
-      if (!cf) return reply.code(404).send({ error: 'Continuity family not found' })
-      return cf
-    },
-  )
+      const cf = await getContinuityFamilyBySlug(request.params.franchise, request.params.slug);
+      if (!cf) return reply.code(404).send({ error: 'Continuity family not found' });
+      return cf;
+    }
+  );
 }

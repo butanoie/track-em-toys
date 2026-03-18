@@ -17,6 +17,7 @@ Implemented the complete Phase 1.3 web SPA authentication system for Track'em To
 ### 1. Project Scaffolding
 
 **Created:**
+
 - `web/package.json` — React 19, TanStack Query v5, TanStack Router v1, Zod, Tailwind CSS 4, Vitest, Testing Library
 - `web/tsconfig.json`, `web/tsconfig.app.json`, `web/tsconfig.node.json` — TypeScript strict mode with `@/` path alias
 - `web/vite.config.ts` — Vite + React + Tailwind CSS 4 + TanStack Router plugin (auto-generates `routeTree.gen.ts`)
@@ -26,6 +27,7 @@ Implemented the complete Phase 1.3 web SPA authentication system for Track'em To
 - `web/components.json` — Shadcn/ui configuration
 
 **Dependencies installed:**
+
 - `react@^19`, `react-dom@^19`
 - `@tanstack/react-query@^5`, `@tanstack/react-router@^1`, `@tanstack/router-plugin`
 - `zod@^3`
@@ -125,14 +127,14 @@ User Profile:  sessionStorage (trackem:user)
 ### 401 Refresh Mutex Pattern
 
 ```typescript
-let refreshPromise: Promise<boolean> | null = null
+let refreshPromise: Promise<boolean> | null = null;
 
 if (!refreshPromise) {
   refreshPromise = attemptRefresh().finally(() => {
-    refreshPromise = null
-  })
+    refreshPromise = null;
+  });
 }
-const refreshed = await refreshPromise
+const refreshed = await refreshPromise;
 ```
 
 Three simultaneous 401s → one `/auth/refresh` call, all three await the same promise.
@@ -168,17 +170,17 @@ Test Files  9 passed (9)
 
 ### Test Coverage by Area
 
-| File | Tests |
-|------|-------|
-| `zod-schemas.test.ts` | 14 — all schema validation paths |
-| `auth-store.test.ts` | 8 — token CRUD, timer cancel |
-| `api-client.test.ts` | 14 — headers, 401 interceptor, refresh mutex, error handling |
-| `google-auth.test.ts` | 3 — credential extraction |
-| `apple-auth.test.ts` | 6 — nonce generation, sessionStorage management, SDK load |
-| `AuthProvider.test.tsx` | 8 — silent refresh, sign-in, logout, state management |
-| `LoginPage.test.tsx` | 8 — render, Google/Apple buttons, error states |
-| `AppleCallback.test.tsx` | 8 — CSRF, error states, navigation, session cleanup |
-| `ProtectedRoute.test.tsx` | 3 — loading, unauthenticated redirect, authenticated outlet |
+| File                      | Tests                                                        |
+| ------------------------- | ------------------------------------------------------------ |
+| `zod-schemas.test.ts`     | 14 — all schema validation paths                             |
+| `auth-store.test.ts`      | 8 — token CRUD, timer cancel                                 |
+| `api-client.test.ts`      | 14 — headers, 401 interceptor, refresh mutex, error handling |
+| `google-auth.test.ts`     | 3 — credential extraction                                    |
+| `apple-auth.test.ts`      | 6 — nonce generation, sessionStorage management, SDK load    |
+| `AuthProvider.test.tsx`   | 8 — silent refresh, sign-in, logout, state management        |
+| `LoginPage.test.tsx`      | 8 — render, Google/Apple buttons, error states               |
+| `AppleCallback.test.tsx`  | 8 — CSRF, error states, navigation, session cleanup          |
+| `ProtectedRoute.test.tsx` | 3 — loading, unauthenticated redirect, authenticated outlet  |
 
 ### Pre-Submission Checklist
 
@@ -202,6 +204,7 @@ Test Files  9 passed (9)
 ## Related Files
 
 **Created:**
+
 - `web/package.json`
 - `web/tsconfig.json`, `web/tsconfig.app.json`, `web/tsconfig.node.json`
 - `web/vite.config.ts`
@@ -242,6 +245,7 @@ Test Files  9 passed (9)
 - `web/src/auth/__tests__/ProtectedRoute.test.tsx`
 
 **Modified:**
+
 - `.gitignore` — Added `web/.env` and `web/.env.local`
 
 ## Status

@@ -1,51 +1,66 @@
-import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest'
-import type { FastifyInstance } from 'fastify'
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
+import type { FastifyInstance } from 'fastify';
 
 const { testPrivatePem, testPublicPem } = vi.hoisted(() => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports -- required inside vi.hoisted
-  const nodeCrypto = require('node:crypto') as typeof import('node:crypto')
-  const { privateKey, publicKey } = nodeCrypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' })
+  const nodeCrypto = require('node:crypto') as typeof import('node:crypto');
+  const { privateKey, publicKey } = nodeCrypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
   return {
     testPrivatePem: privateKey.export({ type: 'pkcs8', format: 'pem' }) as string,
     testPublicPem: publicKey.export({ type: 'spki', format: 'pem' }) as string,
-  }
-})
+  };
+});
 
 vi.mock('../../config.js', () => ({
   config: {
-    port: 3000, corsOrigin: '*', trustProxy: false, secureCookies: false,
+    port: 3000,
+    corsOrigin: '*',
+    trustProxy: false,
+    secureCookies: false,
     cookieSecret: 'test-cookie-secret-32-bytes-long!!',
-    logLevel: 'silent', nodeEnv: 'test',
+    logLevel: 'silent',
+    nodeEnv: 'test',
     database: { url: 'postgresql://test:test@localhost/test', poolMax: 2 },
     jwt: {
-      privateKey: testPrivatePem, publicKey: testPublicPem,
-      keyId: 'test-kid', issuer: 'test', audience: 'test', accessTokenExpiry: '15m',
+      privateKey: testPrivatePem,
+      publicKey: testPublicPem,
+      keyId: 'test-kid',
+      issuer: 'test',
+      audience: 'test',
+      accessTokenExpiry: '15m',
     },
-    apple: { bundleId: 'com.test' }, google: { webClientId: 'test' },
+    apple: { bundleId: 'com.test' },
+    google: { webClientId: 'test' },
   },
-}))
+}));
 
-const mockQuery = vi.fn()
+const mockQuery = vi.fn();
 vi.mock('../../db/pool.js', () => ({
   pool: { query: mockQuery, connect: vi.fn(), on: vi.fn(), end: vi.fn() },
   withTransaction: vi.fn(),
-}))
+}));
 
 // Mock auth dependencies so buildServer doesn't fail
 vi.mock('../../auth/key-store.js', () => ({
   initKeyStore: vi.fn(),
   getCurrentKid: vi.fn().mockReturnValue('test-kid'),
   getPublicKeyPem: vi.fn().mockReturnValue(testPublicPem),
-}))
+}));
 
-const { buildServer } = await import('../../server.js')
+const { buildServer } = await import('../../server.js');
 
 describe('franchise routes', () => {
-  let server: FastifyInstance
+  let server: FastifyInstance;
 
-  beforeAll(async () => { server = await buildServer() })
-  afterAll(async () => { await server.close() })
-  beforeEach(() => { vi.clearAllMocks() })
+  beforeAll(async () => {
+    server = await buildServer();
+  });
+  afterAll(async () => {
+    await server.close();
+  });
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   const franchiseRow = {
     id: '550e8400-e29b-41d4-a716-446655440001',
@@ -54,44 +69,44 @@ describe('franchise routes', () => {
     sort_order: 1,
     notes: 'Robots in disguise',
     created_at: '2026-01-01T00:00:00Z',
-  }
+  };
 
   describe('GET /catalog/franchises', () => {
     it('should return 200 with franchise list', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [franchiseRow] })
+      mockQuery.mockResolvedValueOnce({ rows: [franchiseRow] });
 
-      const res = await server.inject({ method: 'GET', url: '/catalog/franchises' })
-      expect(res.statusCode).toBe(200)
+      const res = await server.inject({ method: 'GET', url: '/catalog/franchises' });
+      expect(res.statusCode).toBe(200);
 
-      const body = res.json<{ data: typeof franchiseRow[] }>()
-      expect(body.data).toHaveLength(1)
-      expect(body.data[0]?.slug).toBe('transformers')
-    })
+      const body = res.json<{ data: (typeof franchiseRow)[] }>();
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0]?.slug).toBe('transformers');
+    });
 
     it('should return 200 with empty array when no franchises exist', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] })
+      mockQuery.mockResolvedValueOnce({ rows: [] });
 
-      const res = await server.inject({ method: 'GET', url: '/catalog/franchises' })
-      expect(res.statusCode).toBe(200)
-      expect(res.json<{ data: unknown[] }>().data).toHaveLength(0)
-    })
-  })
+      const res = await server.inject({ method: 'GET', url: '/catalog/franchises' });
+      expect(res.statusCode).toBe(200);
+      expect(res.json<{ data: unknown[] }>().data).toHaveLength(0);
+    });
+  });
 
   describe('GET /catalog/franchises/:slug', () => {
     it('should return 200 with franchise detail', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [franchiseRow] })
+      mockQuery.mockResolvedValueOnce({ rows: [franchiseRow] });
 
-      const res = await server.inject({ method: 'GET', url: '/catalog/franchises/transformers' })
-      expect(res.statusCode).toBe(200)
-      expect(res.json<typeof franchiseRow>().slug).toBe('transformers')
-    })
+      const res = await server.inject({ method: 'GET', url: '/catalog/franchises/transformers' });
+      expect(res.statusCode).toBe(200);
+      expect(res.json<typeof franchiseRow>().slug).toBe('transformers');
+    });
 
     it('should return 404 when franchise not found', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] })
+      mockQuery.mockResolvedValueOnce({ rows: [] });
 
-      const res = await server.inject({ method: 'GET', url: '/catalog/franchises/nonexistent' })
-      expect(res.statusCode).toBe(404)
-      expect(res.json<{ error: string }>().error).toBe('Franchise not found')
-    })
-  })
-})
+      const res = await server.inject({ method: 'GET', url: '/catalog/franchises/nonexistent' });
+      expect(res.statusCode).toBe(404);
+      expect(res.json<{ error: string }>().error).toBe('Franchise not found');
+    });
+  });
+});

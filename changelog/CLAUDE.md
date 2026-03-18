@@ -7,6 +7,7 @@
 Every changelog entry must include:
 
 ### Header Metadata
+
 ```markdown
 # Title - Brief Description
 
@@ -18,6 +19,7 @@ Every changelog entry must include:
 ```
 
 ### Core Sections
+
 1. **Summary** - Brief overview of what was accomplished (2-3 sentences)
 2. **Changes Implemented** - Detailed breakdown of all changes
 3. **Technical Details** - Configuration, code snippets, technical specifics
@@ -27,6 +29,7 @@ Every changelog entry must include:
 7. **Status** - ✅ COMPLETE or current status
 
 ### Optional Sections (Use When Relevant)
+
 - **Documentation Benefits** - How this improves documentation
 - **Next Steps** - What can be done after this change
 - **Future Enhancements** - Recommended improvements
@@ -40,6 +43,7 @@ Every changelog entry must include:
 ## Best Practices
 
 **Level of Detail:**
+
 - Be comprehensive - changelogs are historical records
 - Include specific file paths, line counts, and metrics
 - Show verification results (test output, lint results, build success)
@@ -47,6 +51,7 @@ Every changelog entry must include:
 - Explain WHY changes were made, not just WHAT changed
 
 **Writing Style:**
+
 - Use clear headings and subsections
 - Include code blocks for examples
 - Use checkmarks (✅) for completed items
@@ -55,6 +60,7 @@ Every changelog entry must include:
 - Link to related documentation files
 
 **Examples to Follow:**
+
 - See `2026-01-25T231357_phase1-completion.md` for phase completion example
 - See `2026-01-25T233843_static-analysis-documentation-enforcement.md` for infrastructure example
 - See `2026-01-27T082828_testing-infrastructure-setup.md` for detailed technical example
@@ -84,9 +90,11 @@ Every changelog entry must include:
 [Detailed description]
 
 **Created:**
+
 - File paths and purposes
 
 **Modified:**
+
 - File paths and changes
 
 ---

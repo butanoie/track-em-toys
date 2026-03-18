@@ -1,28 +1,28 @@
-import 'dotenv/config'
+import 'dotenv/config';
 
 function required(name: string): string {
-  const value = process.env[name]
+  const value = process.env[name];
   if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`)
+    throw new Error(`Missing required environment variable: ${name}`);
   }
-  return value
+  return value;
 }
 
 function requiredPem(name: string): string {
-  return required(name).replace(/\\n/g, '\n')
+  return required(name).replace(/\\n/g, '\n');
 }
 
 function requiredMinLength(name: string, minLength: number): string {
-  const value = required(name)
+  const value = required(name);
   if (value.length < minLength) {
-    throw new Error(`Environment variable ${name} must be at least ${minLength} characters`)
+    throw new Error(`Environment variable ${name} must be at least ${minLength} characters`);
   }
-  return value
+  return value;
 }
 
 function optional(name: string, fallback: string): string {
-  const value = process.env[name]
-  return value !== undefined && value !== '' ? value : fallback
+  const value = process.env[name];
+  return value !== undefined && value !== '' ? value : fallback;
 }
 
 /**
@@ -34,8 +34,8 @@ function optional(name: string, fallback: string): string {
  * @param name - Environment variable name
  */
 function optionalOrUndefined(name: string): string | undefined {
-  const value = process.env[name]
-  return value !== undefined && value !== '' ? value : undefined
+  const value = process.env[name];
+  return value !== undefined && value !== '' ? value : undefined;
 }
 
 /**
@@ -46,54 +46,54 @@ function optionalOrUndefined(name: string): string | undefined {
  * @param name - Environment variable name
  */
 function optionalPem(name: string): string | undefined {
-  const value = optionalOrUndefined(name)
-  return value !== undefined ? value.replace(/\\n/g, '\n') : undefined
+  const value = optionalOrUndefined(name);
+  return value !== undefined ? value.replace(/\\n/g, '\n') : undefined;
 }
 
-type NodeEnv = 'development' | 'test' | 'staging' | 'production'
-const VALID_NODE_ENVS: readonly NodeEnv[] = ['development', 'test', 'staging', 'production']
+type NodeEnv = 'development' | 'test' | 'staging' | 'production';
+const VALID_NODE_ENVS: readonly NodeEnv[] = ['development', 'test', 'staging', 'production'];
 
 function nodeEnv(): NodeEnv {
-  const value = optional('NODE_ENV', 'development')
+  const value = optional('NODE_ENV', 'development');
   // Cast is safe: TypeScript cannot narrow string to NodeEnv for Array<NodeEnv>.includes(); the check itself is the validation guard
   if (!VALID_NODE_ENVS.includes(value as NodeEnv)) {
-    throw new Error(`Invalid NODE_ENV: "${value}". Must be one of: ${VALID_NODE_ENVS.join(', ')}`)
+    throw new Error(`Invalid NODE_ENV: "${value}". Must be one of: ${VALID_NODE_ENVS.join(', ')}`);
   }
   // Safe: VALID_NODE_ENVS.includes() check above guarantees the value is a valid NodeEnv
-  return value as NodeEnv
+  return value as NodeEnv;
 }
 
 function optionalBool(name: string, fallback: boolean): boolean {
-  const value = process.env[name]
-  if (value === undefined || value === '') return fallback
-  return value === 'true'
+  const value = process.env[name];
+  if (value === undefined || value === '') return fallback;
+  return value === 'true';
 }
 
 function optionalInt(name: string, fallback: number, min: number, max: number): number {
-  const raw = optional(name, String(fallback))
-  const n = parseInt(raw, 10)
+  const raw = optional(name, String(fallback));
+  const n = parseInt(raw, 10);
   if (isNaN(n) || n < min || n > max) {
-    throw new Error(`${name} must be a number between ${min} and ${max}, got: ${raw}`)
+    throw new Error(`${name} must be a number between ${min} and ${max}, got: ${raw}`);
   }
-  return n
+  return n;
 }
 
 function loadCorsOrigin(): string {
-  const origin = optional('CORS_ORIGIN', 'http://localhost:5173')
+  const origin = optional('CORS_ORIGIN', 'http://localhost:5173');
   if (origin === '*') {
-    throw new Error('CORS_ORIGIN=* is not permitted when credentials are enabled')
+    throw new Error('CORS_ORIGIN=* is not permitted when credentials are enabled');
   }
-  return origin
+  return origin;
 }
 
 /**
  * Access token lifetime. Keep short — access tokens are not revocable.
  * See also REFRESH_TOKEN_EXPIRY_DAYS in src/auth/tokens.ts for the refresh token lifetime.
  */
-const ACCESS_TOKEN_EXPIRY = '15m' as const
+const ACCESS_TOKEN_EXPIRY = '15m' as const;
 
 /** Application configuration loaded from environment variables. */
-const parsedPort = optionalInt('PORT', 3000, 1, 65535)
+const parsedPort = optionalInt('PORT', 3000, 1, 65535);
 
 export const config = {
   port: parsedPort,
@@ -139,9 +139,9 @@ export const config = {
     certFile: optionalOrUndefined('TLS_CERT_FILE'),
     keyFile: optionalOrUndefined('TLS_KEY_FILE'),
   },
-} as const
+} as const;
 
 // Startup validation: TLS requires both cert and key, or neither.
 if ((config.tls.certFile != null) !== (config.tls.keyFile != null)) {
-  throw new Error('TLS_CERT_FILE and TLS_KEY_FILE must both be set or both be unset')
+  throw new Error('TLS_CERT_FILE and TLS_KEY_FILE must both be set or both be unset');
 }

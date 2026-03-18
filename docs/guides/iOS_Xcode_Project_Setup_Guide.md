@@ -38,17 +38,17 @@ Xcode's "New Project" wizard cannot merge into an existing directory. We create 
 3. Select **Multiplatform → App** at the top, then click **Next**
 4. Fill in the project details:
 
-| Field | Value |
-|-------|-------|
-| **Product Name** | `track-em-toys` |
-| **Team** | Your Apple Developer team |
+| Field                       | Value                                                                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Product Name**            | `track-em-toys`                                                                                                               |
+| **Team**                    | Your Apple Developer team                                                                                                     |
 | **Organization Identifier** | Your reverse-domain org ID (e.g. `com.yourcompany`) — the resulting Bundle ID must match `APPLE_BUNDLE_ID` in your API `.env` |
-| **Interface** | SwiftUI |
-| **Language** | Swift |
-| **Storage** | None |
-| **Host in CloudKit** | Unchecked |
-| **Testing System** | Swift Testing |
-| **Include UI Tests** | Unchecked |
+| **Interface**               | SwiftUI                                                                                                                       |
+| **Language**                | Swift                                                                                                                         |
+| **Storage**                 | None                                                                                                                          |
+| **Host in CloudKit**        | Unchecked                                                                                                                     |
+| **Testing System**          | Swift Testing                                                                                                                 |
+| **Include UI Tests**        | Unchecked                                                                                                                     |
 
 5. Click **Next**
 6. **Save to a temporary location** — e.g. your Desktop or `/tmp`
@@ -212,6 +212,7 @@ You should see output similar to:
 ```
 
 **Verify these two things:**
+
 - **`CLIENT_ID`** must match `GOOGLE_IOS_CLIENT_ID` in your API's `.env`
 - **`BUNDLE_ID`** must match your Xcode target's Bundle Identifier and `APPLE_BUNDLE_ID` in your API's `.env`
 
@@ -412,20 +413,20 @@ Without this step, the app will fail with `NSURLErrorDomain Code=-1202 "The cert
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| `No such module 'GoogleSignIn'` | File → Packages → Resolve Package Versions, then ⌘B |
-| `Signing requires a development team` | Target → Signing & Capabilities → select your Team |
-| Bundle ID mismatch with API | Ensure target's Bundle Identifier matches `APPLE_BUNDLE_ID` in `api/.env` |
-| Test target can't import app module | Step 3.3 — set Host Application and enable "Allow testing Host Application APIs" |
-| Red file references after moving `.xcodeproj` | Remove broken references (Remove Reference, not Move to Trash), re-add via Step 2.2/2.4 |
-| Apple Sign-In doesn't work on Simulator | Sign into an Apple ID in Simulator → Settings → Apple Account |
-| `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` error in tests | Keychain tests may need the "Keychain Sharing" capability on the test target too |
-| macOS build fails with UIKit references | All UIKit code should be wrapped in `#if os(iOS)` — check `GoogleSignInCoordinator.swift` and `AuthView.swift` |
-| macOS: "A server with the specified hostname could not be found" (`NSURLErrorDomain -1003`) | Missing `com.apple.security.network.client` entitlement — see Step 7.3 |
-| macOS: "Connection refused" on `::1` (IPv6) | The API binds to `0.0.0.0` (IPv4 only). Use `127.0.0.1` instead of `localhost` in the debug base URL to force IPv4 |
-| TLS certificate error connecting to local API (macOS) | Regenerate certs with `mkcert` including all needed SANs: `mkcert -cert-file cert.pem -key-file key.pem localhost 127.0.0.1 dev.track-em-toys.com` — see Step 9.1 |
-| iOS Simulator: "The certificate for this server is invalid" (`NSURLErrorDomain -1202`) | The simulator doesn't trust the mkcert CA — run `xcrun simctl keychain booted add-root-cert "$(mkcert -CAROOT)/rootCA.pem"` — see Step 9.3 |
+| Issue                                                                                       | Solution                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `No such module 'GoogleSignIn'`                                                             | File → Packages → Resolve Package Versions, then ⌘B                                                                                                               |
+| `Signing requires a development team`                                                       | Target → Signing & Capabilities → select your Team                                                                                                                |
+| Bundle ID mismatch with API                                                                 | Ensure target's Bundle Identifier matches `APPLE_BUNDLE_ID` in `api/.env`                                                                                         |
+| Test target can't import app module                                                         | Step 3.3 — set Host Application and enable "Allow testing Host Application APIs"                                                                                  |
+| Red file references after moving `.xcodeproj`                                               | Remove broken references (Remove Reference, not Move to Trash), re-add via Step 2.2/2.4                                                                           |
+| Apple Sign-In doesn't work on Simulator                                                     | Sign into an Apple ID in Simulator → Settings → Apple Account                                                                                                     |
+| `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` error in tests                           | Keychain tests may need the "Keychain Sharing" capability on the test target too                                                                                  |
+| macOS build fails with UIKit references                                                     | All UIKit code should be wrapped in `#if os(iOS)` — check `GoogleSignInCoordinator.swift` and `AuthView.swift`                                                    |
+| macOS: "A server with the specified hostname could not be found" (`NSURLErrorDomain -1003`) | Missing `com.apple.security.network.client` entitlement — see Step 7.3                                                                                            |
+| macOS: "Connection refused" on `::1` (IPv6)                                                 | The API binds to `0.0.0.0` (IPv4 only). Use `127.0.0.1` instead of `localhost` in the debug base URL to force IPv4                                                |
+| TLS certificate error connecting to local API (macOS)                                       | Regenerate certs with `mkcert` including all needed SANs: `mkcert -cert-file cert.pem -key-file key.pem localhost 127.0.0.1 dev.track-em-toys.com` — see Step 9.1 |
+| iOS Simulator: "The certificate for this server is invalid" (`NSURLErrorDomain -1202`)      | The simulator doesn't trust the mkcert CA — run `xcrun simctl keychain booted add-root-cert "$(mkcert -CAROOT)/rootCA.pem"` — see Step 9.3                        |
 
 ---
 

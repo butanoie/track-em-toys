@@ -1,13 +1,13 @@
-import type { FastifyInstance } from 'fastify'
-import { searchCatalog } from './queries.js'
-import type { SearchResultRow } from './queries.js'
-import { searchSchema } from './schemas.js'
+import type { FastifyInstance } from 'fastify';
+import { searchCatalog } from './queries.js';
+import type { SearchResultRow } from './queries.js';
+import { searchSchema } from './schemas.js';
 
 interface SearchQuery {
-  q: string
-  franchise?: string
-  page?: number
-  limit?: number
+  q: string;
+  franchise?: string;
+  page?: number;
+  limit?: number;
 }
 
 /**
@@ -22,7 +22,7 @@ function formatResult(row: SearchResultRow) {
     name: row.name,
     slug: row.slug,
     franchise: { slug: row.franchise_slug, name: row.franchise_name },
-  }
+  };
 }
 
 /**
@@ -40,23 +40,23 @@ export async function searchRoutes(fastify: FastifyInstance, _opts: object): Pro
       config: { rateLimit: { max: 100, timeWindow: '1 minute' } },
     },
     async (request) => {
-      const page = request.query.page ?? 1
-      const limit = Math.max(1, Math.min(request.query.limit ?? 20, 100))
-      const offset = (page - 1) * limit
+      const page = request.query.page ?? 1;
+      const limit = Math.max(1, Math.min(request.query.limit ?? 20, 100));
+      const offset = (page - 1) * limit;
 
       const { rows, totalCount } = await searchCatalog({
         query: request.query.q,
         franchiseSlug: request.query.franchise ?? null,
         limit,
         offset,
-      })
+      });
 
       return {
         data: rows.map(formatResult),
         page,
         limit,
         total_count: totalCount,
-      }
-    },
-  )
+      };
+    }
+  );
 }

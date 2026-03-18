@@ -112,11 +112,13 @@ Factions like Human, Neutral, Other were previously `franchise: null`. With NOT 
 ## Related Files
 
 **Created:**
+
 - `api/db/migrations/015_normalize_franchise.sql`
 - `api/db/seed/reference/franchises.json`
 - `changelog/2026-03-17T193127_normalize-franchise.md`
 
 **Modified:**
+
 - `api/db/seed/reference/factions.json`
 - `api/db/seed/reference/sub_groups.json`
 - `api/db/seed/reference/continuity_families.json`
@@ -135,4 +137,5 @@ Factions like Human, Neutral, Other were previously `franchise: null`. With NOT 
 ---
 
 ## Status
+
 ✅ COMPLETE

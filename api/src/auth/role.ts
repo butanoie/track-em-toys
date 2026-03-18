@@ -1,5 +1,5 @@
-import type { FastifyRequest, FastifyReply } from 'fastify'
-import type { UserRole } from '../types/index.js'
+import type { FastifyRequest, FastifyReply } from 'fastify';
+import type { UserRole } from '../types/index.js';
 
 /**
  * Numeric hierarchy for role comparison. Higher value = more privileges.
@@ -9,9 +9,9 @@ export const ROLE_HIERARCHY: Record<UserRole, number> = {
   user: 0,
   curator: 1,
   admin: 2,
-} as const
+} as const;
 
-const VALID_ROLES = new Set<string>(['user', 'curator', 'admin'])
+const VALID_ROLES = new Set<string>(['user', 'curator', 'admin']);
 
 /**
  * Check if the actual role meets or exceeds the required role level.
@@ -20,7 +20,7 @@ const VALID_ROLES = new Set<string>(['user', 'curator', 'admin'])
  * @param required - The minimum role required
  */
 export function hasRequiredRole(actual: UserRole, required: UserRole): boolean {
-  return ROLE_HIERARCHY[actual] >= ROLE_HIERARCHY[required]
+  return ROLE_HIERARCHY[actual] >= ROLE_HIERARCHY[required];
 }
 
 /**
@@ -33,12 +33,10 @@ export function hasRequiredRole(actual: UserRole, required: UserRole): boolean {
  *
  * @param user - JWT payload to validate
  */
-export function isRolePayload(
-  user: unknown,
-): user is { sub: string; role: UserRole } {
-  if (typeof user !== 'object' || user === null) return false
-  const u = user as Record<string, unknown>
-  return typeof u.sub === 'string' && typeof u.role === 'string' && VALID_ROLES.has(u.role)
+export function isRolePayload(user: unknown): user is { sub: string; role: UserRole } {
+  if (typeof user !== 'object' || user === null) return false;
+  const u = user as Record<string, unknown>;
+  return typeof u.sub === 'string' && typeof u.role === 'string' && VALID_ROLES.has(u.role);
 }
 
 /**
@@ -48,16 +46,13 @@ export function isRolePayload(
  *
  * @param minRole - The minimum role required to access the route
  */
-export function requireRole(
-  minRole: UserRole,
-): (request: FastifyRequest, reply: FastifyReply) => Promise<void> {
-   
+export function requireRole(minRole: UserRole): (request: FastifyRequest, reply: FastifyReply) => Promise<void> {
   return async (request: FastifyRequest, reply: FastifyReply) => {
     if (!isRolePayload(request.user)) {
-      return reply.code(403).send({ error: 'Forbidden' })
+      return reply.code(403).send({ error: 'Forbidden' });
     }
     if (!hasRequiredRole(request.user.role, minRole)) {
-      return reply.code(403).send({ error: 'Forbidden' })
+      return reply.code(403).send({ error: 'Forbidden' });
     }
-  }
+  };
 }

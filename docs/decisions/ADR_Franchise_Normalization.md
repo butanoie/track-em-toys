@@ -14,15 +14,16 @@
 
 ### Current State
 
-| Table | Column Definition | Current Values |
-|---|---|---|
-| `characters` | `franchise TEXT NOT NULL DEFAULT 'Transformers'` | "Transformers" |
-| `continuity_families` | `franchise TEXT` | "Transformers" or NULL |
-| `factions` | `franchise TEXT` | "Transformers" or NULL |
-| `sub_groups` | `franchise TEXT` | "Transformers" or NULL |
-| `toy_lines` | `franchise TEXT` | "Transformers" or NULL |
+| Table                 | Column Definition                                | Current Values         |
+| --------------------- | ------------------------------------------------ | ---------------------- |
+| `characters`          | `franchise TEXT NOT NULL DEFAULT 'Transformers'` | "Transformers"         |
+| `continuity_families` | `franchise TEXT`                                 | "Transformers" or NULL |
+| `factions`            | `franchise TEXT`                                 | "Transformers" or NULL |
+| `sub_groups`          | `franchise TEXT`                                 | "Transformers" or NULL |
+| `toy_lines`           | `franchise TEXT`                                 | "Transformers" or NULL |
 
 Franchise is used in two unique indexes:
+
 - `idx_characters_name_franchise_cf`: `(lower(name), lower(franchise), continuity_family_id)` — character identity boundary
 - `idx_sub_groups_name_franchise`: `(lower(name), COALESCE(franchise, ''))` — allows same sub-group name across franchises
 
@@ -37,6 +38,7 @@ Franchise is used in two unique indexes:
 ### Tables That Reference Franchise
 
 Franchise is the **top-level domain boundary** for the catalog. When G.I. Joe collectors browse, they need:
+
 - Characters filtered by franchise
 - Items filtered by franchise (via character)
 - Factions scoped to franchise (Cobra is G.I. Joe, Decepticon is Transformers)
@@ -140,6 +142,7 @@ All seed JSON files change `"franchise": "Transformers"` to `"franchise_slug": "
 ### Impact on Catalog API (Phase 1.5)
 
 With normalization:
+
 - `?franchise=transformers` filters by `fr.slug = $1` via JOIN (consistent with all other slug filters)
 - `GET /catalog/franchises` queries the table directly (not `SELECT DISTINCT`)
 - No case-insensitive `lower()` comparison needed — slugs are canonical

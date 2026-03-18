@@ -1,12 +1,20 @@
-import type { FastifyInstance } from 'fastify'
-import { listCharacters, getCharacterBySlug } from './queries.js'
-import type { CharacterListRow, CharacterDetail } from './queries.js'
-import { listCharactersSchema, getCharacterSchema } from './schemas.js'
-import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js'
+import type { FastifyInstance } from 'fastify';
+import { listCharacters, getCharacterBySlug } from './queries.js';
+import type { CharacterListRow, CharacterDetail } from './queries.js';
+import { listCharactersSchema, getCharacterSchema } from './schemas.js';
+import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js';
 
-interface FranchiseParams { franchise: string }
-interface FranchiseSlugParams { franchise: string; slug: string }
-interface PaginationQuery { limit?: number; cursor?: string }
+interface FranchiseParams {
+  franchise: string;
+}
+interface FranchiseSlugParams {
+  franchise: string;
+  slug: string;
+}
+interface PaginationQuery {
+  limit?: number;
+  cursor?: string;
+}
 
 /**
  * Format a character row for list responses.
@@ -24,7 +32,7 @@ function formatListItem(row: CharacterListRow) {
     character_type: row.character_type,
     alt_mode: row.alt_mode,
     is_combined_form: row.is_combined_form,
-  }
+  };
 }
 
 /**
@@ -33,22 +41,20 @@ function formatListItem(row: CharacterListRow) {
  * @param detail - Character detail to format
  */
 function formatDetail(detail: CharacterDetail) {
-  const { base, subGroups, appearances } = detail
+  const { base, subGroups, appearances } = detail;
   return {
     ...formatListItem(base),
     combiner_role: base.combiner_role,
-    combined_form: base.combined_form_slug
-      ? { slug: base.combined_form_slug, name: base.combined_form_name! }
-      : null,
+    combined_form: base.combined_form_slug ? { slug: base.combined_form_slug, name: base.combined_form_name! } : null,
     sub_groups: subGroups,
     appearances,
     metadata: base.metadata,
     created_at: base.created_at,
     updated_at: base.updated_at,
-  }
+  };
 }
 
-const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const
+const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const;
 
 /**
  * Register character catalog routes.
@@ -62,32 +68,32 @@ export async function characterRoutes(fastify: FastifyInstance, _opts: object): 
     '/',
     { schema: listCharactersSchema, config: rateLimitConfig },
     async (request, reply) => {
-      const limit = clampLimit(request.query.limit)
+      const limit = clampLimit(request.query.limit);
 
-      let cursor: { name: string; id: string } | null = null
+      let cursor: { name: string; id: string } | null = null;
       if (request.query.cursor) {
-        cursor = decodeCursor(request.query.cursor)
-        if (!cursor) return reply.code(400).send({ error: 'Invalid cursor' })
+        cursor = decodeCursor(request.query.cursor);
+        if (!cursor) return reply.code(400).send({ error: 'Invalid cursor' });
       }
 
       const { rows, totalCount } = await listCharacters({
         franchiseSlug: request.params.franchise,
         limit,
         cursor,
-      })
+      });
 
-      const page = buildCursorPage(rows.map(formatListItem), limit)
-      return { ...page, total_count: totalCount }
-    },
-  )
+      const page = buildCursorPage(rows.map(formatListItem), limit);
+      return { ...page, total_count: totalCount };
+    }
+  );
 
   fastify.get<{ Params: FranchiseSlugParams }>(
     '/:slug',
     { schema: getCharacterSchema, config: rateLimitConfig },
     async (request, reply) => {
-      const detail = await getCharacterBySlug(request.params.franchise, request.params.slug)
-      if (!detail) return reply.code(404).send({ error: 'Character not found' })
-      return formatDetail(detail)
-    },
-  )
+      const detail = await getCharacterBySlug(request.params.franchise, request.params.slug);
+      if (!detail) return reply.code(404).send({ error: 'Character not found' });
+      return formatDetail(detail);
+    }
+  );
 }

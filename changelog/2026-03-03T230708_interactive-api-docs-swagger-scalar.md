@@ -19,6 +19,7 @@ Added auto-generated OpenAPI 3.0 documentation and an interactive API reference 
 Created a Fastify plugin that registers Swagger (OpenAPI spec generation) and Scalar (interactive reference UI).
 
 **Created:**
+
 - `api/src/plugins/docs.ts` — Plugin using `fastify-plugin` wrapper that registers:
   - `@fastify/swagger` — Generates OpenAPI 3.0.3 spec from Fastify route schemas
   - `@scalar/fastify-api-reference` — Serves interactive API explorer at `/reference/`
@@ -30,6 +31,7 @@ Created a Fastify plugin that registers Swagger (OpenAPI spec generation) and Sc
 Registered the docs plugin in `buildServer()`, gated behind an environment check so it's excluded in production.
 
 **Modified:**
+
 - `api/src/server.ts` — Conditionally registers `docsPlugin` when `nodeEnv !== 'production'`
 
 ### 3. Schema Enrichment
@@ -37,16 +39,19 @@ Registered the docs plugin in `buildServer()`, gated behind an environment check
 Enhanced all existing route schemas with OpenAPI metadata for better documentation.
 
 **Modified:**
+
 - `api/src/auth/schemas.ts` — Added `description`, `summary`, `tags`, and `security` fields to all 6 route schemas (signin, refresh, logout, link-account, JWKS, health)
 - `api/src/auth/jwks.ts` — Added schema metadata for the JWKS discovery endpoint
 
 ### 4. Dependencies
 
 **Added:**
+
 - `@fastify/swagger` — OpenAPI spec generation from Fastify schemas
 - `@scalar/fastify-api-reference` — Modern API reference UI (alternative to Swagger UI)
 
 **Modified:**
+
 - `api/package.json` — Added 2 new dependencies
 - `api/package-lock.json` — Lock file updated (+277 lines)
 
@@ -89,6 +94,7 @@ Tests use `vi.doMock()` + `vi.resetModules()` to swap `config.nodeEnv` between d
 ## Validation & Testing
 
 **Created:**
+
 - `api/src/plugins/docs.test.ts` — 158 lines covering:
   - OpenAPI spec generation (`/documentation/json` returns valid spec)
   - Scalar reference UI serves at `/reference/`
@@ -110,10 +116,12 @@ Tests use `vi.doMock()` + `vi.resetModules()` to swap `config.nodeEnv` between d
 ## Related Files
 
 **Created (2):**
+
 - `api/src/plugins/docs.ts`
 - `api/src/plugins/docs.test.ts`
 
 **Modified (4):**
+
 - `api/src/server.ts`
 - `api/src/auth/schemas.ts`
 - `api/src/auth/jwks.ts`
@@ -123,14 +131,14 @@ Tests use `vi.doMock()` + `vi.resetModules()` to swap `config.nodeEnv` between d
 
 ## Summary Statistics
 
-| Metric | Count |
-|--------|-------|
-| Files created | 2 |
-| Files modified | 4 |
-| Lines added | ~504 |
-| Dependencies added | 2 |
-| Route schemas enriched | 6 |
-| Test lines added | 158 |
+| Metric                 | Count |
+| ---------------------- | ----- |
+| Files created          | 2     |
+| Files modified         | 4     |
+| Lines added            | ~504  |
+| Dependencies added     | 2     |
+| Route schemas enriched | 6     |
+| Test lines added       | 158   |
 
 ---
 

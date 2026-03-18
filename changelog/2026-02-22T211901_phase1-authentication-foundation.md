@@ -24,6 +24,7 @@ Five SQL migration files created in `api/migrations/` (102 lines total). These m
 #### Migration Files Created
 
 **001_create_users.sql** (34 lines)
+
 - Creates `users` table as the core entity for all authentication
 - Columns: `id` (UUID PK), `email` (VARCHAR), `email_verified` (BOOLEAN), `display_name` (VARCHAR), `avatar_url` (TEXT), `deactivated_at` (TIMESTAMPTZ for soft-delete), `created_at`, `updated_at`
 - Case-insensitive email unique index: `UNIQUE (LOWER(email))` prevents email collisions across Apple private relay, custom email, etc.
@@ -31,6 +32,7 @@ Five SQL migration files created in `api/migrations/` (102 lines total). These m
 - Soft-delete pattern: `deactivated_at IS NOT NULL` indicates deactivated accounts without hard-deleting data (preserves audit history)
 
 **002_create_oauth_accounts.sql** (19 lines)
+
 - Links users to OAuth provider accounts (Apple, Google)
 - Columns: `id` (UUID PK), `user_id` (FK → users, CASCADE delete), `provider` (VARCHAR), `provider_user_id` (VARCHAR), `email` (VARCHAR), `is_private_email` (BOOLEAN), `raw_profile` (JSONB), `created_at`
 - Unique constraint on `(provider, provider_user_id)` ensures one identity per provider per user
@@ -39,6 +41,7 @@ Five SQL migration files created in `api/migrations/` (102 lines total). These m
 - `is_private_email` flag tracks Apple private relay accounts for account-linking logic
 
 **003_create_refresh_tokens.sql** (17 lines)
+
 - Manages long-lived refresh tokens for token rotation strategy
 - Columns: `id` (UUID PK), `user_id` (FK → users, CASCADE delete), `token_hash` (CHAR(64), SHA-256 hex digest), `device_info` (VARCHAR), `expires_at` (TIMESTAMPTZ), `revoked_at` (TIMESTAMPTZ), `created_at`
 - `token_hash` stored as hex string (never as binary) for easier troubleshooting in database tools
@@ -48,6 +51,7 @@ Five SQL migration files created in `api/migrations/` (102 lines total). These m
 - `device_info` optional field for future "Devices" UI (list active sessions)
 
 **004_rls_session_context.sql** (9 lines)
+
 - Creates PostgreSQL function `current_app_user_id()` for row-level security policies
 - Sets session variable `app.user_id` from Fastify middleware before each DB query
 - Returns UUID or NULL if not set
@@ -55,6 +59,7 @@ Five SQL migration files created in `api/migrations/` (102 lines total). These m
 - Future tables (`user_collection_items`, `user_pricing_records`, etc.) will use RLS policies like: `CREATE POLICY user_owns_record ON user_collection_items USING (user_id = current_app_user_id())`
 
 **005_create_auth_events.sql** (23 lines)
+
 - Audit log table for compliance, security incident investigation, and token reuse detection
 - Columns: `id` (UUID PK), `user_id` (FK → users, SET NULL on delete to preserve audit trail), `event_type` (VARCHAR with CHECK constraint), `ip_address` (INET), `user_agent` (VARCHAR), `metadata` (JSONB), `created_at`
 - Enum-like CHECK constraint: `event_type IN ('signin', 'refresh', 'logout', 'link_account', 'token_reuse_detected', 'account_deactivated')`
@@ -71,6 +76,7 @@ Five SQL migration files created in `api/migrations/` (102 lines total). These m
 Comprehensive blueprint for Phases 1.2–1.5, covering:
 
 #### Phase 1.2: API Server + Auth Endpoints (🚧 PLANNED)
+
 - Fastify 5 + TypeScript setup with `@fastify/jwt`, `@fastify/cookie`, `apple-signin-auth`, `google-auth-library`
 - Four endpoints:
   - `POST /auth/signin` — OAuth verification + user creation/linking + JWT issuance
@@ -82,6 +88,7 @@ Comprehensive blueprint for Phases 1.2–1.5, covering:
 - Concurrent first-login handling: `ON CONFLICT` clause prevents race conditions on `(provider, provider_user_id)`
 
 #### Phase 1.3: Web SPA Authentication (🚧 PLANNED)
+
 - React 19 + Vite with `AuthProvider` context for user state
 - Apple Sign-In via redirect flow (form_post callback)
 - Google Sign-In via `@react-oauth/google` popup
@@ -89,6 +96,7 @@ Comprehensive blueprint for Phases 1.2–1.5, covering:
 - Auto-refresh interceptor: 401 response triggers `/auth/refresh` retry
 
 #### Phase 1.4: iOS Authentication (🚧 PLANNED)
+
 - Native Apple Sign-In via `AuthenticationServices` (no SDK needed)
 - Google Sign-In via SPM `GoogleSignIn` package
 - Keychain storage for refresh token (not UserDefaults or SwiftData)
@@ -96,6 +104,7 @@ Comprehensive blueprint for Phases 1.2–1.5, covering:
 - Apple name persistence: temporary Keychain storage until API confirms user creation
 
 #### Phase 1.5: Webhooks & Hardening (🚧 PLANNED)
+
 - Apple webhook endpoint for `consent-revoked` and `account-delete` events
 - Refresh token reuse detection: revoke all tokens if stolen token is used
 - Cleanup jobs: 60-day refresh token expiry, 90-day auth event retention, 30-day raw_profile, 30-day deactivated account grace period
@@ -175,12 +184,14 @@ PostgreSQL function reads session variable set by API middleware. Future RLS pol
 ### OAuth Provider Integration Strategy
 
 #### Apple Sign-In
+
 - Supports two audiences: Bundle ID (iOS) and Services ID (web/macOS)
 - Nonce-based replay protection: client generates nonce, hashes it, includes hash in auth request, sends raw nonce to `/auth/signin`
 - Apple returns only `fullName` and `email` on FIRST authorization; subsequent sign-ins return only `sub`
 - Private relay email: `is_private_email = TRUE` prevents auto-linking with verified emails
 
 #### Google Sign-In
+
 - Single `id_token` verified via `google-auth-library`
 - Supports multiple client IDs (Web, iOS, Android)
 - No nonce support (Google uses `aud` + `iss` + expiry for replay protection)
@@ -195,12 +206,12 @@ PostgreSQL function reads session variable set by API middleware. Future RLS pol
 
 ### Data Retention Policies (Enforced via Cleanup Jobs)
 
-| Data | Retention | Cleanup Mechanism | Rationale |
-|------|-----------|-------------------|-----------|
-| `users` rows | Until hard delete request | API endpoint + Apple webhook + 30-day grace period | Allows account recovery; complies with "right to be forgotten" (30-day grace) |
-| `oauth_accounts.raw_profile` | 30 days after creation | Application-level job nullifies column | GDPR data minimization; preserves foreign key referential integrity |
-| `refresh_tokens` (expired/revoked) | 60 days after expiry/revocation | Batched DELETE (10K rows/job) to avoid locks | Allows token reuse detection within 60-day window; cleanup before partition rotation |
-| `auth_events` | 90 days | Batched DELETE (10K rows/job); consider monthly partitioning if >1M rows/month | Complies with typical security log retention; partitioning prevents table bloat |
+| Data                               | Retention                       | Cleanup Mechanism                                                              | Rationale                                                                            |
+| ---------------------------------- | ------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `users` rows                       | Until hard delete request       | API endpoint + Apple webhook + 30-day grace period                             | Allows account recovery; complies with "right to be forgotten" (30-day grace)        |
+| `oauth_accounts.raw_profile`       | 30 days after creation          | Application-level job nullifies column                                         | GDPR data minimization; preserves foreign key referential integrity                  |
+| `refresh_tokens` (expired/revoked) | 60 days after expiry/revocation | Batched DELETE (10K rows/job) to avoid locks                                   | Allows token reuse detection within 60-day window; cleanup before partition rotation |
+| `auth_events`                      | 90 days                         | Batched DELETE (10K rows/job); consider monthly partitioning if >1M rows/month | Complies with typical security log retention; partitioning prevents table bloat      |
 
 ---
 
@@ -209,6 +220,7 @@ PostgreSQL function reads session variable set by API middleware. Future RLS pol
 ### Database Validation (Manual)
 
 ✅ Migrations can be applied to local PostgreSQL:
+
 ```bash
 cd api
 npm install -g dbmate
@@ -216,6 +228,7 @@ dbmate up
 ```
 
 ✅ Tables created with correct structure:
+
 ```bash
 psql -d trackem_dev -c "\d+ users"
 psql -d trackem_dev -c "\d+ oauth_accounts"
@@ -224,17 +237,20 @@ psql -d trackem_dev -c "\d+ auth_events"
 ```
 
 ✅ Trigger and function created:
+
 ```bash
 psql -d trackem_dev -c "SELECT proname FROM pg_proc WHERE proname = 'current_app_user_id';"
 psql -d trackem_dev -c "SELECT proname FROM pg_proc WHERE proname = 'update_updated_at';"
 ```
 
 ✅ Indexes created:
+
 ```bash
 psql -d trackem_dev -c "\di" | grep -E "idx_users_email_lower|idx_oauth_accounts|idx_refresh_tokens|idx_auth_events"
 ```
 
 ✅ RLS session context works:
+
 ```bash
 psql -d trackem_dev << EOF
 SELECT set_config('app.user_id', '12345678-1234-1234-1234-123456789012', true);
@@ -243,6 +259,7 @@ EOF
 ```
 
 ✅ Constraint enforcement:
+
 ```bash
 psql -d trackem_dev << EOF
 INSERT INTO users (email, display_name) VALUES ('test@example.com', 'Test');
@@ -254,6 +271,7 @@ EOF
 ### Implementation Plan Validation
 
 The `docs/User_Authentication_Implementation_Plan.md` file serves as the specification for Phases 1.2–1.5:
+
 - ✅ Comprehensive endpoint definitions with request/response schemas
 - ✅ JWT signing strategy with key rotation procedure
 - ✅ Token storage best practices for web (httpOnly cookies) and iOS (Keychain)
@@ -302,6 +320,7 @@ The `docs/User_Authentication_Implementation_Plan.md` file serves as the specifi
 ## Related Files
 
 ### Created
+
 - `api/migrations/001_create_users.sql` (34 lines)
 - `api/migrations/002_create_oauth_accounts.sql` (19 lines)
 - `api/migrations/003_create_refresh_tokens.sql` (17 lines)
@@ -310,9 +329,11 @@ The `docs/User_Authentication_Implementation_Plan.md` file serves as the specifi
 - `docs/User_Authentication_Implementation_Plan.md` (595 lines)
 
 ### Modified
+
 None
 
 ### Deleted
+
 None
 
 ---
@@ -322,6 +343,7 @@ None
 ### Phase 1.1 — Database Migrations ✅ COMPLETE
 
 **Deliverables:**
+
 - ✅ 5 SQL migration files (102 lines)
 - ✅ Schema designed for OAuth, token rotation, audit logging, RLS
 - ✅ Indexes optimized for common queries
@@ -366,19 +388,19 @@ None
 
 ## Summary Statistics
 
-| Metric | Value |
-|--------|-------|
-| Migration files created | 5 |
-| Total SQL lines | 102 |
-| Database tables | 5 |
-| Indexes created | 8 |
-| RLS functions | 1 |
-| Triggers | 1 |
-| Implementation plan lines | 595 |
-| Documented endpoints | 4 |
-| Event types supported | 6 |
-| Supported OAuth providers | 2 |
-| Data retention periods defined | 4 |
+| Metric                         | Value |
+| ------------------------------ | ----- |
+| Migration files created        | 5     |
+| Total SQL lines                | 102   |
+| Database tables                | 5     |
+| Indexes created                | 8     |
+| RLS functions                  | 1     |
+| Triggers                       | 1     |
+| Implementation plan lines      | 595   |
+| Documented endpoints           | 4     |
+| Event types supported          | 6     |
+| Supported OAuth providers      | 2     |
+| Data retention periods defined | 4     |
 
 ---
 
@@ -410,6 +432,7 @@ None
 ### Why Soft-Delete Instead of Hard-Delete?
 
 Soft-delete (via `deactivated_at`) provides:
+
 - Account recovery within grace period (user accidentally deleted account)
 - Audit trail preservation (`ON DELETE SET NULL` on `auth_events` ensures historical data remains)
 - Compliance with "right to be forgotten" (30-day window before hard delete)
@@ -418,6 +441,7 @@ Soft-delete (via `deactivated_at`) provides:
 ### Why OAuth Raw Profile JSONB?
 
 Stores full provider response for:
+
 - Audit trail (what did Apple/Google provide on sign-in?)
 - Account linking heuristics (compare provider emails across linked accounts)
 - Future provider quirks discovery (e.g., unexpected claims)

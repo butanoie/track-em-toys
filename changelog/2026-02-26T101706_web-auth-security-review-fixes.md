@@ -19,6 +19,7 @@ Two rounds of comprehensive code review on the Phase 1.3 React 19 authentication
 ### 1. Critical Security Fixes
 
 #### CSRF State Validation Fail-Open Bug
+
 **File:** `web/src/auth/AppleCallback.tsx`
 
 The CSRF nonce/state comparison operated with fail-open logic — both missing values and mismatches were treated as success:
@@ -44,6 +45,7 @@ if (!a || !b || a !== b) {
 ---
 
 #### CSRF Tokens Cleared Before Sign-In Success
+
 **File:** `web/src/auth/AppleCallback.tsx`
 
 Nonce/state were removed from `sessionStorage` before the `signInWithApple()` API call completed:
@@ -75,6 +77,7 @@ try {
 ---
 
 #### Open Redirect via Absolute URL
+
 **File:** `web/src/routes/_authenticated.tsx`
 
 The login redirect parameter was passed as an absolute `location.href` URL, which always failed the `startsWith('/')` relative-path validator:
@@ -104,6 +107,7 @@ navigate({
 ---
 
 #### Open Redirect via Protocol-Relative URL
+
 **File:** `web/src/routes/login.tsx`
 
 The redirect parameter validation accepted protocol-relative URLs (`//evil.com`), allowing redirect to external domains:
@@ -132,6 +136,7 @@ if (!redirectTo || !redirectTo.startsWith('/') || redirectTo.startsWith('//')) {
 ### 2. High Severity Fixes
 
 #### Unsafe Generic `json as T` Type Casting (Bypassed All Validation)
+
 **File:** `web/src/lib/api-client.ts`
 
 The `apiFetchJson<T>()` function cast response bodies directly to `T` without runtime validation:
@@ -149,10 +154,7 @@ Refactored to require explicit schema validation:
 
 ```typescript
 // ✅ AFTER: explicit schema parameter
-async function apiFetchJson<T>(
-  url: string,
-  schema: z.ZodType<T>
-): Promise<T> {
+async function apiFetchJson<T>(url: string, schema: z.ZodType<T>): Promise<T> {
   const response = await fetch(url);
   const json = await response.json();
   const result = schema.safeParse(json);
@@ -170,6 +172,7 @@ All call sites now pass explicit schemas (`UserSchema`, `TokenResponseSchema`, e
 ---
 
 #### Unsafe Error Body Casting
+
 **File:** `web/src/auth/AuthProvider.tsx`
 
 Both sign-in handlers used unchecked `as` assertions on error responses:
@@ -202,6 +205,7 @@ try {
 ---
 
 #### Duplicate Refresh Token Logic with No Mutex
+
 **File:** `web/src/auth/AuthProvider.tsx` & `web/src/lib/api-client.ts`
 
 The token refresh implementation existed twice (`doRefresh()` and `attemptRefresh()`), both making independent API calls with no shared mutex:
@@ -209,10 +213,14 @@ The token refresh implementation existed twice (`doRefresh()` and `attemptRefres
 ```typescript
 // ❌ BEFORE: duplicate logic, no deduplication
 // AuthProvider.tsx
-async function doRefresh() { /* full refresh implementation */ }
+async function doRefresh() {
+  /* full refresh implementation */
+}
 
 // api-client.ts
-async function attemptRefresh() { /* identical code */ }
+async function attemptRefresh() {
+  /* identical code */
+}
 ```
 
 Deleted the duplicate, exported `attemptRefresh()` from `api-client.ts`, and updated `AuthProvider` to call the single source:
@@ -232,6 +240,7 @@ const token = await attemptRefresh();
 ---
 
 #### Too-Broad `sessionStorage.clear()` Destructiveness
+
 **File:** `web/src/auth/AuthProvider.tsx`
 
 Logout used `sessionStorage.clear()`, removing all session data indiscriminately:
@@ -240,7 +249,7 @@ Logout used `sessionStorage.clear()`, removing all session data indiscriminately
 // ❌ BEFORE: destroys all session storage
 logout: () => {
   sessionStorage.clear();
-}
+};
 ```
 
 Changed to targeted cleanup:
@@ -252,7 +261,7 @@ logout: () => {
   sessionStorage.removeItem(SESSION_KEYS.nonce);
   sessionStorage.removeItem(SESSION_KEYS.state);
   authStore.clear();
-}
+};
 ```
 
 **Impact:** Third-party integrations or future session data would be destroyed unexpectedly.
@@ -260,6 +269,7 @@ logout: () => {
 ---
 
 #### Hard `window.location.href` Navigation Bypassed Router State
+
 **File:** `web/src/lib/api-client.ts`
 
 Session expiry redirected via hard navigation, losing React Query cache, router state, and redirect destination:
@@ -276,9 +286,7 @@ Changed to emit a custom event that `AuthProvider` handles:
 ```typescript
 // ✅ AFTER: emit event, let AuthProvider handle it
 if (response.status === 401) {
-  window.dispatchEvent(
-    new CustomEvent('auth:sessionexpired', { detail: { redirect: location.pathname } })
-  );
+  window.dispatchEvent(new CustomEvent('auth:sessionexpired', { detail: { redirect: location.pathname } }));
   throw new ApiError('Session expired', null);
 }
 
@@ -297,6 +305,7 @@ useEffect(() => {
 ---
 
 #### Apple SDK Duplicate Script Injection on Rapid Clicks
+
 **File:** `web/src/auth/apple-auth.ts`
 
 The Apple SDK loader checked for `window.AppleID` only after script injection, allowing duplicate concurrent loads:
@@ -341,6 +350,7 @@ async function initAppleSDK() {
 ---
 
 #### Zero-Delay `scheduleRefresh` Caused Immediate Repeat Refresh
+
 **File:** `web/src/auth/AuthProvider.tsx`
 
 When tokens were near expiry, `Math.max(delay, 0)` clamped to 0, firing `setTimeout(fn, 0)` on the next tick:
@@ -348,9 +358,12 @@ When tokens were near expiry, `Math.max(delay, 0)` clamped to 0, firing `setTime
 ```typescript
 // ❌ BEFORE: Math.max clamps negative to 0
 const delay = expiresAt - Date.now();
-setTimeout(() => {
-  attemptRefresh();
-}, Math.max(delay, 0)); // If delay < 0, fires next tick
+setTimeout(
+  () => {
+    attemptRefresh();
+  },
+  Math.max(delay, 0)
+); // If delay < 0, fires next tick
 ```
 
 Added explicit zero-delay guard:
@@ -372,6 +385,7 @@ setTimeout(() => {
 ---
 
 #### `ErrorBoundary` Swallowed Router Redirects (Thrown, Not Error-Extended)
+
 **File:** `web/src/routes/__root.tsx` (new `ErrorBoundary.tsx` component)
 
 TanStack Router uses `throw value` for redirects, where `value` is not an `Error`. React's `getDerivedStateFromError` doesn't catch these because they're not errors:
@@ -457,10 +471,7 @@ The transition from fail-open to fail-closed CSRF validation is the most critica
 
 ```typescript
 // Pattern: Both values required, mismatch rejected
-function validateCsrfState(
-  received: string | null,
-  stored: string | null
-): boolean {
+function validateCsrfState(received: string | null, stored: string | null): boolean {
   // Fail-closed: if either is missing OR they don't match, reject
   if (!received || !stored || received !== stored) {
     return false;
@@ -470,6 +481,7 @@ function validateCsrfState(
 ```
 
 This pattern is now applied to:
+
 - Apple callback nonce validation (line 45 in `AppleCallback.tsx`)
 - Apple callback state validation (line 48 in `AppleCallback.tsx`)
 
@@ -555,10 +567,7 @@ Generic responses now require explicit schema validation:
 **File:** `web/src/lib/api-client.ts`
 
 ```typescript
-export async function apiFetchJson<T>(
-  url: string,
-  schema: z.ZodType<T>
-): Promise<T> {
+export async function apiFetchJson<T>(url: string, schema: z.ZodType<T>): Promise<T> {
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -666,6 +675,7 @@ function isValidRedirect(redirectTo: string | null): boolean {
 ```
 
 Used in:
+
 - Login page form submission (line 67)
 - Apple callback redirect (line 52 in `AppleCallback.tsx`)
 - Authenticated redirect (line 18 in `_authenticated.tsx`)
@@ -708,6 +718,7 @@ export const Route = createRootRoute({
 ## Validation & Testing
 
 ### TypeScript Type Checking
+
 ```
 ✅ PASSED
 > track-em-toys-web@0.0.1 typecheck
@@ -716,6 +727,7 @@ export const Route = createRootRoute({
 ```
 
 ### ESLint Linting
+
 ```
 ✅ PASSED
 > track-em-toys-web@0.0.1 lint
@@ -724,6 +736,7 @@ export const Route = createRootRoute({
 ```
 
 ### Vitest Unit Tests
+
 ```
 ✅ PASSED (102/102)
 > track-em-toys-web@0.0.1 test
@@ -748,6 +761,7 @@ export const Route = createRootRoute({
 ```
 
 **Quality Metrics:**
+
 - Type errors: **0**
 - Linting errors: **0**
 - Test failures: **0**
@@ -759,29 +773,34 @@ export const Route = createRootRoute({
 ## Impact Assessment
 
 ### Security Hardening
+
 - **4 open redirect vulnerabilities eliminated** (absolute URL, protocol-relative URL, missing validation layers)
 - **4 token/session handling vulnerabilities closed** (premature clearing, duplicate refresh, session expiry hard navigation, SDK duplicate injection)
 - **2 runtime validation bypasses remediated** (generic `as T` casting, unsafe error casting)
 - **CSRF validation migrated to fail-closed** (was fail-open for missing values)
 
 ### Development Process Improvements
+
 - **Single source of truth for token refresh** (eliminated duplicate logic)
 - **Schema-driven API response validation** (compile-time + runtime safety)
 - **Consistent redirect handling** (event-based, preserves SPA state)
 - **Comprehensive error boundary** (handles React errors + router redirects)
 
 ### Code Quality
+
 - **Test coverage increased:** 18 new test cases covering critical paths
 - **ESLint rules tightened:** Promoted `exhaustive-deps` to error, added `no-unsafe-argument`
 - **Dead code removed:** Deleted unused `ProtectedRoute` component
 - **Agent guidelines enhanced:** 3 new checklist items for auth layer development
 
 ### Backward Compatibility
+
 - **Fully backward compatible** — no API contract changes
 - **Transparent refactoring** — same user-facing behavior, safer implementation
 - **Existing code patterns preserved** — no breaking changes to `AuthProvider` or route APIs
 
 ### Performance
+
 - **Token refresh deduplication** prevents redundant API calls
 - **SDK loading deduplication** prevents multiple script injections
 - **Eliminates tight refresh loops** (zero-delay scheduling fix)
@@ -792,6 +811,7 @@ export const Route = createRootRoute({
 ## Related Files
 
 **Modified Files (20):**
+
 - `web/eslint.config.js` — Added `no-unsafe-argument` rule
 - `web/src/auth/AppleCallback.tsx` — CSRF validation, token clearing order, TanStack Router integration
 - `web/src/auth/AuthProvider.tsx` — Token refresh deduplication, session expiry event handling, targeted cleanup
@@ -811,10 +831,12 @@ export const Route = createRootRoute({
 - `.claude/agents/react-dev.md` — 3 new auth security checklist items
 
 **Created Files (2):**
+
 - `web/src/components/ErrorBoundary.tsx` — Error boundary component, 55 lines
 - `web/src/components/__tests__/ErrorBoundary.test.tsx` — Comprehensive test suite, 6 tests
 
 **Deleted Files (2):**
+
 - `web/src/auth/ProtectedRoute.tsx` — Removed dead code (duplicate LoadingSpinner)
 - `web/src/auth/__tests__/ProtectedRoute.test.tsx` — Removed dead tests
 
@@ -823,23 +845,27 @@ export const Route = createRootRoute({
 ## Summary Statistics
 
 **Scope:**
+
 - Files modified: **20**
 - Files created: **2**
 - Files deleted: **2**
 - Total affected files: **24**
 
 **Code Changes:**
+
 - Lines added: **851**
 - Lines removed: **214**
 - Net change: **+637 lines**
 
 **Testing:**
+
 - New tests created: **18** (3 test files with 6, 8, and 4 new tests respectively)
 - Total test count: **102** ✅
 - Test pass rate: **100%** ✅
 - Test duration: **1.73s**
 
 **Security Issues Resolved:**
+
 - Critical: **2** (CSRF validation, token clearing order)
 - High: **7** (schema casting, error casting, duplicate refresh, destructive clear, hard nav, SDK duplication, zero-delay refresh)
 - Medium: **12** (dead code, error handling, test isolation, lint rules, error codes, error boundary, router links, env validation, etc.)
@@ -848,6 +874,7 @@ export const Route = createRootRoute({
 **Total Issues Addressed: 30** (2 Critical + 7 High + 12 Medium + 9 Low)
 
 **Quality Gates:**
+
 - TypeScript: ✅ 0 errors
 - ESLint: ✅ 0 errors
 - Tests: ✅ 102/102 passing
@@ -860,10 +887,10 @@ export const Route = createRootRoute({
 ✅ **COMPLETE**
 
 All security and correctness issues identified in code review have been remediated. Changes are fully validated:
+
 - Type-safe (TypeScript strict mode)
 - Lint-clean (ESLint 0 errors)
 - Test-verified (102/102 passing)
 - Production-ready pending integration testing
 
 **Ready for:** Merge to main branch, integration testing, and Phase 1.3 release.
-

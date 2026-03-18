@@ -19,35 +19,42 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 ### 1. API Scaffolding & Project Configuration
 
 **api/package.json** (40 lines)
+
 - Node.js project setup with Fastify 5, TypeScript 5.9, ES modules
 - Production dependencies: `fastify`, `@fastify/jwt`, `@fastify/cookie`, `@fastify/cors`, `@fastify/rate-limit`, `pg`, `jose`, `apple-signin-auth`, `google-auth-library`, `dotenv`, `pino`
 - Dev dependencies: `vitest` (testing), `tsx` (dev runner), `eslint` + `typescript-eslint` (linting)
 - Scripts: `dev`, `build`, `start`, `typecheck`, `lint`, `lint:fix`, `test`, `test:watch`
 
 **api/package-lock.json**
+
 - Locked dependency versions for reproducible builds
 
 **api/tsconfig.json** (20 lines)
+
 - ES2020 target, CommonJS modules, strict type checking
 - Module resolution: ESNext, skipLibCheck for faster builds
 - `sourceMap: true` for production debugging
 
 **api/eslint.config.js** (59 lines)
+
 - Flat config format (ESLint 9+)
 - `@eslint/js` + `typescript-eslint` recommended rules
 - JSDoc plugin for API documentation requirements
 - Targets `src/**/*.ts`, ignores `dist/` and `node_modules/`
 
 **api/vitest.config.ts** (12 lines)
+
 - Vitest test runner configured with TypeScript support
 - Globals mode for `describe`, `it`, `expect`
 
 **api/.env.example** (30 lines)
+
 - Complete environment template for local development
 - Sections: Database, JWT (ES256), Apple Sign-In, Google Sign-In, Server
 - Non-sensitive configuration guide for team setup
 
 **api/README.md** (260 lines)
+
 - Quick start guide: install, create db, copy .env, run migrations, start dev server
 - Detailed environment variable documentation with values/sources
 - API endpoint reference with request/response schemas
@@ -58,12 +65,14 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 ### 2. OAuth Token Verification & Provider Integration
 
 **api/src/auth/apple.ts** (45 lines)
+
 - `verifyAppleToken(idToken, nonce)`: Verifies Apple Sign-In id_token against Apple's JWKS
 - Supports both iOS (Bundle ID) and web (Services ID) audiences
 - Extracts and normalizes claims: `sub`, `email`, `email_verified`, `name`, `picture`
 - `isPrivateRelayEmail(email)`: Detects Apple private relay addresses (`@privaterelay.appleid.com`)
 
 **api/src/auth/apple.test.ts** (164 lines)
+
 - 13 tests covering:
   - Valid token verification with both audiences
   - Nonce validation (replay protection)
@@ -72,23 +81,27 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
   - Error handling (missing config, invalid tokens, nonce mismatch)
 
 **api/src/auth/google.ts** (39 lines)
+
 - `verifyGoogleToken(idToken)`: Verifies Google Sign-In id_token using `google-auth-library`
 - Caches JWKS internally via `OAuth2Client`
 - Supports web, iOS, Android client IDs
 - Returns normalized claims
 
 **api/src/auth/google.test.ts** (108 lines)
+
 - 6 tests covering:
   - Valid token verification across client IDs
   - Email verification status
   - Error handling (invalid token, expired, wrong audience)
 
 **api/src/auth/jwks.ts** (13 lines)
+
 - `GET /.well-known/jwks.json` endpoint
 - Returns public keys in JWKS format for client-side JWT verification
 - Enables zero-downtime key rotation (clients fetch latest keys)
 
 **api/src/auth/key-store.ts** (64 lines)
+
 - `getCurrentKid()`: Returns the current key ID for JWT signing
 - `getPrivateKeyPem(kid)`: Returns ES256 private key PEM
 - `getPublicKeyPem(kid)`: Returns ES256 public key PEM by key ID
@@ -98,6 +111,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 ### 3. JWT Token Generation & Rotation
 
 **api/src/auth/tokens.ts** (67 lines)
+
 - `generateRefreshToken()`: Creates 32-byte random token as 64-char hex string
 - `hashToken(token)`: SHA-256 hex digest for database storage
 - `createAndStoreRefreshToken(client, userId, deviceInfo)`: Generates, hashes, persists token; returns raw token to client
@@ -105,6 +119,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 - Constants: 32-byte tokens, 30-day expiry
 
 **api/src/auth/tokens.test.ts** (154 lines)
+
 - 14 tests covering:
   - Token generation: format (64-char hex), uniqueness, consistency
   - Token hashing: SHA-256 format, determinism, collision resistance
@@ -115,6 +130,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 ### 4. Authentication Routes & Endpoint Handlers
 
 **api/src/auth/routes.ts** (430 lines)
+
 - `POST /auth/signin`: OAuth verification → user create/link → JWT issuance
   - Verifies Apple/Google id_token (with nonce for Apple)
   - Auto-creates user if first-time sign-in
@@ -147,6 +163,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 - **HttpError class**: Custom error type thrown inside transactions; caught at route handler level to trigger ROLLBACK + HTTP response
 
 **api/src/auth/schemas.ts** (102 lines)
+
 - Fastify JSON schema validation for all auth endpoints
 - `signinSchema`: Request body + 200 response schema
 - `refreshSchema`: Request + response
@@ -158,6 +175,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 ### 5. Database Layer & Connection Management
 
 **api/src/db/pool.ts** (50 lines)
+
 - PostgreSQL connection pool configuration
 - `getPool()`: Lazy-initialized pool with max 20 connections
 - `withTransaction<T>(callback)`: Executes callback in transaction; auto-rollback on error
@@ -165,6 +183,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 - Proper error handling: connection errors, query errors, transaction rollback
 
 **api/src/db/pool.test.ts** (197 lines)
+
 - 10 tests covering:
   - Pool initialization and singleton pattern
   - Transaction success: COMMIT on successful callback
@@ -174,6 +193,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
   - Concurrent transaction safety
 
 **api/src/db/queries.ts** (344 lines)
+
 - **User queries:**
   - `findUserById(client, id)`: Get user by ID
   - `createUser(client, email, displayName)`: Insert new user
@@ -201,6 +221,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
   - `normalizeEmail(email)`: Lowercase for consistent case-insensitive queries
 
 **api/src/db/queries.test.ts** (505 lines)
+
 - 34 tests covering:
   - User creation with email normalization
   - OAuth account creation with case-insensitive email index
@@ -213,6 +234,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 ### 6. Configuration & Type Definitions
 
 **api/src/config.ts** (63 lines)
+
 - Centralized environment variable loading with validation
 - `required(name)`: Throws if missing
 - `requiredPem(name)`: Handles newline escaping for PEM keys
@@ -227,6 +249,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
   - `google`: webClientId, iosClientId
 
 **api/src/types/index.ts** (108 lines)
+
 - `ProviderClaims`: Normalized claims from Apple/Google (sub, email, email_verified, name, picture)
 - `OAuthProvider`: 'apple' | 'google' type
 - `SigninRequest`: Request body for `/auth/signin`
@@ -237,14 +260,17 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 - All types properly typed with null/optional fields
 
 **api/src/hooks/set-user-context.ts** (4 lines)
+
 - Fastify hook placeholder for setting RLS session context (Phase 1.3+)
 
 **api/src/hooks/set-user-context.test.ts** (10 lines)
+
 - Test placeholder structure
 
 ### 7. Server Initialization & Plugin Registration
 
 **api/src/server.ts** (111 lines)
+
 - `buildServer()`: Main Fastify server factory
 - **Plugins registered:**
   - `@fastify/cors`: CORS with credentials
@@ -262,6 +288,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 - **Graceful shutdown:** `close()` method for cleanup
 
 **api/src/index.ts** (33 lines)
+
 - Entry point: builds server, listens on port
 - Connects to PostgreSQL pool on startup
 - Handles shutdown signals (SIGTERM, SIGINT)
@@ -269,6 +296,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 ### 8. Database Schema Reference & Migrations
 
 **api/db/schema.sql** (287 lines)
+
 - Complete reference schema showing all tables, columns, indexes, functions
 - Not executed as migration; serves as documentation of current schema state
 - Includes all 5 migration steps in one consolidated file for reference
@@ -278,16 +306,19 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 **api/db/migrations/003_create_refresh_tokens.sql** - **Migrated from api/migrations/**
 **api/db/migrations/004_rls_session_context.sql** - **Migrated from api/migrations/**
 **api/db/migrations/005_create_auth_events.sql** - **Migrated from api/migrations/**
+
 - All five migration files moved from `api/migrations/` to `api/db/migrations/` per CLAUDE.md standards
 - No changes to migration content; location standardization only
 
 ### 9. Project Standards & Documentation Updates
 
 **.gitignore** - Enhanced
+
 - Added: `node_modules/`, `api/dist/`, `*.pem`, `*.p8`
 - Prevents accidental commit of JWT keys, Apple keys, node dependencies
 
 **CLAUDE.md** - Updated
+
 - **New section: Testing Requirements**
   - ALWAYS write unit tests for new/updated code
   - Tests mandatory, not optional
@@ -301,6 +332,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 - Standardizes database artifact organization
 
 **docs/User_Authentication_Implementation_Plan.md** - Updated
+
 - **Phase 1.2 status updated:** 🚧 PLANNED → ✅ COMPLETE
 - Section confirming all endpoints implemented, tested, validated
 - Database layer production-ready
@@ -312,6 +344,7 @@ Phase 1.2 completes the Node.js/Fastify API authentication layer with full OAuth
 ### OAuth Provider Integration Architecture
 
 **Apple Sign-In Verification Flow:**
+
 ```typescript
 // Request:
 POST /auth/signin
@@ -340,26 +373,29 @@ POST /auth/signin
 ```
 
 **Google Sign-In Verification Flow:**
+
 ```typescript
 // No nonce needed (Google uses aud + iss + exp)
-const claims = await verifyGoogleToken(idToken)
+const claims = await verifyGoogleToken(idToken);
 // google-auth-library auto-caches JWKS, verifies signature
 ```
 
 ### JWT Signing with ES256 (Asymmetric Cryptography)
 
 **Key Pair Generation:**
+
 ```bash
 openssl ecparam -genkey -name prime256v1 -noout -out jwt-private.pem
 openssl ec -in jwt-private.pem -pubout -out jwt-public.pem
 ```
 
 **Signing Process:**
+
 ```typescript
 // api/src/auth/tokens.ts + server.ts integration
-const privateKeyPem = config.jwt.privateKey // ES256 private key
-const payload = { sub: userId, iat, exp, iss, aud }
-const token = fastify.jwt.sign(payload, { kid: getCurrentKid() })
+const privateKeyPem = config.jwt.privateKey; // ES256 private key
+const payload = { sub: userId, iat, exp, iss, aud };
+const token = fastify.jwt.sign(payload, { kid: getCurrentKid() });
 
 // Token header includes: { alg: 'ES256', kid: 'key-2026-02-22' }
 // Client uses .well-known/jwks.json to fetch public key matching kid
@@ -367,6 +403,7 @@ const token = fastify.jwt.sign(payload, { kid: getCurrentKid() })
 ```
 
 **Benefits of ES256 over HS256:**
+
 - Public key distribution via JWKS endpoint (no shared secret)
 - Zero-downtime key rotation (clients fetch latest JWKS)
 - Service-to-service token verification without credential sharing
@@ -377,6 +414,7 @@ const token = fastify.jwt.sign(payload, { kid: getCurrentKid() })
 **Problem:** Two concurrent requests sign in same user (race condition on `users` or `oauth_accounts` insert)
 
 **Solution:** PostgreSQL `ON CONFLICT DO UPDATE` in queries:
+
 ```sql
 -- api/src/db/queries.ts pattern
 INSERT INTO oauth_accounts (...)
@@ -391,39 +429,42 @@ DO UPDATE SET ... RETURNING *;
 ```
 
 **Wrapped in transaction:**
+
 ```typescript
 withTransaction(async (client) => {
   // All queries within transaction see consistent state
   // COMMIT atomic: all-or-nothing
   // ROLLBACK on any error: no partial writes
-})
+});
 ```
 
 ### Database Query Patterns
 
 **Token Rotation:**
+
 ```typescript
 // 1. Revoke old token
-await queries.revokeRefreshToken(client, oldTokenHash)
+await queries.revokeRefreshToken(client, oldTokenHash);
 
 // 2. Create new token atomically in same transaction
-const newRawToken = await createAndStoreRefreshToken(client, userId, userAgent)
+const newRawToken = await createAndStoreRefreshToken(client, userId, userAgent);
 
 // 3. COMMIT both changes together
 // If either fails, ROLLBACK entire transaction
 ```
 
 **Email-Based Account Linking:**
+
 ```typescript
 // Find user with verified email (ignore private relay)
-const existingUser = await findUserByVerifiedEmail(client, newEmail)
+const existingUser = await findUserByVerifiedEmail(client, newEmail);
 
 if (existingUser && !isPrivateRelayEmail(newEmail)) {
   // Auto-link new provider to existing user
-  await linkOAuthAccount(client, existingUser.id, provider, sub)
+  await linkOAuthAccount(client, existingUser.id, provider, sub);
 } else {
   // Create new user
-  createUser(client, newEmail, displayName)
+  createUser(client, newEmail, displayName);
 }
 ```
 
@@ -431,9 +472,9 @@ if (existingUser && !isPrivateRelayEmail(newEmail)) {
 
 ```javascript
 // api/eslint.config.js
-import js from '@eslint/js'
-import tseslint from 'typescript-eslint'
-import jsdoc from 'eslint-plugin-jsdoc'
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import jsdoc from 'eslint-plugin-jsdoc';
 
 export default [
   js.configs.recommended,
@@ -445,10 +486,11 @@ export default [
       'jsdoc/require-description': 'warn',
     },
   },
-]
+];
 ```
 
 **Enforces:**
+
 - JSDoc comments on all exported functions (documentation requirement)
 - No TypeScript any without cast
 - No unused variables
@@ -458,7 +500,7 @@ export default [
 
 ```typescript
 // api/vitest.config.ts
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
@@ -471,7 +513,7 @@ export default defineConfig({
       exclude: ['src/**/*.test.ts'],
     },
   },
-})
+});
 ```
 
 ---
@@ -514,6 +556,7 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 ```
 
 **Test Coverage Summary:**
+
 - **Apple OAuth:** 13 tests (token verification, nonce validation, email handling, private relay, error cases)
 - **Google OAuth:** 6 tests (token verification, multiple client IDs, error handling)
 - **Token Management:** 14 tests (generation, hashing, rotation, expiry, storage)
@@ -525,13 +568,13 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 
 ### Code Quality Metrics
 
-| Metric | Value |
-|--------|-------|
-| TypeScript Compilation | ✅ No errors |
-| ESLint Validation | ✅ All files pass |
-| Test Pass Rate | 100% (78/78) |
-| Test Execution Time | 229ms |
-| Code Coverage Files | 11 source files |
+| Metric                 | Value             |
+| ---------------------- | ----------------- |
+| TypeScript Compilation | ✅ No errors      |
+| ESLint Validation      | ✅ All files pass |
+| Test Pass Rate         | 100% (78/78)      |
+| Test Execution Time    | 229ms             |
+| Code Coverage Files    | 11 source files   |
 
 ---
 
@@ -540,18 +583,21 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 ### For Development Team
 
 **Immediate Benefits:**
+
 - ✅ Production-ready authentication API: can integrate with web/iOS clients
 - ✅ All endpoints tested and documented with Curl examples
 - ✅ Environment setup guide eliminates configuration ambiguity
 - ✅ TypeScript types shared with web/iOS teams for consistency
 
 **Development Workflow:**
+
 - `npm run dev` starts hot-reload server on port 3000
 - `npm test` runs full test suite in 229ms
 - `npm run lint:fix` auto-fixes ESLint issues
 - `.env.example` template guides credential setup
 
 **Code Quality:**
+
 - All 78 tests pass with 100% success rate
 - TypeScript strict mode prevents runtime errors
 - ESLint enforces JSDoc documentation
@@ -560,6 +606,7 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 ### For Project Timeline
 
 **Phase 1 Status:**
+
 - Phase 1.1 (Database) ✅ COMPLETE — Migrations in place
 - Phase 1.2 (API) ✅ COMPLETE — All endpoints implemented, tested, production-ready
 - Phase 1.3 (Web) 🚧 READY TO START — Depends only on Phase 1.2 API being complete (✅)
@@ -567,6 +614,7 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 - Phase 1.5 (Webhooks & hardening) 🚧 READY TO PLAN — After Phase 1.2, requires real credentials
 
 **Parallelization Opportunity:**
+
 - Phase 1.3 web frontend development can proceed immediately (API endpoints finalized)
 - Phase 1.4 iOS development can proceed immediately (API endpoints finalized)
 - Phases 1.3 + 1.4 proceed in parallel for 2–3 weeks
@@ -576,24 +624,28 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 ### For Production Deployment
 
 **Database Safety:**
+
 - All queries wrapped in transactions for data consistency
 - `ON CONFLICT` clauses prevent race conditions on concurrent inserts
 - `ON DELETE CASCADE/SET NULL` maintains referential integrity
 - Soft-delete pattern (deactivated_at) allows account recovery and audit trails
 
 **Security:**
+
 - Refresh tokens hashed with SHA-256 before storage (database breach mitigation)
 - API keys/tokens never logged (config validation prevents .env exposure)
 - JWT signed with ES256 (private key isolated, public key safely distributed)
 - Rate limiting plugin ready for deployment (global: false, enable per-route as needed)
 
 **Monitoring & Debugging:**
+
 - Pino logger configured for structured logging
 - `auth_events` table logs all authentication activities (signin, refresh, logout, link-account)
 - PostgreSQL timestamps enable audit trail queries
 - JWT kid header enables key rotation tracking
 
 **Scaling Considerations:**
+
 - Connection pool max 20 connections (tunable in production)
 - No session state in memory (stateless API)
 - Refresh tokens stored in PostgreSQL (not in-memory)
@@ -606,11 +658,13 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 ### Created (31 files)
 
 **API Core:**
+
 - `/Users/buta/Repos/track-em-toys/api/src/index.ts` (33 lines)
 - `/Users/buta/Repos/track-em-toys/api/src/server.ts` (111 lines)
 - `/Users/buta/Repos/track-em-toys/api/src/config.ts` (63 lines)
 
 **Authentication Module:**
+
 - `/Users/buta/Repos/track-em-toys/api/src/auth/routes.ts` (430 lines)
 - `/Users/buta/Repos/track-em-toys/api/src/auth/schemas.ts` (102 lines)
 - `/Users/buta/Repos/track-em-toys/api/src/auth/tokens.ts` (67 lines)
@@ -623,17 +677,20 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 - `/Users/buta/Repos/track-em-toys/api/src/auth/jwks.ts` (13 lines)
 
 **Database Layer:**
+
 - `/Users/buta/Repos/track-em-toys/api/src/db/pool.ts` (50 lines)
 - `/Users/buta/Repos/track-em-toys/api/src/db/pool.test.ts` (197 lines)
 - `/Users/buta/Repos/track-em-toys/api/src/db/queries.ts` (344 lines)
 - `/Users/buta/Repos/track-em-toys/api/src/db/queries.test.ts` (505 lines)
 
 **Type System & Hooks:**
+
 - `/Users/buta/Repos/track-em-toys/api/src/types/index.ts` (108 lines)
 - `/Users/buta/Repos/track-em-toys/api/src/hooks/set-user-context.ts` (4 lines)
 - `/Users/buta/Repos/track-em-toys/api/src/hooks/set-user-context.test.ts` (10 lines)
 
 **Configuration:**
+
 - `/Users/buta/Repos/track-em-toys/api/tsconfig.json` (20 lines)
 - `/Users/buta/Repos/track-em-toys/api/vitest.config.ts` (12 lines)
 - `/Users/buta/Repos/track-em-toys/api/eslint.config.js` (59 lines)
@@ -641,11 +698,13 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 - `/Users/buta/Repos/track-em-toys/api/package-lock.json`
 
 **Documentation & Schema:**
+
 - `/Users/buta/Repos/track-em-toys/api/README.md` (260 lines)
 - `/Users/buta/Repos/track-em-toys/api/.env.example` (30 lines)
 - `/Users/buta/Repos/track-em-toys/api/db/schema.sql` (287 lines)
 
 **Migrations (moved, not created):**
+
 - `/Users/buta/Repos/track-em-toys/api/db/migrations/001_create_users.sql` (migrated from api/migrations/)
 - `/Users/buta/Repos/track-em-toys/api/db/migrations/002_create_oauth_accounts.sql` (migrated from api/migrations/)
 - `/Users/buta/Repos/track-em-toys/api/db/migrations/003_create_refresh_tokens.sql` (migrated from api/migrations/)
@@ -670,46 +729,50 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 
 ## Summary Statistics
 
-| Metric | Value |
-|--------|-------|
-| **Files Created** | 31 |
-| **Files Modified** | 3 |
-| **Files Deleted/Moved** | 5 |
-| **Total Changed** | 36 |
-| **Lines Added** | 8,074 |
-| **Lines Deleted** | 33 |
-| **Net Change** | +8,041 |
-| **Test Files** | 6 |
-| **Unit Tests** | 78 |
-| **Test Pass Rate** | 100% |
-| **Authentication Endpoints** | 4 |
-| **OAuth Providers Supported** | 2 (Apple, Google) |
-| **Database Queries** | 15+ |
-| **Type-Safe Functions** | 35+ |
-| **ESLint Rules Enforced** | 20+ |
-| **Documentation Lines** | 557 (README + env example + plan update) |
+| Metric                        | Value                                    |
+| ----------------------------- | ---------------------------------------- |
+| **Files Created**             | 31                                       |
+| **Files Modified**            | 3                                        |
+| **Files Deleted/Moved**       | 5                                        |
+| **Total Changed**             | 36                                       |
+| **Lines Added**               | 8,074                                    |
+| **Lines Deleted**             | 33                                       |
+| **Net Change**                | +8,041                                   |
+| **Test Files**                | 6                                        |
+| **Unit Tests**                | 78                                       |
+| **Test Pass Rate**            | 100%                                     |
+| **Authentication Endpoints**  | 4                                        |
+| **OAuth Providers Supported** | 2 (Apple, Google)                        |
+| **Database Queries**          | 15+                                      |
+| **Type-Safe Functions**       | 35+                                      |
+| **ESLint Rules Enforced**     | 20+                                      |
+| **Documentation Lines**       | 557 (README + env example + plan update) |
 
 ---
 
 ## Next Steps
 
 ### Immediate (This week)
+
 1. Deploy API to staging environment with real Apple/Google credentials
 2. Test all four endpoints with web/iOS clients using Curl
 3. Verify database persistence (check auth_events log after each signin)
 4. Load test with concurrent logins (verify race condition safety)
 
 ### Short-term (Week 1–2)
+
 1. Begin Phase 1.3 (Web SPA): React 19 AuthProvider, Apple/Google sign-in buttons
 2. Begin Phase 1.4 (iOS): AuthManager, native Apple/Google sign-in
 3. Integrate with Phase 1.2 API endpoints (test with staging server)
 
 ### Mid-term (Week 2–3)
+
 1. Complete Phase 1.3 web frontend (login page, protected routes, token refresh)
 2. Complete Phase 1.4 iOS authentication (sign-in, Keychain storage, session management)
 3. End-to-end testing: iOS + Web + API + Database
 
 ### Later (Week 3–4)
+
 1. Phase 1.5: Implement Apple webhook for consent-revoked/account-delete events
 2. Implement token reuse detection and cleanup jobs
 3. Production deployment: configure rate limits, monitoring, alerting
@@ -719,11 +782,13 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 ## References
 
 ### Documentation
+
 - **Implementation Plan:** `/Users/buta/Repos/track-em-toys/docs/User_Authentication_Implementation_Plan.md` — Phases 1.3–1.5 specifications
 - **API README:** `/Users/buta/Repos/track-em-toys/api/README.md` — Quick start, endpoints, environment setup
 - **Project Standards:** `/Users/buta/Repos/track-em-toys/CLAUDE.md` — Swift 6, iOS 17+, build commands, testing requirements
 
 ### External Resources
+
 - **Apple Sign-In:** https://developer.apple.com/sign-in-with-apple/ — Developer documentation
 - **Google Sign-In:** https://developers.google.com/identity — Web & mobile guides
 - **Fastify:** https://www.fastify.io/ — Server framework documentation
@@ -736,28 +801,33 @@ Duration: 229ms (transform 308ms, setup 0ms, import 399ms, tests 28ms, environme
 ## Key Decisions & Rationale
 
 ### Why Node.js + Fastify?
+
 - **Fastify:** Fast, lightweight HTTP framework with minimal overhead
 - **TypeScript:** Type safety shared with web frontend (single language for JS-based monorepo)
 - **npm:** Ecosystem includes mature OAuth libraries (apple-signin-auth, google-auth-library)
 - **Aligns with web development:** React 19 frontend uses Node.js build tools, consistent DX
 
 ### Why ES256 (Asymmetric JWT)?
+
 - **Zero-downtime key rotation:** Clients fetch public key from JWKS endpoint
 - **Stateless verification:** Any service can verify JWT without shared secret
 - **Future scalability:** Multiple API instances, microservices can verify tokens independently
 - **Industry standard:** Same pattern used by Auth0, Okta, AWS Cognito
 
 ### Why Transaction-Wrapped Queries?
+
 - **Race condition safety:** `ON CONFLICT` + transaction prevents duplicate accounts on concurrent signins
 - **Data consistency:** COMMIT atomic (all-or-nothing); ROLLBACK on any error
 - **Audit trail:** All changes logged in `auth_events` atomically
 
 ### Why SHA-256 Token Hashing?
+
 - **Database breach mitigation:** Stolen database doesn't reveal token values
 - **Hex storage:** CHAR(64) hex string (not binary) easier to debug in psql
 - **Standard practice:** Same pattern used by Django, Laravel, Express middleware
 
 ### Why Email Case-Insensitive Index?
+
 - **RFC 5321 compliance:** Email addresses are case-insensitive per standard
 - **OAuth provider normalization:** Apple/Google normalize emails before sign-in
 - **Prevents duplicates:** Stops "alice@example.com" and "Alice@Example.com" from being separate accounts

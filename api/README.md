@@ -43,23 +43,24 @@ Copy `.env.example` to `.env` and fill in each value.
 
 ### Database
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| Variable       | Required | Description                  |
+| -------------- | -------- | ---------------------------- |
+| `DATABASE_URL` | Yes      | PostgreSQL connection string |
 
 Default for local dev:
+
 ```
 DATABASE_URL=postgresql://your_user:your_password@localhost:5432/trackem_dev
 ```
 
 ### JWT Signing (ES256)
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `JWT_PRIVATE_KEY` | Yes | ES256 PEM private key (full contents including BEGIN/END lines) |
-| `JWT_PUBLIC_KEY` | Yes | ES256 PEM public key (full contents including BEGIN/END lines) |
-| `JWT_KEY_ID` | Yes | Unique key identifier used as `kid` in JWT headers |
-| `JWT_ISSUER` | No | Token issuer claim (default: `track-em-toys`) |
+| Variable          | Required | Description                                                     |
+| ----------------- | -------- | --------------------------------------------------------------- |
+| `JWT_PRIVATE_KEY` | Yes      | ES256 PEM private key (full contents including BEGIN/END lines) |
+| `JWT_PUBLIC_KEY`  | Yes      | ES256 PEM public key (full contents including BEGIN/END lines)  |
+| `JWT_KEY_ID`      | Yes      | Unique key identifier used as `kid` in JWT headers              |
+| `JWT_ISSUER`      | No       | Token issuer claim (default: `track-em-toys`)                   |
 
 Generate a key pair:
 
@@ -74,13 +75,13 @@ Paste the full PEM file contents into the env vars. For `JWT_KEY_ID`, use any un
 
 All values come from [Apple Developer Portal → Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources/).
 
-| Variable | Required | Where to find it |
-|----------|----------|------------------|
-| `APPLE_TEAM_ID` | Yes | Top-right of Developer portal (10-char alphanumeric) |
-| `APPLE_KEY_ID` | Yes | Keys section — create a key with "Sign in with Apple" enabled |
-| `APPLE_PRIVATE_KEY` | Yes | The `.p8` file downloaded at key creation (one-time download) |
-| `APPLE_BUNDLE_ID` | Yes | Your iOS app's bundle identifier under Identifiers → App IDs |
-| `APPLE_SERVICES_ID` | Yes | Create under Identifiers → Services IDs (used for web sign-in) |
+| Variable            | Required | Where to find it                                               |
+| ------------------- | -------- | -------------------------------------------------------------- |
+| `APPLE_TEAM_ID`     | Yes      | Top-right of Developer portal (10-char alphanumeric)           |
+| `APPLE_KEY_ID`      | Yes      | Keys section — create a key with "Sign in with Apple" enabled  |
+| `APPLE_PRIVATE_KEY` | Yes      | The `.p8` file downloaded at key creation (one-time download)  |
+| `APPLE_BUNDLE_ID`   | Yes      | Your iOS app's bundle identifier under Identifiers → App IDs   |
+| `APPLE_SERVICES_ID` | Yes      | Create under Identifiers → Services IDs (used for web sign-in) |
 
 Requires a paid Apple Developer account ($99/year).
 
@@ -88,11 +89,11 @@ Requires a paid Apple Developer account ($99/year).
 
 All values come from [Google Cloud Console → APIs & Credentials](https://console.cloud.google.com/apis/credentials).
 
-| Variable | Required | Where to find it |
-|----------|----------|------------------|
-| `GOOGLE_WEB_CLIENT_ID` | Yes | Create an OAuth 2.0 Client ID with type "Web application" |
-| `GOOGLE_IOS_CLIENT_ID` | Yes | Create an OAuth 2.0 Client ID with type "iOS" |
-| `GOOGLE_DESKTOP_CLIENT_ID` | No | Create an OAuth 2.0 Client ID with type "Desktop app" (for macOS native sign-in) |
+| Variable                   | Required | Where to find it                                                                 |
+| -------------------------- | -------- | -------------------------------------------------------------------------------- |
+| `GOOGLE_WEB_CLIENT_ID`     | Yes      | Create an OAuth 2.0 Client ID with type "Web application"                        |
+| `GOOGLE_IOS_CLIENT_ID`     | Yes      | Create an OAuth 2.0 Client ID with type "iOS"                                    |
+| `GOOGLE_DESKTOP_CLIENT_ID` | No       | Create an OAuth 2.0 Client ID with type "Desktop app" (for macOS native sign-in) |
 
 For the web client, add `http://localhost:5173` as an authorized JavaScript origin. You also need an OAuth consent screen configured on the project.
 
@@ -102,10 +103,10 @@ The desktop client ID is used by the macOS app, which authenticates via `ASWebAu
 
 Both the API and web dev servers share a single TLS certificate stored in `.certs/` at the repo root. This is required for Apple Sign-In (which mandates HTTPS callbacks) and for the iOS/macOS native client.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `TLS_CERT_FILE` | No | Path to PEM certificate file (default: unset — HTTP only) |
-| `TLS_KEY_FILE` | No | Path to PEM private key file (default: unset — HTTP only) |
+| Variable        | Required | Description                                               |
+| --------------- | -------- | --------------------------------------------------------- |
+| `TLS_CERT_FILE` | No       | Path to PEM certificate file (default: unset — HTTP only) |
+| `TLS_KEY_FILE`  | No       | Path to PEM private key file (default: unset — HTTP only) |
 
 Both must be set together, or both left unset. For local dev, point them at the shared mkcert certs:
 
@@ -131,6 +132,7 @@ mkcert -cert-file cert.pem -key-file key.pem localhost 127.0.0.1 dev.track-em-to
 ```
 
 This creates a certificate valid for:
+
 - **`localhost`** — web dev server (`https://localhost:5173`)
 - **`127.0.0.1`** — iOS/macOS native client (avoids IPv6 loopback issues with `localhost`)
 - **`dev.track-em-toys.com`** — optional custom domain for cookie scoping
@@ -153,10 +155,10 @@ If you need to add a new hostname (e.g. for a new service), re-run the `mkcert` 
 
 ### Server
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `PORT` | No | Server port (default: `3000`) |
-| `CORS_ORIGIN` | No | Allowed CORS origin (default: `http://localhost:5173`) |
+| Variable      | Required | Description                                            |
+| ------------- | -------- | ------------------------------------------------------ |
+| `PORT`        | No       | Server port (default: `3000`)                          |
+| `CORS_ORIGIN` | No       | Allowed CORS origin (default: `http://localhost:5173`) |
 
 ## Database Migrations
 
@@ -175,52 +177,52 @@ dbmate status
 
 The current migrations create:
 
-| File | Table/Function |
-|------|----------------|
-| `001_create_users.sql` | `users` table with email uniqueness and `updated_at` trigger |
-| `002_create_oauth_accounts.sql` | `oauth_accounts` table linking providers to users |
-| `003_create_refresh_tokens.sql` | `refresh_tokens` table with token rotation support |
-| `004_rls_session_context.sql` | `current_app_user_id()` function for Row-Level Security |
-| `005_create_auth_events.sql` | `auth_events` audit log table |
+| File                            | Table/Function                                               |
+| ------------------------------- | ------------------------------------------------------------ |
+| `001_create_users.sql`          | `users` table with email uniqueness and `updated_at` trigger |
+| `002_create_oauth_accounts.sql` | `oauth_accounts` table linking providers to users            |
+| `003_create_refresh_tokens.sql` | `refresh_tokens` table with token rotation support           |
+| `004_rls_session_context.sql`   | `current_app_user_id()` function for Row-Level Security      |
+| `005_create_auth_events.sql`    | `auth_events` audit log table                                |
 
 ## NPM Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start dev server with hot reload (tsx watch) |
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm start` | Run the compiled production build |
-| `npm run typecheck` | Type-check without emitting files |
-| `npm run lint` | Run ESLint |
-| `npm run lint:fix` | Run ESLint with auto-fix |
-| `npm test` | Run tests once (vitest) |
-| `npm run test:watch` | Run tests in watch mode |
+| Script               | Description                                  |
+| -------------------- | -------------------------------------------- |
+| `npm run dev`        | Start dev server with hot reload (tsx watch) |
+| `npm run build`      | Compile TypeScript to `dist/`                |
+| `npm start`          | Run the compiled production build            |
+| `npm run typecheck`  | Type-check without emitting files            |
+| `npm run lint`       | Run ESLint                                   |
+| `npm run lint:fix`   | Run ESLint with auto-fix                     |
+| `npm test`           | Run tests once (vitest)                      |
+| `npm run test:watch` | Run tests in watch mode                      |
 
 ## API Endpoints
 
 ### Public
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/health` | Health check |
-| `GET` | `/.well-known/jwks.json` | Public JWKS for token verification |
-| `GET` | `/reference/` | Interactive API documentation (Scalar) |
-| `GET` | `/reference/openapi.json` | OpenAPI 3.0 JSON spec |
-| `POST` | `/auth/signin` | Sign in with Apple or Google (rate limit: 10/min per IP) |
-| `POST` | `/auth/refresh` | Rotate refresh token for a new access token (rate limit: 5/min per IP) |
+| Method | Path                      | Description                                                            |
+| ------ | ------------------------- | ---------------------------------------------------------------------- |
+| `GET`  | `/health`                 | Health check                                                           |
+| `GET`  | `/.well-known/jwks.json`  | Public JWKS for token verification                                     |
+| `GET`  | `/reference/`             | Interactive API documentation (Scalar)                                 |
+| `GET`  | `/reference/openapi.json` | OpenAPI 3.0 JSON spec                                                  |
+| `POST` | `/auth/signin`            | Sign in with Apple or Google (rate limit: 10/min per IP)               |
+| `POST` | `/auth/refresh`           | Rotate refresh token for a new access token (rate limit: 5/min per IP) |
 
 ### Authenticated (requires `Authorization: Bearer <access_token>`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/auth/me` | Get current user profile and linked providers |
-| `POST` | `/auth/logout` | Revoke a refresh token |
+| Method | Path                 | Description                                                    |
+| ------ | -------------------- | -------------------------------------------------------------- |
+| `GET`  | `/auth/me`           | Get current user profile and linked providers                  |
+| `POST` | `/auth/logout`       | Revoke a refresh token                                         |
 | `POST` | `/auth/link-account` | Link an additional OAuth provider (rate limit: 5/min per user) |
 
 ### Webhooks
 
-| Method | Path | Description |
-|--------|------|-------------|
+| Method | Path                   | Description                                                                 |
+| ------ | ---------------------- | --------------------------------------------------------------------------- |
 | `POST` | `/auth/webhooks/apple` | Apple server-to-server notifications (consent revocation, account deletion) |
 
 ### Sign-In Request
@@ -270,10 +272,10 @@ The API ships with interactive documentation powered by [Scalar](https://scalar.
 
 With the dev server running (`npm run dev`):
 
-| URL | Description |
-|-----|-------------|
-| `https://localhost:3010/reference/` | Interactive Scalar UI — browse endpoints, view request/response schemas, and send test requests |
-| `https://localhost:3010/reference/openapi.json` | Raw OpenAPI 3.0 JSON spec — import into Postman, Insomnia, or other API clients |
+| URL                                             | Description                                                                                     |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `https://localhost:3010/reference/`             | Interactive Scalar UI — browse endpoints, view request/response schemas, and send test requests |
+| `https://localhost:3010/reference/openapi.json` | Raw OpenAPI 3.0 JSON spec — import into Postman, Insomnia, or other API clients                 |
 
 > **Note:** Replace `3010` with your configured `PORT` if different. If running without TLS, use `http://` instead.
 
@@ -346,12 +348,14 @@ All variables listed as "Required" in the tables above must be set in your `.env
 
 **`ECONNREFUSED` on startup**
 PostgreSQL is not running or `DATABASE_URL` is incorrect. Verify with:
+
 ```bash
 psql $DATABASE_URL -c "SELECT 1"
 ```
 
 **Migrations fail**
 Ensure `dbmate` is installed and `DATABASE_URL` is set. If running outside the `api/` directory, export the variable first:
+
 ```bash
 export DATABASE_URL=postgresql://...
 dbmate -d ./api/migrations up

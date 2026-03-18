@@ -1,4 +1,4 @@
-import type { CredentialResponse } from '@react-oauth/google'
+import type { CredentialResponse } from '@react-oauth/google';
 
 /**
  * Extracts the id_token string from a Google CredentialResponse.
@@ -6,7 +6,7 @@ import type { CredentialResponse } from '@react-oauth/google'
  */
 export function extractGoogleCredential(response: CredentialResponse): string | null {
   if (!response.credential || typeof response.credential !== 'string') {
-    return null
+    return null;
   }
-  return response.credential
+  return response.credential;
 }

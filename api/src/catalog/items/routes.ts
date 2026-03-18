@@ -1,12 +1,20 @@
-import type { FastifyInstance } from 'fastify'
-import { listItems, getItemBySlug } from './queries.js'
-import type { ItemListRow, ItemDetail } from './queries.js'
-import { listItemsSchema, getItemSchema } from './schemas.js'
-import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js'
+import type { FastifyInstance } from 'fastify';
+import { listItems, getItemBySlug } from './queries.js';
+import type { ItemListRow, ItemDetail } from './queries.js';
+import { listItemsSchema, getItemSchema } from './schemas.js';
+import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js';
 
-interface FranchiseParams { franchise: string }
-interface FranchiseSlugParams { franchise: string; slug: string }
-interface PaginationQuery { limit?: number; cursor?: string }
+interface FranchiseParams {
+  franchise: string;
+}
+interface FranchiseSlugParams {
+  franchise: string;
+  slug: string;
+}
+interface PaginationQuery {
+  limit?: number;
+  cursor?: string;
+}
 
 /**
  * Format an item row for list responses.
@@ -20,15 +28,13 @@ function formatListItem(row: ItemListRow) {
     slug: row.slug,
     franchise: { slug: row.franchise_slug, name: row.franchise_name },
     character: { slug: row.character_slug, name: row.character_name },
-    manufacturer: row.manufacturer_slug
-      ? { slug: row.manufacturer_slug, name: row.manufacturer_name! }
-      : null,
+    manufacturer: row.manufacturer_slug ? { slug: row.manufacturer_slug, name: row.manufacturer_name! } : null,
     toy_line: { slug: row.toy_line_slug, name: row.toy_line_name },
     size_class: row.size_class,
     year_released: row.year_released,
     is_third_party: row.is_third_party,
     data_quality: row.data_quality,
-  }
+  };
 }
 
 /**
@@ -37,7 +43,7 @@ function formatListItem(row: ItemListRow) {
  * @param detail - Item detail to format
  */
 function formatDetail(detail: ItemDetail) {
-  const { base, photos } = detail
+  const { base, photos } = detail;
   return {
     ...formatListItem(base),
     appearance: base.appearance_slug
@@ -56,10 +62,10 @@ function formatDetail(detail: ItemDetail) {
     metadata: base.metadata,
     created_at: base.created_at,
     updated_at: base.updated_at,
-  }
+  };
 }
 
-const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const
+const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const;
 
 /**
  * Register item catalog routes.
@@ -73,32 +79,32 @@ export async function itemRoutes(fastify: FastifyInstance, _opts: object): Promi
     '/',
     { schema: listItemsSchema, config: rateLimitConfig },
     async (request, reply) => {
-      const limit = clampLimit(request.query.limit)
+      const limit = clampLimit(request.query.limit);
 
-      let cursor: { name: string; id: string } | null = null
+      let cursor: { name: string; id: string } | null = null;
       if (request.query.cursor) {
-        cursor = decodeCursor(request.query.cursor)
-        if (!cursor) return reply.code(400).send({ error: 'Invalid cursor' })
+        cursor = decodeCursor(request.query.cursor);
+        if (!cursor) return reply.code(400).send({ error: 'Invalid cursor' });
       }
 
       const { rows, totalCount } = await listItems({
         franchiseSlug: request.params.franchise,
         limit,
         cursor,
-      })
+      });
 
-      const page = buildCursorPage(rows.map(formatListItem), limit)
-      return { ...page, total_count: totalCount }
-    },
-  )
+      const page = buildCursorPage(rows.map(formatListItem), limit);
+      return { ...page, total_count: totalCount };
+    }
+  );
 
   fastify.get<{ Params: FranchiseSlugParams }>(
     '/:slug',
     { schema: getItemSchema, config: rateLimitConfig },
     async (request, reply) => {
-      const detail = await getItemBySlug(request.params.franchise, request.params.slug)
-      if (!detail) return reply.code(404).send({ error: 'Item not found' })
-      return formatDetail(detail)
-    },
-  )
+      const detail = await getItemBySlug(request.params.franchise, request.params.slug);
+      if (!detail) return reply.code(404).send({ error: 'Item not found' });
+      return formatDetail(detail);
+    }
+  );
 }

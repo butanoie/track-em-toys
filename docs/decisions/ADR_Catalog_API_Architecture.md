@@ -34,17 +34,17 @@ The existing codebase has one route module (`src/auth/`) with a flat structure: 
 
 Slug uniqueness is scoped to franchise rather than globally unique. This means the same slug (e.g., `megatron`) can exist in different franchises, and the franchise in the URL path disambiguates.
 
-| Table | Uniqueness Constraint | Rationale |
-|---|---|---|
-| `characters` | `UNIQUE (slug, franchise_id)` | Same name across franchises (cross-franchise growth) |
-| `factions` | `UNIQUE (slug, franchise_id)` | Faction names are franchise-specific |
-| `sub_groups` | `UNIQUE (slug, franchise_id)` | Sub-group names are franchise-specific |
-| `continuity_families` | `UNIQUE (slug, franchise_id)` | Continuity groupings are franchise-specific |
-| `toy_lines` | `UNIQUE (slug, franchise_id)` | Toy line names are franchise-specific |
-| `items` | `UNIQUE (slug, franchise_id)` | Items belong to a franchise context |
-| `character_appearances` | `UNIQUE (slug, character_id)` | Scoped to parent character |
-| `manufacturers` | `UNIQUE (slug)` — globally unique | Span franchises (Hasbro, Takara Tomy) |
-| `franchises` | `UNIQUE (slug)` — globally unique | Top-level scope |
+| Table                   | Uniqueness Constraint             | Rationale                                            |
+| ----------------------- | --------------------------------- | ---------------------------------------------------- |
+| `characters`            | `UNIQUE (slug, franchise_id)`     | Same name across franchises (cross-franchise growth) |
+| `factions`              | `UNIQUE (slug, franchise_id)`     | Faction names are franchise-specific                 |
+| `sub_groups`            | `UNIQUE (slug, franchise_id)`     | Sub-group names are franchise-specific               |
+| `continuity_families`   | `UNIQUE (slug, franchise_id)`     | Continuity groupings are franchise-specific          |
+| `toy_lines`             | `UNIQUE (slug, franchise_id)`     | Toy line names are franchise-specific                |
+| `items`                 | `UNIQUE (slug, franchise_id)`     | Items belong to a franchise context                  |
+| `character_appearances` | `UNIQUE (slug, character_id)`     | Scoped to parent character                           |
+| `manufacturers`         | `UNIQUE (slug)` — globally unique | Span franchises (Hasbro, Takara Tomy)                |
+| `franchises`            | `UNIQUE (slug)` — globally unique | Top-level scope                                      |
 
 ### Module Layout
 
@@ -85,45 +85,45 @@ api/src/catalog/
 
 #### Unscoped Routes
 
-| Endpoint | Module | Notes |
-|---|---|---|
-| `GET /catalog/franchises` | franchises/ | List all franchises |
-| `GET /catalog/franchises/:slug` | franchises/ | Franchise detail |
-| `GET /catalog/manufacturers` | manufacturers/ | All rows, franchise-agnostic |
-| `GET /catalog/manufacturers/:slug` | manufacturers/ | Detail |
-| `GET /catalog/search?q=...` | search/ | Offset-paginated, optional `&franchise=` filter |
+| Endpoint                           | Module         | Notes                                           |
+| ---------------------------------- | -------------- | ----------------------------------------------- |
+| `GET /catalog/franchises`          | franchises/    | List all franchises                             |
+| `GET /catalog/franchises/:slug`    | franchises/    | Franchise detail                                |
+| `GET /catalog/manufacturers`       | manufacturers/ | All rows, franchise-agnostic                    |
+| `GET /catalog/manufacturers/:slug` | manufacturers/ | Detail                                          |
+| `GET /catalog/search?q=...`        | search/        | Offset-paginated, optional `&franchise=` filter |
 
 #### Franchise-Scoped Routes (`/catalog/franchises/:franchise/...`)
 
-| Endpoint | Module | Paginated |
-|---|---|---|
-| `GET .../characters` | characters/ | Cursor |
-| `GET .../characters/:slug` | characters/ | — |
-| `GET .../items` | items/ | Cursor |
-| `GET .../items/:slug` | items/ | — |
-| `GET .../toy-lines` | toy-lines/ | No (all rows) |
-| `GET .../toy-lines/:slug` | toy-lines/ | — |
-| `GET .../factions` | reference/ | No (all rows) |
-| `GET .../factions/:slug` | reference/ | — |
-| `GET .../sub-groups` | reference/ | No (all rows) |
-| `GET .../sub-groups/:slug` | reference/ | — |
-| `GET .../continuity-families` | reference/ | No (all rows) |
-| `GET .../continuity-families/:slug` | reference/ | — |
+| Endpoint                            | Module      | Paginated     |
+| ----------------------------------- | ----------- | ------------- |
+| `GET .../characters`                | characters/ | Cursor        |
+| `GET .../characters/:slug`          | characters/ | —             |
+| `GET .../items`                     | items/      | Cursor        |
+| `GET .../items/:slug`               | items/      | —             |
+| `GET .../toy-lines`                 | toy-lines/  | No (all rows) |
+| `GET .../toy-lines/:slug`           | toy-lines/  | —             |
+| `GET .../factions`                  | reference/  | No (all rows) |
+| `GET .../factions/:slug`            | reference/  | —             |
+| `GET .../sub-groups`                | reference/  | No (all rows) |
+| `GET .../sub-groups/:slug`          | reference/  | —             |
+| `GET .../continuity-families`       | reference/  | No (all rows) |
+| `GET .../continuity-families/:slug` | reference/  | —             |
 
 **17 endpoints total.**
 
 ### Why This Structure
 
-| Decision | Rationale |
-|---|---|
-| Franchise path prefix, not query param | Franchise is the primary browsing scope, not an optional filter. Collectors browse within a franchise. Slug scoping makes franchise required for disambiguation. |
-| Characters and items get own modules | Complex: cursor pagination, multi-table JOINs, many filters, will gain write endpoints |
-| Manufacturers stay unscoped | Franchise-agnostic (Hasbro spans franchises), globally unique slugs |
-| Reference/ bundles factions + sub-groups + continuity-families | Share the same trivial list+detail pattern within franchise scope |
-| Franchises/ is a separate unscoped module | The franchise list and detail endpoints don't need franchise scoping |
-| Queries colocate with routes (not in `db/`) | Auth queries are in `db/queries.ts` (690 lines). Adding catalog queries there would create a 2000+ line file. Each catalog domain's queries are only consumed by that domain's routes. |
-| Barrel `routes.ts` at catalog root | `server.ts` registers one plugin; catalog-scoped hooks (e.g., cache-control) can be added at one level |
-| `franchise-scoped.ts` sub-barrel | Registers all franchise-scoped sub-plugins under the `:franchise` parameterized prefix |
+| Decision                                                       | Rationale                                                                                                                                                                              |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Franchise path prefix, not query param                         | Franchise is the primary browsing scope, not an optional filter. Collectors browse within a franchise. Slug scoping makes franchise required for disambiguation.                       |
+| Characters and items get own modules                           | Complex: cursor pagination, multi-table JOINs, many filters, will gain write endpoints                                                                                                 |
+| Manufacturers stay unscoped                                    | Franchise-agnostic (Hasbro spans franchises), globally unique slugs                                                                                                                    |
+| Reference/ bundles factions + sub-groups + continuity-families | Share the same trivial list+detail pattern within franchise scope                                                                                                                      |
+| Franchises/ is a separate unscoped module                      | The franchise list and detail endpoints don't need franchise scoping                                                                                                                   |
+| Queries colocate with routes (not in `db/`)                    | Auth queries are in `db/queries.ts` (690 lines). Adding catalog queries there would create a 2000+ line file. Each catalog domain's queries are only consumed by that domain's routes. |
+| Barrel `routes.ts` at catalog root                             | `server.ts` registers one plugin; catalog-scoped hooks (e.g., cache-control) can be added at one level                                                                                 |
+| `franchise-scoped.ts` sub-barrel                               | Registers all franchise-scoped sub-plugins under the `:franchise` parameterized prefix                                                                                                 |
 
 ---
 

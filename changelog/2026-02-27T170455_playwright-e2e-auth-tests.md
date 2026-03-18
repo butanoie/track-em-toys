@@ -18,10 +18,12 @@ Added a Playwright E2E test suite for browser-level testing of the auth flow aga
 Set up `@playwright/test` as a dev dependency with a dedicated config, TypeScript project reference, and ESLint rule block. Vitest is configured to exclude the `e2e/` directory so the two runners don't overlap.
 
 **Created:**
+
 - `web/playwright.config.ts` — Chromium project, HTTPS base URL (`https://localhost:4173`), `ignoreHTTPSErrors`, Vite preview web server
 - `web/tsconfig.e2e.json` — isolated TS project for E2E files (ES2022, strict, noEmit)
 
 **Modified:**
+
 - `web/package.json` — added `@playwright/test` dev dep, `test:e2e` and `test:e2e:ui` scripts
 - `web/package-lock.json` — lockfile updated with playwright packages
 - `web/tsconfig.json` — added `tsconfig.e2e.json` project reference
@@ -34,6 +36,7 @@ Set up `@playwright/test` as a dev dependency with a dedicated config, TypeScrip
 Four Playwright spec files covering the core auth-gated user journey, plus a shared fixture module for mock auth setup.
 
 **Created:**
+
 - `web/e2e/fixtures/auth.ts` — `setupAuthenticated()` helper (injects localStorage session flag, sessionStorage user, mocks `/auth/refresh` route), `mockRefreshFailure()` for 401 scenarios
 - `web/e2e/login-page.spec.ts` — login page renders heading + Apple sign-in button; unauthenticated `/` redirects to `/login`
 - `web/e2e/protected-routes.spec.ts` — unauthenticated redirect, redirect param preserved, authenticated user accesses dashboard
@@ -43,6 +46,7 @@ Four Playwright spec files covering the core auth-gated user journey, plus a sha
 ### 3. New Vitest Unit Test Suites
 
 **Created:**
+
 - `web/src/auth/__tests__/auth-refresh-scheduling.test.tsx` — AuthProvider schedules `setTimeout` for proactive token refresh based on JWT `exp`, clears timer on logout
 - `web/src/lib/__tests__/api-client-refresh-mutex.test.ts` — refresh mutex serializes concurrent 401 retries so only one `/auth/refresh` call is made
 - `web/src/routes/__tests__/_authenticated.test.tsx` — authenticated layout guard: loading spinner while `isLoading`, outlet when authenticated, redirect to `/login` when unauthenticated, no redirect while loading
@@ -50,13 +54,15 @@ Four Playwright spec files covering the core auth-gated user journey, plus a sha
 ### 4. AuthProvider Test Additions
 
 **Modified:**
+
 - `web/src/auth/__tests__/AuthProvider.test.tsx` — added two new test cases:
-  - *fail-closed refresh*: when refresh returns 401, cached sessionStorage user is NOT restored (no stale session)
-  - *sessionexpired clears queryClient*: `auth:sessionexpired` event triggers the injected `queryClientClear` callback
+  - _fail-closed refresh_: when refresh returns 401, cached sessionStorage user is NOT restored (no stale session)
+  - _sessionexpired clears queryClient_: `auth:sessionexpired` event triggers the injected `queryClientClear` callback
 
 ### 5. Settings
 
 **Modified:**
+
 - `.claude/settings.json` — disabled `github@claude-plugins-official` plugin
 
 ---
@@ -67,7 +73,7 @@ Four Playwright spec files covering the core auth-gated user journey, plus a sha
 
 ```typescript
 // HTTPS against Vite preview (self-signed certs from mkcert)
-const baseURL = 'https://localhost:4173'
+const baseURL = 'https://localhost:4173';
 
 export default defineConfig({
   testDir: './e2e',
@@ -77,7 +83,7 @@ export default defineConfig({
     url: baseURL,
     ignoreHTTPSErrors: true,
   },
-})
+});
 ```
 
 The preview server reuses the HTTPS cert/key configured in `vite.config.ts`. `ignoreHTTPSErrors` is required because mkcert certificates are not trusted by Playwright's bundled Chromium.
@@ -102,11 +108,13 @@ Each project compiles independently with `tsc -b`. The E2E project uses `noEmit:
 ## Validation & Testing
 
 ### New Test Counts
+
 - **Playwright E2E specs:** 4 files, 10 test cases
 - **Vitest unit tests:** 3 new files + 2 new cases in existing file
 - **Total vitest tests:** increased from 72 to ~85+
 
 ### Net File Impact
+
 - 18 files changed, +798 lines
 
 ---
@@ -122,26 +130,26 @@ Each project compiles independently with `tsc -b`. The E2E project uses `noEmit:
 
 ## Related Files
 
-| File | Action |
-|---|---|
-| `web/playwright.config.ts` | Created |
-| `web/tsconfig.e2e.json` | Created |
-| `web/e2e/fixtures/auth.ts` | Created |
-| `web/e2e/login-page.spec.ts` | Created |
-| `web/e2e/protected-routes.spec.ts` | Created |
-| `web/e2e/authenticated-session.spec.ts` | Created |
-| `web/e2e/session-persistence.spec.ts` | Created |
-| `web/src/auth/__tests__/auth-refresh-scheduling.test.tsx` | Created |
-| `web/src/lib/__tests__/api-client-refresh-mutex.test.ts` | Created |
-| `web/src/routes/__tests__/_authenticated.test.tsx` | Created |
-| `web/src/auth/__tests__/AuthProvider.test.tsx` | Modified |
-| `web/package.json` | Modified |
-| `web/package-lock.json` | Modified |
-| `web/tsconfig.json` | Modified |
-| `web/vitest.config.ts` | Modified |
-| `web/eslint.config.js` | Modified |
-| `.gitignore` | Modified |
-| `.claude/settings.json` | Modified |
+| File                                                      | Action   |
+| --------------------------------------------------------- | -------- |
+| `web/playwright.config.ts`                                | Created  |
+| `web/tsconfig.e2e.json`                                   | Created  |
+| `web/e2e/fixtures/auth.ts`                                | Created  |
+| `web/e2e/login-page.spec.ts`                              | Created  |
+| `web/e2e/protected-routes.spec.ts`                        | Created  |
+| `web/e2e/authenticated-session.spec.ts`                   | Created  |
+| `web/e2e/session-persistence.spec.ts`                     | Created  |
+| `web/src/auth/__tests__/auth-refresh-scheduling.test.tsx` | Created  |
+| `web/src/lib/__tests__/api-client-refresh-mutex.test.ts`  | Created  |
+| `web/src/routes/__tests__/_authenticated.test.tsx`        | Created  |
+| `web/src/auth/__tests__/AuthProvider.test.tsx`            | Modified |
+| `web/package.json`                                        | Modified |
+| `web/package-lock.json`                                   | Modified |
+| `web/tsconfig.json`                                       | Modified |
+| `web/vitest.config.ts`                                    | Modified |
+| `web/eslint.config.js`                                    | Modified |
+| `.gitignore`                                              | Modified |
+| `.claude/settings.json`                                   | Modified |
 
 ---
 
