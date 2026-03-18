@@ -79,6 +79,10 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `ConfirmDialog` pattern for destructive actions: generic component in `src/admin/components/`, reusable for deactivation, purge, and future catalog deletes
 - GDPR-purged users (tombstones): show "Deleted user" for email, "—" for name, disable all action buttons
 - Self-action guard: disable role/deactivate/purge controls when `row.id === currentUser.id`
+- Role changes also go through `ConfirmDialog` (simple "Are you sure?" — no type-to-confirm since reversible)
+- `LoadingSpinner` shared component at `src/components/LoadingSpinner.tsx` — accepts `className` for contextual sizing
+- `throwApiError(response)` in `api-client.ts` — shared error extraction for void-response endpoints (DELETE 204)
+- `UserRole` type derived from `AdminUserRowSchema.shape.role` — single source of truth for role enum
 
 ### Photo Domains (Web UI)
 

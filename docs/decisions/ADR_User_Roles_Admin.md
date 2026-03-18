@@ -125,6 +125,13 @@ Code-split admin section within the same SPA under `/admin/*` routes. Admin JS b
 
 **Dependencies added:** `react-hook-form`, `@hookform/resolvers` (installed for future catalog editing forms, not used in admin MVP).
 
+**Patterns established during implementation:**
+
+- `throwApiError(response)` — shared helper in `api-client.ts` for void-response endpoints (e.g., DELETE 204). Eliminates error-handling duplication between `apiFetchJson` and manual `apiFetch` callers.
+- `LoadingSpinner` — shared component at `src/components/LoadingSpinner.tsx`, accepts `className` for contextual sizing. Used by `_authenticated.tsx`, `admin.tsx`, and `admin/users.tsx`.
+- Role changes route through `ConfirmDialog` (simple confirm, no type-to-confirm) — consistent with the destructive action pattern used for deactivation and GDPR purge.
+- `UserRole` type exported from `zod-schemas.ts` as `AdminUserRow['role']` — single source of truth for the role enum, derived from the Zod schema.
+
 ### Scope NOT Included
 
 - No changes to existing catalog read routes (all stay public)
