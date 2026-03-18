@@ -1,20 +1,15 @@
 {
   "mcpServers": {
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem"]
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
     "xcodebuild": {
       "command": "npx",
       "args": ["-y", "xcodebuildmcp@latest", "mcp"]
     },
     "deepl": {
-      "command": "./scripts/mcp-launcher.sh",
-      "args": ["deepl"]
+      "command": "npx",
+      "args": ["-y", "deepl-mcp-server"],
+      "env": {
+        "DEEPL_API_KEY": "${DEEPL_API_KEY}"
+      }
     }
   }
 }

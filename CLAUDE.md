@@ -61,12 +61,6 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - Seed data (`api/db/seed/`) uses slug-based FK references — never integer IDs — to avoid fragile positional coupling
 - GDPR user deletion uses tombstone pattern: scrub PII (email, display_name, avatar_url), set `deleted_at`, keep the row so all FKs remain intact. NEVER use `ON DELETE CASCADE` or `ON DELETE SET NULL` on user FKs. App checks `deleted_at IS NOT NULL` to display "Deleted user". Phase 1.12 implements the deletion endpoint + UI.
 
-## Authentication
-
-- OAuth-only: Apple Sign-In + Google Sign-In (no email/password auth)
-- ES256 asymmetric JWT access tokens (15-min), SHA-256 hashed refresh tokens (7-day)
-- Role included in JWT claims — no DB lookup needed per request
-
 ## User Roles
 
 - `users.role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'curator', 'admin'))`
@@ -76,14 +70,6 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - API: `requireRole(role)` Fastify preHandler middleware enforces role checks
 - Web: Admin routes under `/admin/*`, code-split via lazy import; role checks in TanStack Router `beforeLoad`
 - Catalog write operations (photo upload, item edits) require `curator` or `admin` role
-
-## Photo Domains
-
-Two distinct photo types with different privacy models:
-
-- **Catalog photos** (`item_photos` table): Centrally managed reference images (product shots, box art). Shared across all users, no RLS. Feed ML training directly. Upload requires `curator` role.
-- **User collection photos** (future table, post-ML): Private condition/shelf photos of a collector's own items. Will use RLS on `uploaded_by`. Deferred to Phase 1.6.
-- ML training uses only catalog photos — no consent mechanism needed (app-managed content, not user PII)
 
 ## Development Strategy
 
@@ -111,12 +97,6 @@ Two distinct photo types with different privacy models:
 
 ### Formatting (Prettier)
 
-- Prettier enforces consistent formatting across all TypeScript, JSON, Markdown, CSS, and YAML files
-- Config: `.prettierrc.json` at repo root — single quotes, trailing semicolons, 2-space indent, 120 print width, es5 trailing commas
-- Ignored: SQL migrations, seed JSON, generated files (see `.prettierignore`)
-- `eslint-config-prettier` disables conflicting ESLint rules in both `api/` and `web/`
-- Pre-commit hook (husky + lint-staged) auto-formats staged files on commit
-- VS Code: format-on-save enabled via `track-em-toys.code-workspace` settings
 - Root `package.json` is a tooling host only (husky + lint-staged + prettier) — NOT an npm workspace
 - `.prettierignore` does NOT auto-discover from subdirectories — per-module scripts use `--ignore-path ../.prettierignore`
 - Prettier converts regex hex escapes (e.g. `\x00`) to literal bytes — place `eslint-disable` comments directly above the `.replace()` line, not above the enclosing expression
@@ -131,36 +111,6 @@ Root-level commands (run from repo root):
 - `npm install` — install husky + lint-staged (required once after clone)
 - `npm run format` — Prettier format entire repo
 - `npm run format:check` — Prettier check entire repo (CI mode)
-
-## Security Guidelines for Documentation
-
-When documenting configuration and setup:
-
-### DO Document
-
-- How to obtain tokens (links to official sources)
-- `.env.example` file locations and structure
-- Configuration file format and options
-- Error messages and troubleshooting
-- Security best practices
-
-### NEVER Document
-
-- Actual token values
-- API keys or secrets
-- Hardcoded credentials
-- Private authentication details
-
-### Documentation Accuracy
-
-- Verify file paths referenced actually exist in the repo
-- Verify code examples have correct syntax
-
-## Shell Scripts
-
-- Always quote variables: `"$VAR"` not `$VAR` — unquoted variables cause word splitting and globbing bugs
-- Never use `chmod 777` or `chmod a+w` — use minimum permissions needed (e.g. `chmod 755` for executables)
-- Use `set -euo pipefail` at the top of scripts to fail fast on errors
 
 ## Testing Requirements
 
@@ -207,36 +157,9 @@ Tests are mandatory, not optional — no code change is complete without corresp
 - A feature touching user-facing web flows needs unit tests AND E2E tests
 - Bug fixes need a regression test at the appropriate layer
 
-## Commit Standards
-
-- Write clear, descriptive commit messages
-- Follow conventional commits format
-- Reference issue numbers when applicable
-- Keep commits atomic and focused
-
 ## Feature Development Gates
 
-These gates apply to any non-trivial feature work, whether using `/feature-dev` or working ad-hoc. Trivial changes (bug fixes, config tweaks, small additions) do not require them.
-
-### Verification Gate
-
-**CRITICAL: Run `/run-checks` before considering any implementation complete.** Do NOT skip this step. Do NOT rely on "it looks right" — run the automated checks. This catches issues that manual review misses (type errors, lint violations, failing tests).
-
-- After implementation: run `/run-checks`
-- After review fixes: run `/run-checks` again
-- If checks fail, fix the issues and re-run — do not proceed with failures
-
-### Post-Architecture Documentation Gate
-
-**CRITICAL: After the architecture/plan is approved by the user, first review and audit the design for correctness (consistency, security, data model, edge cases, scope), THEN update documentation BEFORE writing implementation code.** Do NOT skip the audit step. Do NOT skip the doc updates. Treat both as hard blockers.
-
-See [`docs/guides/DOC_GATE_REFERENCE.md`](docs/guides/DOC_GATE_REFERENCE.md) for the full checklist and common mistakes.
-
-### Post-Review Documentation Gate
-
-**CRITICAL: After review issues have been fixed and checks pass, update documentation to reflect implementation reality BEFORE writing the summary.**
-
-See [`docs/guides/DOC_GATE_REFERENCE.md`](docs/guides/DOC_GATE_REFERENCE.md) for the full checklist and common mistakes.
+Non-trivial feature work requires verification and documentation gates. See [`docs/guides/DOC_GATE_REFERENCE.md`](docs/guides/DOC_GATE_REFERENCE.md) for the full checklist. The `.claude/rules/doc-gates-task-integration.md` rule enforces these as explicit tasks in every feature task list.
 
 ## Changelog
 
