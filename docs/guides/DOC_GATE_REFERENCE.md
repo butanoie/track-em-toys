@@ -48,9 +48,18 @@ Complete Step 1 (audit) fully before starting Step 2 (documentation). Review eac
 
 ---
 
-## Gate 2: Post-Review (After Quality Review Passes, Before Summary)
+## Code Simplification (After Quality Review, Before Post-Review Gate)
 
-**Trigger:** Review issues have been fixed and `/run-checks` passes.
+**Trigger:** Quality Review is complete and all review fixes are applied.
+**Blocks:** Post-Review Documentation Gate.
+
+Launch the `code-simplifier:code-simplifier` agent to simplify and refine recently written code for clarity, consistency, and maintainability. This runs as a subagent to avoid bloating the main conversation context.
+
+---
+
+## Gate 2: Post-Review (After Code Simplification, Before Summary)
+
+**Trigger:** Code simplification is complete and `/run-checks` still passes.
 **Blocks:** Summary cannot be written until this gate passes.
 
 ### Checklist
