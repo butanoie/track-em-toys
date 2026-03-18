@@ -252,7 +252,7 @@ async function upsertContinuityFamilies(
     await client.query(
       `INSERT INTO continuity_families (slug, name, franchise_id, sort_order, notes)
        VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (slug) DO UPDATE SET
+       ON CONFLICT (slug, franchise_id) DO UPDATE SET
          name = EXCLUDED.name,
          franchise_id = EXCLUDED.franchise_id,
          sort_order = EXCLUDED.sort_order,
@@ -280,7 +280,7 @@ async function upsertFactions(
     await client.query(
       `INSERT INTO factions (name, slug, franchise_id, notes)
        VALUES ($1, $2, $3, $4)
-       ON CONFLICT (slug) DO UPDATE SET
+       ON CONFLICT (slug, franchise_id) DO UPDATE SET
          name = EXCLUDED.name,
          franchise_id = EXCLUDED.franchise_id,
          notes = EXCLUDED.notes`,
@@ -313,7 +313,7 @@ async function upsertSubGroups(
     await client.query(
       `INSERT INTO sub_groups (name, slug, faction_id, franchise_id, notes)
        VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (slug) DO UPDATE SET
+       ON CONFLICT (slug, franchise_id) DO UPDATE SET
          name = EXCLUDED.name,
          faction_id = EXCLUDED.faction_id,
          franchise_id = EXCLUDED.franchise_id,
@@ -380,7 +380,7 @@ async function upsertToyLines(
     await client.query(
       `INSERT INTO toy_lines (name, slug, franchise_id, manufacturer_id, scale, description)
        VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT (slug) DO UPDATE SET
+       ON CONFLICT (slug, franchise_id) DO UPDATE SET
          name = EXCLUDED.name,
          franchise_id = EXCLUDED.franchise_id,
          manufacturer_id = EXCLUDED.manufacturer_id,
@@ -442,9 +442,8 @@ async function upsertCharactersPass1(
           is_combined_form, combined_form_id, combiner_role,
           continuity_family_id, metadata)
        VALUES ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9, $10)
-       ON CONFLICT (slug) DO UPDATE SET
+       ON CONFLICT (slug, franchise_id) DO UPDATE SET
          name = EXCLUDED.name,
-         franchise_id = EXCLUDED.franchise_id,
          faction_id = EXCLUDED.faction_id,
          character_type = EXCLUDED.character_type,
          alt_mode = EXCLUDED.alt_mode,
@@ -559,9 +558,8 @@ async function upsertAppearances(
            (slug, name, character_id, description, source_media, source_name,
             year_start, year_end, metadata)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         ON CONFLICT (slug) DO UPDATE SET
+         ON CONFLICT (slug, character_id) DO UPDATE SET
            name = EXCLUDED.name,
-           character_id = EXCLUDED.character_id,
            description = EXCLUDED.description,
            source_media = EXCLUDED.source_media,
            source_name = EXCLUDED.source_name,
@@ -620,7 +618,7 @@ async function upsertItems(
             character_appearance_id, size_class, year_released,
             product_code, is_third_party, metadata)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-         ON CONFLICT (slug) DO UPDATE SET
+         ON CONFLICT (slug, franchise_id) DO UPDATE SET
            name = EXCLUDED.name,
            manufacturer_id = EXCLUDED.manufacturer_id,
            character_id = EXCLUDED.character_id,

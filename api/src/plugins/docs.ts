@@ -19,6 +19,8 @@ async function docsPluginImpl(fastify: FastifyInstance, _opts: object): Promise<
         { name: 'system', description: 'Health and status endpoints' },
         { name: 'jwks', description: 'JSON Web Key Set discovery' },
         { name: 'auth', description: 'Authentication and session management' },
+        { name: 'catalog', description: 'Shared toy catalog — characters, items, manufacturers, toy lines, and reference data' },
+        { name: 'catalog-search', description: 'Full-text search across the catalog' },
       ],
       components: {
         securitySchemes: {
