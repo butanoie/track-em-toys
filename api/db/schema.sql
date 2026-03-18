@@ -29,6 +29,25 @@ $$;
 
 
 --
+-- Name: items_default_franchise_id(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.items_default_franchise_id() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF NEW.franchise_id IS NULL OR
+       (TG_OP = 'UPDATE' AND NEW.toy_line_id IS DISTINCT FROM OLD.toy_line_id) THEN
+        SELECT franchise_id INTO NEW.franchise_id
+          FROM public.toy_lines
+         WHERE id = NEW.toy_line_id;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: update_updated_at(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -172,7 +191,8 @@ CREATE TABLE public.characters (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     continuity_family_id uuid NOT NULL,
-    franchise_id uuid NOT NULL
+    franchise_id uuid NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((((name || ' '::text) || COALESCE(alt_mode, ''::text)) || ' '::text) || COALESCE(character_type, ''::text)))) STORED
 );
 
 
@@ -363,6 +383,8 @@ CREATE TABLE public.items (
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     character_appearance_id uuid,
     size_class text,
+    franchise_id uuid NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((((((name || ' '::text) || COALESCE(description, ''::text)) || ' '::text) || COALESCE(product_code, ''::text)) || ' '::text) || COALESCE(sku, ''::text)))) STORED,
     CONSTRAINT items_data_quality_check CHECK ((data_quality = ANY (ARRAY['needs_review'::text, 'verified'::text, 'community_verified'::text])))
 );
 
@@ -575,14 +597,6 @@ ALTER TABLE ONLY public.character_appearances
 
 
 --
--- Name: character_appearances character_appearances_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.character_appearances
-    ADD CONSTRAINT character_appearances_slug_key UNIQUE (slug);
-
-
---
 -- Name: character_sub_groups character_sub_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -599,14 +613,6 @@ ALTER TABLE ONLY public.characters
 
 
 --
--- Name: characters characters_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.characters
-    ADD CONSTRAINT characters_slug_key UNIQUE (slug);
-
-
---
 -- Name: continuity_families continuity_families_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -615,35 +621,11 @@ ALTER TABLE ONLY public.continuity_families
 
 
 --
--- Name: continuity_families continuity_families_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.continuity_families
-    ADD CONSTRAINT continuity_families_slug_key UNIQUE (slug);
-
-
---
--- Name: factions factions_name_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.factions
-    ADD CONSTRAINT factions_name_key UNIQUE (name);
-
-
---
 -- Name: factions factions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.factions
     ADD CONSTRAINT factions_pkey PRIMARY KEY (id);
-
-
---
--- Name: factions factions_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.factions
-    ADD CONSTRAINT factions_slug_key UNIQUE (slug);
 
 
 --
@@ -684,14 +666,6 @@ ALTER TABLE ONLY public.item_photos
 
 ALTER TABLE ONLY public.items
     ADD CONSTRAINT items_pkey PRIMARY KEY (id);
-
-
---
--- Name: items items_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.items
-    ADD CONSTRAINT items_slug_key UNIQUE (slug);
 
 
 --
@@ -759,27 +733,11 @@ ALTER TABLE ONLY public.sub_groups
 
 
 --
--- Name: sub_groups sub_groups_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sub_groups
-    ADD CONSTRAINT sub_groups_slug_key UNIQUE (slug);
-
-
---
 -- Name: toy_lines toy_lines_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.toy_lines
     ADD CONSTRAINT toy_lines_pkey PRIMARY KEY (id);
-
-
---
--- Name: toy_lines toy_lines_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.toy_lines
-    ADD CONSTRAINT toy_lines_slug_key UNIQUE (slug);
 
 
 --
@@ -841,6 +799,13 @@ CREATE INDEX idx_character_appearances_character ON public.character_appearances
 
 
 --
+-- Name: idx_character_appearances_slug_character; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_character_appearances_slug_character ON public.character_appearances USING btree (slug, character_id);
+
+
+--
 -- Name: idx_character_sub_groups_sub_group; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -876,10 +841,38 @@ CREATE INDEX idx_characters_franchise ON public.characters USING btree (franchis
 
 
 --
+-- Name: idx_characters_franchise_name_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_characters_franchise_name_id ON public.characters USING btree (franchise_id, name, id);
+
+
+--
 -- Name: idx_characters_name_franchise_cf; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX idx_characters_name_franchise_cf ON public.characters USING btree (lower(name), franchise_id, continuity_family_id);
+
+
+--
+-- Name: idx_characters_name_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_characters_name_id ON public.characters USING btree (name, id);
+
+
+--
+-- Name: idx_characters_search; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_characters_search ON public.characters USING gin (search_vector);
+
+
+--
+-- Name: idx_characters_slug_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_characters_slug_franchise ON public.characters USING btree (slug, franchise_id);
 
 
 --
@@ -897,10 +890,31 @@ CREATE INDEX idx_continuity_families_franchise ON public.continuity_families USI
 
 
 --
+-- Name: idx_continuity_families_slug_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_continuity_families_slug_franchise ON public.continuity_families USING btree (slug, franchise_id);
+
+
+--
 -- Name: idx_factions_franchise; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_factions_franchise ON public.factions USING btree (franchise_id);
+
+
+--
+-- Name: idx_factions_name_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_factions_name_franchise ON public.factions USING btree (lower(name), franchise_id);
+
+
+--
+-- Name: idx_factions_slug_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_factions_slug_franchise ON public.factions USING btree (slug, franchise_id);
 
 
 --
@@ -939,10 +953,31 @@ CREATE INDEX idx_items_data_quality ON public.items USING btree (data_quality);
 
 
 --
+-- Name: idx_items_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_franchise ON public.items USING btree (franchise_id);
+
+
+--
+-- Name: idx_items_franchise_name_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_franchise_name_id ON public.items USING btree (franchise_id, name, id);
+
+
+--
 -- Name: idx_items_manufacturer; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_items_manufacturer ON public.items USING btree (manufacturer_id);
+
+
+--
+-- Name: idx_items_name_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_name_id ON public.items USING btree (name, id);
 
 
 --
@@ -953,10 +988,24 @@ CREATE INDEX idx_items_product_code ON public.items USING btree (product_code) W
 
 
 --
+-- Name: idx_items_search; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_items_search ON public.items USING gin (search_vector);
+
+
+--
 -- Name: idx_items_size_class; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_items_size_class ON public.items USING btree (size_class) WHERE (size_class IS NOT NULL);
+
+
+--
+-- Name: idx_items_slug_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_items_slug_franchise ON public.items USING btree (slug, franchise_id);
 
 
 --
@@ -1016,6 +1065,13 @@ CREATE UNIQUE INDEX idx_sub_groups_name_franchise ON public.sub_groups USING btr
 
 
 --
+-- Name: idx_sub_groups_slug_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_sub_groups_slug_franchise ON public.sub_groups USING btree (slug, franchise_id);
+
+
+--
 -- Name: idx_toy_lines_franchise; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1027,6 +1083,13 @@ CREATE INDEX idx_toy_lines_franchise ON public.toy_lines USING btree (franchise_
 --
 
 CREATE INDEX idx_toy_lines_manufacturer ON public.toy_lines USING btree (manufacturer_id);
+
+
+--
+-- Name: idx_toy_lines_slug_franchise; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_toy_lines_slug_franchise ON public.toy_lines USING btree (slug, franchise_id);
 
 
 --
@@ -1048,6 +1111,13 @@ CREATE TRIGGER character_appearances_updated_at BEFORE UPDATE ON public.characte
 --
 
 CREATE TRIGGER characters_updated_at BEFORE UPDATE ON public.characters FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: items items_default_franchise; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER items_default_franchise BEFORE INSERT OR UPDATE ON public.items FOR EACH ROW EXECUTE FUNCTION public.items_default_franchise_id();
 
 
 --
@@ -1223,6 +1293,14 @@ ALTER TABLE ONLY public.items
 
 
 --
+-- Name: items items_franchise_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_franchise_id_fkey FOREIGN KEY (franchise_id) REFERENCES public.franchises(id) ON DELETE RESTRICT;
+
+
+--
 -- Name: items items_manufacturer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1312,4 +1390,7 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('012'),
     ('013'),
     ('014'),
-    ('015');
+    ('015'),
+    ('016'),
+    ('017'),
+    ('018');
