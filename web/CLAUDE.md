@@ -85,11 +85,20 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `throwApiError(response)` in `api-client.ts` — shared error extraction for void-response endpoints (DELETE 204)
 - `UserRole` type derived from `AdminUserRowSchema.shape.role` — single source of truth for role enum
 
+### Tailwind CSS 4 Theming
+
+- Theme colors use `oklch()` values in CSS custom properties (`src/index.css`)
+- `@theme inline` block maps `--color-*` tokens to `var(--*)` — this is what makes `bg-popover`, `text-foreground`, etc. work as Tailwind utility classes
+- When adding a new semantic color: define it in `:root` and `.dark` as `oklch(...)`, then add `--color-name: var(--name)` to the `@theme inline` block
+- NEVER use raw HSL channel values (e.g., `0 0% 100%`) — Tailwind v4 passes variables through as-is, so they must be complete CSS colors
+- Dark mode uses `@custom-variant dark (&:is(.dark *))` — class-based, not `prefers-color-scheme`
+
 ### Shadcn/ui CLI
 
 - `components.json` aliases must use `src/` paths (e.g., `"ui": "src/components/ui"`), NOT `@/` paths — the CLI resolves them as literal directories, not TypeScript path aliases
 - Install components via `npx shadcn@latest add <name>` — the CLI handles Radix dependencies automatically
 - CLI-generated components may differ stylistically from hand-written ones (forwardRef patterns, data-slot) — this is fine, both work
+- CLI may generate components with v3-style HSL variables — convert any raw HSL channel values to `oklch()` after installation
 
 ### Playwright E2E
 
