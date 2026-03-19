@@ -242,7 +242,40 @@ export const CatalogSearchResponseSchema = z.object({
   total_count: z.number().int(),
 });
 
+// Character detail (GET /catalog/franchises/:franchise/characters/:slug)
+export const CharacterAppearanceSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  source_media: z.string().nullable(),
+  source_name: z.string().nullable(),
+  year_start: z.number().int().nullable(),
+  year_end: z.number().int().nullable(),
+  description: z.string().nullable(),
+});
+
+export const CharacterDetailSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  franchise: SlugNameRefSchema,
+  faction: NullableSlugNameRefSchema,
+  continuity_family: SlugNameRefSchema,
+  character_type: z.string().nullable(),
+  alt_mode: z.string().nullable(),
+  is_combined_form: z.boolean(),
+  combiner_role: z.string().nullable(),
+  combined_form: NullableSlugNameRefSchema,
+  sub_groups: z.array(SlugNameRefSchema),
+  appearances: z.array(CharacterAppearanceSchema),
+  metadata: z.record(z.unknown()),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
 // Catalog types
+export type CharacterAppearance = z.infer<typeof CharacterAppearanceSchema>;
+export type CharacterDetail = z.infer<typeof CharacterDetailSchema>;
 export type SearchCharacterResult = z.infer<typeof SearchCharacterResultSchema>;
 export type SearchItemResult = z.infer<typeof SearchItemResultSchema>;
 export type SearchResult = z.infer<typeof SearchResultSchema>;

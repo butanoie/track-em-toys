@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { ChevronRight, SlidersHorizontal, X } from 'lucide-react';
-import { Route } from '@/routes/_authenticated/catalog/$franchise/items';
+import { Route } from '@/routes/_authenticated/catalog/$franchise/items/index';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { Button } from '@/components/ui/button';
@@ -35,8 +35,16 @@ export function ItemsPage() {
     if (search.toy_line) f.toy_line = search.toy_line;
     if (search.continuity_family) f.continuity_family = search.continuity_family;
     if (search.is_third_party !== undefined) f.is_third_party = search.is_third_party;
+    if (search.character) f.character = search.character;
     return f;
-  }, [search.manufacturer, search.size_class, search.toy_line, search.continuity_family, search.is_third_party]);
+  }, [
+    search.manufacturer,
+    search.size_class,
+    search.toy_line,
+    search.continuity_family,
+    search.is_third_party,
+    search.character,
+  ]);
 
   const hasActiveFilters = Object.keys(filters).length > 0;
 
@@ -152,7 +160,7 @@ export function ItemsPage() {
         <AppHeader title="Track'em Toys" />
         <MainNav />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h2 className="text-xl font-semibold text-foreground mb-2">Franchise not found</h2>
+          <h1 className="text-xl font-semibold text-foreground mb-2">Franchise not found</h1>
           <Link to="/catalog" className="text-primary hover:underline">
             Back to Catalog
           </Link>
@@ -207,9 +215,9 @@ export function ItemsPage() {
                 size="sm"
                 className="h-7 text-xs gap-1"
                 onClick={() => setFilter(key as keyof ItemFilters, undefined)}
-                aria-label={`Remove filter: ${key.replace('_', ' ')}: ${String(value)}`}
+                aria-label={`Remove filter: ${key.replace(/_/g, ' ')}: ${String(value)}`}
               >
-                {key.replace('_', ' ')}: {String(value)}
+                {key.replace(/_/g, ' ')}: {String(value)}
                 <X className="h-3 w-3" />
               </Button>
             ))}

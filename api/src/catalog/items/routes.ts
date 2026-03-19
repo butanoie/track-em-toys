@@ -20,14 +20,7 @@ interface ItemsListQuery {
   toy_line?: string;
   continuity_family?: string;
   is_third_party?: boolean;
-}
-
-interface FacetsQuery {
-  manufacturer?: string;
-  size_class?: string;
-  toy_line?: string;
-  continuity_family?: string;
-  is_third_party?: boolean;
+  character?: string;
 }
 
 /**
@@ -35,13 +28,14 @@ interface FacetsQuery {
  *
  * @param query - Validated query params
  */
-function extractFilters(query: ItemsListQuery | FacetsQuery): ItemFilters {
+function extractFilters(query: ItemsListQuery | ItemFilters): ItemFilters {
   const filters: ItemFilters = {};
   if (query.manufacturer !== undefined) filters.manufacturer = query.manufacturer;
   if (query.size_class !== undefined) filters.size_class = query.size_class;
   if (query.toy_line !== undefined) filters.toy_line = query.toy_line;
   if (query.continuity_family !== undefined) filters.continuity_family = query.continuity_family;
   if (query.is_third_party !== undefined) filters.is_third_party = query.is_third_party;
+  if (query.character !== undefined) filters.character = query.character;
   return filters;
 }
 
@@ -82,7 +76,7 @@ export async function itemRoutes(fastify: FastifyInstance, _opts: object): Promi
   );
 
   // Facets must be registered before /:slug to prevent Fastify matching "facets" as a slug
-  fastify.get<{ Params: FranchiseParams; Querystring: FacetsQuery }>(
+  fastify.get<{ Params: FranchiseParams; Querystring: ItemFilters }>(
     '/facets',
     { schema: getItemFacetsSchema, config: rateLimitConfig },
     async (request) => {

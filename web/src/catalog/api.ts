@@ -6,6 +6,7 @@ import {
   CatalogItemDetailSchema,
   ItemFacetsSchema,
   ContinuityFamilyListSchema,
+  CharacterDetailSchema,
   ManufacturerDetailSchema,
   ManufacturerStatsListSchema,
   ManufacturerItemFacetsSchema,
@@ -16,18 +17,23 @@ import {
   type CatalogItemDetail,
   type ItemFacets,
   type ContinuityFamilyList,
+  type CharacterDetail,
   type ManufacturerDetail,
   type ManufacturerStatsList,
   type ManufacturerItemFacets,
   type CatalogSearchResponse,
 } from '@/lib/zod-schemas';
 
-export interface ItemFilters {
-  manufacturer?: string;
+interface BaseItemFilters {
   size_class?: string;
   toy_line?: string;
   continuity_family?: string;
   is_third_party?: boolean;
+}
+
+export interface ItemFilters extends BaseItemFilters {
+  manufacturer?: string;
+  character?: string;
 }
 
 export interface ListItemsParams {
@@ -70,6 +76,13 @@ export async function getCatalogItemDetail(franchise: string, slug: string): Pro
   );
 }
 
+export async function getCharacterDetail(franchise: string, slug: string): Promise<CharacterDetail> {
+  return apiFetchJson(
+    `/catalog/franchises/${encodeURIComponent(franchise)}/characters/${encodeURIComponent(slug)}`,
+    CharacterDetailSchema
+  );
+}
+
 export async function getItemFacets(franchise: string, filters?: ItemFilters): Promise<ItemFacets> {
   const searchParams = buildFilterParams(filters);
   const qs = searchParams.toString();
@@ -107,12 +120,8 @@ export async function searchCatalog(params: SearchParams): Promise<CatalogSearch
 // Manufacturer-scoped API
 // ---------------------------------------------------------------------------
 
-export interface ManufacturerItemFilters {
+export interface ManufacturerItemFilters extends BaseItemFilters {
   franchise?: string;
-  size_class?: string;
-  toy_line?: string;
-  continuity_family?: string;
-  is_third_party?: boolean;
 }
 
 export interface ListManufacturerItemsParams {

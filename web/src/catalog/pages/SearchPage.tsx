@@ -9,7 +9,7 @@ import { useSearch } from '@/catalog/hooks/useSearch';
 import { ItemList } from '@/catalog/components/ItemList';
 import { ItemDetailPanel } from '@/catalog/components/ItemDetailPanel';
 import { CharacterResultList } from '@/catalog/components/CharacterResultList';
-import { CharacterStubPanel } from '@/catalog/components/CharacterStubPanel';
+import { CharacterDetailPanel } from '@/catalog/components/CharacterDetailPanel';
 import { SearchPagination } from '@/catalog/components/SearchPagination';
 import type { SearchCharacterResult, SearchItemResult } from '@/lib/zod-schemas';
 
@@ -89,7 +89,7 @@ export function SearchPage() {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <p aria-live="polite" className="sr-only" />
           <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-foreground mb-2">Search the Catalog</h2>
+          <h1 className="text-xl font-semibold text-foreground mb-2">Search the Catalog</h1>
           <p className="text-sm text-muted-foreground">Search for characters and items across the catalog.</p>
         </main>
       </div>
@@ -161,7 +161,11 @@ export function SearchPage() {
 
             <div className="hidden lg:block border-l border-border min-h-[400px]">
               {search.selected_type === 'character' ? (
-                <CharacterStubPanel character={selectedCharacter} onClose={() => selectCharacter(undefined)} />
+                <CharacterDetailPanel
+                  franchise={selectedCharacter?.franchise.slug ?? ''}
+                  characterSlug={search.selected_type === 'character' ? search.selected : undefined}
+                  onClose={() => selectCharacter(undefined)}
+                />
               ) : (
                 <ItemDetailPanel
                   franchise={selectedItem?.franchise.slug ?? ''}

@@ -111,6 +111,32 @@ async function setupSearchMocks(page: import('@playwright/test').Page) {
       body: JSON.stringify(mockItemDetail),
     })
   );
+
+  await page.route('**/catalog/franchises/transformers/characters/optimus-prime', (route) => {
+    if (route.request().resourceType() === 'document') return route.continue();
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: 'c-1',
+        name: 'Optimus Prime',
+        slug: 'optimus-prime',
+        franchise: { slug: 'transformers', name: 'Transformers' },
+        faction: { slug: 'autobots', name: 'Autobots' },
+        continuity_family: { slug: 'g1', name: 'Generation 1' },
+        character_type: 'Transformer',
+        alt_mode: 'Truck',
+        is_combined_form: false,
+        combiner_role: null,
+        combined_form: null,
+        sub_groups: [],
+        appearances: [],
+        metadata: {},
+        created_at: '2026-01-01T00:00:00Z',
+        updated_at: '2026-01-01T00:00:00Z',
+      }),
+    });
+  });
 }
 
 // --- Tests ---
@@ -142,20 +168,23 @@ test.describe('Catalog Search', () => {
     await page.getByText('MP-44 Optimus Prime').click();
 
     // Detail panel should show item information
-    const panel = page.locator('aside[aria-label*="Item detail"]');
+    const panel = page.getByRole('complementary', { name: /Item detail/ });
     await expect(panel.getByText('Masterpiece', { exact: true })).toBeVisible();
   });
 
-  test('Given search results, When clicking a character, Then stub panel opens', async ({ page }) => {
+  test('Given search results, When clicking a character, Then character detail panel opens', async ({ page }) => {
     await setupSearchMocks(page);
     await page.goto('/catalog/search?q=optimus');
 
     // Click the character result (first "Optimus Prime" in the characters section)
     const charList = page.getByRole('listbox', { name: 'Character results' });
-    await charList.getByText('Optimus Prime').click();
+    await charList.getByRole('option', { name: /Optimus Prime/ }).click();
 
-    // Stub panel should show coming soon message
-    await expect(page.getByText('Character detail pages coming soon.')).toBeVisible();
+    // Character detail panel should show real data
+    const panel = page.getByRole('complementary', { name: /Character detail/ });
+    await expect(panel.getByText('Autobots')).toBeVisible();
+    await expect(panel.getByText('Generation 1')).toBeVisible();
+    await expect(page.getByRole('link', { name: /View full profile/ })).toBeVisible();
   });
 
   test('Given search for nonexistent term, Then no results message is displayed', async ({ page }) => {

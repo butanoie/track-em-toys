@@ -13,11 +13,12 @@ const itemsSearchSchema = z.object({
     .transform((v) => v === 'true')
     .optional()
     .catch(undefined),
+  character: z.string().optional().catch(undefined),
   cursor: z.string().optional().catch(undefined),
   selected: z.string().optional().catch(undefined),
 });
 
-export const Route = createFileRoute('/_authenticated/catalog/$franchise/items')({
+export const Route = createFileRoute('/_authenticated/catalog/$franchise/items/')({
   validateSearch: itemsSearchSchema,
   pendingComponent: () => <LoadingSpinner className="py-16" />,
   component: ItemsPage,
