@@ -56,6 +56,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Access tokens are held in a module-scoped variable (never persisted to storage); `localStorage` stores only a boolean session flag (`trackem:has_session`); `sessionStorage` stores user profile data
 - `vitest.config.ts` is separate from `vite.config.ts` — excludes TanStack Router Vite plugin and uses `jsdom` environment
 - `QueryClient` is instantiated inside `RootLayout` via `useState` (stable per render, not shared between test runs) — not a top-level singleton
+- `useRef<T>()` requires an explicit initial value in React 19 — use `useRef<T>(undefined)` or `useRef<T>(null)`, not bare `useRef<T>()`
 
 ### Authentication
 
@@ -139,6 +140,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `FacetSidebar` accepts generic `groups: FacetGroupConfig[]` + `onFilterChange: (key: string, value) => void` — callers construct the groups array and cast the key to their filter type. Do NOT add domain-specific filter types to FacetSidebar.
 - Manufacturer browsing pages live in `src/catalog/pages/Manufacturer*.tsx` with hooks in `src/catalog/hooks/useManufacturer*.ts`
 - Manufacturer routes: `/catalog/manufacturers` (list), `/catalog/manufacturers/:slug` (hub), `/catalog/manufacturers/:slug/items` (items browse with filters in search params)
+- Search page uses page/offset pagination (`SearchPagination` component), not cursor-based — matching the `GET /catalog/search` API contract. Page controls are different from `ItemList`'s cursor stack pattern.
 
 ## Before Writing New Code
 

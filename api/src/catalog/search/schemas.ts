@@ -1,8 +1,21 @@
-import { errorResponse, slugNameRef } from '../shared/schemas.js';
+import { errorResponse, slugNameRef, nullableSlugNameRef } from '../shared/schemas.js';
 
 const searchResultItem = {
   type: 'object',
-  required: ['entity_type', 'id', 'name', 'slug', 'franchise'],
+  required: [
+    'entity_type',
+    'id',
+    'name',
+    'slug',
+    'franchise',
+    'character',
+    'manufacturer',
+    'toy_line',
+    'size_class',
+    'year_released',
+    'is_third_party',
+    'data_quality',
+  ],
   additionalProperties: false,
   properties: {
     entity_type: { type: 'string', enum: ['character', 'item'] },
@@ -10,6 +23,13 @@ const searchResultItem = {
     name: { type: 'string' },
     slug: { type: 'string' },
     franchise: slugNameRef,
+    character: nullableSlugNameRef,
+    manufacturer: nullableSlugNameRef,
+    toy_line: nullableSlugNameRef,
+    size_class: { type: ['string', 'null'] },
+    year_released: { type: ['integer', 'null'] },
+    is_third_party: { oneOf: [{ type: 'boolean' }, { type: 'null' }] },
+    data_quality: { type: ['string', 'null'] },
   },
 } as const;
 

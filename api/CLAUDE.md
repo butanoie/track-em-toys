@@ -127,6 +127,7 @@ Two distinct photo types:
 - Detail lookups always validate franchise ownership: `WHERE slug = $1 AND fr.slug = $2`
 - Manufacturers stay globally unique slugs (franchise-agnostic)
 - FTS uses generated `search_vector tsvector STORED` columns — queries use `WHERE search_vector @@ ...`, never recompute the tsvector expression inline
+- Fastify's `fast-json-stringify` does NOT support `oneOf` for serialization — use a flat superset schema with nullable fields instead. Apply discriminated unions at the web Zod layer, not the Fastify schema layer
 - Cursor pagination encodes `{ v: 1, name, id }` as base64url — always include version field
 - Cursor UUID comparison uses `$N::uuid`, not text cast
 - Error responses use `reply.code(N).send({ error: '...' })` — no HttpError (no transactions)

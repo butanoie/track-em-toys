@@ -210,7 +210,43 @@ export const ManufacturerItemFacetsSchema = z.object({
   is_third_party: z.array(FacetValueSchema),
 });
 
+// Catalog search (GET /catalog/search)
+export const SearchCharacterResultSchema = z.object({
+  entity_type: z.literal('character'),
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  franchise: SlugNameRefSchema,
+  character: z.null(),
+  manufacturer: z.null(),
+  toy_line: z.null(),
+  size_class: z.null(),
+  year_released: z.null(),
+  is_third_party: z.null(),
+  data_quality: z.null(),
+});
+
+export const SearchItemResultSchema = CatalogItemSchema.extend({
+  entity_type: z.literal('item'),
+});
+
+export const SearchResultSchema = z.discriminatedUnion('entity_type', [
+  SearchCharacterResultSchema,
+  SearchItemResultSchema,
+]);
+
+export const CatalogSearchResponseSchema = z.object({
+  data: z.array(SearchResultSchema),
+  page: z.number().int(),
+  limit: z.number().int(),
+  total_count: z.number().int(),
+});
+
 // Catalog types
+export type SearchCharacterResult = z.infer<typeof SearchCharacterResultSchema>;
+export type SearchItemResult = z.infer<typeof SearchItemResultSchema>;
+export type SearchResult = z.infer<typeof SearchResultSchema>;
+export type CatalogSearchResponse = z.infer<typeof CatalogSearchResponseSchema>;
 export type FranchiseStatsItem = z.infer<typeof FranchiseStatsItemSchema>;
 export type FranchiseStatsList = z.infer<typeof FranchiseStatsListSchema>;
 export type FranchiseDetail = z.infer<typeof FranchiseDetailSchema>;

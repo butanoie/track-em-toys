@@ -12,6 +12,13 @@ vi.mock('@tanstack/react-router', () => ({
       {children}
     </a>
   ),
+  useNavigate: () => vi.fn(),
+  useRouterState: (opts?: {
+    select?: (s: { location: { pathname: string; search: Record<string, unknown> } }) => unknown;
+  }) => {
+    const state = { location: { pathname: '/', search: {} } };
+    return opts?.select ? opts.select(state) : state;
+  },
 }));
 
 const mockUser = {
