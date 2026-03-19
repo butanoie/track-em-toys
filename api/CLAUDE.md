@@ -135,6 +135,14 @@ Two distinct photo types:
 - Migrations that depend on columns added by other migrations must be ordered accordingly — do not create indexes on columns that don't exist yet
 - See `docs/decisions/ADR_Catalog_API_Architecture.md` for full architecture
 
+### Catalog Filters & Facets (Phase 1.7+)
+
+- `paginationQuery` (shared schema) has `additionalProperties: false` — CANNOT be extended. Routes with additional query params must create their own querystring schema copying pagination fields
+- Filtered list queries use `buildItemsQuery()` in `items/queries.ts` — returns shared `{ joins, whereClause, params }` for both data and count queries. Cursor params are appended AFTER filter params with dynamic `$N` indexing
+- Facet cross-filtering: each dimension runs its own GROUP BY query excluding its own filter via `filtersExcluding(key)`. All 5 queries run in parallel via `Promise.all`
+- Facets use unified `{ value: string, label: string, count: number }` shape — slug-based facets use `value=slug, label=name`; free-text facets use `value=label=raw_value`; boolean facets use `value="true"/"false", label="Third Party"/"Official"`
+- NULL values excluded from facets: manufacturer facet uses `AND mfr.id IS NOT NULL`, size_class uses `AND i.size_class IS NOT NULL`
+
 ## Before Writing New Code
 
 Read existing files for patterns before writing anything new:

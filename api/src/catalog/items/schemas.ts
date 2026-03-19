@@ -2,7 +2,6 @@ import {
   errorResponse,
   franchiseParam,
   franchiseSlugParams,
-  paginationQuery,
   slugNameRef,
   nullableSlugNameRef,
   cursorListResponse,
@@ -112,16 +111,76 @@ const itemDetail = {
   },
 } as const;
 
+const itemsListQuerystring = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+    cursor: { type: 'string', maxLength: 512 },
+    manufacturer: { type: 'string', minLength: 1, maxLength: 120 },
+    size_class: { type: 'string', minLength: 1, maxLength: 120 },
+    toy_line: { type: 'string', minLength: 1, maxLength: 120 },
+    continuity_family: { type: 'string', minLength: 1, maxLength: 120 },
+    is_third_party: { type: 'boolean' },
+  },
+} as const;
+
+const itemFiltersQuerystring = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    manufacturer: { type: 'string', minLength: 1, maxLength: 120 },
+    size_class: { type: 'string', minLength: 1, maxLength: 120 },
+    toy_line: { type: 'string', minLength: 1, maxLength: 120 },
+    continuity_family: { type: 'string', minLength: 1, maxLength: 120 },
+    is_third_party: { type: 'boolean' },
+  },
+} as const;
+
+const facetValueItem = {
+  type: 'object',
+  required: ['value', 'label', 'count'],
+  additionalProperties: false,
+  properties: {
+    value: { type: 'string' },
+    label: { type: 'string' },
+    count: { type: 'integer' },
+  },
+} as const;
+
 export const listItemsSchema = {
-  description: 'List items in a franchise with cursor-based pagination.',
+  description: 'List items in a franchise with cursor-based pagination and optional filters.',
   tags: ['catalog'],
   summary: 'List items',
   params: franchiseParam,
-  querystring: paginationQuery,
+  querystring: itemsListQuerystring,
   response: {
     200: cursorListResponse(itemListItem),
     400: errorResponse,
     404: errorResponse,
+    500: errorResponse,
+  },
+} as const;
+
+export const getItemFacetsSchema = {
+  description: 'Get facet counts for items in a franchise, with cross-filtering.',
+  tags: ['catalog'],
+  summary: 'Get item facets',
+  params: franchiseParam,
+  querystring: itemFiltersQuerystring,
+  response: {
+    200: {
+      type: 'object',
+      required: ['manufacturers', 'size_classes', 'toy_lines', 'continuity_families', 'is_third_party'],
+      additionalProperties: false,
+      properties: {
+        manufacturers: { type: 'array', items: facetValueItem },
+        size_classes: { type: 'array', items: facetValueItem },
+        toy_lines: { type: 'array', items: facetValueItem },
+        continuity_families: { type: 'array', items: facetValueItem },
+        is_third_party: { type: 'array', items: facetValueItem },
+      },
+    },
     500: errorResponse,
   },
 } as const;

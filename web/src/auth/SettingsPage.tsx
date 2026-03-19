@@ -6,6 +6,7 @@ import { useLinkAccount } from './hooks/useLinkAccount';
 import { useAuth } from './useAuth';
 import { ApiError } from '@/lib/api-client';
 import { AppHeader } from '@/components/AppHeader';
+import { MainNav } from '@/components/MainNav';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -70,7 +71,8 @@ export function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader title="Settings" />
+      <AppHeader title="Track'em Toys" />
+      <MainNav />
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {error && (

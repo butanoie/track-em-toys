@@ -109,4 +109,39 @@ describe('franchise routes', () => {
       expect(res.json<{ error: string }>().error).toBe('Franchise not found');
     });
   });
+
+  describe('GET /catalog/franchises/stats', () => {
+    const statsRow = {
+      slug: 'transformers',
+      name: 'Transformers',
+      sort_order: 1,
+      notes: 'Robots in disguise',
+      item_count: 42,
+      continuity_family_count: 3,
+      manufacturer_count: 5,
+    };
+
+    it('should return 200 with franchise stats', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [statsRow] });
+
+      const res = await server.inject({ method: 'GET', url: '/catalog/franchises/stats' });
+      expect(res.statusCode).toBe(200);
+
+      const body = res.json<{ data: (typeof statsRow)[] }>();
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0]).toBeDefined();
+      expect(body.data[0]!.slug).toBe('transformers');
+      expect(body.data[0]!.item_count).toBe(42);
+      expect(body.data[0]!.continuity_family_count).toBe(3);
+      expect(body.data[0]!.manufacturer_count).toBe(5);
+    });
+
+    it('should return 200 with empty array when no franchises exist', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+
+      const res = await server.inject({ method: 'GET', url: '/catalog/franchises/stats' });
+      expect(res.statusCode).toBe(200);
+      expect(res.json<{ data: unknown[] }>().data).toHaveLength(0);
+    });
+  });
 });

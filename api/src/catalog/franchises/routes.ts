@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
-import { listFranchises, getFranchiseBySlug } from './queries.js';
-import { listFranchisesSchema, getFranchiseSchema } from './schemas.js';
+import { listFranchises, listFranchiseStats, getFranchiseBySlug } from './queries.js';
+import { listFranchisesSchema, listFranchiseStatsSchema, getFranchiseSchema } from './schemas.js';
 
 /**
  * Register franchise catalog routes.
@@ -18,6 +18,18 @@ export async function franchiseRoutes(fastify: FastifyInstance, _opts: object): 
     },
     async () => {
       const data = await listFranchises();
+      return { data };
+    }
+  );
+
+  fastify.get(
+    '/stats',
+    {
+      schema: listFranchiseStatsSchema,
+      config: { rateLimit: { max: 100, timeWindow: '1 minute' } },
+    },
+    async () => {
+      const data = await listFranchiseStats();
       return { data };
     }
   );

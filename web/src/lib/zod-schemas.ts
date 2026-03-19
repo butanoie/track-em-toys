@@ -61,3 +61,124 @@ export type ApiErrorBody = z.infer<typeof ApiErrorSchema>;
 export type AdminUserRow = z.infer<typeof AdminUserRowSchema>;
 export type AdminUsersList = z.infer<typeof AdminUsersListSchema>;
 export type UserRole = AdminUserRow['role'];
+
+// ---------------------------------------------------------------------------
+// Catalog API schemas
+// ---------------------------------------------------------------------------
+
+const SlugNameRefSchema = z.object({ slug: z.string(), name: z.string() });
+const NullableSlugNameRefSchema = SlugNameRefSchema.nullable();
+
+// Franchise stats (GET /catalog/franchises/stats)
+export const FranchiseStatsItemSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  sort_order: z.number().int().nullable(),
+  notes: z.string().nullable(),
+  item_count: z.number().int(),
+  continuity_family_count: z.number().int(),
+  manufacturer_count: z.number().int(),
+});
+
+export const FranchiseStatsListSchema = z.object({
+  data: z.array(FranchiseStatsItemSchema),
+});
+
+// Franchise detail (GET /catalog/franchises/:slug)
+export const FranchiseDetailSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  sort_order: z.number().int().nullable(),
+  notes: z.string().nullable(),
+  created_at: z.string(),
+});
+
+// Catalog item (list response)
+export const CatalogItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  franchise: SlugNameRefSchema,
+  character: SlugNameRefSchema,
+  manufacturer: NullableSlugNameRefSchema,
+  toy_line: SlugNameRefSchema,
+  size_class: z.string().nullable(),
+  year_released: z.number().int().nullable(),
+  is_third_party: z.boolean(),
+  data_quality: z.enum(['needs_review', 'verified', 'community_verified']),
+});
+
+export const CatalogItemListSchema = z.object({
+  data: z.array(CatalogItemSchema),
+  next_cursor: z.string().nullable(),
+  total_count: z.number().int(),
+});
+
+// Catalog item detail (GET /catalog/franchises/:franchise/items/:slug)
+export const CatalogItemDetailSchema = CatalogItemSchema.extend({
+  appearance: z
+    .object({
+      slug: z.string(),
+      name: z.string(),
+      source_media: z.string().nullable(),
+      source_name: z.string().nullable(),
+    })
+    .nullable(),
+  description: z.string().nullable(),
+  barcode: z.string().nullable(),
+  sku: z.string().nullable(),
+  product_code: z.string().nullable(),
+  photos: z.array(
+    z.object({
+      id: z.string(),
+      url: z.string(),
+      caption: z.string().nullable(),
+      is_primary: z.boolean(),
+    })
+  ),
+  metadata: z.record(z.unknown()),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+// Facet counts (GET /catalog/franchises/:franchise/items/facets)
+export const FacetValueSchema = z.object({
+  value: z.string(),
+  label: z.string(),
+  count: z.number().int(),
+});
+
+export const ItemFacetsSchema = z.object({
+  manufacturers: z.array(FacetValueSchema),
+  size_classes: z.array(FacetValueSchema),
+  toy_lines: z.array(FacetValueSchema),
+  continuity_families: z.array(FacetValueSchema),
+  is_third_party: z.array(FacetValueSchema),
+});
+
+// Continuity family (GET /catalog/franchises/:franchise/continuity-families)
+export const ContinuityFamilySchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  sort_order: z.number().int().nullable(),
+  notes: z.string().nullable(),
+  created_at: z.string(),
+});
+
+export const ContinuityFamilyListSchema = z.object({
+  data: z.array(ContinuityFamilySchema),
+});
+
+// Catalog types
+export type FranchiseStatsItem = z.infer<typeof FranchiseStatsItemSchema>;
+export type FranchiseStatsList = z.infer<typeof FranchiseStatsListSchema>;
+export type FranchiseDetail = z.infer<typeof FranchiseDetailSchema>;
+export type CatalogItem = z.infer<typeof CatalogItemSchema>;
+export type CatalogItemList = z.infer<typeof CatalogItemListSchema>;
+export type CatalogItemDetail = z.infer<typeof CatalogItemDetailSchema>;
+export type FacetValue = z.infer<typeof FacetValueSchema>;
+export type ItemFacets = z.infer<typeof ItemFacetsSchema>;
+export type ContinuityFamily = z.infer<typeof ContinuityFamilySchema>;
+export type ContinuityFamilyList = z.infer<typeof ContinuityFamilyListSchema>;

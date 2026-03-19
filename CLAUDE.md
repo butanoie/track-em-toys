@@ -93,6 +93,12 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - **Do not write comments claiming behavior that isn't implemented** — e.g., never claim state "resets automatically" unless the mechanism actually exists in the code
 - See module-specific CLAUDE.md files for framework-specific refactoring rules
 
+### Web Navigation
+
+- `MainNav` (Dashboard | Catalog | My Collection) renders on all non-admin authenticated pages
+- Admin pages use their own sidebar layout — do NOT render MainNav on admin routes
+- Catalog URLs: `/catalog` (franchise list), `/catalog/:franchise` (hub), `/catalog/:franchise/items` (items browse with filters in search params)
+
 ## Code Conventions
 
 - Swift: async/await always, SwiftUI over UIKit, SF Symbols for icons
