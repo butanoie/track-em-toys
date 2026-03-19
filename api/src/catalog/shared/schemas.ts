@@ -63,6 +63,50 @@ export const nullableSlugNameRef = {
   oneOf: [slugNameRef, { type: 'null' }],
 } as const;
 
+/** Shared item shape for list responses (franchise-scoped and manufacturer-scoped). */
+export const itemListItem = {
+  type: 'object',
+  required: [
+    'id',
+    'name',
+    'slug',
+    'franchise',
+    'character',
+    'manufacturer',
+    'toy_line',
+    'size_class',
+    'year_released',
+    'is_third_party',
+    'data_quality',
+  ],
+  additionalProperties: false,
+  properties: {
+    id: { type: 'string' },
+    name: { type: 'string' },
+    slug: { type: 'string' },
+    franchise: slugNameRef,
+    character: slugNameRef,
+    manufacturer: nullableSlugNameRef,
+    toy_line: slugNameRef,
+    size_class: { type: ['string', 'null'] },
+    year_released: { type: ['integer', 'null'] },
+    is_third_party: { type: 'boolean' },
+    data_quality: { type: 'string', enum: ['needs_review', 'verified', 'community_verified'] },
+  },
+} as const;
+
+/** Shared facet value shape: { value, label, count }. */
+export const facetValueItem = {
+  type: 'object',
+  required: ['value', 'label', 'count'],
+  additionalProperties: false,
+  properties: {
+    value: { type: 'string' },
+    label: { type: 'string' },
+    count: { type: 'integer' },
+  },
+} as const;
+
 /**
  * Cursor-paginated list response wrapper.
  *

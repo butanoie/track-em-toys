@@ -171,6 +171,45 @@ export const ContinuityFamilyListSchema = z.object({
   data: z.array(ContinuityFamilySchema),
 });
 
+// Manufacturer detail (GET /catalog/manufacturers/:slug)
+export const ManufacturerDetailSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  is_official_licensee: z.boolean(),
+  country: z.string().nullable(),
+  website_url: z.string().nullable(),
+  aliases: z.array(z.string()),
+  notes: z.string().nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+// Manufacturer stats (GET /catalog/manufacturers/stats)
+export const ManufacturerStatsItemSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  is_official_licensee: z.boolean(),
+  country: z.string().nullable(),
+  item_count: z.number().int(),
+  toy_line_count: z.number().int(),
+  franchise_count: z.number().int(),
+});
+
+export const ManufacturerStatsListSchema = z.object({
+  data: z.array(ManufacturerStatsItemSchema),
+});
+
+// Manufacturer-scoped facets (GET /catalog/manufacturers/:slug/items/facets)
+// Has franchises[] instead of manufacturers[] (scope is already manufacturer)
+export const ManufacturerItemFacetsSchema = z.object({
+  franchises: z.array(FacetValueSchema),
+  size_classes: z.array(FacetValueSchema),
+  toy_lines: z.array(FacetValueSchema),
+  continuity_families: z.array(FacetValueSchema),
+  is_third_party: z.array(FacetValueSchema),
+});
+
 // Catalog types
 export type FranchiseStatsItem = z.infer<typeof FranchiseStatsItemSchema>;
 export type FranchiseStatsList = z.infer<typeof FranchiseStatsListSchema>;
@@ -182,3 +221,7 @@ export type FacetValue = z.infer<typeof FacetValueSchema>;
 export type ItemFacets = z.infer<typeof ItemFacetsSchema>;
 export type ContinuityFamily = z.infer<typeof ContinuityFamilySchema>;
 export type ContinuityFamilyList = z.infer<typeof ContinuityFamilyListSchema>;
+export type ManufacturerDetail = z.infer<typeof ManufacturerDetailSchema>;
+export type ManufacturerStatsItem = z.infer<typeof ManufacturerStatsItemSchema>;
+export type ManufacturerStatsList = z.infer<typeof ManufacturerStatsListSchema>;
+export type ManufacturerItemFacets = z.infer<typeof ManufacturerItemFacetsSchema>;

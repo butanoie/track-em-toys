@@ -496,9 +496,26 @@ API additions:
 - `GET /catalog/franchises/:franchise/items` -- extended with filter query params
 - `GET /catalog/franchises/:franchise/items/facets` -- cross-filtered facet counts
 
-### Slice 2: Browse by Manufacturer (future)
+### Slice 2: Browse by Manufacturer
 
-Pages: `/catalog/manufacturers`, `/catalog/manufacturers/:slug`
+Pages: `/catalog/manufacturers`, `/catalog/manufacturers/:slug`, `/catalog/manufacturers/:slug/items`
+
+API additions:
+
+- `GET /catalog/manufacturers/stats` -- aggregate counts via subquery pattern (item_count, toy_line_count, franchise_count per manufacturer)
+- `GET /catalog/manufacturers/:slug/items` -- manufacturer-scoped items with cursor pagination and filters (franchise, size_class, toy_line, continuity_family, is_third_party)
+- `GET /catalog/manufacturers/:slug/items/facets` -- cross-filtered facet counts with `franchises[]` replacing `manufacturers[]`
+
+Key design decisions (3 rounds of architecture audit):
+
+1. **Separate query builder:** `buildManufacturerItemsQuery()` parallels `buildItemsQuery()` rather than generalizing — different scope semantics (INNER JOIN mfr vs LEFT JOIN mfr), no regression risk on existing franchise queries.
+2. **Generic FacetSidebar:** Refactored from typed `ItemFilters`/`ItemFacets` props to generic `groups: FacetGroupConfig[]` — decouples the component from domain types so both franchise and manufacturer pages can use it.
+3. **No manufacturer-scoped item detail endpoint:** Item slugs are `UNIQUE(slug, franchise_id)`, not per-manufacturer — a manufacturer-scoped lookup could match multiple items across franchises. Instead, `ItemDetailPanel` receives `franchise` from the selected item's `CatalogItem.franchise.slug` field (always available in list response).
+4. **Standalone manufacturer list page:** `/catalog/manufacturers` is a separate page, NOT a tab on FranchiseListPage. Cross-linked via "Browse by Manufacturer" / "Browse by Franchise" links.
+5. **Manufacturer hub uses facets endpoint:** `GET /manufacturers/:slug/items/facets` (no filters) provides franchise cards and toy line cards — same pattern as franchise hub using its facets endpoint.
+6. **`useItemDetail` guard:** Added `franchise !== ''` to `enabled` condition to prevent malformed API requests when selected item is not in current page.
+7. **`formatListItem` extracted to shared:** Moved from private in `items/routes.ts` to `catalog/shared/formatters.ts` for reuse by manufacturer routes.
+8. **New composite index:** `idx_items_manufacturer_name_id ON items (manufacturer_id, name, id)` for cursor pagination performance under manufacturer scope.
 
 ### Slice 3: Search (future)
 

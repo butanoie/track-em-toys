@@ -4,39 +4,10 @@ import {
   franchiseSlugParams,
   slugNameRef,
   nullableSlugNameRef,
+  itemListItem,
+  facetValueItem,
   cursorListResponse,
 } from '../shared/schemas.js';
-
-const itemListItem = {
-  type: 'object',
-  required: [
-    'id',
-    'name',
-    'slug',
-    'franchise',
-    'character',
-    'manufacturer',
-    'toy_line',
-    'size_class',
-    'year_released',
-    'is_third_party',
-    'data_quality',
-  ],
-  additionalProperties: false,
-  properties: {
-    id: { type: 'string' },
-    name: { type: 'string' },
-    slug: { type: 'string' },
-    franchise: slugNameRef,
-    character: slugNameRef,
-    manufacturer: nullableSlugNameRef,
-    toy_line: slugNameRef,
-    size_class: { type: ['string', 'null'] },
-    year_released: { type: ['integer', 'null'] },
-    is_third_party: { type: 'boolean' },
-    data_quality: { type: 'string', enum: ['needs_review', 'verified', 'community_verified'] },
-  },
-} as const;
 
 const appearanceRef = {
   type: 'object',
@@ -134,17 +105,6 @@ const itemFiltersQuerystring = {
     toy_line: { type: 'string', minLength: 1, maxLength: 120 },
     continuity_family: { type: 'string', minLength: 1, maxLength: 120 },
     is_third_party: { type: 'boolean' },
-  },
-} as const;
-
-const facetValueItem = {
-  type: 'object',
-  required: ['value', 'label', 'count'],
-  additionalProperties: false,
-  properties: {
-    value: { type: 'string' },
-    label: { type: 'string' },
-    count: { type: 'integer' },
   },
 } as const;
 

@@ -136,6 +136,9 @@ cd web && npm run format:check # Prettier check (CI mode)
 - URL search params drive all catalog filter/pagination state — `useMemo` the filters object to prevent TanStack Query key instability
 - Item detail panel reads `selected` slug from URL, fetches independently via `useItemDetail`
 - NEVER use `z.coerce.boolean()` for URL search params — `Boolean("false")` returns `true`. Use `z.enum(['true', 'false']).transform(v => v === 'true')` instead
+- `FacetSidebar` accepts generic `groups: FacetGroupConfig[]` + `onFilterChange: (key: string, value) => void` — callers construct the groups array and cast the key to their filter type. Do NOT add domain-specific filter types to FacetSidebar.
+- Manufacturer browsing pages live in `src/catalog/pages/Manufacturer*.tsx` with hooks in `src/catalog/hooks/useManufacturer*.ts`
+- Manufacturer routes: `/catalog/manufacturers` (list), `/catalog/manufacturers/:slug` (hub), `/catalog/manufacturers/:slug/items` (items browse with filters in search params)
 
 ## Before Writing New Code
 

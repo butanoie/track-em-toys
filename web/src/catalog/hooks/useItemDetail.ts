@@ -6,7 +6,7 @@ export function useItemDetail(franchise: string, slug: string | undefined) {
   return useQuery<CatalogItemDetail>({
     queryKey: ['catalog', 'items', franchise, slug],
     queryFn: () => getCatalogItemDetail(franchise, slug!),
-    enabled: slug !== undefined,
+    enabled: slug !== undefined && franchise !== '',
     staleTime: 60_000,
   });
 }

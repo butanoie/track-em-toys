@@ -6,12 +6,18 @@ import {
   CatalogItemDetailSchema,
   ItemFacetsSchema,
   ContinuityFamilyListSchema,
+  ManufacturerDetailSchema,
+  ManufacturerStatsListSchema,
+  ManufacturerItemFacetsSchema,
   type FranchiseStatsList,
   type FranchiseDetail,
   type CatalogItemList,
   type CatalogItemDetail,
   type ItemFacets,
   type ContinuityFamilyList,
+  type ManufacturerDetail,
+  type ManufacturerStatsList,
+  type ManufacturerItemFacets,
 } from '@/lib/zod-schemas';
 
 export interface ItemFilters {
@@ -29,13 +35,12 @@ export interface ListItemsParams {
   limit?: number;
 }
 
-function buildFilterParams(filters?: ItemFilters): URLSearchParams {
+function buildFilterParams(filters?: ItemFilters | ManufacturerItemFilters): URLSearchParams {
   const params = new URLSearchParams();
-  if (filters?.manufacturer) params.set('manufacturer', filters.manufacturer);
-  if (filters?.size_class) params.set('size_class', filters.size_class);
-  if (filters?.toy_line) params.set('toy_line', filters.toy_line);
-  if (filters?.continuity_family) params.set('continuity_family', filters.continuity_family);
-  if (filters?.is_third_party !== undefined) params.set('is_third_party', String(filters.is_third_party));
+  if (!filters) return params;
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== '') params.set(key, String(value));
+  }
   return params;
 }
 
@@ -75,4 +80,50 @@ export async function listContinuityFamilies(franchise: string): Promise<Continu
     `/catalog/franchises/${encodeURIComponent(franchise)}/continuity-families`,
     ContinuityFamilyListSchema
   );
+}
+
+// ---------------------------------------------------------------------------
+// Manufacturer-scoped API
+// ---------------------------------------------------------------------------
+
+export interface ManufacturerItemFilters {
+  franchise?: string;
+  size_class?: string;
+  toy_line?: string;
+  continuity_family?: string;
+  is_third_party?: boolean;
+}
+
+export interface ListManufacturerItemsParams {
+  manufacturer: string;
+  filters?: ManufacturerItemFilters;
+  cursor?: string;
+  limit?: number;
+}
+
+export async function listManufacturerStats(): Promise<ManufacturerStatsList> {
+  return apiFetchJson('/catalog/manufacturers/stats', ManufacturerStatsListSchema);
+}
+
+export async function getManufacturerDetail(slug: string): Promise<ManufacturerDetail> {
+  return apiFetchJson(`/catalog/manufacturers/${encodeURIComponent(slug)}`, ManufacturerDetailSchema);
+}
+
+export async function listManufacturerItems(params: ListManufacturerItemsParams): Promise<CatalogItemList> {
+  const searchParams = buildFilterParams(params.filters);
+  if (params.cursor) searchParams.set('cursor', params.cursor);
+  if (params.limit) searchParams.set('limit', String(params.limit));
+  const qs = searchParams.toString();
+  const url = `/catalog/manufacturers/${encodeURIComponent(params.manufacturer)}/items${qs ? `?${qs}` : ''}`;
+  return apiFetchJson(url, CatalogItemListSchema);
+}
+
+export async function getManufacturerItemFacets(
+  manufacturer: string,
+  filters?: ManufacturerItemFilters
+): Promise<ManufacturerItemFacets> {
+  const searchParams = buildFilterParams(filters);
+  const qs = searchParams.toString();
+  const url = `/catalog/manufacturers/${encodeURIComponent(manufacturer)}/items/facets${qs ? `?${qs}` : ''}`;
+  return apiFetchJson(url, ManufacturerItemFacetsSchema);
 }
