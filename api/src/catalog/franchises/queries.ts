@@ -21,6 +21,46 @@ export async function listFranchises(): Promise<FranchiseRow[]> {
   return rows;
 }
 
+// ---------------------------------------------------------------------------
+// Stats (aggregate counts per franchise)
+// ---------------------------------------------------------------------------
+
+export interface FranchiseStatsRow {
+  slug: string;
+  name: string;
+  sort_order: number | null;
+  notes: string | null;
+  item_count: number;
+  continuity_family_count: number;
+  manufacturer_count: number;
+}
+
+/**
+ * List all franchises with aggregate item/CF/manufacturer counts.
+ *
+ * Uses a single GROUP BY query. JOINs through items → characters →
+ * continuity_families so counts reflect only entities that have items.
+ */
+export async function listFranchiseStats(): Promise<FranchiseStatsRow[]> {
+  const { rows } = await pool.query<FranchiseStatsRow>(
+    `SELECT fr.slug, fr.name, fr.sort_order, fr.notes,
+            COUNT(DISTINCT i.id)::int AS item_count,
+            COUNT(DISTINCT cf.id)::int AS continuity_family_count,
+            COUNT(DISTINCT i.manufacturer_id)::int AS manufacturer_count
+       FROM franchises fr
+       LEFT JOIN items i ON i.franchise_id = fr.id
+       LEFT JOIN characters ch ON ch.id = i.character_id
+       LEFT JOIN continuity_families cf ON cf.id = ch.continuity_family_id
+      GROUP BY fr.id, fr.slug, fr.name, fr.sort_order, fr.notes
+      ORDER BY fr.sort_order ASC NULLS LAST, fr.name ASC`
+  );
+  return rows;
+}
+
+// ---------------------------------------------------------------------------
+// Detail
+// ---------------------------------------------------------------------------
+
 /**
  * Fetch a single franchise by slug.
  *

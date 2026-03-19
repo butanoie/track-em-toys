@@ -159,4 +159,122 @@ describe('item routes (franchise-scoped)', () => {
       expect(res.json<{ appearance: null }>().appearance).toBeNull();
     });
   });
+
+  // ─── Filtered List ──────────────────────────────────────────────────
+
+  describe('GET /catalog/franchises/:franchise/items (with filters)', () => {
+    it('should return filtered items by manufacturer', async () => {
+      const filteredRow = { ...itemListRow, manufacturer_slug: 'hasbro', manufacturer_name: 'Hasbro' };
+      mockQuery.mockResolvedValueOnce({ rows: [filteredRow] }).mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/items?manufacturer=hasbro',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ data: Array<{ manufacturer: { slug: string } }>; total_count: number }>();
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0]).toBeDefined();
+      expect(body.data[0]!.manufacturer).toBeDefined();
+      expect(body.data[0]!.manufacturer!.slug).toBe('hasbro');
+      expect(body.total_count).toBe(1);
+    });
+
+    it('should return filtered items by is_third_party', async () => {
+      const officialRow = { ...itemListRow, is_third_party: false };
+      mockQuery.mockResolvedValueOnce({ rows: [officialRow] }).mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/items?is_third_party=false',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ data: Array<{ is_third_party: boolean }>; total_count: number }>();
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0]).toBeDefined();
+      expect(body.data[0]!.is_third_party).toBe(false);
+    });
+  });
+
+  // ─── Facets ─────────────────────────────────────────────────────────
+
+  describe('GET /catalog/franchises/:franchise/items/facets', () => {
+    it('should return 200 with facet counts', async () => {
+      // 5 parallel queries: manufacturers, size_classes, toy_lines, continuity_families, is_third_party
+      mockQuery
+        .mockResolvedValueOnce({ rows: [{ value: 'hasbro', label: 'Hasbro', count: 10 }] })
+        .mockResolvedValueOnce({ rows: [{ value: 'Leader', label: 'Leader', count: 5 }] })
+        .mockResolvedValueOnce({ rows: [{ value: 'generations', label: 'Generations', count: 8 }] })
+        .mockResolvedValueOnce({ rows: [{ value: 'g1', label: 'Generation 1', count: 12 }] })
+        .mockResolvedValueOnce({
+          rows: [
+            { value: 'false', label: 'Official', count: 7 },
+            { value: 'true', label: 'Third Party', count: 3 },
+          ],
+        });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/items/facets',
+      });
+      expect(res.statusCode).toBe(200);
+
+      const body = res.json<{
+        manufacturers: Array<{ value: string; label: string; count: number }>;
+        size_classes: Array<{ value: string; label: string; count: number }>;
+        toy_lines: Array<{ value: string; label: string; count: number }>;
+        continuity_families: Array<{ value: string; label: string; count: number }>;
+        is_third_party: Array<{ value: string; label: string; count: number }>;
+      }>();
+
+      expect(body.manufacturers).toHaveLength(1);
+      expect(body.manufacturers[0]).toBeDefined();
+      expect(body.manufacturers[0]!.value).toBe('hasbro');
+      expect(body.manufacturers[0]!.count).toBe(10);
+
+      expect(body.size_classes).toHaveLength(1);
+      expect(body.size_classes[0]).toBeDefined();
+      expect(body.size_classes[0]!.value).toBe('Leader');
+
+      expect(body.toy_lines).toHaveLength(1);
+      expect(body.toy_lines[0]).toBeDefined();
+      expect(body.toy_lines[0]!.value).toBe('generations');
+
+      expect(body.continuity_families).toHaveLength(1);
+      expect(body.continuity_families[0]).toBeDefined();
+      expect(body.continuity_families[0]!.value).toBe('g1');
+
+      expect(body.is_third_party).toHaveLength(2);
+    });
+
+    it('should return 200 with empty arrays for franchise with no items', async () => {
+      // 5 parallel queries all returning empty
+      mockQuery
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/empty-franchise/items/facets',
+      });
+      expect(res.statusCode).toBe(200);
+
+      const body = res.json<{
+        manufacturers: unknown[];
+        size_classes: unknown[];
+        toy_lines: unknown[];
+        continuity_families: unknown[];
+        is_third_party: unknown[];
+      }>();
+
+      expect(body.manufacturers).toHaveLength(0);
+      expect(body.size_classes).toHaveLength(0);
+      expect(body.toy_lines).toHaveLength(0);
+      expect(body.continuity_families).toHaveLength(0);
+      expect(body.is_third_party).toHaveLength(0);
+    });
+  });
 });

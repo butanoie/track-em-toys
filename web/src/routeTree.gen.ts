@@ -14,8 +14,11 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authenticated/catalog/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedCatalogFranchiseIndexRouteImport } from './routes/_authenticated/catalog/$franchise/index'
+import { Route as AuthenticatedCatalogFranchiseItemsRouteImport } from './routes/_authenticated/catalog/$franchise/items'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -41,6 +44,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedCatalogIndexRoute =
+  AuthenticatedCatalogIndexRouteImport.update({
+    id: '/catalog/',
+    path: '/catalog/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -51,6 +60,18 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedCatalogFranchiseIndexRoute =
+  AuthenticatedCatalogFranchiseIndexRouteImport.update({
+    id: '/catalog/$franchise/',
+    path: '/catalog/$franchise/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCatalogFranchiseItemsRoute =
+  AuthenticatedCatalogFranchiseItemsRouteImport.update({
+    id: '/catalog/$franchise/items',
+    path: '/catalog/$franchise/items',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -59,6 +80,9 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/catalog/': typeof AuthenticatedCatalogIndexRoute
+  '/catalog/$franchise/items': typeof AuthenticatedCatalogFranchiseItemsRoute
+  '/catalog/$franchise/': typeof AuthenticatedCatalogFranchiseIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -66,6 +90,9 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/catalog': typeof AuthenticatedCatalogIndexRoute
+  '/catalog/$franchise/items': typeof AuthenticatedCatalogFranchiseItemsRoute
+  '/catalog/$franchise': typeof AuthenticatedCatalogFranchiseIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -76,6 +103,9 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
+  '/_authenticated/catalog/$franchise/items': typeof AuthenticatedCatalogFranchiseItemsRoute
+  '/_authenticated/catalog/$franchise/': typeof AuthenticatedCatalogFranchiseIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,8 +116,19 @@ export interface FileRouteTypes {
     | '/settings'
     | '/admin/users'
     | '/admin/'
+    | '/catalog/'
+    | '/catalog/$franchise/items'
+    | '/catalog/$franchise/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/settings' | '/' | '/admin/users' | '/admin'
+  to:
+    | '/login'
+    | '/settings'
+    | '/'
+    | '/admin/users'
+    | '/admin'
+    | '/catalog'
+    | '/catalog/$franchise/items'
+    | '/catalog/$franchise'
   id:
     | '__root__'
     | '/_authenticated'
@@ -97,6 +138,9 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/'
+    | '/_authenticated/catalog/'
+    | '/_authenticated/catalog/$franchise/items'
+    | '/_authenticated/catalog/$franchise/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -141,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/catalog/': {
+      id: '/_authenticated/catalog/'
+      path: '/catalog'
+      fullPath: '/catalog/'
+      preLoaderRoute: typeof AuthenticatedCatalogIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
@@ -154,6 +205,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/users'
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/catalog/$franchise/': {
+      id: '/_authenticated/catalog/$franchise/'
+      path: '/catalog/$franchise'
+      fullPath: '/catalog/$franchise/'
+      preLoaderRoute: typeof AuthenticatedCatalogFranchiseIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/catalog/$franchise/items': {
+      id: '/_authenticated/catalog/$franchise/items'
+      path: '/catalog/$franchise/items'
+      fullPath: '/catalog/$franchise/items'
+      preLoaderRoute: typeof AuthenticatedCatalogFranchiseItemsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
@@ -175,12 +240,20 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedCatalogIndexRoute: typeof AuthenticatedCatalogIndexRoute
+  AuthenticatedCatalogFranchiseItemsRoute: typeof AuthenticatedCatalogFranchiseItemsRoute
+  AuthenticatedCatalogFranchiseIndexRoute: typeof AuthenticatedCatalogFranchiseIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedCatalogIndexRoute: AuthenticatedCatalogIndexRoute,
+  AuthenticatedCatalogFranchiseItemsRoute:
+    AuthenticatedCatalogFranchiseItemsRoute,
+  AuthenticatedCatalogFranchiseIndexRoute:
+    AuthenticatedCatalogFranchiseIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

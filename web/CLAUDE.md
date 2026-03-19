@@ -128,6 +128,15 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Photo upload UI (Phase 1.9) requires `curator` role — show/hide upload controls based on user role
 - User collection photos (private, per-item condition shots) are deferred to post-ML Phase 1.6
 
+### Catalog Browsing (Phase 1.7+)
+
+- Catalog pages live in `src/catalog/` with `api.ts`, `hooks/`, `components/`, `pages/` sub-directories
+- Route files under `src/routes/_authenticated/catalog/` — directory-based nesting, no layout route (each page renders AppHeader + MainNav)
+- `MainNav` component (`src/components/MainNav.tsx`) renders on all non-admin pages — when adding it to a page, update that page's test file to mock `useRouterState` in the `@tanstack/react-router` mock
+- URL search params drive all catalog filter/pagination state — `useMemo` the filters object to prevent TanStack Query key instability
+- Item detail panel reads `selected` slug from URL, fetches independently via `useItemDetail`
+- NEVER use `z.coerce.boolean()` for URL search params — `Boolean("false")` returns `true`. Use `z.enum(['true', 'false']).transform(v => v === 'true')` instead
+
 ## Before Writing New Code
 
 Read existing files for patterns before writing anything new:

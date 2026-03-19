@@ -8,13 +8,14 @@ import { AuthContext, type AuthContextValue } from '../AuthProvider';
 import { ApiError } from '@/lib/api-client';
 import type { AppleSignInResult } from '../apple-auth';
 
-// Mock TanStack Router — AppHeader uses Link
+// Mock TanStack Router — AppHeader uses Link, MainNav uses useRouterState
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, ...props }: { children: React.ReactNode; to: string; className?: string }) => (
     <a href={to} {...props}>
       {children}
     </a>
   ),
+  useRouterState: () => '/settings',
 }));
 
 // Mock @react-oauth/google

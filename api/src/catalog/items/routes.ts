@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
-import { listItems, getItemBySlug } from './queries.js';
-import type { ItemListRow, ItemDetail } from './queries.js';
-import { listItemsSchema, getItemSchema } from './schemas.js';
+import { listItems, getItemBySlug, getItemFacets } from './queries.js';
+import type { ItemListRow, ItemDetail, ItemFilters } from './queries.js';
+import { listItemsSchema, getItemSchema, getItemFacetsSchema } from './schemas.js';
 import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js';
 
 interface FranchiseParams {
@@ -11,9 +11,37 @@ interface FranchiseSlugParams {
   franchise: string;
   slug: string;
 }
-interface PaginationQuery {
+interface ItemsListQuery {
   limit?: number;
   cursor?: string;
+  manufacturer?: string;
+  size_class?: string;
+  toy_line?: string;
+  continuity_family?: string;
+  is_third_party?: boolean;
+}
+
+interface FacetsQuery {
+  manufacturer?: string;
+  size_class?: string;
+  toy_line?: string;
+  continuity_family?: string;
+  is_third_party?: boolean;
+}
+
+/**
+ * Extract item filters from validated querystring params.
+ *
+ * @param query - Validated query params
+ */
+function extractFilters(query: ItemsListQuery | FacetsQuery): ItemFilters {
+  const filters: ItemFilters = {};
+  if (query.manufacturer !== undefined) filters.manufacturer = query.manufacturer;
+  if (query.size_class !== undefined) filters.size_class = query.size_class;
+  if (query.toy_line !== undefined) filters.toy_line = query.toy_line;
+  if (query.continuity_family !== undefined) filters.continuity_family = query.continuity_family;
+  if (query.is_third_party !== undefined) filters.is_third_party = query.is_third_party;
+  return filters;
 }
 
 /**
@@ -75,7 +103,7 @@ const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as c
  */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function itemRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
-  fastify.get<{ Params: FranchiseParams; Querystring: PaginationQuery }>(
+  fastify.get<{ Params: FranchiseParams; Querystring: ItemsListQuery }>(
     '/',
     { schema: listItemsSchema, config: rateLimitConfig },
     async (request, reply) => {
@@ -87,14 +115,27 @@ export async function itemRoutes(fastify: FastifyInstance, _opts: object): Promi
         if (!cursor) return reply.code(400).send({ error: 'Invalid cursor' });
       }
 
+      const filters = extractFilters(request.query);
+
       const { rows, totalCount } = await listItems({
         franchiseSlug: request.params.franchise,
         limit,
         cursor,
+        filters,
       });
 
       const page = buildCursorPage(rows.map(formatListItem), limit);
       return { ...page, total_count: totalCount };
+    }
+  );
+
+  // Facets must be registered before /:slug to prevent Fastify matching "facets" as a slug
+  fastify.get<{ Params: FranchiseParams; Querystring: FacetsQuery }>(
+    '/facets',
+    { schema: getItemFacetsSchema, config: rateLimitConfig },
+    async (request) => {
+      const filters = extractFilters(request.query);
+      return getItemFacets(request.params.franchise, filters);
     }
   );
 
