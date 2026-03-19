@@ -517,10 +517,36 @@ Key design decisions (3 rounds of architecture audit):
 7. **`formatListItem` extracted to shared:** Moved from private in `items/routes.ts` to `catalog/shared/formatters.ts` for reuse by manufacturer routes.
 8. **New composite index:** `idx_items_manufacturer_name_id ON items (manufacturer_id, name, id)` for cursor pagination performance under manufacturer scope.
 
-### Slice 3: Search (future)
+### Slice 3: Search
 
 Pages: `/catalog/search`
-Enriched search results with manufacturer, toy line, size class info.
+
+API changes:
+
+- Enrich `GET /catalog/search` item results to include all `CatalogItem` fields: `manufacturer` (slug+name, nullable), `toy_line` (slug+name), `character` (slug+name), `size_class`, `year_released`, `is_third_party`, `data_quality`
+- Item UNION branch adds `LEFT JOIN manufacturers`, `JOIN toy_lines`, `JOIN characters` — inner JOINs are safe because `toy_line_id` and `character_id` are NOT NULL
+- Character UNION branch pads with typed NULL literals to keep UNION column count aligned
+- Count query unchanged (counts only need `search_vector` match)
+- Flat superset Fastify schema (no `oneOf` — fast-json-stringify limitation). All item-specific fields nullable and in `required` array
+
+Web changes:
+
+- Zod discriminated union: `SearchItemResultSchema = CatalogItemSchema.extend({ entity_type: z.literal('item') })`, `SearchCharacterResultSchema` with lean fields. `z.discriminatedUnion('entity_type', [...])` for zero-maintenance schema inheritance
+- `SearchInput` component in `AppHeader` (site-wide, compact). 300ms debounce via `useRef<setTimeout>`. `replace: true` during debounce, `replace: false` on Enter. Initializes from URL `q` param via `useRouterState`
+- `SearchPage` at `/catalog/search?q=...&page=N&selected=...&selected_type=item|character`. Groups results by entity_type. Reuses `ItemList` for items (type guard narrows enriched results to `CatalogItem`). New `CharacterResultList` for characters
+- `ItemDetailPanel` franchise comes from `selectedItem?.franchise.slug` lookup in results array (same pattern as `ManufacturerItemsPage`)
+- `CharacterStubPanel` shows basic info + "Character detail pages coming soon"
+- `SearchPagination` with numbered pages (not cursor — matches API's page/offset pagination)
+- Clears `selected`/`selected_type` on `q` or `page` change
+- Empty state: "Search for characters and items" when no q; "No results for 'X'" when no matches
+
+Key audit resolutions:
+
+1. `character_id` and `toy_line_id` are NOT NULL — inner JOINs correct
+2. Admin pages unaffected (they don't use `AppHeader`)
+3. `replace: true` only during debounce; `replace: false` on explicit submit (preserves back button)
+4. `selected` cleared on query/page change to avoid stale references
+5. SearchInput initializes from URL param — survives back navigation
 
 ---
 

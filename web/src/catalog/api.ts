@@ -9,6 +9,7 @@ import {
   ManufacturerDetailSchema,
   ManufacturerStatsListSchema,
   ManufacturerItemFacetsSchema,
+  CatalogSearchResponseSchema,
   type FranchiseStatsList,
   type FranchiseDetail,
   type CatalogItemList,
@@ -18,6 +19,7 @@ import {
   type ManufacturerDetail,
   type ManufacturerStatsList,
   type ManufacturerItemFacets,
+  type CatalogSearchResponse,
 } from '@/lib/zod-schemas';
 
 export interface ItemFilters {
@@ -80,6 +82,25 @@ export async function listContinuityFamilies(franchise: string): Promise<Continu
     `/catalog/franchises/${encodeURIComponent(franchise)}/continuity-families`,
     ContinuityFamilyListSchema
   );
+}
+
+// ---------------------------------------------------------------------------
+// Catalog search
+// ---------------------------------------------------------------------------
+
+export interface SearchParams {
+  q: string;
+  franchise?: string;
+  page?: number;
+  limit?: number;
+}
+
+export async function searchCatalog(params: SearchParams): Promise<CatalogSearchResponse> {
+  const sp = new URLSearchParams({ q: params.q });
+  if (params.page) sp.set('page', String(params.page));
+  if (params.limit) sp.set('limit', String(params.limit));
+  if (params.franchise) sp.set('franchise', params.franchise);
+  return apiFetchJson(`/catalog/search?${sp.toString()}`, CatalogSearchResponseSchema);
 }
 
 // ---------------------------------------------------------------------------

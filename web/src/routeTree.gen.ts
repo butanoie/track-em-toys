@@ -16,6 +16,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authenticated/catalog/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedCatalogSearchRouteImport } from './routes/_authenticated/catalog/search'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedCatalogManufacturersIndexRouteImport } from './routes/_authenticated/catalog/manufacturers/index'
 import { Route as AuthenticatedCatalogFranchiseIndexRouteImport } from './routes/_authenticated/catalog/$franchise/index'
@@ -58,6 +59,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedCatalogSearchRoute =
+  AuthenticatedCatalogSearchRouteImport.update({
+    id: '/catalog/search',
+    path: '/catalog/search',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/catalog/search': typeof AuthenticatedCatalogSearchRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/catalog/': typeof AuthenticatedCatalogIndexRoute
   '/catalog/$franchise/items': typeof AuthenticatedCatalogFranchiseItemsRoute
@@ -113,6 +121,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/catalog/search': typeof AuthenticatedCatalogSearchRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/catalog': typeof AuthenticatedCatalogIndexRoute
   '/catalog/$franchise/items': typeof AuthenticatedCatalogFranchiseItemsRoute
@@ -129,6 +138,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/catalog/search': typeof AuthenticatedCatalogSearchRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
   '/_authenticated/catalog/$franchise/items': typeof AuthenticatedCatalogFranchiseItemsRoute
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/settings'
     | '/admin/users'
+    | '/catalog/search'
     | '/admin/'
     | '/catalog/'
     | '/catalog/$franchise/items'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/admin/users'
+    | '/catalog/search'
     | '/admin'
     | '/catalog'
     | '/catalog/$franchise/items'
@@ -173,6 +185,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/'
     | '/_authenticated/admin/users'
+    | '/_authenticated/catalog/search'
     | '/_authenticated/admin/'
     | '/_authenticated/catalog/'
     | '/_authenticated/catalog/$franchise/items'
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/catalog/search': {
+      id: '/_authenticated/catalog/search'
+      path: '/catalog/search'
+      fullPath: '/catalog/search'
+      preLoaderRoute: typeof AuthenticatedCatalogSearchRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/users': {
       id: '/_authenticated/admin/users'
       path: '/users'
@@ -300,6 +320,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedCatalogSearchRoute: typeof AuthenticatedCatalogSearchRoute
   AuthenticatedCatalogIndexRoute: typeof AuthenticatedCatalogIndexRoute
   AuthenticatedCatalogFranchiseItemsRoute: typeof AuthenticatedCatalogFranchiseItemsRoute
   AuthenticatedCatalogFranchiseIndexRoute: typeof AuthenticatedCatalogFranchiseIndexRoute
@@ -312,6 +333,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedCatalogSearchRoute: AuthenticatedCatalogSearchRoute,
   AuthenticatedCatalogIndexRoute: AuthenticatedCatalogIndexRoute,
   AuthenticatedCatalogFranchiseItemsRoute:
     AuthenticatedCatalogFranchiseItemsRoute,
