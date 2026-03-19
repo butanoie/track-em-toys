@@ -1,4 +1,4 @@
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, type ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import type { CatalogItem } from '@/lib/zod-schemas';
 
@@ -7,9 +7,10 @@ interface ItemListProps {
   selectedSlug: string | undefined;
   onSelect: (slug: string | undefined) => void;
   totalCount: number;
+  paginationControls?: ReactNode;
 }
 
-export function ItemList({ items, selectedSlug, onSelect, totalCount }: ItemListProps) {
+export function ItemList({ items, selectedSlug, onSelect, totalCount, paginationControls }: ItemListProps) {
   const listRef = useRef<HTMLUListElement>(null);
   const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
@@ -59,6 +60,7 @@ export function ItemList({ items, selectedSlug, onSelect, totalCount }: ItemList
         <p className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
           {totalCount} {totalCount === 1 ? 'item' : 'items'}
         </p>
+        {paginationControls && <div className="flex items-center gap-2">{paginationControls}</div>}
       </div>
       {items.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">

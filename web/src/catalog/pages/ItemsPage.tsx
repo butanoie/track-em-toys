@@ -208,24 +208,29 @@ export function ItemsPage() {
             {itemsPending && !itemsData ? (
               <LoadingSpinner className="py-16" />
             ) : itemsData ? (
-              <>
-                <ItemList
-                  items={itemsData.data}
-                  selectedSlug={search.selected}
-                  onSelect={selectItem}
-                  totalCount={itemsData.total_count}
-                />
-                {(cursorStack.length > 0 || itemsData.next_cursor) && (
-                  <div className="mt-4 flex justify-center gap-2">
-                    <Button variant="outline" onClick={loadPreviousPage} disabled={cursorStack.length === 0}>
-                      Previous
-                    </Button>
-                    <Button variant="outline" onClick={loadNextPage} disabled={!itemsData.next_cursor}>
-                      Next
-                    </Button>
-                  </div>
-                )}
-              </>
+              <ItemList
+                items={itemsData.data}
+                selectedSlug={search.selected}
+                onSelect={selectItem}
+                totalCount={itemsData.total_count}
+                paginationControls={
+                  cursorStack.length > 0 || itemsData.next_cursor ? (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={loadPreviousPage}
+                        disabled={cursorStack.length === 0}
+                      >
+                        Previous
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={loadNextPage} disabled={!itemsData.next_cursor}>
+                        Next
+                      </Button>
+                    </>
+                  ) : undefined
+                }
+              />
             ) : null}
           </div>
 
