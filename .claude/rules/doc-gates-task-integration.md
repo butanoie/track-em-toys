@@ -2,10 +2,10 @@ When creating a task list for non-trivial feature development (via /feature-dev 
 
 Required gate tasks:
 
-1. **"Architecture Review & Audit"** — after Architecture Design, before documentation. Blocks documentation. Review the design for consistency, security, data model correctness, dependency conflicts, edge cases, and scope creep.
+1. **"Architecture Review & Audit"** — after Architecture Design, before documentation. Blocks documentation. Use `/ralph-loop:ralph-loop` with 5 iterations to review the design for consistency, security, data model correctness, dependency conflicts, edge cases, and scope creep. Present the results to the user for confirmation before proceeding.
 2. **"Post-Architecture Documentation Gate"** — after Architecture Review & Audit passes, before Implementation. Blocks implementation.
 3. **"Verification Gate: run /run-checks"** — after Implementation, before Quality Review.
-4. **"Code Simplification: run code-simplifier agent"** — after Quality Review, before Post-Review Documentation Gate. Launch the `code-simplifier:code-simplifier` agent to simplify and refine recently written code.
+4. **"Code Simplification: run code-simplifier agent"** — after Quality Review, before Post-Review Documentation Gate. Use `/ralph-loop:ralph-loop` with 2 iterations to simplify and refine recently written code via the `code-simplifier:code-simplifier` agent. Present the results to the user for confirmation before proceeding.
 5. **"Post-Review Documentation Gate"** — after Code Simplification, before Summary. Blocks summary.
 6. **"Run /changelog"** — after Summary. Create a changelog entry documenting the work.
 7. **"Run /claude-md-management:revise-claude-md"** — after Summary. Review session for CLAUDE.md improvements.
