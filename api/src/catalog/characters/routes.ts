@@ -41,11 +41,12 @@ function formatListItem(row: CharacterListRow) {
  * @param detail - Character detail to format
  */
 function formatDetail(detail: CharacterDetail) {
-  const { base, subGroups, appearances } = detail;
+  const { base, subGroups, appearances, componentCharacters } = detail;
   return {
     ...formatListItem(base),
     combiner_role: base.combiner_role,
     combined_form: base.combined_form_slug ? { slug: base.combined_form_slug, name: base.combined_form_name! } : null,
+    component_characters: componentCharacters,
     sub_groups: subGroups,
     appearances,
     metadata: base.metadata,

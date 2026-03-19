@@ -107,10 +107,18 @@ export async function listCharacters(
 // Get Character Detail
 // ---------------------------------------------------------------------------
 
+export interface ComponentCharacterRef {
+  slug: string;
+  name: string;
+  combiner_role: string | null;
+  alt_mode: string | null;
+}
+
 export interface CharacterDetail {
   base: CharacterBaseRow;
   subGroups: SubGroupRef[];
   appearances: AppearanceRow[];
+  componentCharacters: ComponentCharacterRef[];
 }
 
 /**
@@ -144,7 +152,7 @@ export async function getCharacterBySlug(
   const base = baseRows[0];
   if (!base) return null;
 
-  const [subGroupResult, appearanceResult] = await Promise.all([
+  const [subGroupResult, appearanceResult, componentResult] = await Promise.all([
     pool.query<SubGroupRef>(
       `SELECT sg.slug, sg.name
          FROM character_sub_groups csg
@@ -161,11 +169,21 @@ export async function getCharacterBySlug(
         ORDER BY year_start ASC NULLS LAST, name ASC`,
       [base.id]
     ),
+    base.is_combined_form
+      ? pool.query<ComponentCharacterRef>(
+          `SELECT slug, name, combiner_role, alt_mode
+             FROM characters
+            WHERE combined_form_id = $1
+            ORDER BY name ASC`,
+          [base.id]
+        )
+      : Promise.resolve({ rows: [] as ComponentCharacterRef[] }),
   ]);
 
   return {
     base,
     subGroups: subGroupResult.rows,
     appearances: appearanceResult.rows,
+    componentCharacters: componentResult.rows,
   };
 }

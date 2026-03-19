@@ -129,6 +129,7 @@ async function setupSearchMocks(page: import('@playwright/test').Page) {
         is_combined_form: false,
         combiner_role: null,
         combined_form: null,
+        component_characters: [],
         sub_groups: [],
         appearances: [],
         metadata: {},

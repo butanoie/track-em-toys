@@ -51,6 +51,18 @@ const appearanceItem = {
   },
 } as const;
 
+const componentCharacterItem = {
+  type: 'object',
+  required: ['slug', 'name', 'combiner_role', 'alt_mode'],
+  additionalProperties: false,
+  properties: {
+    slug: { type: 'string' },
+    name: { type: 'string' },
+    combiner_role: { type: ['string', 'null'] },
+    alt_mode: { type: ['string', 'null'] },
+  },
+} as const;
+
 const characterDetail = {
   type: 'object',
   required: [
@@ -65,6 +77,7 @@ const characterDetail = {
     'is_combined_form',
     'combiner_role',
     'combined_form',
+    'component_characters',
     'sub_groups',
     'appearances',
     'metadata',
@@ -84,6 +97,7 @@ const characterDetail = {
     is_combined_form: { type: 'boolean' },
     combiner_role: { type: ['string', 'null'] },
     combined_form: nullableSlugNameRef,
+    component_characters: { type: 'array', items: componentCharacterItem },
     sub_groups: { type: 'array', items: slugNameRef },
     appearances: { type: 'array', items: appearanceItem },
     metadata: { type: 'object', additionalProperties: true },

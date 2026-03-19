@@ -28,6 +28,28 @@ Scenario: Character detail shows combiner information
   And the combined form name is a link to the combined form's character page
 ```
 
+### Happy Path: Combined form shows component characters
+
+```gherkin
+Scenario: Combined form character shows its component characters
+  Given the character is a combined form (e.g., Devastator)
+  And other characters have combined_form_id pointing to this character
+  When the character detail page loads
+  Then a "Component Characters" list is displayed
+  And each component shows its name, combiner role, and alt-mode
+  And each component name is a link to that character's detail page
+```
+
+### Happy Path: Combined form with no components
+
+```gherkin
+Scenario: Combined form badge shows when no component characters exist
+  Given the character is a combined form but has no linked components
+  When the character detail page loads
+  Then the "Combined Form" badge is displayed
+  And no component characters list is shown
+```
+
 ### Happy Path: Character with sub-groups
 
 ```gherkin

@@ -254,6 +254,13 @@ export const CharacterAppearanceSchema = z.object({
   description: z.string().nullable(),
 });
 
+export const ComponentCharacterRefSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  combiner_role: z.string().nullable(),
+  alt_mode: z.string().nullable(),
+});
+
 export const CharacterDetailSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -266,6 +273,7 @@ export const CharacterDetailSchema = z.object({
   is_combined_form: z.boolean(),
   combiner_role: z.string().nullable(),
   combined_form: NullableSlugNameRefSchema,
+  component_characters: z.array(ComponentCharacterRefSchema),
   sub_groups: z.array(SlugNameRefSchema),
   appearances: z.array(CharacterAppearanceSchema),
   metadata: z.record(z.unknown()),
@@ -275,6 +283,7 @@ export const CharacterDetailSchema = z.object({
 
 // Catalog types
 export type CharacterAppearance = z.infer<typeof CharacterAppearanceSchema>;
+export type ComponentCharacterRef = z.infer<typeof ComponentCharacterRefSchema>;
 export type CharacterDetail = z.infer<typeof CharacterDetailSchema>;
 export type SearchCharacterResult = z.infer<typeof SearchCharacterResultSchema>;
 export type SearchItemResult = z.infer<typeof SearchItemResultSchema>;

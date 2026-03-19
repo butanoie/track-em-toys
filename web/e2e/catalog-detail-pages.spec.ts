@@ -30,6 +30,7 @@ const mockCharacterDetail = {
   is_combined_form: false,
   combiner_role: null,
   combined_form: null,
+  component_characters: [],
   sub_groups: [{ slug: 'convoy', name: 'Convoy' }],
   appearances: [
     {
@@ -74,6 +75,22 @@ const mockItemDetail = {
   updated_at: '2026-01-01T00:00:00Z',
 };
 
+const mockGestaltCharacter = {
+  ...mockCharacterDetail,
+  id: 'c-2',
+  name: 'Devastator',
+  slug: 'devastator',
+  is_combined_form: true,
+  faction: { slug: 'decepticons', name: 'Decepticons' },
+  sub_groups: [],
+  appearances: [],
+  component_characters: [
+    { slug: 'bonecrusher', name: 'Bonecrusher', combiner_role: 'left arm', alt_mode: 'bulldozer' },
+    { slug: 'mixmaster', name: 'Mixmaster', combiner_role: 'left leg', alt_mode: 'cement mixer' },
+    { slug: 'scrapper', name: 'Scrapper', combiner_role: 'right leg', alt_mode: 'front-end loader' },
+  ],
+};
+
 const mockRelatedItems = {
   data: [
     {
@@ -115,6 +132,11 @@ async function setupDetailMocks(page: import('@playwright/test').Page) {
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCharacterDetail) });
   });
 
+  await page.route('**/catalog/franchises/transformers/characters/devastator', (route) => {
+    if (route.request().resourceType() === 'document') return route.continue();
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockGestaltCharacter) });
+  });
+
   await page.route('**/catalog/franchises/transformers/characters/nonexistent', (route) => {
     if (route.request().resourceType() === 'document') return route.continue();
     return route.fulfill({
@@ -138,7 +160,16 @@ async function setupDetailMocks(page: import('@playwright/test').Page) {
     });
   });
 
-  // Related items for character detail page
+  // Related items for character detail pages
+  await page.route('**/catalog/franchises/transformers/items?*character=devastator*', (route) => {
+    if (route.request().resourceType() === 'document') return route.continue();
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: [], next_cursor: null, total_count: 0 }),
+    });
+  });
+
   await page.route('**/catalog/franchises/transformers/items?*character=optimus-prime*', (route) => {
     if (route.request().resourceType() === 'document') return route.continue();
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockRelatedItems) });
@@ -208,6 +239,26 @@ test.describe('Character Detail Page', () => {
     await expect(breadcrumb.getByText('Catalog')).toBeVisible();
     await expect(breadcrumb.getByText('Transformers')).toBeVisible();
     await expect(breadcrumb.getByText('Optimus Prime')).toBeVisible();
+  });
+
+  test('Given combined form character, When on character page, Then component characters are listed with links', async ({
+    page,
+  }) => {
+    await setupDetailMocks(page);
+    await page.goto('/catalog/transformers/characters/devastator');
+
+    await expect(page.getByRole('heading', { name: 'Devastator' })).toBeVisible();
+    await expect(page.getByText('Combined Form')).toBeVisible();
+    await expect(page.getByText('Component Characters')).toBeVisible();
+
+    // Verify component names are visible and linked
+    const boneLink = page.getByRole('link', { name: 'Bonecrusher' });
+    await expect(boneLink).toBeVisible();
+    await expect(boneLink).toHaveAttribute('href', /\/catalog\/transformers\/characters\/bonecrusher/);
+
+    // Verify additional detail (combiner role + alt mode)
+    await expect(page.getByText('left arm')).toBeVisible();
+    await expect(page.getByText('bulldozer')).toBeVisible();
   });
 
   test('Given invalid character slug, When navigating, Then not found message is displayed', async ({ page }) => {
