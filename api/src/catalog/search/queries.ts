@@ -96,7 +96,8 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
       SELECT 'item'::text AS entity_type,
              i.id, i.name, i.slug,
              fr.slug AS franchise_slug, fr.name AS franchise_name,
-             ts_rank(i.search_vector, to_tsquery('simple', $1)) AS rank,
+             GREATEST(ts_rank(i.search_vector, to_tsquery('simple', $1)),
+                      ts_rank(ch.search_vector, to_tsquery('simple', $1))) AS rank,
              ch.slug AS character_slug, ch.name AS character_name,
              mfr.slug AS manufacturer_slug, mfr.name AS manufacturer_name,
              tl.slug AS toy_line_slug, tl.name AS toy_line_name,
@@ -106,7 +107,8 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
         JOIN characters ch ON ch.id = i.character_id
         LEFT JOIN manufacturers mfr ON mfr.id = i.manufacturer_id
         JOIN toy_lines tl ON tl.id = i.toy_line_id
-       WHERE i.search_vector @@ to_tsquery('simple', $1)
+       WHERE (i.search_vector @@ to_tsquery('simple', $1)
+              OR ch.search_vector @@ to_tsquery('simple', $1))
          AND ($2::text IS NULL OR fr.slug = $2)
     ) results
     ORDER BY rank DESC, name ASC, entity_type ASC, id ASC
@@ -123,7 +125,9 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
       (SELECT COUNT(*)::int
          FROM items i
          JOIN franchises fr ON fr.id = i.franchise_id
-        WHERE i.search_vector @@ to_tsquery('simple', $1)
+         JOIN characters ch ON ch.id = i.character_id
+        WHERE (i.search_vector @@ to_tsquery('simple', $1)
+               OR ch.search_vector @@ to_tsquery('simple', $1))
           AND ($2::text IS NULL OR fr.slug = $2))
     ) AS total_count`;
 

@@ -188,6 +188,53 @@ describe('search routes', () => {
       expect(char!.character).toBeNull();
     });
 
+    it('should return items matched via character name (third-party naming)', async () => {
+      // Regression: "Sovereign" is a third-party Galvatron — searching "galvatron"
+      // must return it because the linked character matches, even though the item
+      // name doesn't contain "galvatron".
+      const thirdPartyItem = {
+        ...itemSearchResult,
+        id: 'i-2',
+        name: 'Sovereign',
+        slug: 'ft-16-sovereign',
+        character_slug: 'galvatron',
+        character_name: 'Galvatron',
+        manufacturer_slug: 'fanstoys',
+        manufacturer_name: 'Fans Toys',
+        toy_line_slug: 'fanstoys-mainline',
+        toy_line_name: 'Fans Toys Mainline',
+        is_third_party: true,
+      };
+
+      mockQuery.mockResolvedValueOnce({ rows: [thirdPartyItem] }).mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/search?q=galvatron',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{
+        data: Array<{
+          name: string;
+          character: { slug: string; name: string } | null;
+          is_third_party: boolean | null;
+        }>;
+        total_count: number;
+      }>();
+      expect(body.data).toHaveLength(1);
+      const item = body.data[0];
+      expect(item).toBeDefined();
+      expect(item!.name).toBe('Sovereign');
+      expect(item!.character).toEqual({ slug: 'galvatron', name: 'Galvatron' });
+      expect(item!.is_third_party).toBe(true);
+
+      // Verify the query includes character search_vector in the WHERE clause
+      const dataQueryCall = mockQuery.mock.calls[0];
+      expect(dataQueryCall).toBeDefined();
+      const sql = dataQueryCall![0] as string;
+      expect(sql).toContain('ch.search_vector');
+    });
+
     it('should return empty results for punctuation-only query', async () => {
       // buildSearchTsquery returns null for '!!!' → empty results without hitting DB
       const res = await server.inject({
