@@ -3,16 +3,16 @@ import { LayoutGrid, List } from 'lucide-react';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { Button } from '@/components/ui/button';
-import { useFranchises } from '@/catalog/hooks/useFranchises';
-import { FranchiseTileGrid } from '@/catalog/components/FranchiseTileGrid';
-import { FranchiseTable } from '@/catalog/components/FranchiseTable';
+import { useManufacturers } from '@/catalog/hooks/useManufacturers';
+import { ManufacturerTileGrid } from '@/catalog/components/ManufacturerTileGrid';
+import { ManufacturerTable } from '@/catalog/components/ManufacturerTable';
 import { useLocalStorage } from '@/lib/use-local-storage';
 
 type ViewMode = 'grid' | 'table';
 
-export function FranchiseListPage() {
-  const { data, isPending, isError, error } = useFranchises();
-  const [viewMode, setViewMode] = useLocalStorage<ViewMode>('catalog:view-mode', 'grid');
+export function ManufacturerListPage() {
+  const { data, isPending, isError, error } = useManufacturers();
+  const [viewMode, setViewMode] = useLocalStorage<ViewMode>('catalog:manufacturers-view-mode', 'grid');
 
   return (
     <div className="min-h-screen bg-background">
@@ -22,11 +22,11 @@ export function FranchiseListPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-semibold text-foreground">Catalog</h2>
+            <h2 className="text-2xl font-semibold text-foreground">Manufacturers</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Browse toy franchises{' '}
-              <Link to="/catalog/manufacturers" className="text-primary hover:underline">
-                or by manufacturer
+              Browse toy manufacturers{' '}
+              <Link to="/catalog" className="text-primary hover:underline">
+                or by franchise
               </Link>
             </p>
           </div>
@@ -59,7 +59,7 @@ export function FranchiseListPage() {
             role="alert"
             className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive mb-6"
           >
-            {error instanceof Error ? error.message : 'Failed to load franchises.'}
+            {error instanceof Error ? error.message : 'Failed to load manufacturers.'}
           </div>
         )}
 
@@ -73,16 +73,16 @@ export function FranchiseListPage() {
 
         {data && data.data.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
-            <p>No franchises in the catalog yet.</p>
+            <p>No manufacturers in the catalog yet.</p>
           </div>
         )}
 
         {data &&
           data.data.length > 0 &&
           (viewMode === 'grid' ? (
-            <FranchiseTileGrid franchises={data.data} />
+            <ManufacturerTileGrid manufacturers={data.data} />
           ) : (
-            <FranchiseTable franchises={data.data} />
+            <ManufacturerTable manufacturers={data.data} />
           ))}
       </main>
     </div>

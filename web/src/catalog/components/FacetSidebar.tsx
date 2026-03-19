@@ -1,18 +1,23 @@
-import type { ItemFacets, FacetValue } from '@/lib/zod-schemas';
-import type { ItemFilters } from '@/catalog/api';
+import type { FacetValue } from '@/lib/zod-schemas';
+
+export interface FacetGroupConfig {
+  label: string;
+  values: FacetValue[];
+  filterKey: string;
+  activeValue: string | boolean | undefined;
+}
 
 interface FacetSidebarProps {
-  facets: ItemFacets;
-  filters: ItemFilters;
-  onFilterChange: (key: keyof ItemFilters, value: string | boolean | undefined) => void;
+  groups: FacetGroupConfig[];
+  onFilterChange: (key: string, value: string | boolean | undefined) => void;
 }
 
 interface FacetGroupProps {
   label: string;
   values: FacetValue[];
   activeValue: string | boolean | undefined;
-  filterKey: keyof ItemFilters;
-  onFilterChange: (key: keyof ItemFilters, value: string | boolean | undefined) => void;
+  filterKey: string;
+  onFilterChange: (key: string, value: string | boolean | undefined) => void;
 }
 
 function FacetGroup({ label, values, activeValue, filterKey, onFilterChange }: FacetGroupProps) {
@@ -22,7 +27,7 @@ function FacetGroup({ label, values, activeValue, filterKey, onFilterChange }: F
     <fieldset className="space-y-1">
       <legend className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">{label}</legend>
       {values.map((v) => {
-        const isActive = String(activeValue) === v.value;
+        const isActive = activeValue !== undefined && String(activeValue) === v.value;
         return (
           <label
             key={v.value}
@@ -31,12 +36,15 @@ function FacetGroup({ label, values, activeValue, filterKey, onFilterChange }: F
             <input
               type="checkbox"
               checked={isActive}
-              onChange={() =>
-                onFilterChange(
-                  filterKey,
-                  isActive ? undefined : filterKey === 'is_third_party' ? v.value === 'true' : v.value
-                )
-              }
+              onChange={() => {
+                if (isActive) {
+                  onFilterChange(filterKey, undefined);
+                } else if (filterKey === 'is_third_party') {
+                  onFilterChange(filterKey, v.value === 'true');
+                } else {
+                  onFilterChange(filterKey, v.value);
+                }
+              }}
               className="rounded border-input h-4 w-4 accent-primary"
             />
             <span className="flex-1 truncate">{v.label}</span>
@@ -48,15 +56,7 @@ function FacetGroup({ label, values, activeValue, filterKey, onFilterChange }: F
   );
 }
 
-export function FacetSidebar({ facets, filters, onFilterChange }: FacetSidebarProps) {
-  const groups: { label: string; values: FacetValue[]; filterKey: keyof ItemFilters }[] = [
-    { label: 'Continuity', values: facets.continuity_families, filterKey: 'continuity_family' },
-    { label: 'Manufacturer', values: facets.manufacturers, filterKey: 'manufacturer' },
-    { label: 'Toy Line', values: facets.toy_lines, filterKey: 'toy_line' },
-    { label: 'Size Class', values: facets.size_classes, filterKey: 'size_class' },
-    { label: 'Type', values: facets.is_third_party, filterKey: 'is_third_party' },
-  ];
-
+export function FacetSidebar({ groups, onFilterChange }: FacetSidebarProps) {
   return (
     <aside aria-label="Catalog filters" className="space-y-5">
       {groups.map((g) => (
@@ -64,7 +64,7 @@ export function FacetSidebar({ facets, filters, onFilterChange }: FacetSidebarPr
           key={g.filterKey}
           label={g.label}
           values={g.values}
-          activeValue={filters[g.filterKey]}
+          activeValue={g.activeValue}
           filterKey={g.filterKey}
           onFilterChange={onFilterChange}
         />

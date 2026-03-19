@@ -1,8 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { listItems, getItemBySlug, getItemFacets } from './queries.js';
-import type { ItemListRow, ItemDetail, ItemFilters } from './queries.js';
+import type { ItemFilters } from './queries.js';
 import { listItemsSchema, getItemSchema, getItemFacetsSchema } from './schemas.js';
 import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js';
+import { formatListItem, formatDetail } from '../shared/formatters.js';
 
 interface FranchiseParams {
   franchise: string;
@@ -42,55 +43,6 @@ function extractFilters(query: ItemsListQuery | FacetsQuery): ItemFilters {
   if (query.continuity_family !== undefined) filters.continuity_family = query.continuity_family;
   if (query.is_third_party !== undefined) filters.is_third_party = query.is_third_party;
   return filters;
-}
-
-/**
- * Format an item row for list responses.
- *
- * @param row - Database row to format
- */
-function formatListItem(row: ItemListRow) {
-  return {
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    franchise: { slug: row.franchise_slug, name: row.franchise_name },
-    character: { slug: row.character_slug, name: row.character_name },
-    manufacturer: row.manufacturer_slug ? { slug: row.manufacturer_slug, name: row.manufacturer_name! } : null,
-    toy_line: { slug: row.toy_line_slug, name: row.toy_line_name },
-    size_class: row.size_class,
-    year_released: row.year_released,
-    is_third_party: row.is_third_party,
-    data_quality: row.data_quality,
-  };
-}
-
-/**
- * Format an item detail for the detail response.
- *
- * @param detail - Item detail to format
- */
-function formatDetail(detail: ItemDetail) {
-  const { base, photos } = detail;
-  return {
-    ...formatListItem(base),
-    appearance: base.appearance_slug
-      ? {
-          slug: base.appearance_slug,
-          name: base.appearance_name!,
-          source_media: base.appearance_source_media,
-          source_name: base.appearance_source_name,
-        }
-      : null,
-    description: base.description,
-    barcode: base.barcode,
-    sku: base.sku,
-    product_code: base.product_code,
-    photos,
-    metadata: base.metadata,
-    created_at: base.created_at,
-    updated_at: base.updated_at,
-  };
 }
 
 const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const;

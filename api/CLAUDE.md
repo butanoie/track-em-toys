@@ -142,6 +142,12 @@ Two distinct photo types:
 - Facet cross-filtering: each dimension runs its own GROUP BY query excluding its own filter via `filtersExcluding(key)`. All 5 queries run in parallel via `Promise.all`
 - Facets use unified `{ value: string, label: string, count: number }` shape — slug-based facets use `value=slug, label=name`; free-text facets use `value=label=raw_value`; boolean facets use `value="true"/"false", label="Third Party"/"Official"`
 - NULL values excluded from facets: manufacturer facet uses `AND mfr.id IS NOT NULL`, size_class uses `AND i.size_class IS NOT NULL`
+- Stats queries with multiple independent aggregates (e.g., item count + toy line count) must use subquery JOINs — dual LEFT JOINs from the same anchor table produce Cartesian products
+
+### Catalog Shared Modules
+
+- `catalog/shared/schemas.ts` — shared schema fragments: `itemListItem`, `facetValueItem`, `slugNameRef`, `nullableSlugNameRef`, `cursorListResponse`. Import these instead of defining local copies.
+- `catalog/shared/formatters.ts` — shared `formatListItem()` and `formatDetail()` for item responses. Used by both `items/routes.ts` and `manufacturers/routes.ts`.
 
 ## Before Writing New Code
 
