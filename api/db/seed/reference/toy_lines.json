@@ -2,7 +2,7 @@
   "_metadata": {
     "table": "toy_lines",
     "description": "Seed data for the toy_lines table",
-    "total": 22,
+    "total": 23,
     "import_order": 4,
     "references": [
       "manufacturers (via manufacturer_slug)"
@@ -184,6 +184,14 @@
       "description": "Takara Beast Wars Metals toyline (1999). C/D-40 through C/D-50 numbering. Japanese release of Transmetals/TM2 figures with show-accurate decos and lenticular bio cards. 3 waves over 4 months (Sep-Dec 1999)",
       "manufacturer_slug": "takara-tomy",
       "franchise_slug": "transformers"
+    },
+    {
+      "name": "G.I. Joe Classified Series",
+      "slug": "gi-joe-classified-series",
+      "scale": "6-inch",
+      "description": "Hasbro's premium 6-inch G.I. Joe action figure line (2020-present). Numbered sequential releases with multiple sub-series including Cobra Island, Tiger Force, and Special Missions. Highly detailed figures with extensive articulation and accessories",
+      "manufacturer_slug": "hasbro",
+      "franchise_slug": "gi-joe"
     }
   ]
 }

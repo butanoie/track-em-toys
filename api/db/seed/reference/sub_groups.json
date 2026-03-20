@@ -2,7 +2,7 @@
   "_metadata": {
     "table": "sub_groups",
     "description": "Seed data for the sub_groups reference table",
-    "total": 55,
+    "total": 111,
     "import_order": 2,
     "references": [
       "factions (via faction_slug)"
@@ -392,6 +392,398 @@
       "slug": "vehicon-generals",
       "notes": "Beast Machines: Megatron's elite Vehicon commanders. Each controls a type of drone army. Tankor (tanks), Jetstorm (aero-drones), Thrust (cycle-drones), Obsidian (copter-drones), Strika (assault vehicles)",
       "faction_slug": "vehicon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Autobot Brothers",
+      "slug": "autobot-brothers",
+      "notes": "RiD 2001 trio of Autobot car warriors: Side Burn, Prowl, and X-Brawn. Earth-based patrol team",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Team Bullet Train",
+      "slug": "team-bullet-train",
+      "notes": "RiD 2001 Autobot trio that patrols Earth's railways. Railspike, Rapid Run, and Midnight Express combine to form Rail Racer",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Build Team",
+      "slug": "build-team",
+      "notes": "RiD 2001 Autobot construction vehicle team. Wedge (leader), Grimlock, Heavy Load, and Hightower combine to form Landfill",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Spychangers",
+      "slug": "spychangers",
+      "notes": "RiD 2001 Autobot special ops team of six smaller-than-average bots. Led by Hot Shot. Specialize in stealth and covert espionage",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Predacon Trio",
+      "slug": "predacon-trio",
+      "notes": "RiD 2001 trio of bumbling Predacon minions under Sky-Byte's command: Dark Scream, Gas Skunk, and Slapper. Beast mode Transformers",
+      "faction_slug": "predacon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Commandos",
+      "slug": "commandos-rid",
+      "notes": "RiD 2001 Decepticon military team led by Scourge. Mega-Octane, Ro-Tor, Movor, Armorhide, and Rollbar combine to form Ruination. Brainwashed Autobot protoforms. Also known as Combatrons",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Tiger Force",
+      "slug": "tiger-force",
+      "notes": "Elite G.I. Joe jungle warfare unit with distinctive tiger-stripe camouflage. 1988 sub-line featuring repainted classic characters and vehicles",
+      "faction_slug": "gi-joe",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Force",
+      "slug": "night-force",
+      "notes": "Covert G.I. Joe nighttime operations team with dark color schemes. 1989 Toys 'R' Us exclusive sub-line. Largest ARAH sub-team by member count",
+      "faction_slug": "gi-joe",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Slaughter's Marauders",
+      "slug": "slaughters-marauders",
+      "notes": "Sgt. Slaughter's hand-picked elite team. 1989 sub-line with bright multi-color camouflage. Named after real-life WWF wrestler Sgt. Slaughter",
+      "faction_slug": "gi-joe",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Sky Patrol",
+      "slug": "sky-patrol",
+      "notes": "G.I. Joe airborne operations team equipped with working parachute packs. 1990 sub-line. Led by Sky Dive",
+      "faction_slug": "gi-joe",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Eco-Warriors",
+      "slug": "eco-warriors",
+      "notes": "Environmental combat team with color-change water-activated gimmick. 1991 sub-line. Includes both G.I. Joe and Cobra members",
+      "faction_slug": null,
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "DEF",
+      "slug": "def",
+      "notes": "Drug Elimination Force. G.I. Joe law enforcement-themed unit. 1992 sub-line featuring Bullet-Proof, Mutt, Cutter, and Shockwave vs Headman and Headhunter",
+      "faction_slug": "gi-joe",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Mega Marines",
+      "slug": "mega-marines",
+      "notes": "G.I. Joe monster-fighting team equipped with moldable Bio-Armor. 1993 sub-line. Counterpart to Cobra's Mega Monsters",
+      "faction_slug": "gi-joe",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Star Brigade",
+      "slug": "star-brigade",
+      "notes": "Space operations team for orbital and extraterrestrial missions. 1993-1994 sub-line. Includes both G.I. Joe and Cobra members. Final ARAH sub-line",
+      "faction_slug": null,
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Battle Force 2000",
+      "slug": "battle-force-2000",
+      "notes": "Futuristic vehicle specialists with combining vehicles. 1987 sub-line. Members: Avalanche, Blaster, Blocker, Dee-Jay, Dodger, Knockdown, Maverick",
+      "faction_slug": "gi-joe",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Steel Brigade",
+      "slug": "steel-brigade",
+      "notes": "Mail-order custom G.I. Joe trooper. Members could personalize name and military specialty on included file card. 1987. Iconic gold-visored helmet",
+      "faction_slug": "gi-joe",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Dreadnoks",
+      "slug": "dreadnoks",
+      "notes": "Biker mercenary gang led by Zartan. Known for crude, destructive tendencies and love of grape soda and chocolate-covered doughnuts. Core members: Buzzer, Ripper, Torch",
+      "faction_slug": "cobra",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Crimson Guard",
+      "slug": "crimson-guard",
+      "notes": "Elite Cobra troopers known as 'Siegies' (from CG — Crimson Guard). Highly trained infiltrators posing as professionals in civilian society. Led by Crimson Guard Commanders Tomax and Xamot",
+      "faction_slug": "cobra",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Python Patrol",
+      "slug": "python-patrol",
+      "notes": "Cobra stealth unit with radar-defeating Python camouflage process. 1989 sub-line featuring repainted Cobra vehicles and troopers in yellow and black",
+      "faction_slug": "cobra",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Headhunters",
+      "slug": "headhunters",
+      "notes": "Drug trafficking enforcers working for Headman. 1993 sub-line tied to DEF storyline. Cobra-allied organized crime",
+      "faction_slug": "cobra",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "B.A.T.s",
+      "slug": "bats",
+      "notes": "Battle Android Troopers. Cobra's expendable robotic soldiers. First released 1986. Distinctive exposed chest circuitry. Multiple versions across ARAH and modern lines",
+      "faction_slug": "cobra",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Creepers",
+      "slug": "night-creepers",
+      "notes": "Techno-ninja mercenaries hired by Cobra for espionage and assassination. First released 1990. Blend high-tech gadgetry with traditional ninja skills",
+      "faction_slug": "cobra",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Mega Monsters",
+      "slug": "mega-monsters",
+      "notes": "Cobra's mutant monster soldiers. 1993 sub-line counterpart to the Mega Marines. Bio-engineered creatures with moldable monster armor",
+      "faction_slug": "cobra",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Iron Grenadiers",
+      "slug": "iron-grenadiers",
+      "notes": "Destro's personal military force. Independent arms-dealing army with signature gold and black livery. Operates autonomously from Cobra. First released 1988",
+      "faction_slug": "cobra",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Ninja Force",
+      "slug": "ninja-force",
+      "notes": "Ninja-trained operatives from both G.I. Joe and Cobra. 1992-1993 sub-line with spring-loaded action gimmick. Includes Snake Eyes, Storm Shadow, Scarlett, Slice, Dice",
+      "faction_slug": null,
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Shadow Ninjas",
+      "slug": "shadow-ninjas",
+      "notes": "Successor to Ninja Force with color-change and neon gimmicks. 1994 sub-line. Both G.I. Joe and Cobra members. Final ninja-themed ARAH sub-line",
+      "faction_slug": null,
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Street Action Mini-Con Team",
+      "slug": "street-action-mini-con-team",
+      "notes": "Armada Mini-Con team: High Wire, Grindor, Sureshock. Combine to form Perceptor. First Mini-Cons found on Earth",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Air Defense Mini-Con Team",
+      "slug": "air-defense-mini-con-team",
+      "notes": "Armada Mini-Con team: Jetstorm, Runway, Sonar. Combine to form the Star Saber sword, possibly the mightiest weapon known to Transformer-kind",
+      "faction_slug": null,
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Race Mini-Con Team",
+      "slug": "race-mini-con-team",
+      "notes": "Armada Mini-Con team: Dirt Boss, Downshift, Mirage. Combine to form the Skyboom Shield, the ultimate defensive force",
+      "faction_slug": null,
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Space Mini-Con Team",
+      "slug": "space-mini-con-team",
+      "notes": "Armada Mini-Con team: Astroscope, Payload, Sky Blast. Combine to form the Requiem Blaster, drawing on supernova energy",
+      "faction_slug": null,
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Omnicons",
+      "slug": "omnicons",
+      "notes": "Energon: Autobot-allied workers who mine and process raw energon into weapons and energon stars. Includes Arcee, Signal Flare, Skyblast, Strongarm",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Terrorcons (Energon)",
+      "slug": "terrorcons-energon",
+      "notes": "Energon: Energon-devouring creatures created by Alpha Q. Often mass-produced drones. Led by Scorponok. Distinct from G1 Terrorcons",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Construction Team",
+      "slug": "construction-team-energon",
+      "notes": "Energon: Five Decepticon construction vehicles (Steamhammer, Bonecrusher, Duststorm, Sledge, Wideload) that combine to form Constructicon Maximus",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Destruction Team",
+      "slug": "destruction-team",
+      "notes": "Energon: Five super-energon-powered Decepticon military vehicles (Barricade, Blackout, Blight, Kickback, Stormcloud) that combine to form Bruticus Maximus",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Air Team (Energon)",
+      "slug": "air-team-energon",
+      "notes": "Energon: Five Autobot jets (Storm Jet, Sky Shadow, Terradive, Treadshot, Windrazor) that combine to form Superion Maximus",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Recon Mini-Con Team",
+      "slug": "recon-mini-con-team",
+      "notes": "Cybertron Mini-Con trio (Jolt, Reverb, Six-Speed) from Gigantion who assist Vector Prime and the Autobots in reconnaissance",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Wreckers (Movie)",
+      "slug": "wreckers-mv",
+      "notes": "Movieverse Autobot combat engineers with NASCAR stock car alt modes. Leadfoot, Topspin, Roadbuster. Dark of the Moon (2011)",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Guardian Knights",
+      "slug": "guardian-knights-mv",
+      "notes": "Twelve ancient Cybertronian knights who combine to form Dragonstorm. The Last Knight (2017)",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Mini Dinobots",
+      "slug": "mini-dinobots-mv",
+      "notes": "Baby Dinobot copies at Cade Yeager's junkyard. Sharp-T, Pterry, Tops. The Last Knight (2017)",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Terrorcons (ROTB)",
+      "slug": "terrorcons-rotb-mv",
+      "notes": "Movieverse Terrorcons serving Unicron in Rise of the Beasts (2023). Led by Scourge. Includes Nightbird and Battletrap",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Elite Guard",
+      "slug": "elite-guard",
+      "notes": "Animated: Cybertron's premier military force. Led by Ultra Magnus. Includes Sentinel Prime, Jazz, Blurr, Jetfire, Jetstorm, Warpath",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Team Athenia",
+      "slug": "team-athenia",
+      "notes": "Animated: Autobot unit led by Rodimus Prime. Members: Ironhide, Hot Shot, Brawn, Red Alert. Encountered Lockdown during a mission",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Starscream Clones",
+      "slug": "starscream-clones",
+      "notes": "Animated: Clones of Starscream, each embodying one aspect of his personality. Skywarp (cowardice), Thundercracker (ego), Sunstorm (sycophancy), Ramjet (lies), Slipstream (unknown trait)",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Team Chaar",
+      "slug": "team-chaar",
+      "notes": "Animated: Decepticon unit based on planet Chaar. Led by Strika. Members: Oil Slick, Blackout, Spittor, Cyclonus",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Team Prime",
+      "slug": "team-prime",
+      "notes": "Core Autobot team on Earth in Transformers: Prime. Optimus Prime, Bumblebee, Arcee, Bulkhead, Ratchet, Cliffjumper, Wheeljack, Smokescreen, Ultra Magnus",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Wreckers (Aligned)",
+      "slug": "wreckers-aligned",
+      "notes": "Aligned continuity Wreckers. Elite Autobot commando unit. Includes Bulkhead and Wheeljack in Prime",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Seekers (Aligned)",
+      "slug": "seekers-aligned",
+      "notes": "Aligned continuity Decepticon jet warriors. Starscream, Thundercracker, Skywarp, Dreadwing, Skyquake, Slipstream",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Predacons (Aligned)",
+      "slug": "predacons-aligned",
+      "notes": "Aligned continuity Predacons. Ancient Cybertronians cloned by Shockwave from fossilized CNA. Predaking, Darksteel, Skylynx",
+      "faction_slug": "predacon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Insecticons (Aligned)",
+      "slug": "insecticons-aligned",
+      "notes": "Aligned continuity Insecticons. Hive-minded swarm of Decepticon warriors. Hardshell is the only named individual",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Dinobots (Aligned)",
+      "slug": "dinobots-aligned",
+      "notes": "Aligned continuity Dinobots (Lightning Strike Coalition). Experimented on by Shockwave in FOC. Grimlock, Swoop, Slug, Snarl",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Combaticons (Aligned)",
+      "slug": "combaticons-aligned",
+      "notes": "Aligned continuity Combaticons. Combine to form Bruticus. Onslaught, Blast Off, Brawl, Swindle, Vortex. Featured in FOC",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Aerialbots (Aligned)",
+      "slug": "aerialbots-aligned",
+      "notes": "Aligned continuity Aerialbots. Autobot air team in WFC. Jetfire, Air Raid, Silverbolt",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Rescue Bots",
+      "slug": "rescue-bots",
+      "notes": "Aligned continuity Rescue Bots team stationed in Griffin Rock. Heatwave, Chase, Blades, Boulder, plus later additions",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Rescue Bots Academy",
+      "slug": "rescue-bots-academy",
+      "notes": "Training academy for new Rescue Bot recruits. Hot Shot, Whirl, Hoist, Medix, Wedge",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Burns Family",
+      "slug": "burns-family",
+      "notes": "Griffin Rock first responder family who partner with the Rescue Bots. Chief Charlie, Kade, Dani, Graham, Cody Burns",
+      "faction_slug": "human",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Stunticons (RiD)",
+      "slug": "stunticons-rid",
+      "notes": "RiD 2015 Decepticon combiner team. Motormaster, Heatseeker, Wildbreak, Dragstrip, Slashmark combine to form Menasor",
+      "faction_slug": "decepticon",
       "franchise_slug": "transformers"
     }
   ]

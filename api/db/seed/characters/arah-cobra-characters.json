@@ -1,0 +1,1430 @@
+{
+  "_metadata": {
+    "description": "ARAH Cobra, Iron Grenadier, Cobra-La, and Oktober Guard characters — all named villains and generic troop types from the original 3.75\" A Real American Hero toyline (1982-1994)",
+    "total_characters": 110
+  },
+  "characters": [
+    {
+      "name": "Cobra Commander",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name classified. Cobra supreme leader. Intelligence specialist. First released 1982 (mail-in), carded 1983. Multiple versions throughout the line",
+      "slug": "cobra-commander",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Cobra Trooper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra infantry soldier. Also called 'Cobra Enemy' or 'Cobra Soldier' on packaging. First released 1982",
+      "slug": "cobra-trooper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Cobra Officer",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra field officer. First released 1982. Came with black AK-47 assault rifle",
+      "slug": "cobra-officer",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Destro",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown on original filecard (later revealed as James McCullen Destro XXIV). Weapons manufacturer. Head of M.A.R.S. (Military Armaments Research System). Wears hereditary silver battle mask. First released 1983",
+      "slug": "destro",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Major Bludd",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Sebastian Bludd. Born in Sydney, Australia. Mercenary and terrorist. Former Australian SAS and French Foreign Legion. First released 1983 (mail-in)",
+      "slug": "major-bludd",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "H.I.S.S. Driver",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra H.I.S.S. tank operator. Packaged exclusively with the Cobra H.I.S.S. Tank. First released 1983",
+      "slug": "hiss-driver",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Viper Pilot",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra F.A.N.G. gyrocopter pilot. Packaged exclusively with the Cobra F.A.N.G. First released 1983",
+      "slug": "viper-pilot",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Baroness",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Anastasia DeCobray (birth name Cisarovna). Intelligence specialist and fixed-wing pilot. Spoiled offspring of wealthy European aristocrats. First released 1984",
+      "slug": "baroness",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Firefly",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name classified (unknown even to Cobra Commander). Saboteur and demolitions expert. Expert in all NATO and Warsaw Pact explosives. First released 1984",
+      "slug": "firefly",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Scrap-Iron",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name classified. Anti-armor specialist. Designs and field-tests all of Destro's weapons systems. First released 1984",
+      "slug": "scrap-iron",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Storm Shadow",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Thomas S. Arashikage. Ninja and Cobra assassin. Member of the Arashikage clan. Sworn brother to Snake Eyes. Initially Cobra, later joins G.I. Joe. First released 1984",
+      "slug": "storm-shadow",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "ninja-force",
+        "shadow-ninjas"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Copperhead",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name classified. Cobra Water Moccasin pilot. Swamp fighter and smuggler. Packaged with Water Moccasin vehicle. First released 1984",
+      "slug": "copperhead",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Wild Weasel",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name classified. Cobra Rattler pilot. Ace combat pilot who served in bush wars of South America and Africa. Packaged with Rattler. First released 1984",
+      "slug": "wild-weasel",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Zartan",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Master of disguise and leader of the Dreadnoks. Can change skin color. Expert marksman, ventriloquist, and linguist. First released 1984",
+      "slug": "zartan",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Stinger Driver",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Stinger jeep operator. Packaged exclusively with the Cobra Night Attack Stinger 4-WD. First released 1984",
+      "slug": "stinger-driver",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Buzzer",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Dick Blinken. Born in Ponsonby, Australia. Dreadnok. Former Cambridge sociology professor turned biker gang member. First released 1985",
+      "slug": "buzzer",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Ripper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Harry Nod. Born in Grim Cape, Tasmania. Dreadnok. Boatswain and smuggler. First released 1985",
+      "slug": "ripper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Torch",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Tom Winken. Born in Botany Bay, Australia. Dreadnok. Cutting torch specialist. First released 1985",
+      "slug": "torch",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Crimson Guard",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic elite Cobra trooper known as 'Siegies'. Infiltrators posing as professionals in civilian life. First released 1985",
+      "slug": "crimson-guard-trooper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "crimson-guard"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Eels",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra frogman. Underwater demolitions specialist. First released 1985",
+      "slug": "eels",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Snow Serpent",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra arctic trooper. Snow operations specialist. First released 1985",
+      "slug": "snow-serpent",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tele-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra communications specialist. First released 1985",
+      "slug": "tele-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tomax",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Tomax Paoli. Crimson Guard Commander and twin brother of Xamot. Psychic bond with his twin. Extensive Enterprises CEO. First released 1985",
+      "slug": "tomax",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "crimson-guard"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Xamot",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Xamot Paoli. Crimson Guard Commander and twin brother of Tomax. Distinguished by facial scar. Extensive Enterprises CEO. First released 1985",
+      "slug": "xamot",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "crimson-guard"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Lamprey",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra hydrofoil pilot. Packaged exclusively with the Cobra Moray Hydrofoil. First released 1985",
+      "slug": "lamprey",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "B.A.T.",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Battle Android Trooper. Cobra's expendable robotic infantry. Distinctive exposed chest circuitry with interchangeable hand attachments. First released 1986",
+      "slug": "bat",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "bats"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Dr. Mindbender",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name classified on original filecard (later identified as Brian Binder). Former orthodontist turned mad scientist. Creator of Serpentor. Master of mind control. First released 1986",
+      "slug": "dr-mindbender",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Monkeywrench",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Bill Winkie. Dreadnok. Explosives enthusiast who loves destroying things. First released 1986",
+      "slug": "monkeywrench",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra infantry trooper. Replaced the original Cobra Trooper as the standard foot soldier. First released 1986",
+      "slug": "viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Zandar",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Zartan's brother and Dreadnok. Master of camouflage and illusion. First released 1986",
+      "slug": "zandar",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Zarana",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Zoe (per Dreadnoks: Declassified). Zartan's sister and Dreadnok. Expert in disguise and undercover operations. First released 1986",
+      "slug": "zarana",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Serpentor",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Genetically engineered Cobra Emperor. Created by Dr. Mindbender from DNA of history's greatest warriors. Packaged with Air Chariot. First released 1986",
+      "slug": "serpentor",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "A.V.A.C.",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Air Viper Advanced Class. Generic Cobra Firebat pilot. Packaged with Cobra Terrordrome. First released 1986",
+      "slug": "avac",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Motor-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra STUN driver. Packaged exclusively with the Cobra STUN vehicle. First released 1986",
+      "slug": "motor-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Strato-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Night Raven pilot. Packaged exclusively with the Cobra Night Raven S3P. First released 1986",
+      "slug": "strato-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Thrasher",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Dreadnok Thunder Machine driver. Youngest of the original Dreadnoks. Packaged with Thunder Machine. First released 1986",
+      "slug": "thrasher",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Big Boa",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Cobra trainer and hand-to-hand combat instructor. Uses boxing as primary fighting style. First released 1987",
+      "slug": "big-boa",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Croc Master",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Cobra reptile trainer who guards Cobra Island's perimeter with crocodiles. Self-trained alligator wrestler. First released 1987",
+      "slug": "croc-master",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Crystal Ball",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Cobra hypnotist and interrogator. Claims to be a Romani mystic with the evil eye. Based on Vincent Price. First released 1987",
+      "slug": "crystal-ball",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Raptor",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Cobra falconer and accountant. Uses trained birds of prey for reconnaissance. One of the more eccentric Cobra characters. First released 1987",
+      "slug": "raptor",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Techno-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra battlefield technician and combat engineer. Maintains Cobra's advanced weapons and vehicles. First released 1987",
+      "slug": "techno-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Gyro-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Mamba helicopter pilot. Packaged with Cobra Mamba. First released 1987",
+      "slug": "gyro-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Ice Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Wolf arctic vehicle driver. Packaged with Cobra Wolf. First released 1987",
+      "slug": "ice-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Sea Slug",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Sea Ray pilot. Packaged with Cobra Sea Ray. First released 1987",
+      "slug": "sea-slug",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Steam-Roller (Cobra)",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Maggot driver. Packaged with Cobra Maggot vehicle. First released 1987. Different character from the G.I. Joe Steam-Roller (Mobile Command Center driver). UNCERTAIN: sometimes listed as a named character vs generic trooper",
+      "slug": "steam-roller-cobra",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "W.O.R.M.S.",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Weapon Ordnance Rugged Machine Specialist. Generic Cobra Maggot gunner. Packaged with Cobra Maggot vehicle. First released 1987",
+      "slug": "worms",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Zanzibar",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Dreadnok pirate and Air Skiff pilot. Packaged with Dreadnok Air Skiff. First released 1987",
+      "slug": "zanzibar",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Golobulus",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Supreme ruler of Cobra-La. Ancient serpent-man with snake-like lower body. Main antagonist of G.I. Joe: The Movie (1987). Sold in Cobra-La 3-pack. First released 1987",
+      "slug": "golobulus",
+      "faction_slug": "cobra-la",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Nemesis Enforcer",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Golobulus's winged enforcer and bodyguard. Bio-engineered creature, not fully human. Sold in Cobra-La 3-pack. First released 1987",
+      "slug": "nemesis-enforcer",
+      "faction_slug": "cobra-la",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Royal Guard",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra-La palace guard. Bred and surgically enhanced for size and strength to protect Golobulus. Sold in Cobra-La 3-pack. First released 1987",
+      "slug": "royal-guard",
+      "faction_slug": "cobra-la",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Astro-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra space trooper. Pilots the Cobra Stellar Stiletto. First released 1988",
+      "slug": "astro-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Hydro-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra advanced underwater operative. Underwater assault specialist. First released 1988",
+      "slug": "hydro-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Iron Grenadier",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic elite trooper of Destro's personal military force. Gold and black livery. First released 1988",
+      "slug": "iron-grenadier",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Road Pig",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Donald DeLuca. Born in Goblu, Michigan. Dreadnok. Immensely strong brawler with a cinderblock hammer. Named after a Hasbro design director. First released 1988",
+      "slug": "road-pig",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Toxo-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra hostile environment trooper. Handles toxic and chemical warfare materials. First released 1988",
+      "slug": "toxo-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Voltar",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Iron Grenadier general and Destro's field commander. First released 1988",
+      "slug": "voltar",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Nullifier",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Iron Grenadier A.G.P. (Anti-Gravity Pod) pilot. Packaged with the Iron Grenadier A.G.P. vehicle. First released 1988",
+      "slug": "nullifier",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Secto-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra B.U.G.G. pilot. Packaged with the Cobra B.U.G.G. vehicle. First released 1988",
+      "slug": "secto-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Star-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Stellar Stiletto pilot. Packaged with Cobra Stellar Stiletto. First released 1988. UNCERTAIN: may be same specialty as Astro-Viper (space operations)",
+      "slug": "star-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Alley Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra urban assault trooper. Specialists in city warfare. Distinctive orange and blue color scheme. First released 1989",
+      "slug": "alley-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Frag-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra grenade thrower. Explosive ordnance specialist. First released 1989",
+      "slug": "frag-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Gnawgahyde",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Dreadnok poacher and hunter. Accompanied by a wild boar named Clyde. First released 1989",
+      "slug": "gnawgahyde",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "dreadnoks"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "H.E.A.T. Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "High Explosive Anti-Tank Viper. Generic Cobra bazooka trooper. Anti-armor specialist. First released 1989",
+      "slug": "heat-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra night fighter. Specialist in nighttime operations and stealth. First released 1989",
+      "slug": "night-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Annihilator",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Iron Grenadier elite trooper. Destro's personal airborne assault force. First released 1989",
+      "slug": "annihilator",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Darklon",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Destro's nephew and Iron Grenadier operative. Packaged with Darklon's Evader vehicle. First released 1989",
+      "slug": "darklon",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Aero-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Condor Z25 pilot. Packaged with Cobra Condor. First released 1989",
+      "slug": "aero-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Track Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra H.I.S.S. II driver. Packaged with Cobra H.I.S.S. II vehicle. First released 1989",
+      "slug": "track-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Laser-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra laser trooper. Directed-energy weapons specialist. First released 1990",
+      "slug": "laser-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Metal-Head",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Iron Grenadier anti-tank specialist. Destro's walking arsenal. First released 1990",
+      "slug": "metal-head",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night-Creeper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra techno-ninja mercenary. Blends high-tech gadgetry with traditional ninja skills. Hired by Cobra for espionage and assassination. First released 1990",
+      "slug": "night-creeper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "night-creepers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Range-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra wilderness trooper. Wilderness combat specialist. First released 1990",
+      "slug": "range-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Rock-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra mountain trooper. Alpine warfare specialist. First released 1990",
+      "slug": "rock-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "S.A.W.-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Special Assault Weapons Viper. Generic Cobra heavy machine gunner. First released 1990",
+      "slug": "saw-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Overlord",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Mikhail Derenko. Iron Grenadier commander. Packaged with Dictator vehicle. First released 1990",
+      "slug": "overlord-gijoe",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Decimator",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Iron Grenadier Razorback driver. Packaged with Iron Grenadier Razorback vehicle. First released 1990. UNCERTAIN: may be a named character rather than generic",
+      "slug": "decimator",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Vapor",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Hammerhead pilot. Packaged with Cobra Hammerhead vehicle. First released 1990. UNCERTAIN: sometimes listed as named character vs generic trooper",
+      "slug": "vapor",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Crimson Guard Immortal",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic elite Crimson Guard trooper. Advanced version of the original Crimson Guard. First released 1991",
+      "slug": "crimson-guard-immortal",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "crimson-guard"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Desert Scorpion",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra desert trooper. Desert warfare specialist. First released 1991",
+      "slug": "desert-scorpion",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Incinerators",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra flamethrower trooper. First released 1991",
+      "slug": "incinerators",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Cesspool",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name Vincent D'Alleva. Born in Newton, Massachusetts. Eco-Warriors Cobra operative. Former CEO of a chemical company disfigured in an industrial accident. Named after a Hasbro executive. First released 1991",
+      "slug": "cesspool",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "eco-warriors"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Sludge Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra toxic waste operative. Eco-Warriors sub-line. First released 1991",
+      "slug": "sludge-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "eco-warriors"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Overkill",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "B.A.T. leader. Android commander of Cobra's Battle Android Troopers. Talking Battle Commanders sub-line. First released 1991 (Talking Battle Commanders), later 1992",
+      "slug": "overkill-gijoe",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "bats"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Red Star",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Oktober Guard team member. First Soviet character released in the ARAH line. First released 1991",
+      "slug": "red-star",
+      "faction_slug": "oktober-guard",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Dice",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Cobra Ninja Force operative. Partner to Slice. Specialist in pressure points, choke holds, and snares. Rumored former Night Creeper. First released 1992",
+      "slug": "dice",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "ninja-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Slice",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Cobra Ninja Force swordsman. Renegade from the Arashikage clan. Cobra's supreme swordsman. Partner to Dice. First released 1992",
+      "slug": "slice",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "ninja-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Flak-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra anti-aircraft trooper. First released 1992",
+      "slug": "flak-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Headman",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Drug kingpin and leader of the Headhunters criminal organization. DEF (Drug Elimination Force) sub-line. Cobra-allied organized crime boss. First released 1992",
+      "slug": "headman",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "headhunters"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Headhunter",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Headman's drug enforcement thug. DEF (Drug Elimination Force) sub-line. First released 1992",
+      "slug": "headhunter",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "headhunters"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Toxo-Zombie",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Cobra Eco-Warriors toxic waste mutant. Color-change gimmick reacting to water temperature. First released 1992",
+      "slug": "toxo-zombie",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "eco-warriors"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Cobra Air Devil",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Cobra Air Commandos operative. Paraglider-equipped air assault trooper. First released 1992",
+      "slug": "cobra-air-devil",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Cobra Ninja Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra ninja trooper. Mail-in exclusive figure. First released 1992",
+      "slug": "cobra-ninja-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "ninja-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Big Bear",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Oktober Guard team member. Only Oktober Guard character released as a carded figure during original ARAH run. First released 1992",
+      "slug": "big-bear",
+      "faction_slug": "oktober-guard",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Creeper Leader",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Real name unknown. Commander of the Night Creeper techno-ninja mercenary clan. Conducts all field and covert operations for Cobra. First released 1993",
+      "slug": "night-creeper-leader",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "night-creepers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Crimson Guard Commander",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic elite officer of the Crimson Guard. Battle Corps sub-line. First released 1993",
+      "slug": "crimson-guard-commander",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "crimson-guard"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Headhunter Stormtrooper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic elite Headhunter enforcer. Upgraded Headhunter trooper. First released 1993",
+      "slug": "headhunter-stormtrooper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "headhunters"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Bio-Viper",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Genetically enhanced undersea monster created by Dr. Mindbender. Mega Marines sub-line. Not human. First released 1993",
+      "slug": "bio-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "mega-monsters"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Cyber-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra cyborg trooper. Mega Marines sub-line with moldable bio-armor. First released 1993",
+      "slug": "cyber-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "mega-monsters"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Mega-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Mega-Monster trainer. Mega Marines sub-line with moldable bio-armor. First released 1993",
+      "slug": "mega-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "mega-monsters"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Monstro-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra bio-genetic Mega-Marine hunter. Mega Marines sub-line with moldable bio-armor. First released 1993",
+      "slug": "monstro-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "mega-monsters"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Cobra B.A.A.T.",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Battle Armored Android Trooper. Armored version of the B.A.T. for space operations. Star Brigade sub-line. First released 1993",
+      "slug": "cobra-baat",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "bats",
+        "star-brigade"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Cobra Blackstar",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Cobra Star Brigade operative. Space warfare specialist. First released 1994",
+      "slug": "cobra-blackstar",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "star-brigade"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Lobotomaxx",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Alien character from the Lunartix Empire, allied with Cobra. Star Brigade sub-line. First released 1994",
+      "slug": "lobotomaxx",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "star-brigade"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Predacon",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Alien character from the Lunartix Empire, allied with Cobra. Star Brigade sub-line. First released 1994",
+      "slug": "predacon-gijoe",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "star-brigade"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Carcass",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Alien character from the Lunartix Empire, allied with Cobra. Star Brigade sub-line. First released 1994",
+      "slug": "carcass",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "star-brigade"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Heli-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra helicopter assault trooper. Packaged with Cobra Liquidator vehicle. First released 1992",
+      "slug": "heli-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Nitro-Viper",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Detonator driver. Packaged with Cobra Detonator vehicle. First released 1993",
+      "slug": "nitro-viper",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Wild Boar",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Iron Grenadier Razorback gunner. Packaged with Iron Grenadier Razorback. First released 1989. UNCERTAIN: may overlap with Decimator as Razorback crew",
+      "slug": "wild-boar",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Ferret",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Iron Grenadier recon operative. Packaged with Iron Grenadier vehicle. First released 1988",
+      "slug": "ferret",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [
+        "iron-grenadiers"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Ghostrider (Cobra)",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Generic Cobra Phantom X-19 pilot. Packaged with Cobra Phantom X-19. First released 1988. Different character from the G.I. Joe Ghostrider (Phantom X-19 Stealth Fighter pilot)",
+      "slug": "ghostrider-cobra",
+      "faction_slug": "cobra",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    }
+  ]
+}

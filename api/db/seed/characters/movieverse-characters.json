@@ -1,0 +1,1354 @@
+{
+  "_metadata": {
+    "description": "Live-Action Movieverse characters — TF1 (2007), ROTF (2009), DOTM (2011), AOE (2014), TLK (2017), Bumblebee (2018), ROTB (2023)",
+    "total_characters": 108
+  },
+  "characters": [
+    {
+      "name": "Optimus Prime",
+      "character_type": "Transformer",
+      "alt_mode": "Peterbilt 379 semi-truck (custom flame deco)",
+      "is_combined_form": false,
+      "notes": "Autobot leader. Voiced by Peter Cullen. Killed by Megatron in ROTF, resurrected via the Matrix of Leadership. Merges with Jetfire's parts to defeat The Fallen. TF1, ROTF",
+      "slug": "optimus-prime-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Bumblebee",
+      "character_type": "Transformer",
+      "alt_mode": "1976 Chevrolet Camaro / 2009 Chevrolet Camaro concept",
+      "is_combined_form": false,
+      "notes": "Sam Witwicky's guardian. Communicates via radio clips due to damaged voice box. Upgrades from a 1976 Camaro to the 2009 concept in TF1. TF1, ROTF",
+      "slug": "bumblebee-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Jazz",
+      "character_type": "Transformer",
+      "alt_mode": "Pontiac Solstice",
+      "is_combined_form": false,
+      "notes": "Autobot first lieutenant. Voiced by Darius McCrary. Killed by Megatron in the Battle of Mission City — torn in half. TF1",
+      "slug": "jazz-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Ironhide",
+      "character_type": "Transformer",
+      "alt_mode": "GMC TopKick C4500 pickup truck",
+      "is_combined_form": false,
+      "notes": "Autobot weapons specialist. Voiced by Jess Harnell. Known for heavy weaponry and protective instincts. Part of NEST in ROTF. TF1, ROTF",
+      "slug": "ironhide-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Ratchet",
+      "character_type": "Transformer",
+      "alt_mode": "Hummer H2 search and rescue vehicle",
+      "is_combined_form": false,
+      "notes": "Autobot medical officer. Voiced by Robert Foxworth. Grafts Jetfire's parts onto Optimus Prime in ROTF. TF1, ROTF",
+      "slug": "ratchet-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Megatron",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian jet (TF1) / Cybertronian flying tank (ROTF)",
+      "is_combined_form": false,
+      "notes": "Decepticon leader. Voiced by Hugo Weaving. Frozen in Arctic ice for millennia. Killed by the AllSpark in TF1, revived by Constructicons in ROTF. Serves The Fallen. TF1, ROTF",
+      "slug": "megatron-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Starscream",
+      "character_type": "Transformer",
+      "alt_mode": "Lockheed Martin F-22 Raptor",
+      "is_combined_form": false,
+      "notes": "Decepticon air commander. Voiced by Charlie Adler. Retreats after Megatron's defeat in TF1. Continues to serve (and question) Megatron in ROTF. TF1, ROTF",
+      "slug": "starscream-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Barricade",
+      "character_type": "Transformer",
+      "alt_mode": "Saleen S281E police car ('To punish and enslave...')",
+      "is_combined_form": false,
+      "notes": "Decepticon hunter. Pursues Sam Witwicky early in TF1. Disappears during the final battle. TF1",
+      "slug": "barricade-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Frenzy",
+      "character_type": "Transformer",
+      "alt_mode": "GPX CD player / Nokia phone",
+      "is_combined_form": false,
+      "notes": "Small Decepticon infiltrator. Partner to Barricade. Infiltrates Air Force One. Decapitated by Mikaela but head continues to function. Accidentally kills himself with his own shuriken. TF1",
+      "slug": "frenzy-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Blackout",
+      "character_type": "Transformer",
+      "alt_mode": "Sikorsky MH-53 Pave Low helicopter",
+      "is_combined_form": false,
+      "notes": "Largest Decepticon in TF1. Attacks SOCCENT Forward Operations Base in Qatar in the film's opening. Carries Scorponok. Killed by Captain Lennox and Air Force during the Battle of Mission City. TF1",
+      "slug": "blackout-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Scorponok",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical scorpion (drone/symbiote of Blackout)",
+      "is_combined_form": false,
+      "notes": "Blackout's symbiotic drone. Attacks Lennox's team in the Qatar desert. Burrows underground to escape. Returns in ROTF, killed by Jetfire in Egypt. TF1, ROTF",
+      "slug": "scorponok-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Bonecrusher",
+      "character_type": "Transformer",
+      "alt_mode": "Force Protection Buffalo mine-protected vehicle",
+      "is_combined_form": false,
+      "notes": "Decepticon berserker. Attacks Optimus Prime on the highway. Killed by Optimus via energon sword through the neck during the Battle of Mission City. TF1",
+      "slug": "bonecrusher-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Brawl",
+      "character_type": "Transformer",
+      "alt_mode": "Modified M1 Abrams tank",
+      "is_combined_form": false,
+      "notes": "Decepticon heavy weapons fighter. Credited as 'Devastator' in TF1 due to a production error; later confirmed as Brawl. Destroyed by Bumblebee during the Battle of Mission City. TF1",
+      "slug": "brawl-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Sam Witwicky",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Human protagonist. Played by Shia LaBeouf. Descendant of Archibald Witwicky who discovered Megatron. Uses the AllSpark to destroy Megatron in TF1. AllSpark knowledge imprints on his mind in ROTF; finds the Matrix of Leadership to revive Optimus. TF1, ROTF",
+      "slug": "sam-witwicky-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Mikaela Banes",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Sam's girlfriend. Played by Megan Fox. Skilled mechanic with a juvenile record. Decapitates Frenzy in TF1. Captures Wheelie and assists in ROTF. TF1, ROTF",
+      "slug": "mikaela-banes-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "William Lennox",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "U.S. Army Captain (TF1), promoted to Major in ROTF. Played by Josh Duhamel. Leads SOCCENT survivors in Qatar, helps defeat Blackout and Megatron. Commands NEST operations in ROTF. TF1, ROTF",
+      "slug": "william-lennox-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Robert Epps",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "U.S. Air Force Technical Sergeant (TF1), Master Sergeant in ROTF. Played by Tyrese Gibson. Lennox's right-hand man. Calls in air strikes during key battles. TF1, ROTF",
+      "slug": "robert-epps-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Seymour Simmons",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Sector Seven agent. Played by John Turturro. Antagonistic toward the Autobots in TF1. Returns as an ally in ROTF, helping decode ancient Cybertronian symbols and locate the Matrix. TF1, ROTF",
+      "slug": "seymour-simmons-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "The Fallen",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian spacecraft (non-standard transformation)",
+      "is_combined_form": false,
+      "notes": "Primary antagonist of ROTF. Originally named Megatronus Prime, one of the Dynasty of Primes (the original Seven Primes). Betrayed his brothers to activate the Sun Harvester. Megatron's master. Can only be defeated by a Prime. Killed by Optimus Prime (merged with Jetfire). ROTF",
+      "slug": "the-fallen-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Jetfire",
+      "character_type": "Transformer",
+      "alt_mode": "Lockheed SR-71 Blackbird",
+      "is_combined_form": false,
+      "notes": "Ancient Seeker, former Decepticon who defected to the Autobots. Voiced by Mark Ryan. Dormant at the Smithsonian Air and Space Museum. Teleports the group to Egypt via space bridge. Sacrifices himself so his parts can merge with Optimus Prime. ROTF",
+      "slug": "jetfire-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Sideswipe",
+      "character_type": "Transformer",
+      "alt_mode": "Chevrolet Corvette Stingray concept (silver)",
+      "is_combined_form": false,
+      "notes": "Autobot combat specialist. Voiced by André Sogliuzzo. Slices Sideways in half during the Shanghai pursuit. Known for his wheeled feet and blade-based fighting style. ROTF",
+      "slug": "sideswipe-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Skids",
+      "character_type": "Transformer",
+      "alt_mode": "Chevrolet Beat concept (green)",
+      "is_combined_form": false,
+      "notes": "Autobot, one of the Twins. Voiced by Tom Kenny. Formerly shared an ice cream truck alt mode with Mudflap before scanning individual cars. Comedic character. ROTF",
+      "slug": "skids-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Mudflap",
+      "character_type": "Transformer",
+      "alt_mode": "Chevrolet Trax concept (red/orange)",
+      "is_combined_form": false,
+      "notes": "Autobot, one of the Twins. Voiced by Reno Wilson. Brother of Skids. Swallowed by Devastator during the Egypt battle but punches his way out. Comedic character. ROTF",
+      "slug": "mudflap-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Arcee",
+      "character_type": "Transformer",
+      "alt_mode": "Ducati 848 motorcycle (pink/red)",
+      "is_combined_form": false,
+      "notes": "Female Autobot motorcycle. Part of the Arcee motorcycle trio with Chromia and Elita-One. Whether they share one mind or are three distinct individuals is ambiguous. Killed during the Egypt battle. ROTF",
+      "slug": "arcee-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Chromia",
+      "character_type": "Transformer",
+      "alt_mode": "Suzuki B-King motorcycle (blue)",
+      "is_combined_form": false,
+      "notes": "Female Autobot motorcycle. Part of the Arcee motorcycle trio. The most aggressive of the three sisters. Killed during the Egypt battle. ROTF",
+      "slug": "chromia-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Elita-One",
+      "character_type": "Transformer",
+      "alt_mode": "MV Agusta F4 motorcycle (purple/black)",
+      "is_combined_form": false,
+      "notes": "Female Autobot motorcycle. Part of the Arcee motorcycle trio. Killed during the Egypt battle. ROTF",
+      "slug": "elita-one-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Jolt",
+      "character_type": "Transformer",
+      "alt_mode": "Chevrolet Volt (blue)",
+      "is_combined_form": false,
+      "notes": "Autobot. Uses electro-whips in combat. Assists Ratchet in grafting Jetfire's parts onto Optimus Prime. Minimal screen time. ROTF",
+      "slug": "jolt-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Wheelie",
+      "character_type": "Transformer",
+      "alt_mode": "Radio-controlled Ford F-Series monster truck toy",
+      "is_combined_form": false,
+      "notes": "Small Decepticon spy who defects to the Autobots after Mikaela captures him. Voiced by Tom Kenny. Humps Mikaela's leg. Provides key information about the Fallen. ROTF",
+      "slug": "wheelie-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Soundwave",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian satellite",
+      "is_combined_form": false,
+      "notes": "Decepticon communications officer. Voiced by Frank Welker. Orbits Earth as a satellite, intercepting transmissions and coordinating Decepticon operations. Deploys Ravage to steal the AllSpark shard. ROTF",
+      "slug": "soundwave-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Ravage",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical panther/jaguar",
+      "is_combined_form": false,
+      "notes": "Decepticon. Soundwave's minion, deployed from orbit. Infiltrates Diego Garcia naval base to steal the AllSpark shard used to revive Megatron. Contains Reedman microcons. ROTF",
+      "slug": "ravage-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Demolishor",
+      "character_type": "Transformer",
+      "alt_mode": "Terex RH400 hydraulic mining excavator (red/white)",
+      "is_combined_form": false,
+      "notes": "Large Decepticon Constructicon. Appears in the Shanghai opening battle. Declares 'The Fallen shall rise again' before being executed by Optimus Prime. ROTF",
+      "slug": "demolishor-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Sideways",
+      "character_type": "Transformer",
+      "alt_mode": "Audi R8 (silver)",
+      "is_combined_form": false,
+      "notes": "Decepticon. Pursued through Shanghai by NEST and Sideswipe. Sliced in half by Sideswipe. ROTF",
+      "slug": "sideways-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Scalpel",
+      "character_type": "Transformer",
+      "alt_mode": "Microscope",
+      "is_combined_form": false,
+      "notes": "Tiny Decepticon medic, also known as 'The Doctor'. Insectoid appearance. Examines Sam's brain and performs surgery on Megatron to revive him using the AllSpark shard. ROTF",
+      "slug": "scalpel-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Grindor",
+      "character_type": "Transformer",
+      "alt_mode": "Sikorsky CH-53E Super Stallion helicopter",
+      "is_combined_form": false,
+      "notes": "Large Decepticon similar in appearance to Blackout. Captures Sam, Mikaela, and Leo for Megatron. Killed by Optimus Prime during the forest battle — face ripped apart. ROTF",
+      "slug": "grindor-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Alice",
+      "character_type": "Transformer",
+      "alt_mode": "Human disguise (Pretender)",
+      "is_combined_form": false,
+      "notes": "Decepticon Pretender. Disguises as a human college student to get close to Sam Witwicky. Reveals her mechanical tongue/tail. Killed by Mikaela. ROTF",
+      "slug": "alice-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Devastator",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": true,
+      "notes": "Massive Decepticon combiner formed from multiple Constructicons at the Pyramid of Giza. Has a vortex grinder in its mouth. Destroyed by a U.S. Navy experimental rail gun strike. ROTF",
+      "slug": "devastator-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Scavenger",
+      "character_type": "Transformer",
+      "alt_mode": "Terex O&K RH400 hydraulic excavator (red)",
+      "is_combined_form": false,
+      "notes": "Constructicon. Forms the torso/upper body of Devastator. Same model excavator as Demolishor but a separate character. ROTF",
+      "slug": "scavenger-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Mixmaster",
+      "character_type": "Transformer",
+      "alt_mode": "Mack concrete mixer truck",
+      "is_combined_form": false,
+      "notes": "Constructicon. Forms the head of Devastator. Also appears independently in combat at the Egyptian battle. ROTF",
+      "slug": "mixmaster-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Long Haul",
+      "character_type": "Transformer",
+      "alt_mode": "Caterpillar 773B dump truck (green)",
+      "is_combined_form": false,
+      "notes": "Constructicon. Forms the right leg of Devastator. Also appears independently in combat during Operation Firestorm at the pyramids. ROTF",
+      "slug": "long-haul-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Scrapper",
+      "character_type": "Transformer",
+      "alt_mode": "Caterpillar 992G front-end loader (yellow)",
+      "is_combined_form": false,
+      "notes": "Constructicon. Forms the right arm of Devastator. Also appears independently in combat during the Egypt battle. ROTF",
+      "slug": "scrapper-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Hightower",
+      "character_type": "Transformer",
+      "alt_mode": "Kobelco CK2500 truss crane (yellow)",
+      "is_combined_form": false,
+      "notes": "Constructicon. Forms the left arm of Devastator. ROTF",
+      "slug": "hightower-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Overload",
+      "character_type": "Transformer",
+      "alt_mode": "KW Dart D4661 articulated dump truck (red)",
+      "is_combined_form": false,
+      "notes": "Constructicon. Forms the lower waist/hip section of Devastator. ROTF",
+      "slug": "overload-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Rampage",
+      "character_type": "Transformer",
+      "alt_mode": "Caterpillar D9 bulldozer (red/yellow)",
+      "is_combined_form": false,
+      "notes": "Constructicon. Forms the left leg of Devastator. Also appears independently — holds Sam's parents hostage near the pyramids before being killed by Bumblebee. ROTF",
+      "slug": "rampage-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Leo Spitz",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Sam's college roommate. Played by Ramon Rodriguez. Runs a conspiracy theory website. Provides comic relief. Accompanies Sam on his quest to find the Matrix. ROTF",
+      "slug": "leo-spitz-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "John Keller",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "U.S. Secretary of Defense. Played by Jon Voight. Coordinates the government's response to the Decepticon attacks. TF1",
+      "slug": "john-keller-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Sentinel Prime",
+      "character_type": "Transformer",
+      "alt_mode": "Rosenbauer Panther 6x6 airport fire truck",
+      "is_combined_form": false,
+      "notes": "Former Autobot leader and Optimus Prime's mentor. Secretly allied with Megatron to use space bridge technology to transport Cybertron to Earth. Betrays the Autobots, kills Ironhide. Voiced by Leonard Nimoy. Dark of the Moon (2011)",
+      "slug": "sentinel-prime-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Shockwave",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian tank",
+      "is_combined_form": false,
+      "notes": "Emotionless one-eyed Decepticon warrior. Armed with an arm-mounted AstroMag Cannon. Controls the Driller creature. Left to guard Cybertron before arriving on Earth. Dark of the Moon (2011)",
+      "slug": "shockwave-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Dino",
+      "character_type": "Transformer",
+      "alt_mode": "Ferrari 458 Italia",
+      "is_combined_form": false,
+      "notes": "Autobot warrior with Italian accent. Also known as Mirage in some toy lines and supplementary materials; 'Dino' is the on-screen name per Ferrari licensing. Equipped with electro-disrupter for invisibility. Dark of the Moon (2011)",
+      "slug": "dino-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Que",
+      "character_type": "Transformer",
+      "alt_mode": "Mercedes-Benz E550",
+      "is_combined_form": false,
+      "notes": "Autobot scientist and inventor. Also known as Wheeljack in some materials; 'Que' is the on-screen name, a homage to Q from James Bond. Provides weapons and gadgets to NEST. Executed by Decepticons in Chicago battle. Dark of the Moon (2011)",
+      "slug": "que-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Leadfoot",
+      "character_type": "Transformer",
+      "alt_mode": "NASCAR Sprint Cup Chevrolet Impala (#42 Target car)",
+      "is_combined_form": false,
+      "notes": "Wrecker team member. Former engineer turned fighter, specializes in building weapons. Heavily armed and armored stock car. Dark of the Moon (2011)",
+      "slug": "leadfoot-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "wreckers-mv"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Topspin",
+      "character_type": "Transformer",
+      "alt_mode": "NASCAR Sprint Cup Chevrolet Impala (#48 Lowe's car)",
+      "is_combined_form": false,
+      "notes": "Wrecker team member. Heavily modified stock car with combat weaponry. Dark of the Moon (2011)",
+      "slug": "topspin-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "wreckers-mv"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Roadbuster",
+      "character_type": "Transformer",
+      "alt_mode": "NASCAR Sprint Cup Chevrolet Impala (#88 Amp Energy car)",
+      "is_combined_form": false,
+      "notes": "Wrecker team member. Dale Earnhardt Jr.'s car with extensive weaponry modifications including front-mounted minigun. Dark of the Moon (2011)",
+      "slug": "roadbuster-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "wreckers-mv"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Laserbeak",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian VTOL aircraft (multi-form shapeshifter)",
+      "is_combined_form": false,
+      "notes": "Decepticon spy and assassin serving Soundwave. Highly versatile shapeshifter who can assume multiple disguise forms. Skilled infiltrator who assassinates several humans. Dark of the Moon (2011)",
+      "slug": "laserbeak-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Igor",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Small Decepticon drone created from leftover parts. Resembles a severed head walking with a cane. Serves as Megatron's groveling pet in the African camp. Dark of the Moon (2011)",
+      "slug": "igor-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Brains",
+      "character_type": "Transformer",
+      "alt_mode": "Lenovo ThinkPad laptop",
+      "is_combined_form": false,
+      "notes": "Small Decepticon-turned-Autobot drone. Originally a Decepticon brain unit who developed independent thought and defected. Highly knowledgeable. Also appears in Age of Extinction where he is captured by KSI. Dark of the Moon (2011), Age of Extinction (2014)",
+      "slug": "brains-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Driller",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Enormous Cybertronian subterranean creature, not a true Transformer. Multi-tentacled beast controlled by Shockwave. Semi-sentient, bred for military use. Dark of the Moon (2011)",
+      "slug": "driller-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Carly Spencer",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Sam Witwicky's girlfriend. Works for Dylan Gould at Accuretta Systems. Played by Rosie Huntington-Whiteley. Dark of the Moon (2011)",
+      "slug": "carly-spencer-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Dylan Gould",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Wealthy businessman and secret Decepticon collaborator. Carly's employer at Accuretta Systems. Assists Decepticon invasion of Chicago. Played by Patrick Dempsey. Dark of the Moon (2011)",
+      "slug": "dylan-gould-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Lockdown",
+      "character_type": "Transformer",
+      "alt_mode": "Lamborghini Aventador LP 700-4",
+      "is_combined_form": false,
+      "notes": "Independent bounty hunter working for mysterious alien 'Creators.' Holds himself above the Autobot/Decepticon war. Operates a massive prison ship. Hunts Optimus Prime and other rogue Knights. Voiced by Mark Ryan. Age of Extinction (2014)",
+      "slug": "lockdown-mv",
+      "faction_slug": "neutral",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Drift",
+      "character_type": "Transformer",
+      "alt_mode": "2013 Bugatti Veyron Grand Sport Vitesse / helicopter",
+      "is_combined_form": false,
+      "notes": "Samurai-themed Autobot, former Decepticon. Triple changer with both car and helicopter modes. Wields multiple swords, practices meditation and haikus. Voiced by Ken Watanabe. Age of Extinction (2014)",
+      "slug": "drift-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Crosshairs",
+      "character_type": "Transformer",
+      "alt_mode": "2014 Chevrolet C7 Corvette Stingray",
+      "is_combined_form": false,
+      "notes": "Autobot paratrooper with a distinctive trench coat formed from vehicle panels. Trigger-happy and cynical. Voiced by John DiMaggio. Age of Extinction (2014)",
+      "slug": "crosshairs-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Hound",
+      "character_type": "Transformer",
+      "alt_mode": "Oshkosh Defense FMTV tactical military truck",
+      "is_combined_form": false,
+      "notes": "Portly, cigar-chomping Autobot commando. Weapons specialist who carries an enormous arsenal. Voiced by John Goodman. Age of Extinction (2014)",
+      "slug": "hound-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Galvatron",
+      "character_type": "Transformer",
+      "alt_mode": "2014 Freightliner Argosy cab-over truck",
+      "is_combined_form": false,
+      "notes": "Man-made Transformer created by KSI using Transformium. Intended to be modeled after Optimus Prime but Megatron's consciousness secretly influenced the design, effectively giving Megatron a new body. Sparkless. Age of Extinction (2014)",
+      "slug": "galvatron-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Stinger",
+      "character_type": "Transformer",
+      "alt_mode": "Pagani Huayra",
+      "is_combined_form": false,
+      "notes": "KSI-created drone built from salvaged Transformium. Deliberately designed as an improved version of Bumblebee. Defeated by Bumblebee in Hong Kong. Age of Extinction (2014)",
+      "slug": "stinger-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Grimlock",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical Tyrannosaurus rex",
+      "is_combined_form": false,
+      "notes": "King of the Dinobots. One of the most powerful warriors in the universe. Fire-breathing T-rex mode. Initially hostile to Optimus before being tamed into service. Age of Extinction (2014)",
+      "slug": "grimlock-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "dinobots"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Slug",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical Triceratops",
+      "is_combined_form": false,
+      "notes": "Aggressive Dinobot warrior driven by white-hot rage. Extremely powerful and interested only in combat. Age of Extinction (2014)",
+      "slug": "slug-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "dinobots"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Strafe",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical two-headed pterosaur",
+      "is_combined_form": false,
+      "notes": "Dinobot aerial warrior. Transforms into a two-headed, fire-breathing pterosaur. Despite fearsome appearance, is friendly off the battlefield. Close friendship with Bumblebee. Age of Extinction (2014)",
+      "slug": "strafe-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "dinobots"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Scorn",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical Spinosaurus",
+      "is_combined_form": false,
+      "notes": "Dinobot demolitions specialist. Largest Dinobot in the film. Wields the Scrapmaker Sword in robot mode. Nearly impossible to bring down. Age of Extinction (2014)",
+      "slug": "scorn-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "dinobots"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Junkheap",
+      "character_type": "Transformer",
+      "alt_mode": "Waste Management garbage truck",
+      "is_combined_form": false,
+      "notes": "KSI-created drone built from Transformium. Can split into three separate robots. Serves under Galvatron's command during the Hong Kong battle. Age of Extinction (2014)",
+      "slug": "junkheap-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Cade Yeager",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Struggling inventor and single father from Texas. Discovers and repairs Optimus Prime. Becomes a key human ally to the Autobots. Played by Mark Wahlberg. Age of Extinction (2014)",
+      "slug": "cade-yeager-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Tessa Yeager",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Cade Yeager's teenage daughter. Drawn into the conflict when Cemetery Wind targets her father. Played by Nicola Peltz. Age of Extinction (2014)",
+      "slug": "tessa-yeager-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Joshua Joyce",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Founder of KSI (Kinetic Solutions Incorporated). Creates artificial Transformers using Transformium, including Galvatron and Stinger. Eventually sides with the Autobots. Played by Stanley Tucci. Age of Extinction (2014)",
+      "slug": "joshua-joyce-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Harold Attinger",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Rogue CIA operative who leads Cemetery Wind, a black ops unit that hunts all Transformers regardless of faction. Secretly collaborates with Lockdown. Played by Kelsey Grammer. Age of Extinction (2014)",
+      "slug": "harold-attinger-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Hot Rod",
+      "character_type": "Transformer",
+      "alt_mode": "Lamborghini Centenario",
+      "is_combined_form": false,
+      "notes": "Brash Autobot protector with a French accent. Possesses a time bubble gun. Served as deep cover bodyguard for Viviane Wembly. Fought alongside Bumblebee in WWII. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "hot-rod-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Cogman",
+      "character_type": "Transformer",
+      "alt_mode": "Aston Martin DB11",
+      "is_combined_form": false,
+      "notes": "Described as a Headmaster, though never demonstrates the ability on-screen. Butler, bodyguard, and chauffeur to the Burton family for seven centuries. Polite but with anger management issues. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "cogman-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Nitro Zeus",
+      "character_type": "Transformer",
+      "alt_mode": "Fighter jet (KAI KF-21 Boramae-type)",
+      "is_combined_form": false,
+      "notes": "Merciless Decepticon hunter and tracker. Loudmouthed, self-aggrandizing brawler. Specializes in stalking and destruction. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "nitro-zeus-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Quintessa",
+      "character_type": "Other",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Mysterious space sorceress who claims to be the Prime of Life and creator of the Cybertronians. Primary antagonist who brainwashed Optimus Prime into Nemesis Prime. Seeks to drain Earth's lifeforce to repair Cybertron. Known as 'The Great Deceiver'. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "quintessa-mv",
+      "faction_slug": "other",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Dragonstorm",
+      "character_type": "Transformer",
+      "alt_mode": "Three-headed dragon",
+      "is_combined_form": false,
+      "notes": "Gestalt form of the twelve Guardian Knights. Transforms from three-headed dragon to robot. Does not require all twelve knights to form at any given time. Sometimes depicted as formed from Dragonicus and Stormreign. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "dragonstorm-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "guardian-knights-mv"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Sqweeks",
+      "character_type": "Transformer",
+      "alt_mode": "Vespa-style scooter (cannot transform due to damage)",
+      "is_combined_form": false,
+      "notes": "Small, damaged Autobot companion to Izabella. Found in the ruins of Chicago. Damaged vocal processor limits speech to 'Chihuahua!' Destroyed a gun emplacement in the final battle. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "sqweeks-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Canopy",
+      "character_type": "Transformer",
+      "alt_mode": "Pile of rubble / debris camouflage",
+      "is_combined_form": false,
+      "notes": "Large Autobot who disguises himself as rubble rather than a vehicle to avoid detection. Guardian of Izabella and Sqweeks. Killed by a TRF missile strike in the ruins of Chicago. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "canopy-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Onslaught",
+      "character_type": "Transformer",
+      "alt_mode": "Western Star 4900SF tow truck",
+      "is_combined_form": false,
+      "notes": "Decepticon based on a retooled Long Haul model. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "onslaught-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Mohawk",
+      "character_type": "Transformer",
+      "alt_mode": "Confederate P51 Combat Fighter motorcycle",
+      "is_combined_form": false,
+      "notes": "Small, aggressive Decepticon covered in graffiti and armed with random blades. Released from TRF custody to hunt Cade Yeager. Defeated by Bumblebee. Voiced by Reno Wilson. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "mohawk-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Dreadbot",
+      "character_type": "Transformer",
+      "alt_mode": "Volkswagen Microbus (decorated with Christmas lights)",
+      "is_combined_form": false,
+      "notes": "Tough, destructive Decepticon thug. Imprisoned by the TRF after a deadly bank robbery, released by Megatron. Killed by Grimlock. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "dreadbot-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Viviane Wembly",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Professor of English Literature at the University of Oxford. Last living descendant of Merlin. Only she could retrieve Merlin's staff. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "viviane-wembly-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Edmund Burton",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Last of the Order of the Witwiccans and twelfth Earl of Folgan. Keeper of the secret history of Transformers on Earth. Killed by Megatron. Inducted Seymour Simmons into the Order before his death. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "edmund-burton-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Izabella",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Orphaned girl who grew up in the ruins of Chicago. Found family in the damaged Autobots Canopy and Sqweeks. Skilled at repairing machines. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "izabella-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Sharp-T",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical baby Tyrannosaurus rex",
+      "is_combined_form": false,
+      "notes": "Mini Dinobot, small copy of Grimlock. Acquired the ability to breathe fire. Part of the baby Dinobots that roamed Cade Yeager's junkyard. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "sharp-t-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "mini-dinobots-mv"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Pterry",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical baby pteranodon",
+      "is_combined_form": false,
+      "notes": "Mini Dinobot, small pteranodon-based Autobot. Trained by Cade Yeager to fetch beers from the fridge. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "pterry-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "mini-dinobots-mv"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Tops",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical baby triceratops",
+      "is_combined_form": false,
+      "notes": "Mini Dinobot, small triceratops-based Autobot. Part of the baby Dinobots at Cade Yeager's junkyard. Debuted in Transformers: The Last Knight (2017)",
+      "slug": "tops-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "mini-dinobots-mv"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Shatter",
+      "character_type": "Transformer",
+      "alt_mode": "1971 Plymouth GTX / Harrier jet (triple changer)",
+      "is_combined_form": false,
+      "notes": "Smooth-talking Decepticon manipulator and skilled combatant. Partnered with Dropkick to hunt B-127 on Earth. Design partially inspired by G1 Nightbird. Killed by Bumblebee. Debuted in Bumblebee (2018)",
+      "slug": "shatter-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "triple-changers"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Dropkick",
+      "character_type": "Transformer",
+      "alt_mode": "1974 AMC Javelin / Bell AH-1 SuperCobra helicopter (triple changer)",
+      "is_combined_form": false,
+      "notes": "Disgruntled Decepticon partnered with Shatter. Triple changer with car and helicopter alt modes. Killed by Bumblebee using a chain. Debuted in Bumblebee (2018)",
+      "slug": "dropkick-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "triple-changers"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Blitzwing",
+      "character_type": "Transformer",
+      "alt_mode": "F-4 Phantom II fighter jet",
+      "is_combined_form": false,
+      "notes": "Decepticon Seeker who pursued B-127 to Earth. Tore out Bumblebee's voice synthesizer during interrogation. Destroyed when Bumblebee detonated a missile lodged in his chest. Debuted in Bumblebee (2018)",
+      "slug": "blitzwing-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Cliffjumper",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian car",
+      "is_combined_form": false,
+      "notes": "Autobot scout who appeared briefly on Cybertron and was later captured and killed by Dropkick during interrogation about Optimus Prime's location. Debuted in Bumblebee (2018)",
+      "slug": "cliffjumper-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Charlie Watson",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Teenager who discovered B-127 in a junkyard and named him Bumblebee. Recovering from the loss of her father. Passionate about music, especially The Smiths. Debuted in Bumblebee (2018)",
+      "slug": "charlie-watson-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Memo",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Guillermo 'Memo' Gutierrez. Charlie Watson's neighbor and friend who works at a churro stand. Sci-fi fan. Helped Charlie in her adventures with Bumblebee. Debuted in Bumblebee (2018)",
+      "slug": "memo-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Jack Burns",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Sector Seven intelligence officer. Initially pursued Bumblebee but chose to let him escape after the Autobot saved his life. Gave Bumblebee a respectful salute. Debuted in Bumblebee (2018)",
+      "slug": "jack-burns-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Mirage",
+      "character_type": "Transformer",
+      "alt_mode": "Porsche 911 (964) Carrera RS 3.8",
+      "is_combined_form": false,
+      "notes": "Talkative, showoff Autobot with hologram generation and shapeshifting abilities. Becomes Noah Diaz's partner and friend. Different character from DOTM Dino/Mirage. Voiced by Pete Davidson. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "mirage-rotb-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Scourge",
+      "character_type": "Transformer",
+      "alt_mode": "Armored Peterbilt 359 semi-truck",
+      "is_combined_form": false,
+      "notes": "Most fearsome hunter in the universe and ruthless leader of the Terrorcons. Serves Unicron. Possesses dark energy and can corrupt others. Truck grille decorated with insignias of defeated enemies. Voiced by Peter Dinklage. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "scourge-rotb-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "terrorcons-rotb-mv"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Nightbird",
+      "character_type": "Transformer",
+      "alt_mode": "Nissan GT-R R33",
+      "is_combined_form": false,
+      "notes": "Sword-wielding Terrorcon assassin with a haughty demeanor. More measured than her Terrorcon cohorts. Wields dual katanas and has rocket thrusters for aerial combat. Defeated by Bumblebee. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "nightbird-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "terrorcons-rotb-mv"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Battletrap",
+      "character_type": "Transformer",
+      "alt_mode": "GMC C70 tow truck",
+      "is_combined_form": false,
+      "notes": "Menacing, unrelenting Terrorcon scout and enforcer under Scourge's command. Wields a chain-flail. Never referred to by name in the film. Voiced by David Sobolov. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "battletrap-mv",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "terrorcons-rotb-mv"
+      ],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Unicron",
+      "character_type": "Other",
+      "alt_mode": "Planet / planet-eater",
+      "is_combined_form": false,
+      "notes": "Dark god who consumes planets. Galaxy-roaming Chaos Bringer whom the Terrorcons serve. Attacked the Maximals' homeworld. Continuity with TLK (where Earth is Unicron) is ambiguous. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "unicron-mv",
+      "faction_slug": "other",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Optimus Primal",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical gorilla",
+      "is_combined_form": false,
+      "notes": "Leader of the Maximals. Led survivors to Earth after Unicron attacked their homeworld using the Transwarp Key. Wields twin swords. Voiced by Ron Perlman. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "optimus-primal-mv",
+      "faction_slug": "maximal",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Airazor",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical peregrine falcon",
+      "is_combined_form": false,
+      "notes": "High-flying Maximal scout and protector. Never seen to transform outside of beast mode in the film. Corrupted by Scourge during the battle for the Transwarp Key. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "airazor-mv",
+      "faction_slug": "maximal",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Rhinox",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical rhinoceros",
+      "is_combined_form": false,
+      "notes": "Hard-hitting Maximal bruiser and close-combat specialist. Wields a mighty hammer. Voiced by David Sobolov. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "rhinox-mv",
+      "faction_slug": "maximal",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Cheetor",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical cheetah",
+      "is_combined_form": false,
+      "notes": "Speedy Maximal warrior known for exceptional agility. Fast in both mind and body but prone to overconfidence. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "cheetor-mv",
+      "faction_slug": "maximal",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Wheeljack",
+      "character_type": "Transformer",
+      "alt_mode": "1970 Volkswagen Type 2 microbus",
+      "is_combined_form": false,
+      "notes": "Soft-spoken, insightful Autobot inventor, mechanic, and scientist. Stationed in Peru. Different character from DOTM Que/Wheeljack. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "wheeljack-rotb-mv",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Noah Diaz",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Former military veteran from Brooklyn. Struggling to find work to pay for his brother's medical treatment. Partners with Mirage after a failed carjacking attempt. Recruited by G.I. Joe at the film's end. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "noah-diaz-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Elena Wallace",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Museum intern and researcher who discovered half of the Transwarp Key inside a statue. Central to the mission against Unicron. Credited on 60 Minutes for discovering the temple. Debuted in Transformers: Rise of the Beasts (2023)",
+      "slug": "elena-wallace-mv",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "movieverse",
+      "franchise_slug": "transformers"
+    }
+  ]
+}

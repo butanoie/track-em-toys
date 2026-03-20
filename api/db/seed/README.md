@@ -17,6 +17,7 @@ Tables must be seeded in dependency order:
 | 5     | characters          | `characters/*.json`                    | factions (faction_slug), characters (combined_form_slug), continuity_families (continuity_family_slug), franchises (franchise_slug) |
 | 5b    | character_sub_groups | `characters/*.json` (sub_group_slugs) | characters, sub_groups (via sub_group_slugs array)                              |
 | 5.5   | character_appearances | `appearances/*.json`                 | characters (character_slug)                                                     |
+| 5.7   | character_relationships | `relationships/*.json`             | characters (entity1.slug, entity2.slug)                                         |
 | 6     | items               | `items/*.json` (when added)            | manufacturers, toy_lines, characters, character_appearances (all via slugs)     |
 
 ## FK Convention: Slugs, Not IDs
@@ -62,13 +63,10 @@ Characters are ordered by narrative chronology (NA S1 → S2 → Movie → S3 �
 | `character_type` | `character_type` | Species or gimmick type (see migration 012 comment) |
 | `sub_group_slugs` | `character_sub_groups` | Array of slugs → insert into junction table. Resolve each via `SELECT id FROM sub_groups WHERE slug = $1` |
 | `alt_mode` | `alt_mode` | |
-| `is_combined_form` | `is_combined_form` | |
-| `combined_form_slug` | `combined_form_id` | Resolve via `SELECT id FROM characters WHERE slug = $1`. Two-pass insert required. |
-| `combiner_role` | `combiner_role` | |
+| `is_combined_form` | `is_combined_form` | Denormalized flag. Must be consistent with `combiner-component` relationships |
 | `continuity_family_slug` | `continuity_family_id` | Resolve via `SELECT id FROM continuity_families WHERE slug = $1`. Added in migration 013. Always populated |
 | `notes` | `metadata.notes` | Into JSONB |
 | `series_year` | `metadata.series_year` | Into JSONB |
-| `component_slugs` | — | Not stored directly; inverse of `combined_form_id` FK |
 
 ## Character Appearances
 

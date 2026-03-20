@@ -2,7 +2,7 @@
   "_metadata": {
     "table": "factions",
     "description": "Seed data for the factions reference table",
-    "total": 14,
+    "total": 17,
     "import_order": 1
   },
   "data": [
@@ -89,6 +89,24 @@
       "slug": "cobra",
       "franchise_slug": "gi-joe",
       "notes": "Villainous faction from G.I. Joe franchise"
+    },
+    {
+      "name": "Oktober Guard",
+      "slug": "oktober-guard",
+      "franchise_slug": "gi-joe",
+      "notes": "Soviet special missions team. Cold War counterpart to G.I. Joe. Led by Colonel Brekhov. Sometimes allies with G.I. Joe against Cobra"
+    },
+    {
+      "name": "Cobra-La",
+      "slug": "cobra-la",
+      "franchise_slug": "gi-joe",
+      "notes": "Ancient serpent civilization from G.I. Joe: The Movie (1987). Led by Golobulus. Created Cobra Commander as their agent. Organic bio-technology"
+    },
+    {
+      "name": "Civilian",
+      "slug": "civilian-gijoe",
+      "franchise_slug": "gi-joe",
+      "notes": "Non-combatant characters. Reporters, scientists, politicians, and other civilians encountered across G.I. Joe media"
     }
   ]
 }

@@ -1,0 +1,1598 @@
+{
+  "_metadata": {
+    "description": "ARAH G.I. Joe team vehicles from the original 3.75\" A Real American Hero toyline (1982-1994). Includes all named Joe faction vehicles, playsets, sub-team repaints, and mail-order exclusives.",
+    "total_characters": 122,
+    "uncertain_items": [
+      {
+        "name": "Missile Command Headquarters",
+        "reason": "1982 playset — may be classified as a playset rather than a vehicle. Included for completeness."
+      },
+      {
+        "name": "Headquarters Command Center",
+        "reason": "1983 playset — large fold-out base. Included as a vehicle/playset per precedent."
+      },
+      {
+        "name": "PAC/RATs (Flame Thrower, Machine Gun, Missile Launcher)",
+        "reason": "1983 motorized weapon platforms — borderline between accessories and vehicles. Excluded as they are closer to weapon emplacements than vehicles."
+      },
+      {
+        "name": "Battle Stations (Bivouac, Mountain Howitzer, Watch Tower, Air Defense, Check Point)",
+        "reason": "1984-1985 small battle stations — classified as accessories/emplacements, not vehicles. Excluded."
+      },
+      {
+        "name": "Battlefield Accessories (Machine Gun/Missile/Mortar Defense Units, Ammo Dump, Forward Observer, Rifle Range)",
+        "reason": "1984-1985 small accessory sets — not vehicles. Excluded."
+      },
+      {
+        "name": "Motorized Action Packs (1988 Mine Sweeper, Mortar Launcher, Double Machine Gun)",
+        "reason": "1988 small motorized weapon accessories — borderline. Excluded as accessories."
+      },
+      {
+        "name": "Motorized Vehicle Packs (1988 ATV, Scuba Pack, Tank Car)",
+        "reason": "1988 small motorized vehicle accessories — borderline. Excluded as too small to be named vehicles."
+      },
+      {
+        "name": "S.N.A.K.E. Armor",
+        "reason": "1985 one-man battle armor — borderline between vehicle and wearable armor. Excluded."
+      },
+      {
+        "name": "Bomb Disposal / Weapon Transport",
+        "reason": "1985 small utility vehicles — borderline between accessories and vehicles. Excluded."
+      },
+      {
+        "name": "C.A.T. (Crimson Attack Tank)",
+        "reason": "1985 Sears exclusive — MOBAT repaint in Crimson Guard colors. Technically a Crimson Guard vehicle, faction is ambiguous (Cobra-aligned). Excluded from Joe vehicles."
+      },
+      {
+        "name": "S.M.S. (Sentry and Missile System)",
+        "reason": "1985 Sears exclusive — HISS/MMS repaint in Crimson Guard colors. Cobra-aligned. Excluded from Joe vehicles."
+      },
+      {
+        "name": "Gears (Star Brigade Power Fighter pilot)",
+        "reason": "Gears character does not have an entry in arah-gi-joe-characters.json. component_slugs left empty."
+      },
+      {
+        "name": "Red Ninja (Battle Ax pilot)",
+        "reason": "Red Ninja character does not have an entry in arah-gi-joe-characters.json. Battle Ax excluded — it is a Cobra Ninja Force vehicle."
+      }
+    ]
+  },
+  "characters": [
+    {
+      "name": "F.L.A.K.",
+      "character_type": "Vehicle",
+      "alt_mode": "Field light attack cannon",
+      "is_combined_form": false,
+      "notes": "F.L.A.K. (Field Light Attack Cannon). Mobile anti-aircraft cannon with swivel and elevating barrel. First released 1982. No packaged figure.",
+      "slug": "flak",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "H.A.L.",
+      "character_type": "Vehicle",
+      "alt_mode": "Heavy artillery laser emplacement",
+      "is_combined_form": false,
+      "notes": "H.A.L. (Heavy Artillery Laser). Swivel and elevating laser cannon platform. First released 1982. Packaged with Grand Slam.",
+      "slug": "hal",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "J.U.M.P.",
+      "character_type": "Vehicle",
+      "alt_mode": "Jet-propelled mobile propulsion unit",
+      "is_combined_form": false,
+      "notes": "J.U.M.P. (Jet Mobile Propulsion Unit). Jet pack with launch pad and command console. First released 1982. No packaged figure.",
+      "slug": "jump",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Missile Command Headquarters",
+      "character_type": "Vehicle",
+      "alt_mode": "Mobile missile command playset",
+      "is_combined_form": false,
+      "notes": "Missile Command Headquarters playset. Fold-out mobile command center with missile launchers. First released 1982. No packaged figure.",
+      "slug": "missile-command-headquarters",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "M.M.S.",
+      "character_type": "Vehicle",
+      "alt_mode": "Mobile missile system",
+      "is_combined_form": false,
+      "notes": "M.M.S. (Mobile Missile System). Tracked mobile missile launcher. First released 1982. No packaged figure.",
+      "slug": "mms",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "M.O.B.A.T.",
+      "character_type": "Vehicle",
+      "alt_mode": "Motorized battle tank",
+      "is_combined_form": false,
+      "notes": "M.O.B.A.T. (Motorized Battle Tank). Motorized tank with rotating turret and extending battle cannon. First released 1982. Packaged with Steeler.",
+      "slug": "mobat",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "R.A.M.",
+      "character_type": "Vehicle",
+      "alt_mode": "Rapid-fire motorcycle with sidecar",
+      "is_combined_form": false,
+      "notes": "R.A.M. (Rapid Fire Motorcycle). Motorcycle with Vulcan gatling cannon and saddlebags. First released 1982. No packaged figure.",
+      "slug": "ram",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "V.A.M.P.",
+      "character_type": "Vehicle",
+      "alt_mode": "Multi-purpose attack vehicle (4x4 jeep)",
+      "is_combined_form": false,
+      "notes": "V.A.M.P. (Vehicle: Attack, Multi-Purpose). 4x4 attack jeep with twin .50 caliber machine guns. First released 1982. Packaged with Clutch.",
+      "slug": "vamp",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "A.P.C.",
+      "character_type": "Vehicle",
+      "alt_mode": "Amphibious personnel carrier",
+      "is_combined_form": false,
+      "notes": "A.P.C. (Amphibious Personnel Carrier). Multi-terrain troop transport with removable top and cannon. First released 1983. No packaged figure.",
+      "slug": "apc",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Dragonfly XH-1",
+      "character_type": "Vehicle",
+      "alt_mode": "Twin-engine assault helicopter",
+      "is_combined_form": false,
+      "notes": "Dragonfly XH-1 Assault Copter. Twin-engine attack helicopter with dual gun turrets. First released 1983. Packaged with Wild Bill.",
+      "slug": "dragonfly",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Falcon Glider",
+      "character_type": "Vehicle",
+      "alt_mode": "Unpowered attack glider",
+      "is_combined_form": false,
+      "notes": "Falcon assault glider. Lightweight unpowered attack glider. First released 1983. No packaged figure.",
+      "slug": "falcon-vehicle",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Headquarters Command Center",
+      "character_type": "Vehicle",
+      "alt_mode": "Fold-out command center playset",
+      "is_combined_form": false,
+      "notes": "G.I. Joe Headquarters Command Center. Large fold-out base playset with multiple levels and defense positions. First released 1983. No packaged figure.",
+      "slug": "headquarters-command-center",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Skystriker XP-14F",
+      "character_type": "Vehicle",
+      "alt_mode": "Supersonic combat jet fighter",
+      "is_combined_form": false,
+      "notes": "Skystriker XP-14F Combat Jet. Supersonic fighter jet based on the F-14 Tomcat. First released 1983. Packaged with Ace.",
+      "slug": "skystriker",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Twin Battle Gun",
+      "character_type": "Vehicle",
+      "alt_mode": "Dual-barrel mobile artillery platform",
+      "is_combined_form": false,
+      "notes": "Twin Battle Gun. Dual-barrel mobile gun emplacement. First released 1983. No packaged figure.",
+      "slug": "twin-battle-gun",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Wolverine",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored missile tank",
+      "is_combined_form": false,
+      "notes": "Wolverine Armored Missile Vehicle. Tread-driven missile tank. First released 1983. Packaged with Cover Girl.",
+      "slug": "wolverine",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Killer W.H.A.L.E.",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored assault hovercraft",
+      "is_combined_form": false,
+      "notes": "Killer W.H.A.L.E. (Warrior Hovering Assault Launch Envoy). Large armed hovercraft. First released 1984. Packaged with Cutter.",
+      "slug": "killer-whale",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "MANTA",
+      "character_type": "Vehicle",
+      "alt_mode": "One-man windsurfer/sailboard craft",
+      "is_combined_form": false,
+      "notes": "MANTA windsurfer vehicle. Mail-order exclusive sailboard vehicle never sold at retail. First released 1984. No packaged figure.",
+      "slug": "manta",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "S.H.A.R.C.",
+      "character_type": "Vehicle",
+      "alt_mode": "Submersible high-speed attack reconnaissance craft",
+      "is_combined_form": false,
+      "notes": "S.H.A.R.C. (Submersible High-speed Attack and Reconnaissance Craft). One-man flying submarine. First released 1984. Packaged with Deep Six.",
+      "slug": "sharc",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Sky Hawk",
+      "character_type": "Vehicle",
+      "alt_mode": "One-man VTOL attack aircraft",
+      "is_combined_form": false,
+      "notes": "Sky Hawk VTOL (Vertical Take-Off and Landing). One-man VTOL aircraft with twin Thunderclap cannons and air-to-surface rockets. First released 1984. No packaged figure.",
+      "slug": "sky-hawk",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Slugger",
+      "character_type": "Vehicle",
+      "alt_mode": "Self-propelled cannon",
+      "is_combined_form": false,
+      "notes": "Slugger Self-Propelled Cannon. Armored vehicle with 170mm Howitzer cannon and removable .30 caliber machine gun. First released 1984. Packaged with Thunder.",
+      "slug": "slugger",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "V.A.M.P. Mark II",
+      "character_type": "Vehicle",
+      "alt_mode": "Multi-purpose attack vehicle (upgraded jeep)",
+      "is_combined_form": false,
+      "notes": "V.A.M.P. Mark II Attack Vehicle. Upgraded VAMP with missile launcher, removable roof, and doors. First released 1984. Packaged with Clutch (v2).",
+      "slug": "vamp-mark-ii",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "A.W.E. Striker",
+      "character_type": "Vehicle",
+      "alt_mode": "All-weather/environment 4x4 assault vehicle",
+      "is_combined_form": false,
+      "notes": "A.W.E. Striker (All Weather/Environment). 4x4 assault vehicle with mounted cannon. First released 1985. Packaged with Crankcase.",
+      "slug": "awe-striker",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Bridge Layer",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored mobile bridge-laying vehicle",
+      "is_combined_form": false,
+      "notes": "Bridge Layer. Armored vehicle that deploys a portable bridge. First released 1985. Packaged with Tollbooth.",
+      "slug": "bridge-layer",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Ferret ATV",
+      "character_type": "Vehicle",
+      "alt_mode": "All-terrain reconnaissance vehicle",
+      "is_combined_form": false,
+      "notes": "Ferret ATV. Small all-terrain vehicle with missiles and cannon. First released 1985. No packaged figure.",
+      "slug": "ferret-atv",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Silver Mirage",
+      "character_type": "Vehicle",
+      "alt_mode": "Armed motorcycle with sidecar",
+      "is_combined_form": false,
+      "notes": "Silver Mirage Motorcycle. Motorcycle with sidecar gun operator seat, ground launch missiles, and mortar launcher. First released 1985. No packaged figure.",
+      "slug": "silver-mirage",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Snow Cat",
+      "character_type": "Vehicle",
+      "alt_mode": "Tracked arctic assault vehicle",
+      "is_combined_form": false,
+      "notes": "Snow Cat (Combat All-Terrain). Tracked arctic vehicle with 680 hp engine, dual Avalanche ski-missiles, room for 10 Joes. First released 1985. Packaged with Frostbite.",
+      "slug": "snow-cat-vehicle",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Transportable Tactical Battle Platform",
+      "character_type": "Vehicle",
+      "alt_mode": "Mobile elevated battle platform",
+      "is_combined_form": false,
+      "notes": "T.T.B.P. (Transportable Tactical Battle Platform). Elevated mobile platform with spotlight, crane, and command positions. First released 1985. No packaged figure.",
+      "slug": "ttbp",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "U.S.S. Flagg",
+      "character_type": "Vehicle",
+      "alt_mode": "Aircraft carrier playset",
+      "is_combined_form": false,
+      "notes": "U.S.S. Flagg Aircraft Carrier. Massive 7.5-foot aircraft carrier playset — the largest G.I. Joe toy ever produced. First released 1985. Packaged with Keel-Haul.",
+      "slug": "uss-flagg",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Conquest X-30",
+      "character_type": "Vehicle",
+      "alt_mode": "Supersonic forward-swept-wing fighter jet",
+      "is_combined_form": false,
+      "notes": "Conquest X-30 Supersonic Jet. Forward-swept-wing fighter jet. First released 1986. Packaged with Slip-Stream.",
+      "slug": "conquest-x-30",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Devilfish",
+      "character_type": "Vehicle",
+      "alt_mode": "High-speed attack boat",
+      "is_combined_form": false,
+      "notes": "Devilfish High-Speed Attack Boat. Fast attack boat with twin 110 hp jet motors, repeater cannons, torpedoes, and missiles. First released 1986. No packaged figure.",
+      "slug": "devilfish",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "H.A.V.O.C.",
+      "character_type": "Vehicle",
+      "alt_mode": "Heavy articulated vehicle ordnance carrier",
+      "is_combined_form": false,
+      "notes": "H.A.V.O.C. (Heavy Articulated Vehicle Ordnance Carrier). Large multi-section assault vehicle. First released 1986. Packaged with Cross-Country.",
+      "slug": "havoc",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "L.C.V. Recon Sled",
+      "character_type": "Vehicle",
+      "alt_mode": "Low-crawl reconnaissance vehicle",
+      "is_combined_form": false,
+      "notes": "L.C.V. (Low Crawl Vehicle) Recon Sled. Small motorized recon sled with canopy and machine guns. First released 1986. No packaged figure.",
+      "slug": "lcv-recon-sled",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tomahawk",
+      "character_type": "Vehicle",
+      "alt_mode": "Troop transport helicopter",
+      "is_combined_form": false,
+      "notes": "Tomahawk Troop Transport Helicopter. Large troop-carrying helicopter. First released 1986. Packaged with Lift-Ticket.",
+      "slug": "tomahawk",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Triple T",
+      "character_type": "Vehicle",
+      "alt_mode": "Tag Team Terminator assault vehicle",
+      "is_combined_form": false,
+      "notes": "Triple T (Tag Team Terminator). Wheeled assault vehicle. First released 1986. Packaged with Sgt. Slaughter (v2).",
+      "slug": "triple-t",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Buzz Boar",
+      "character_type": "Vehicle",
+      "alt_mode": "Underground boring attack vehicle",
+      "is_combined_form": false,
+      "notes": "Buzz Boar. Small one-man underground boring/drilling vehicle. First released 1987. No packaged figure.",
+      "slug": "buzz-boar",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Coastal Defender",
+      "character_type": "Vehicle",
+      "alt_mode": "Coastal defense gun emplacement",
+      "is_combined_form": false,
+      "notes": "Coastal Defender. Shore defense gun position. First released 1987. No packaged figure.",
+      "slug": "coastal-defender",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Crossfire",
+      "character_type": "Vehicle",
+      "alt_mode": "Radio-controlled attack vehicle",
+      "is_combined_form": false,
+      "notes": "Crossfire. First radio-controlled G.I. Joe vehicle with 70-foot range, 7 RC functions, scale speed over 100 mph. First released 1987. Packaged with Rumbler.",
+      "slug": "crossfire",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Defiant",
+      "character_type": "Vehicle",
+      "alt_mode": "Space vehicle launch complex with shuttle and gantry",
+      "is_combined_form": false,
+      "notes": "Defiant Space Vehicle Launch Complex. Massive playset with space shuttle, crawler/gantry, and launch tower. First released 1987. Packaged with Payload and Hardtop.",
+      "slug": "defiant",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Mobile Command Center",
+      "character_type": "Vehicle",
+      "alt_mode": "Three-section mobile command headquarters",
+      "is_combined_form": false,
+      "notes": "Mobile Command Center (M.C.C.). Three-section mobile headquarters vehicle. First released 1987. No packaged figure.",
+      "slug": "mobile-command-center",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Persuader",
+      "character_type": "Vehicle",
+      "alt_mode": "High-speed laser tank",
+      "is_combined_form": false,
+      "notes": "Persuader High-Speed Laser Tank. 10-wheel-drive tank with Heatwave 10 Megawatt armor-piercing laser cannon and Dart SAM-37 missiles. First released 1987. Packaged with Backstop.",
+      "slug": "persuader",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Road Toad B.R.V.",
+      "character_type": "Vehicle",
+      "alt_mode": "Battlefield recovery vehicle / tow truck",
+      "is_combined_form": false,
+      "notes": "Road Toad B.R.V. (Battlefield Recovery Vehicle). Armored tow truck / mechanic's platform. First released 1987. No packaged figure.",
+      "slug": "road-toad",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "S.L.A.M.",
+      "character_type": "Vehicle",
+      "alt_mode": "Strategic long-range artillery machine",
+      "is_combined_form": false,
+      "notes": "S.L.A.M. (Strategic Long-Range Artillery Machine). Mobile long-range missile launcher. First released 1987. No packaged figure.",
+      "slug": "slam",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Dominator",
+      "character_type": "Vehicle",
+      "alt_mode": "Arctic assault snow tank",
+      "is_combined_form": false,
+      "notes": "Dominator. Battle Force 2000 arctic assault tank designed for freezing weather. First released 1987. Combines with other BF2000 vehicles to form Future Fortress. No packaged figure (Avalanche sold separately).",
+      "slug": "dominator",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "battle-force-2000"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Eliminator",
+      "character_type": "Vehicle",
+      "alt_mode": "High-speed 4WD pursuit vehicle",
+      "is_combined_form": false,
+      "notes": "Eliminator. Battle Force 2000 high-speed pursuit vehicle. First released 1987. Combines with other BF2000 vehicles to form Future Fortress. No packaged figure (Blocker sold separately).",
+      "slug": "eliminator",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "battle-force-2000"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Marauder",
+      "character_type": "Vehicle",
+      "alt_mode": "Armed attack snowmobile",
+      "is_combined_form": false,
+      "notes": "Marauder. Battle Force 2000 attack motorcycle/snowmobile. First released 1987. Combines with other BF2000 vehicles to form Future Fortress. No packaged figure (Dodger sold separately).",
+      "slug": "marauder",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "battle-force-2000"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Sky Sweeper",
+      "character_type": "Vehicle",
+      "alt_mode": "Anti-aircraft jet",
+      "is_combined_form": false,
+      "notes": "Sky Sweeper. Battle Force 2000 anti-aircraft jet. First released 1987. Combines with other BF2000 vehicles to form Future Fortress. No packaged figure (Maverick sold separately).",
+      "slug": "sky-sweeper",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "battle-force-2000"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Vector",
+      "character_type": "Vehicle",
+      "alt_mode": "Advanced interceptor jet",
+      "is_combined_form": false,
+      "notes": "Vector Jet. Battle Force 2000 advanced interceptor jet. First released 1987. Combines with other BF2000 vehicles to form Future Fortress. No packaged figure (Knockdown sold separately).",
+      "slug": "vector",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "battle-force-2000"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Vindicator",
+      "character_type": "Vehicle",
+      "alt_mode": "Hovering assault platform",
+      "is_combined_form": false,
+      "notes": "Vindicator. Battle Force 2000 hover assault vehicle. First released 1987. Combines with other BF2000 vehicles to form Future Fortress. No packaged figure (Blaster sold separately).",
+      "slug": "vindicator",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "battle-force-2000"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Desert Fox 6WD",
+      "character_type": "Vehicle",
+      "alt_mode": "6-wheel-drive desert attack vehicle",
+      "is_combined_form": false,
+      "notes": "Desert Fox 6WD. Six-wheel-drive desert jeep with Scorpion anti-tank missiles. First released 1988. Packaged with Skidmark.",
+      "slug": "desert-fox",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Mean Dog",
+      "character_type": "Vehicle",
+      "alt_mode": "Multi-section mobile assault vehicle",
+      "is_combined_form": false,
+      "notes": "Mean Dog. Large multi-section attack vehicle with detachable components. First released 1988. Packaged with Wild Card.",
+      "slug": "mean-dog",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Phantom X-19",
+      "character_type": "Vehicle",
+      "alt_mode": "Stealth fighter jet",
+      "is_combined_form": false,
+      "notes": "Phantom X-19 Stealth Fighter. Stealth jet based on the F-19 concept. First released 1988. Packaged with Ghostrider.",
+      "slug": "phantom-x-19",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "R.P.V.",
+      "character_type": "Vehicle",
+      "alt_mode": "Remote-piloted surveillance/attack vehicle",
+      "is_combined_form": false,
+      "notes": "R.P.V. (Remote Piloted Vehicle). Unmanned drone with hydraulically operated missile rack. First released 1988. No packaged figure.",
+      "slug": "rpv",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Rolling Thunder",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored missile launcher transport",
+      "is_combined_form": false,
+      "notes": "Rolling Thunder. Large armored mobile missile launcher. First released 1988. Packaged with Armadillo.",
+      "slug": "rolling-thunder",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Skystorm",
+      "character_type": "Vehicle",
+      "alt_mode": "X-wing interceptor helicopter",
+      "is_combined_form": false,
+      "notes": "Skystorm X-Wing Chopper. Helicopter with X-wing configuration, nose gun, missiles, bombs. First released 1988. Packaged with Windmill.",
+      "slug": "skystorm",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Swampmasher",
+      "character_type": "Vehicle",
+      "alt_mode": "12-wheeled swamp assault vehicle",
+      "is_combined_form": false,
+      "notes": "Swampmasher. 12-wheeled swamp vehicle with four tri-wheeled tracks, 4.3 liter 350 hp engine. First released 1988. No packaged figure.",
+      "slug": "swampmasher",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Warthog A.I.F.V.",
+      "character_type": "Vehicle",
+      "alt_mode": "Amphibious infantry fighting vehicle",
+      "is_combined_form": false,
+      "notes": "Warthog A.I.F.V. (Amphibious Infantry Fighting Vehicle). Amphibious armored troop carrier. First released 1988. Packaged with Sgt. Slaughter (v3).",
+      "slug": "warthog",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tiger Cat",
+      "character_type": "Vehicle",
+      "alt_mode": "Tracked arctic assault vehicle (Tiger Force repaint)",
+      "is_combined_form": false,
+      "notes": "Tiger Cat. Tiger Force repaint of the Snow Cat. First released 1988. No packaged figure.",
+      "slug": "tiger-cat",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "tiger-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tiger Fly",
+      "character_type": "Vehicle",
+      "alt_mode": "Twin-engine assault helicopter (Tiger Force repaint)",
+      "is_combined_form": false,
+      "notes": "Tiger Fly. Tiger Force repaint of the Dragonfly XH-1 assault copter. First released 1988. No packaged figure.",
+      "slug": "tiger-fly",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "tiger-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tiger Paw",
+      "character_type": "Vehicle",
+      "alt_mode": "All-terrain reconnaissance vehicle (Tiger Force repaint)",
+      "is_combined_form": false,
+      "notes": "Tiger Paw. Tiger Force repaint of the Ferret ATV. First released 1988. No packaged figure.",
+      "slug": "tiger-paw",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "tiger-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tiger Rat",
+      "character_type": "Vehicle",
+      "alt_mode": "Ground attack bomber (Tiger Force repaint)",
+      "is_combined_form": false,
+      "notes": "Tiger Rat. Tiger Force repaint of the Rattler ground attack plane. First released 1988. No packaged figure.",
+      "slug": "tiger-rat",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "tiger-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tiger Shark",
+      "character_type": "Vehicle",
+      "alt_mode": "Hydrofoil attack boat (Tiger Force repaint)",
+      "is_combined_form": false,
+      "notes": "Tiger Shark. Tiger Force repaint of the Cobra Water Moccasin. First released 1988. No packaged figure.",
+      "slug": "tiger-shark",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "tiger-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Blaster",
+      "character_type": "Vehicle",
+      "alt_mode": "Multi-tracked assault vehicle (Night Force repaint)",
+      "is_combined_form": false,
+      "notes": "Night Blaster. Night Force (Toys R Us exclusive) repaint of the Cobra Maggot. First released 1988. No packaged figure.",
+      "slug": "night-blaster",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "night-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Raider",
+      "character_type": "Vehicle",
+      "alt_mode": "Wheeled assault vehicle (Night Force repaint)",
+      "is_combined_form": false,
+      "notes": "Night Raider. Night Force (Toys R Us exclusive) repaint of the Triple T. First released 1988. No packaged figure.",
+      "slug": "night-raider",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "night-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Shade",
+      "character_type": "Vehicle",
+      "alt_mode": "Submersible high-speed attack craft (Night Force repaint)",
+      "is_combined_form": false,
+      "notes": "Night Shade. Night Force (Toys R Us exclusive) repaint of the S.H.A.R.C. First released 1988. No packaged figure.",
+      "slug": "night-shade",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "night-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Storm",
+      "character_type": "Vehicle",
+      "alt_mode": "High-speed laser tank (Night Force repaint)",
+      "is_combined_form": false,
+      "notes": "Night Storm. Night Force (Toys R Us exclusive) repaint of the Persuader. First released 1988. No packaged figure.",
+      "slug": "night-storm",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "night-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Striker",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored assault hovercraft (Night Force repaint)",
+      "is_combined_form": false,
+      "notes": "Night Striker. Night Force (Toys R Us exclusive) repaint of the Killer W.H.A.L.E. First released 1988. No packaged figure.",
+      "slug": "night-striker",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "night-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Arctic Blast",
+      "character_type": "Vehicle",
+      "alt_mode": "Arctic assault vehicle with missile launcher",
+      "is_combined_form": false,
+      "notes": "Arctic Blast. Arctic assault vehicle. First released 1989. Packaged with Windchill.",
+      "slug": "arctic-blast",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Crusader",
+      "character_type": "Vehicle",
+      "alt_mode": "Space shuttle with Avenger scout craft",
+      "is_combined_form": false,
+      "notes": "Crusader Space Shuttle with Avenger Scout Craft. Two-piece space vehicle set. First released 1989. Packaged with Payload (v2).",
+      "slug": "crusader",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Devastator",
+      "character_type": "Vehicle",
+      "alt_mode": "One-man battlefield robot walker",
+      "is_combined_form": false,
+      "notes": "Devastator Battlefield Robot. One-man 4WD walking robot vehicle. First released 1989. No packaged figure.",
+      "slug": "devastator-vehicle",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Mudfighter",
+      "character_type": "Vehicle",
+      "alt_mode": "Ground attack aircraft",
+      "is_combined_form": false,
+      "notes": "Mudfighter. Ground attack aircraft. First released 1989. Packaged with Dogfight.",
+      "slug": "mudfighter",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Radar Rat",
+      "character_type": "Vehicle",
+      "alt_mode": "Motorized battlefield surveillance robot",
+      "is_combined_form": false,
+      "notes": "Radar Rat. Small motorized battlefield robot with radar. First released 1989. No packaged figure.",
+      "slug": "radar-rat",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Raider",
+      "character_type": "Vehicle",
+      "alt_mode": "4-track armored assault vehicle",
+      "is_combined_form": false,
+      "notes": "Raider. 4-track assault vehicle. First released 1989. Packaged with Hot Seat.",
+      "slug": "raider",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Thunderclap",
+      "character_type": "Vehicle",
+      "alt_mode": "Three-section mobile assault platform with cannon",
+      "is_combined_form": false,
+      "notes": "Thunderclap. Three-component vehicle: tractor with assault weapon, trailer with blaster cannon, and Annihilator cannon base. First released 1989. Packaged with Long Range.",
+      "slug": "thunderclap",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tri-Blaster",
+      "character_type": "Vehicle",
+      "alt_mode": "One-man 4WD battlefield robot",
+      "is_combined_form": false,
+      "notes": "Tri-Blaster. One-man 4WD battlefield robot with triple-barreled pulse fire laser cannon. First released 1989. No packaged figure.",
+      "slug": "tri-blaster",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tiger Fish",
+      "character_type": "Vehicle",
+      "alt_mode": "High-speed attack boat (Tiger Force repaint)",
+      "is_combined_form": false,
+      "notes": "Tiger Fish. Tiger Force repaint of the Devilfish. First released 1989. No packaged figure.",
+      "slug": "tiger-fish",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "tiger-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Tiger Sting",
+      "character_type": "Vehicle",
+      "alt_mode": "Multi-purpose attack vehicle (Tiger Force repaint)",
+      "is_combined_form": false,
+      "notes": "Tiger Sting. Tiger Force repaint of the V.A.M.P. Mark II. First released 1989. No packaged figure.",
+      "slug": "tiger-sting",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "tiger-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Boomer",
+      "character_type": "Vehicle",
+      "alt_mode": "Supersonic combat jet (Night Force repaint)",
+      "is_combined_form": false,
+      "notes": "Night Boomer. Night Force (Toys R Us exclusive) repaint of the Skystriker. First released 1989. No packaged figure.",
+      "slug": "night-boomer",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "night-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Ray",
+      "character_type": "Vehicle",
+      "alt_mode": "Hydrofoil patrol boat (Night Force repaint)",
+      "is_combined_form": false,
+      "notes": "Night Ray. Night Force (Toys R Us exclusive) repaint of the Cobra Hydrofoil (Moray). First released 1989. No packaged figure.",
+      "slug": "night-ray",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "night-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Night Scrambler",
+      "character_type": "Vehicle",
+      "alt_mode": "Amphibious personnel carrier (Night Force repaint)",
+      "is_combined_form": false,
+      "notes": "Night Scrambler. Night Force (Toys R Us exclusive) repaint of the APC. First released 1989. No packaged figure.",
+      "slug": "night-scrambler",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "night-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Pulverizer",
+      "character_type": "Vehicle",
+      "alt_mode": "Battle Force 2000 armored assault tank",
+      "is_combined_form": false,
+      "notes": "Pulverizer. Battle Force 2000 heavy assault vehicle. First released 1989. No packaged figure (Dee-Jay sold separately).",
+      "slug": "pulverizer",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "battle-force-2000"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Equalizer",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored dual-cannon assault vehicle",
+      "is_combined_form": false,
+      "notes": "Equalizer. Slaughter's Marauders armored vehicle. First released 1989. No packaged figure.",
+      "slug": "equalizer",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "slaughters-marauders"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Lynx",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored reconnaissance vehicle",
+      "is_combined_form": false,
+      "notes": "Lynx. Slaughter's Marauders light reconnaissance vehicle. First released 1989. No packaged figure.",
+      "slug": "lynx",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "slaughters-marauders"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Armadillo (Vehicle)",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored mini-tank",
+      "is_combined_form": false,
+      "notes": "Armadillo Mini-Tank. Slaughter's Marauders light armored vehicle. First released 1989. No packaged figure. Note: also the name of the Rolling Thunder driver.",
+      "slug": "armadillo-vehicle",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "slaughters-marauders"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Avalanche (Vehicle)",
+      "character_type": "Vehicle",
+      "alt_mode": "Arctic assault vehicle with scout craft",
+      "is_combined_form": false,
+      "notes": "Avalanche. Arctic assault vehicle with ice mine deployer, pulse cannon, heat-seeking missiles, and removable scout craft. First released 1990. Packaged with Cold Front.",
+      "slug": "avalanche-vehicle",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "General",
+      "character_type": "Vehicle",
+      "alt_mode": "Mobile strike headquarters with Locust mini-helicopter",
+      "is_combined_form": false,
+      "notes": "General. Mobile strike headquarters vehicle with included Locust mini-helicopter for reconnaissance. First released 1990. No packaged figure.",
+      "slug": "general",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Hammer",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored attack Humvee",
+      "is_combined_form": false,
+      "notes": "Hammer. Armored Humvee-style vehicle with high-impact pulse cannon, rotational gun turret, and quick-slide rear hatches. First released 1990. No packaged figure.",
+      "slug": "hammer",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Locust",
+      "character_type": "Vehicle",
+      "alt_mode": "One-man attack helicopter",
+      "is_combined_form": false,
+      "notes": "Locust. Small one-man attack copter/bomber with air-to-air missiles. Also included with the General. First released 1990. No packaged figure.",
+      "slug": "locust",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Mobile Battle Bunker",
+      "character_type": "Vehicle",
+      "alt_mode": "Mobile armored bunker",
+      "is_combined_form": false,
+      "notes": "Mobile Battle Bunker. Armored mobile fortress with 5,000-round laser ammo dispenser, double-barreled mortar cannons, and hidden missile rack. First released 1990. No packaged figure.",
+      "slug": "mobile-battle-bunker",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Retaliator",
+      "character_type": "Vehicle",
+      "alt_mode": "Attack helicopter",
+      "is_combined_form": false,
+      "notes": "Retaliator. Attack helicopter. First released 1990. Packaged with Updraft.",
+      "slug": "retaliator",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Sky Havoc",
+      "character_type": "Vehicle",
+      "alt_mode": "Heavy articulated vehicle (Sky Patrol chrome repaint)",
+      "is_combined_form": false,
+      "notes": "Sky Havoc. Sky Patrol chrome repaint of the H.A.V.O.C. First released 1990. No packaged figure.",
+      "slug": "sky-havoc",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "sky-patrol"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Sky Hawk (Sky Patrol)",
+      "character_type": "Vehicle",
+      "alt_mode": "One-man VTOL aircraft (Sky Patrol chrome repaint)",
+      "is_combined_form": false,
+      "notes": "Sky Hawk. Sky Patrol chrome repaint of the Sky Hawk VTOL. First released 1990. No packaged figure.",
+      "slug": "sky-hawk-sky-patrol",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "sky-patrol"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Sky Raven",
+      "character_type": "Vehicle",
+      "alt_mode": "High-altitude reconnaissance jet (Sky Patrol chrome repaint)",
+      "is_combined_form": false,
+      "notes": "Sky Raven. Sky Patrol chrome repaint of the Night Raven (without drone). First released 1990. No packaged figure.",
+      "slug": "sky-raven",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "sky-patrol"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Sky S.H.A.R.C.",
+      "character_type": "Vehicle",
+      "alt_mode": "Submersible high-speed attack craft (Sky Patrol chrome repaint)",
+      "is_combined_form": false,
+      "notes": "Sky S.H.A.R.C. Sky Patrol chrome repaint of the S.H.A.R.C. First released 1990. No packaged figure.",
+      "slug": "sky-sharc",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "sky-patrol"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Attack Cruiser",
+      "character_type": "Vehicle",
+      "alt_mode": "River patrol attack boat",
+      "is_combined_form": false,
+      "notes": "Attack Cruiser. River patrol boat with mines, missiles, and launchable attack glider. First released 1991. No packaged figure.",
+      "slug": "attack-cruiser",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Badger",
+      "character_type": "Vehicle",
+      "alt_mode": "All-track armored assault vehicle",
+      "is_combined_form": false,
+      "notes": "Badger. All-track vehicle with radial tires, tow hook, and auto-fire missile launcher. First released 1991. No packaged figure.",
+      "slug": "badger",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Battle Wagon",
+      "character_type": "Vehicle",
+      "alt_mode": "Motorized armored assault truck",
+      "is_combined_form": false,
+      "notes": "Battle Wagon. Motorized assault truck with detachable missile launcher and twelve missiles. First released 1991. No packaged figure.",
+      "slug": "battle-wagon",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Brawler",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored 4x4 with missile launcher",
+      "is_combined_form": false,
+      "notes": "Brawler. Armored vehicle with detachable grenades, missile launcher, and removable hatch cover. First released 1991. No packaged figure.",
+      "slug": "brawler",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Battle Copter (Joe)",
+      "character_type": "Vehicle",
+      "alt_mode": "Pull-string rotor-powered helicopter",
+      "is_combined_form": false,
+      "notes": "G.I. Joe Battle Copter. Pull-string powered helicopter capable of actual flight. First released 1991. Packaged with Major Altitude.",
+      "slug": "battle-copter-joe",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Air Commandos Glider (Skymate)",
+      "character_type": "Vehicle",
+      "alt_mode": "Unpowered stealth assault glider",
+      "is_combined_form": false,
+      "notes": "G.I. Joe Air Commandos Glider. Stealth assault glider. First released 1991. Packaged with Skymate.",
+      "slug": "air-commandos-glider-skymate",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Air Commandos Glider (Cloudburst)",
+      "character_type": "Vehicle",
+      "alt_mode": "Unpowered stealth assault glider",
+      "is_combined_form": false,
+      "notes": "G.I. Joe Air Commandos Glider. Stealth assault glider. First released 1991. Packaged with Cloudburst.",
+      "slug": "air-commandos-glider-cloudburst",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Barracuda",
+      "character_type": "Vehicle",
+      "alt_mode": "One-man attack submarine",
+      "is_combined_form": false,
+      "notes": "Barracuda. One-man attack sub with real diving action (baking soda powered), three Shredder torpedoes, and movable stabilizer fins. First released 1992. No packaged figure.",
+      "slug": "barracuda",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Headquarters (1992)",
+      "character_type": "Vehicle",
+      "alt_mode": "Fold-up portable command base playset",
+      "is_combined_form": false,
+      "notes": "G.I. Joe Headquarters. Fold-up portable base with collapsible towers, electronic battle sounds, missile launchers, removable bunker, fuel station, and movable elevator. First released 1992. No packaged figure.",
+      "slug": "headquarters-1992",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Patriot",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored missile launcher transport",
+      "is_combined_form": false,
+      "notes": "Patriot. Armored missile launcher transport. First released 1992. No packaged figure.",
+      "slug": "patriot",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Storm Eagle",
+      "character_type": "Vehicle",
+      "alt_mode": "Advanced tactical fighter jet (water-shooting)",
+      "is_combined_form": false,
+      "notes": "Storm Eagle A.T.F. (Advanced Tactical Fighter). Water-shooting jet with four missiles and rear landing gear. First released 1992. No packaged figure.",
+      "slug": "storm-eagle",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Liquidator",
+      "character_type": "Vehicle",
+      "alt_mode": "Advanced tactical fighter jet (water-shooting)",
+      "is_combined_form": false,
+      "notes": "Liquidator A.T.F. Water-shooting advanced tactical fighter jet. First released 1992. No packaged figure.",
+      "slug": "liquidator",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Battle Copter (Ace)",
+      "character_type": "Vehicle",
+      "alt_mode": "Pull-string rotor-powered helicopter",
+      "is_combined_form": false,
+      "notes": "G.I. Joe Battle Copter. Pull-string powered helicopter. First released 1992. Packaged with Ace (v2).",
+      "slug": "battle-copter-ace",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Air Commandos Glider (Spirit)",
+      "character_type": "Vehicle",
+      "alt_mode": "Unpowered stealth assault glider",
+      "is_combined_form": false,
+      "notes": "G.I. Joe Air Commandos Glider. Stealth assault glider. First released 1992. Packaged with Spirit (v3).",
+      "slug": "air-commandos-glider-spirit",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Eco Striker",
+      "character_type": "Vehicle",
+      "alt_mode": "Water-shooting assault vehicle (Eco-Warriors)",
+      "is_combined_form": false,
+      "notes": "Eco Striker. Eco-Warriors vehicle — water-shooting recast of the A.W.E. Striker. First released 1992. Packaged with Clean Sweep.",
+      "slug": "eco-striker",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "eco-warriors"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Desert Apache",
+      "character_type": "Vehicle",
+      "alt_mode": "Attack helicopter with electronic sounds (Sonic Fighters)",
+      "is_combined_form": false,
+      "notes": "Desert Apache AH-74. Sonic Fighters electronic sound helicopter with 30mm chin gun and turbo-shaft thruster. First released 1992. No packaged figure.",
+      "slug": "desert-apache",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Fort America",
+      "character_type": "Vehicle",
+      "alt_mode": "Transforming mobile fortress / combat tank (Sonic Fighters)",
+      "is_combined_form": false,
+      "notes": "Fort America. Sonic Fighters electronic sound mobile fortress that transforms from combat tank into battle fortress with missile launchers. First released 1992. No packaged figure.",
+      "slug": "fort-america",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Ghoststriker X-16",
+      "character_type": "Vehicle",
+      "alt_mode": "Stealth attack jet",
+      "is_combined_form": false,
+      "notes": "Ghoststriker X-16. Stealth jet fighter. First released 1993. Packaged with Ace (v3).",
+      "slug": "ghoststriker",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Mudbuster",
+      "character_type": "Vehicle",
+      "alt_mode": "All-terrain 4x4 battle truck",
+      "is_combined_form": false,
+      "notes": "Mudbuster. All-terrain 4x4 battle truck with smash 'n bash bumper, 360-degree rotating missile launcher, and puncture-proof tires. First released 1993. No packaged figure.",
+      "slug": "mudbuster",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Shark 9000",
+      "character_type": "Vehicle",
+      "alt_mode": "Armed assault hydroplane",
+      "is_combined_form": false,
+      "notes": "Shark 9000. Armed assault hydroplane. First released 1993. Packaged with Cutter (v2, Battle Corps).",
+      "slug": "shark-9000",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Monster Blaster A.P.C.",
+      "character_type": "Vehicle",
+      "alt_mode": "Armored personnel carrier (Mega Marines)",
+      "is_combined_form": false,
+      "notes": "Monster Blaster A.P.C. (Armored Personnel Carrier). Mega Marines heavy troop transporter with Lock 'n Load missile launcher, four heat-seeking missiles, and puncture-proof tires. First released 1993. No packaged figure (designed for Clutch v3, sold separately).",
+      "slug": "monster-blaster-apc",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "mega-marines"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Starfighter",
+      "character_type": "Vehicle",
+      "alt_mode": "Star Brigade space fighter",
+      "is_combined_form": false,
+      "notes": "Starfighter. Star Brigade space attack fighter with spring-fired launcher. First released 1993. Packaged with Sci-Fi.",
+      "slug": "starfighter",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "star-brigade"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Armor-Bot",
+      "character_type": "Vehicle",
+      "alt_mode": "Powered exo-armor suit (Star Brigade)",
+      "is_combined_form": false,
+      "notes": "Armor-Bot. Star Brigade: Armor-Tech powered exo-armor suit. First released 1993. Packaged with Hawk (v4).",
+      "slug": "armor-bot",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "star-brigade"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Ninja Lightning",
+      "character_type": "Vehicle",
+      "alt_mode": "Ninja Force high-speed attack cycle",
+      "is_combined_form": false,
+      "notes": "Ninja Lightning. Ninja Force motorcycle/attack cycle. First released 1993. No packaged figure (box art shows Snake Eyes).",
+      "slug": "ninja-lightning",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "ninja-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Pile Driver",
+      "character_type": "Vehicle",
+      "alt_mode": "Ninja Force rapid-assault tornado attack vehicle",
+      "is_combined_form": false,
+      "notes": "Pile Driver. Ninja Force Ninja Raider rapid-assault tornado attack vehicle. First released 1993. Packaged with T'Gin-Zu.",
+      "slug": "pile-driver",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "ninja-force"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Blockbuster",
+      "character_type": "Vehicle",
+      "alt_mode": "Heavy armored assault vehicle",
+      "is_combined_form": false,
+      "notes": "Blockbuster. Heavily armored vehicle with double-barreled pom-pom cannon, ten-shot auto-feeding rocket chamber, anti-aircraft gun, and front-mounted Gatling gun. First released 1994. Packaged with Windchill (v2).",
+      "slug": "blockbuster",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Razor-Blade",
+      "character_type": "Vehicle",
+      "alt_mode": "Zip-line helicopter",
+      "is_combined_form": false,
+      "notes": "Razor-Blade. Helicopter that glides along a string between two handles, with figure rescue backpack. First released 1994. No packaged figure.",
+      "slug": "razor-blade",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Manta-Ray",
+      "character_type": "Vehicle",
+      "alt_mode": "Armed attack raft / hydrofoil",
+      "is_combined_form": false,
+      "notes": "Manta-Ray. Armed attack raft/hydrofoil. First released 1994. No packaged figure.",
+      "slug": "manta-ray",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Power Fighter (Joe)",
+      "character_type": "Vehicle",
+      "alt_mode": "Robotic battle armor exo-suit (Star Brigade)",
+      "is_combined_form": false,
+      "notes": "G.I. Joe Power Fighter. Star Brigade robotic battle armor exo-suit. First released 1994. Packaged with Gears.",
+      "slug": "power-fighter-joe",
+      "faction_slug": "gi-joe",
+      "sub_group_slugs": [
+        "star-brigade"
+      ],
+      "continuity_family_slug": "arah",
+      "franchise_slug": "gi-joe"
+    }
+  ]
+}

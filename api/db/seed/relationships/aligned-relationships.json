@@ -1,0 +1,216 @@
+{
+  "_metadata": {
+    "description": "Character relationships for aligned continuity family",
+    "total": 16
+  },
+  "relationships": [
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "bruticus-aligned",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "blast-off-aligned",
+        "role": "right arm"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "bruticus-aligned",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "brawl-aligned",
+        "role": "left leg"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "bruticus-aligned",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "onslaught-aligned",
+        "role": "torso"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "bruticus-aligned",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "swindle-aligned",
+        "role": "right leg"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "bruticus-aligned",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "vortex-aligned",
+        "role": "left arm"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "galvatronus",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "cyberwarp",
+        "role": null
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "galvatronus",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "cyclonus-aligned",
+        "role": "torso"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "galvatronus",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "riotgear",
+        "role": null
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "galvatronus",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "skyjack",
+        "role": null
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "galvatronus",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "treadshock",
+        "role": null
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "menasor-aligned",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "dragstrip",
+        "role": "right arm"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "menasor-aligned",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "heatseeker",
+        "role": "left leg"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "menasor-aligned",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "motormaster-aligned",
+        "role": "torso"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "menasor-aligned",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "slashmark",
+        "role": "right leg"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "menasor-aligned",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "wildbreak",
+        "role": "left arm"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "ultra-bee",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "strongarm-aligned",
+        "role": null
+      },
+      "metadata": {}
+    }
+  ]
+}

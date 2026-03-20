@@ -1,0 +1,1454 @@
+{
+  "_metadata": {
+    "description": "Aligned continuity characters — TF Prime (2010-2013), WFC/FOC games (2010-2012), Rescue Bots (2012-2016), RiD 2015 (2015-2017)",
+    "total_characters": 111
+  },
+  "characters": [
+    {
+      "name": "Optimus Prime",
+      "character_type": "Transformer",
+      "alt_mode": "Long-nose semi-truck cab",
+      "is_combined_form": false,
+      "notes": "Autobot leader. Voiced by Peter Cullen. Formerly Orion Pax, chosen as Prime by the High Council. Loses memory in S1 finale, mortally wounded in S2 finale, resurrected with new body in S3. Sacrifices himself to restore the AllSpark in Predacons Rising. Also playable in WFC and FOC games",
+      "slug": "optimus-prime-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "team-prime"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Bumblebee",
+      "character_type": "Transformer",
+      "alt_mode": "Yellow muscle car",
+      "is_combined_form": false,
+      "notes": "Autobot scout. Cannot speak for most of the series due to damaged voice box (courtesy of Megatron). Partnered with Raf. Leads Team Prime forces in the final battle. Also playable in WFC and FOC games",
+      "slug": "bumblebee-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "team-prime"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Arcee",
+      "character_type": "Transformer",
+      "alt_mode": "Blue sports motorcycle",
+      "is_combined_form": false,
+      "notes": "Autobot warrior. Partnered with Jack Darby. Lost previous partners Tailgate and Cliffjumper. Fierce fighter with a personal vendetta against Airachnid. Voiced by Sumalee Montano. Also appears in WFC game",
+      "slug": "arcee-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "team-prime"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Bulkhead",
+      "character_type": "Transformer",
+      "alt_mode": "Green armored SUV",
+      "is_combined_form": false,
+      "notes": "Autobot heavy hitter and former Wrecker. Partnered with Miko. Despite his size, has a gentle personality. Severely injured in S2 by Hardshell. Voiced by Kevin Michael Richardson. Also appears in WFC game",
+      "slug": "bulkhead-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "team-prime",
+        "wreckers-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Ratchet",
+      "character_type": "Transformer",
+      "alt_mode": "White and red ambulance",
+      "is_combined_form": false,
+      "notes": "Autobot medic and scientist. Team Prime's doctor and tech specialist. Grumpy but deeply caring. Briefly experiments with synthetic energon. Voiced by Jeffrey Combs. Also playable in WFC game",
+      "slug": "ratchet-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "team-prime"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Cliffjumper",
+      "character_type": "Transformer",
+      "alt_mode": "Red muscle car",
+      "is_combined_form": false,
+      "notes": "Autobot warrior. Killed by Starscream in the pilot episode, establishing the series' willingness to kill characters. Voiced by Dwayne Johnson. Appears in flashbacks. Also playable in FOC",
+      "slug": "cliffjumper-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "team-prime"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Wheeljack",
+      "character_type": "Transformer",
+      "alt_mode": "White sports car with green and red stripes",
+      "is_combined_form": false,
+      "notes": "Autobot Wrecker and commando. Former partner of Bulkhead. A lone wolf who gradually integrates with Team Prime. Expert swordsman and demolitions specialist. Voiced by James Horan. Series: Prime",
+      "slug": "wheeljack-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "team-prime",
+        "wreckers-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Smokescreen",
+      "character_type": "Transformer",
+      "alt_mode": "Blue and yellow sports car with racing number 38",
+      "is_combined_form": false,
+      "notes": "Autobot Elite Guard rookie who joins Team Prime in S2. Trained by Alpha Trion. Nearly chosen as a new Prime. Uses the Phase Shifter relic. Restores Optimus with the Forge of Solus Prime. Voiced by Nolan North. Series: Prime",
+      "slug": "smokescreen-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "team-prime"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Ultra Magnus",
+      "character_type": "Transformer",
+      "alt_mode": "Blue armored truck with missile launchers",
+      "is_combined_form": false,
+      "notes": "Autobot commander and second-in-command. Arrives on Earth in S3 to reinforce Team Prime after the Autobot base is destroyed. Strict, by-the-book leader who wields the Forge of Solus Prime as a hammer weapon. Voiced by Michael Ironside. Series: Prime",
+      "slug": "ultra-magnus-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "team-prime"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Megatron",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian jet",
+      "is_combined_form": false,
+      "notes": "Decepticon leader. Discovers and uses Dark Energon. Nearly killed by Bumblebee in S1, body possessed by Unicron in Predacons Rising. Voluntarily disbands the Decepticons and exiles himself after Unicron's defeat. Voiced by Frank Welker. Also playable in WFC and FOC games",
+      "slug": "megatron-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Starscream",
+      "character_type": "Transformer",
+      "alt_mode": "F-16 fighter jet",
+      "is_combined_form": false,
+      "notes": "Decepticon Air Commander and perpetual schemer. Takes command when Megatron is injured. Repeatedly attempts and fails to seize leadership. Goes rogue in S1 before returning. Voiced by Steve Blum. Also playable in WFC and FOC games",
+      "slug": "starscream-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "seekers-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Soundwave",
+      "character_type": "Transformer",
+      "alt_mode": "MQ-9 Reaper surveillance drone",
+      "is_combined_form": false,
+      "notes": "Decepticon communications chief. Silent and menacing — rarely speaks, replays recordings instead. Deploys Laserbeak as a spy. Utterly loyal to Megatron. Banished to the Shadowzone in the finale. Voiced by Frank Welker. Also playable in WFC and FOC games",
+      "slug": "soundwave-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Knock Out",
+      "character_type": "Transformer",
+      "alt_mode": "Red Aston Martin-style sports car",
+      "is_combined_form": false,
+      "notes": "Decepticon medic. Vain and obsessed with his finish. Partner of Breakdown. Performs experiments on captives. Defects to the Autobots in the finale, claiming he's 'joining the winning team.' Voiced by Daran Norris. Series: Prime",
+      "slug": "knock-out",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Breakdown",
+      "character_type": "Transformer",
+      "alt_mode": "Blue armored SUV/truck",
+      "is_combined_form": false,
+      "notes": "Decepticon bruiser and Knock Out's partner. Rival of Bulkhead. Captured by MECH, who harvest his body. Later killed by Airachnid. His body is used by Silas as a cyborg shell. Also appears in WFC game. Series: Prime",
+      "slug": "breakdown-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Dreadwing",
+      "character_type": "Transformer",
+      "alt_mode": "Blue and gold fighter jet",
+      "is_combined_form": false,
+      "notes": "Decepticon warrior and Skyquake's twin brother. Arrives on Earth in S2 seeking vengeance for his brother. Honorable and loyal to Megatron until learning Starscream desecrated Skyquake's corpse. Killed by Megatron for attempting to kill Starscream. Voiced by Tony Todd. Series: Prime",
+      "slug": "dreadwing-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "seekers-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Skyquake",
+      "character_type": "Transformer",
+      "alt_mode": "Green fighter jet",
+      "is_combined_form": false,
+      "notes": "Decepticon warrior and Dreadwing's twin brother. Loyally guarded a post on Earth for millennia. Killed in S1 episode 'Masters and Students.' His corpse is later reanimated as a Terrorcon by Starscream using Dark Energon. Series: Prime",
+      "slug": "skyquake",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "seekers-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Airachnid",
+      "character_type": "Transformer",
+      "alt_mode": "Attack helicopter",
+      "is_combined_form": false,
+      "notes": "Decepticon rogue and sadistic hunter. Spider-like robot mode. Killed Arcee's former partner Tailgate. Goes rogue from the Decepticons and takes control of an Insecticon hive. Trapped in stasis on a moon. Voiced by Gina Torres. Series: Prime",
+      "slug": "airachnid",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Shockwave",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian tank/cannon",
+      "is_combined_form": false,
+      "notes": "Decepticon scientist. Single optic, logical and ruthless. Guarded Cybertron while Megatron was on Earth. Clones the Predacons in S3 from fossilized remains. His experiments create Predaking, Darksteel, and Skylynx. Also appears in WFC and FOC games. Series: Prime",
+      "slug": "shockwave-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Predaking",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical dragon (firedrake)",
+      "is_combined_form": false,
+      "notes": "Predacon leader. Cloned by Shockwave from ancient CNA. Unexpectedly develops intelligence and transforms. Megatron orders the other Predacon clones destroyed when he realizes Predaking's threat. Allies with Autobots against Unicron in Predacons Rising. Series: Prime",
+      "slug": "predaking-aligned",
+      "faction_slug": "predacon",
+      "sub_group_slugs": [
+        "predacons-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Darksteel",
+      "character_type": "Transformer",
+      "alt_mode": "Ursagryph (bear-griffin hybrid beast)",
+      "is_combined_form": false,
+      "notes": "Predacon warrior. One of two additional Predacons cloned by Shockwave alongside Skylynx. Appears in Predacons Rising TV movie. Less intelligent than Predaking. Allies with the Autobots against Unicron's Terrorcon army. Series: Prime (Predacons Rising)",
+      "slug": "darksteel",
+      "faction_slug": "predacon",
+      "sub_group_slugs": [
+        "predacons-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Skylynx",
+      "character_type": "Transformer",
+      "alt_mode": "Winged dragon",
+      "is_combined_form": false,
+      "notes": "Predacon warrior. One of two additional Predacons cloned by Shockwave alongside Darksteel. Appears in Predacons Rising TV movie. Less intelligent than Predaking. Allies with the Autobots against Unicron's Terrorcon army. Not to be confused with G1 Sky Lynx. Series: Prime (Predacons Rising)",
+      "slug": "skylynx",
+      "faction_slug": "predacon",
+      "sub_group_slugs": [
+        "predacons-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Hardshell",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical horned beetle",
+      "is_combined_form": false,
+      "notes": "Insecticon commander and the only individually named Insecticon in the Prime series. Severely injures Bulkhead. Later killed by Miko using the Apex Armor. The Insecticons in Prime are a hive-minded swarm of warriors loyal to the strongest leader. Series: Prime",
+      "slug": "hardshell",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "insecticons-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Makeshift",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Decepticon spy with shape-shifting abilities. Infiltrates the Autobot base by impersonating Wheeljack in S1. Killed when exposed and ejected through a GroundBridge. Series: Prime",
+      "slug": "makeshift",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Laserbeak",
+      "character_type": "Transformer",
+      "alt_mode": "Surveillance drone (deploys from Soundwave's chest)",
+      "is_combined_form": false,
+      "notes": "Soundwave's Mini-Con deployer. Used primarily as a spy and scout, attaching to Soundwave's chest when not deployed. Does not speak. Series: Prime",
+      "slug": "laserbeak-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Jack Darby",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Human teenager partnered with Arcee. Acts as the de facto leader of the three human kids. Uses the Key to Vector Sigma to restore Optimus Prime's memory. Son of June Darby. Series: Prime",
+      "slug": "jack-darby",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Miko Nakadai",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Japanese exchange student partnered with Bulkhead. Impulsive and thrill-seeking, constantly sneaks into danger. Uses the Apex Armor in battle against Hardshell. Series: Prime",
+      "slug": "miko-nakadai",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Rafael Esquivel",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Young human genius partnered with Bumblebee. Youngest of the three kids but the most technically skilled. Can understand Bumblebee's beeps. Interfaces with the Key to Vector Sigma. Called 'Raf.' Series: Prime",
+      "slug": "rafael-esquivel",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Agent Fowler",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Special Agent William Fowler, US government liaison to the Autobots. Former Army Ranger. Works for Unit:E. Provides military support and political cover for Team Prime. Voiced by Ernie Hudson. Series: Prime",
+      "slug": "agent-fowler",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "June Darby",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Jack Darby's mother, a nurse. Initially unaware of the Transformers. Becomes involved when her son's secret is revealed. Develops a rapport with Agent Fowler. Series: Prime",
+      "slug": "june-darby",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Silas",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Colonel Leland Bishop, leader of MECH — a human terrorist organization that seeks Cybertronian technology. Mortally wounded and grafted into Breakdown's corpse as a cyborg. Eventually captured and experimented on by Knock Out. Series: Prime",
+      "slug": "silas",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Unicron",
+      "character_type": "Other",
+      "alt_mode": "Earth itself (his body forms the planet's core)",
+      "is_combined_form": false,
+      "notes": "The Chaos Bringer, brother of Primus. His body forms the core of Earth. His consciousness awakens when Cybertron begins to be restored. Possesses Megatron's body in Predacons Rising. Sealed away by Optimus Prime using the AllSpark. Series: Prime",
+      "slug": "unicron-aligned",
+      "faction_slug": "other",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Primus",
+      "character_type": "Other",
+      "alt_mode": "Cybertron itself",
+      "is_combined_form": false,
+      "notes": "The creator god of the Transformers. His body IS the planet Cybertron. Brother and eternal enemy of Unicron. Referenced throughout the series but never directly appears. Creator of the Thirteen original Primes. Series: Prime",
+      "slug": "primus-aligned",
+      "faction_slug": "other",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Alpha Trion",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Ancient Autobot and one of the Thirteen original Primes. Mentor who placed Iacon relics on Earth. Trained Smokescreen. Appears in visions and the Covenant of Primus. Voiced by George Takei. Series: Prime",
+      "slug": "alpha-trion-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Tailgate",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian car",
+      "is_combined_form": false,
+      "notes": "Autobot warrior and Arcee's former partner before Cliffjumper. Killed by Airachnid on Cybertron. Appears only in flashbacks. His death deeply affected Arcee's personality. Series: Prime",
+      "slug": "tailgate-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Sentinel Zeta Prime",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian car",
+      "is_combined_form": false,
+      "notes": "Autobot leader who preceded Optimus Prime. Killed by Megatron in War for Cybertron after Soundwave drained his spark via the Omega Key. His death led to Optimus being chosen as the new Prime. Also known as Zeta Prime (game) or Sentinel Prime (novels). Series: WFC",
+      "slug": "sentinel-zeta-prime",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Ironhide",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian truck",
+      "is_combined_form": false,
+      "notes": "Autobot weapons specialist. Playable campaign character in WFC. Tough veteran warrior. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "ironhide-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Sideswipe",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian car",
+      "is_combined_form": false,
+      "notes": "Autobot warrior. Playable campaign character in WFC. Fast melee combatant. Does not appear in the Prime TV show. Series: WFC. Also appears in RiD 2015 with a new design",
+      "slug": "sideswipe-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Jetfire",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian jet",
+      "is_combined_form": false,
+      "notes": "Autobot aerial warrior and scientist. Playable campaign character in WFC. Leads the Aerialbot missions on Cybertron. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "jetfire-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "aerialbots-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Air Raid",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian jet",
+      "is_combined_form": false,
+      "notes": "Autobot Aerialbot. Playable campaign character in WFC alongside Jetfire and Silverbolt. Daring and reckless flyer. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "air-raid-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "aerialbots-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Silverbolt",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian jet",
+      "is_combined_form": false,
+      "notes": "Autobot Aerialbot leader. Playable campaign character in WFC alongside Jetfire and Air Raid. Brave despite a secret fear of heights. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "silverbolt-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "aerialbots-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Warpath",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian tank",
+      "is_combined_form": false,
+      "notes": "Autobot tank. Playable campaign character in WFC. Loud, boisterous warrior who loves combat. Known for his verbal sound effects (BLAM! POW!). Does not appear in the Prime TV show. Series: WFC",
+      "slug": "warpath-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Jazz",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian car",
+      "is_combined_form": false,
+      "notes": "Autobot special operations agent. Playable in FOC campaign and WFC DLC. Cool and versatile. Uses a grappling hook. Does not appear in the Prime TV show. Series: WFC/FOC. Also appears in RiD 2015",
+      "slug": "jazz-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Omega Supreme",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian starship/rocket base",
+      "is_combined_form": false,
+      "notes": "Massive Autobot guardian. Boss fight in WFC Decepticon campaign — the last line of defense for the Omega Key. Damaged by Megatron's Dark Energon corruption. One of the largest Autobots. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "omega-supreme-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Metroplex",
+      "character_type": "Transformer",
+      "alt_mode": "City / Cybertronian battle station",
+      "is_combined_form": false,
+      "notes": "Gigantic Autobot city-former integrated into Iacon's structure. Awakens in FOC when Optimus pulls a lever at the city's core. Deals a near-lethal blow to Megatron. Sacrifices his remaining energy to launch the Ark. Does not appear in the Prime TV show. Series: FOC",
+      "slug": "metroplex-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Grimlock",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical T-Rex",
+      "is_combined_form": false,
+      "notes": "Dinobot leader. Playable in FOC campaign. Captured and experimented on by Shockwave, giving him his dinosaur alt mode. Extremely powerful but rage-driven. Transforms by building up rage energy. Does not appear in the Prime TV show. Series: FOC. Also appears in RiD 2015 as a main character with a new dinosaur design",
+      "slug": "grimlock-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "dinobots-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Swoop",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical pteranodon",
+      "is_combined_form": false,
+      "notes": "Dinobot aerial warrior. Appears in FOC campaign alongside Grimlock. One of the Lightning Strike Coalition members experimented on by Shockwave. Does not appear in the Prime TV show. Series: FOC",
+      "slug": "swoop-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "dinobots-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Slug",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical triceratops",
+      "is_combined_form": false,
+      "notes": "Dinobot warrior (called Slag in G1). Appears in FOC campaign. One of the Lightning Strike Coalition members experimented on by Shockwave. Hot-headed fighter. Does not appear in the Prime TV show. Series: FOC",
+      "slug": "slug-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "dinobots-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Snarl",
+      "character_type": "Transformer",
+      "alt_mode": "Mechanical stegosaurus",
+      "is_combined_form": false,
+      "notes": "Dinobot warrior. Appears in FOC campaign. One of the Lightning Strike Coalition members experimented on by Shockwave. Quiet and solitary. Does not appear in the Prime TV show. Series: FOC",
+      "slug": "snarl-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "dinobots-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Barricade",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian car",
+      "is_combined_form": false,
+      "notes": "Decepticon scout. Playable campaign character in WFC alongside Megatron and Brawl. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "barricade-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Brawl",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian tank",
+      "is_combined_form": false,
+      "notes": "Combaticon heavy weapons specialist. Playable in WFC campaign alongside Megatron. Also a component of Bruticus in FOC. Forms the left leg of Bruticus. Does not appear in the Prime TV show. Series: WFC/FOC",
+      "slug": "brawl-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "combaticons-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Thundercracker",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian jet",
+      "is_combined_form": false,
+      "notes": "Decepticon Seeker. Playable in WFC campaign alongside Starscream and Skywarp. Has doubts about the Decepticon cause but follows orders. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "thundercracker-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "seekers-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Skywarp",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian jet",
+      "is_combined_form": false,
+      "notes": "Decepticon Seeker with teleportation abilities. Playable in WFC campaign alongside Starscream and Thundercracker. Not particularly bright but dangerous. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "skywarp-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "seekers-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Trypticon",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian space station / battle platform",
+      "is_combined_form": false,
+      "notes": "Massive Decepticon weapon. Boss fight in WFC Autobot campaign. Crashes to Earth and becomes the Decepticon warship Nemesis. Does not appear in the Prime TV show directly, though the Nemesis features prominently. Series: WFC",
+      "slug": "trypticon-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Onslaught",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian missile truck",
+      "is_combined_form": false,
+      "notes": "Combaticon commander and torso of Bruticus. Strategic mastermind. WFC DLC character, appears in FOC. Does not appear in the Prime TV show. Series: WFC/FOC",
+      "slug": "onslaught-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "combaticons-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Blast Off",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian jet/spacecraft",
+      "is_combined_form": false,
+      "notes": "Combaticon space warrior and right arm of Bruticus. Aloof and considers himself superior. Appears in FOC. Does not appear in the Prime TV show. Series: FOC",
+      "slug": "blast-off-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "combaticons-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Vortex",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian helicopter",
+      "is_combined_form": false,
+      "notes": "Combaticon interrogator and left arm of Bruticus. Playable in FOC campaign. Sadistic and enjoys aerial combat. Does not appear in the Prime TV show. Series: FOC",
+      "slug": "vortex-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "combaticons-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Swindle",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian armored car",
+      "is_combined_form": false,
+      "notes": "Combaticon arms dealer and right leg of Bruticus. Playable in FOC campaign. Opportunistic and self-serving. Does not appear in the Prime TV show. Series: FOC",
+      "slug": "swindle-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "combaticons-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Bruticus",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": true,
+      "notes": "Combaticon combined form. Formed from Onslaught (torso), Blast Off (right arm), Vortex (left arm), Swindle (right leg), and Brawl (left leg). Playable as a boss-level character in FOC. Incredibly powerful but unintelligent. Does not appear in the Prime TV show. Series: FOC",
+      "slug": "bruticus-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "combaticons-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Slipstream",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian jet",
+      "is_combined_form": false,
+      "notes": "Female Decepticon Seeker. Appears in WFC as a playable character. Named after the Animated continuity character. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "slipstream-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "seekers-aligned"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Scattershot",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian artillery vehicle",
+      "is_combined_form": false,
+      "notes": "Autobot warrior. WFC DLC character. Aggressive and trigger-happy. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "scattershot-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Dead End",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian car",
+      "is_combined_form": false,
+      "notes": "Decepticon warrior. WFC DLC character. Fatalistic and nihilistic. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "dead-end-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Demolishor",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian tank",
+      "is_combined_form": false,
+      "notes": "Decepticon heavy. WFC DLC character. Powerful but slow. Does not appear in the Prime TV show. Series: WFC",
+      "slug": "demolishor-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Heatwave",
+      "character_type": "Transformer",
+      "alt_mode": "Fire truck",
+      "is_combined_form": false,
+      "notes": "Leader of Rescue Force Sigma-17. Appointed team leader by Optimus Prime on Griffin Rock. Later gains a fireboat mode. Voiced by Steve Blum. Series: Rescue Bots",
+      "slug": "heatwave",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Chase",
+      "character_type": "Transformer",
+      "alt_mode": "Police car",
+      "is_combined_form": false,
+      "notes": "Rescue Bot who transforms into a police cruiser. By-the-book and rule-following. Partners with Chief Charlie Burns. Voiced by D.C. Douglas. Series: Rescue Bots",
+      "slug": "chase-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Blades",
+      "character_type": "Transformer",
+      "alt_mode": "Rescue helicopter",
+      "is_combined_form": false,
+      "notes": "Rescue Bot who transforms into a helicopter despite being afraid of heights. Partners with Dani Burns. Later gains a pterodactyl mode. Voiced by Parvesh Cheena. Series: Rescue Bots",
+      "slug": "blades-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Boulder",
+      "character_type": "Transformer",
+      "alt_mode": "Bulldozer",
+      "is_combined_form": false,
+      "notes": "Rescue Bot who transforms into a construction vehicle. Artistic and intellectual, fascinated by Earth culture. Partners with Graham Burns. Voiced by Imari Williams. Series: Rescue Bots",
+      "slug": "boulder",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Salvage",
+      "character_type": "Transformer",
+      "alt_mode": "Garbage truck",
+      "is_combined_form": false,
+      "notes": "Rescue Bot who finds value in discarded materials. Joins the team later in the series. Voiced by Jason Marsden. Series: Rescue Bots",
+      "slug": "salvage",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Blurr",
+      "character_type": "Transformer",
+      "alt_mode": "Race car",
+      "is_combined_form": false,
+      "notes": "Fast-talking, speed-obsessed Rescue Bot. Joins the team in later seasons. Voiced by Max Mittelman. Series: Rescue Bots",
+      "slug": "blurr-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "High Tide",
+      "character_type": "Transformer",
+      "alt_mode": "Rescue ship",
+      "is_combined_form": false,
+      "notes": "Old-school Autobot who transforms into a rescue ship. Can combine with his ship for a Megabot Mode. Also has a submarine mode. Series: Rescue Bots",
+      "slug": "high-tide",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Quickshadow",
+      "character_type": "Transformer",
+      "alt_mode": "Luxury sports car",
+      "is_combined_form": false,
+      "notes": "British-accented female Rescue Bot who transforms into a luxury sports car with right-hand drive. Voiced by Alex Kingston. Series: Rescue Bots",
+      "slug": "quickshadow",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Hot Shot",
+      "character_type": "Transformer",
+      "alt_mode": "Rescue truck (4WD)",
+      "is_combined_form": false,
+      "notes": "Rescue Bots Academy recruit. Enthusiastic and eager to prove himself. Later gains additional jet, hovercraft, and fire truck modes via Mul-T-Cog. Voiced by Pierce Cravens. Series: Rescue Bots Academy",
+      "slug": "hot-shot-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots-academy"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Whirl",
+      "character_type": "Transformer",
+      "alt_mode": "Helicopter",
+      "is_combined_form": false,
+      "notes": "Rescue Bots Academy recruit. Aspires to be a police officer like Chase. Later acquires a police car alt mode. Voiced by Courtney Shaw. Series: Rescue Bots Academy",
+      "slug": "whirl-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots-academy"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Hoist",
+      "character_type": "Transformer",
+      "alt_mode": "Tow truck",
+      "is_combined_form": false,
+      "notes": "Rescue Bots Academy recruit. Aspiring inventor and mechanic. Transforms into a teal green tow truck. Voiced by Alan Trinca. Series: Rescue Bots Academy",
+      "slug": "hoist-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots-academy"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Medix",
+      "character_type": "Transformer",
+      "alt_mode": "Ambulance",
+      "is_combined_form": false,
+      "notes": "Rescue Bots Academy recruit. Medical-focused bot. Voiced by Adam Andrianopoulous. Series: Rescue Bots Academy",
+      "slug": "medix",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots-academy"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Wedge",
+      "character_type": "Transformer",
+      "alt_mode": "Payloader (construction vehicle)",
+      "is_combined_form": false,
+      "notes": "Rescue Bots Academy recruit. Construction-focused bot who later scans a sports car for speed. Voiced by Mason Hensley. Series: Rescue Bots Academy",
+      "slug": "wedge-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "rescue-bots-academy"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Chief Charlie Burns",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Chief of police and fire on Griffin Rock. Father of four children. Partners with Chase. Voiced by Maurice LaMarche. Series: Rescue Bots",
+      "slug": "charlie-burns",
+      "faction_slug": "human",
+      "sub_group_slugs": [
+        "burns-family"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Kade Burns",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Eldest Burns sibling. Firefighter who partners with Heatwave. Brash and overconfident. Voiced by Jason Marsden. Series: Rescue Bots",
+      "slug": "kade-burns",
+      "faction_slug": "human",
+      "sub_group_slugs": [
+        "burns-family"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Dani Burns",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Burns daughter. Helicopter pilot who partners with Blades. Voiced by Lacey Chabert. Series: Rescue Bots",
+      "slug": "dani-burns",
+      "faction_slug": "human",
+      "sub_group_slugs": [
+        "burns-family"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Graham Burns",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Burns son. Engineer who partners with Boulder. Voiced by Shannon McKain. Series: Rescue Bots",
+      "slug": "graham-burns",
+      "faction_slug": "human",
+      "sub_group_slugs": [
+        "burns-family"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Cody Burns",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Youngest Burns child. Acts as liaison between the Rescue Bots and humans. Not officially partnered with a specific bot but closest to all of them. Voiced by Elan Garfias (RB), Andy Zou (RBA). Series: Rescue Bots / Rescue Bots Academy",
+      "slug": "cody-burns",
+      "faction_slug": "human",
+      "sub_group_slugs": [
+        "burns-family"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Doc Greene",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Griffin Rock's eccentric scientist. Full name Ezra Greene. His inventions frequently endanger the island. Father of Frankie Greene. Voiced by LeVar Burton. Series: Rescue Bots",
+      "slug": "doc-greene",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Strongarm",
+      "character_type": "Transformer",
+      "alt_mode": "Police SUV",
+      "is_combined_form": false,
+      "notes": "By-the-book Autobot cadet. Law enforcement officer who follows regulations strictly. Component of Ultra Bee combiner (arm). Series: RiD 2015",
+      "slug": "strongarm-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Fixit",
+      "character_type": "Mini-Con",
+      "alt_mode": "Cybertronian drill sled",
+      "is_combined_form": false,
+      "notes": "Autobot Mini-Con who served as caretaker of the Alchemor prison ship. Team technician and support specialist. Prone to verbal glitches. Series: RiD 2015",
+      "slug": "fixit",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Drift",
+      "character_type": "Transformer",
+      "alt_mode": "Futuristic sports car",
+      "is_combined_form": false,
+      "notes": "Samurai-themed Autobot bounty hunter. Master of Jetstorm and Slipstream. Functions as a sword for Ultra Bee combiner. Series: RiD 2015",
+      "slug": "drift",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Jetstorm",
+      "character_type": "Mini-Con",
+      "alt_mode": "Buzzsaw disc",
+      "is_combined_form": false,
+      "notes": "Autobot Mini-Con student of Drift. Trains alongside Slipstream. Can deploy from Drift in combat. Series: RiD 2015",
+      "slug": "jetstorm-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Slipstream (Mini-Con)",
+      "character_type": "Mini-Con",
+      "alt_mode": "Buzzsaw disc",
+      "is_combined_form": false,
+      "notes": "Autobot Mini-Con student of Drift. Trains alongside Jetstorm. Can deploy from Drift in combat. Series: RiD 2015",
+      "slug": "slipstream-mc-aligned",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Windblade",
+      "character_type": "Transformer",
+      "alt_mode": "VTOL jet",
+      "is_combined_form": false,
+      "notes": "Female Autobot who can create powerful wind blasts. Transforms into a VTOL jet. First animated appearance of the fan-created character. Series: RiD 2015",
+      "slug": "windblade",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Denny Clay",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Owner of a scrapyard that becomes the Autobots' base of operations. Father of Russell. Series: RiD 2015",
+      "slug": "denny-clay",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Russell Clay",
+      "character_type": "Human",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Son of Denny Clay. Befriends the Autobots and helps with missions. Series: RiD 2015",
+      "slug": "russell-clay",
+      "faction_slug": "human",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Steeljaw",
+      "character_type": "Transformer",
+      "alt_mode": "Off-road vehicle",
+      "is_combined_form": false,
+      "notes": "Primary Decepticon antagonist. Wolf-like robot who seeks to build a Decepticon army on Earth. Cunning and charismatic leader. Series: RiD 2015",
+      "slug": "steeljaw-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Underbite",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian tank car",
+      "is_combined_form": false,
+      "notes": "Chompazoid Decepticon. Grows stronger by consuming metal. One of the first escaped prisoners from the Alchemor. Series: RiD 2015",
+      "slug": "underbite",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Thunderhoof",
+      "character_type": "Transformer",
+      "alt_mode": "Tractor",
+      "is_combined_form": false,
+      "notes": "Moose-like Decepticon crime boss. Speaks with an exaggerated accent. Escaped Alchemor prisoner. Series: RiD 2015",
+      "slug": "thunderhoof",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Fracture",
+      "character_type": "Transformer",
+      "alt_mode": "Motorcycle",
+      "is_combined_form": false,
+      "notes": "Decepticon bounty hunter. Rival of Drift. Accompanied by Mini-Con partners. Transforms into a chopper motorcycle. Series: RiD 2015",
+      "slug": "fracture",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Clampdown",
+      "character_type": "Transformer",
+      "alt_mode": "Hatchback car",
+      "is_combined_form": false,
+      "notes": "Crustacean-like Decepticon. Cowardly and paranoid. Transforms into a wood-paneled hatchback. Escaped Alchemor prisoner. Series: RiD 2015",
+      "slug": "clampdown",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Overload",
+      "character_type": "Transformer",
+      "alt_mode": "Cybertronian tank",
+      "is_combined_form": false,
+      "notes": "Powerful Decepticon who transforms into a Cybertronian tank. Series: RiD 2015",
+      "slug": "overload-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Glowstrike",
+      "character_type": "Transformer",
+      "alt_mode": "Ladybug (beast mode)",
+      "is_combined_form": false,
+      "notes": "Cold and aloof Decepticon leader. Insect-like with ability to fire energy bolts from her palms. Commands Decepticon forces from a secret base. Series: RiD 2015",
+      "slug": "glowstrike",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Scorponok",
+      "character_type": "Transformer",
+      "alt_mode": "Scorpion (beast mode)",
+      "is_combined_form": false,
+      "notes": "Decepticon who transforms into a scorpion. Large and powerful with articulated claws and stinger. Series: RiD 2015",
+      "slug": "scorponok-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Saberhorn",
+      "character_type": "Transformer",
+      "alt_mode": "Rhinoceros beetle (beast mode)",
+      "is_combined_form": false,
+      "notes": "Gentleman swordsman Decepticon. Transforms into a winged rhinoceros beetle. Skilled dual-wielding swordfighter. Series: RiD 2015",
+      "slug": "saberhorn",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Ultra Bee",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": true,
+      "notes": "Combined form of Bumblebee (torso), Sideswipe (arm), Strongarm (arm), and Grimlock (legs). Drift functions as a sword. Has no unified personality — components must agree on actions. Series: RiD 2015",
+      "slug": "ultra-bee",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Menasor",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": true,
+      "notes": "Combined form of the Stunticons: Motormaster (torso), Heatseeker (left leg), Wildbreak (left arm), Dragstrip (right arm), and Slashmark (right leg). Clashing component personalities hamper coordination. Series: RiD 2015",
+      "slug": "menasor-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "stunticons-rid"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Motormaster",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Stunticon leader. Forms the torso of Menasor. Series: RiD 2015",
+      "slug": "motormaster-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "stunticons-rid"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Heatseeker",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Stunticon who forms the left leg of Menasor. Series: RiD 2015",
+      "slug": "heatseeker",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "stunticons-rid"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Wildbreak",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Stunticon who forms the left arm of Menasor. Series: RiD 2015",
+      "slug": "wildbreak",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "stunticons-rid"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Dragstrip",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Stunticon who forms the right arm of Menasor. Series: RiD 2015",
+      "slug": "dragstrip",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "stunticons-rid"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Slashmark",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Stunticon who forms the right leg of Menasor. Series: RiD 2015",
+      "slug": "slashmark",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "stunticons-rid"
+      ],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Galvatronus",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": true,
+      "notes": "Combined form of the corrupt Autobot High Council members: Cyclonus (torso), Cyberwarp, Skyjack, Treadshock, and Riotgear. Series: RiD 2015",
+      "slug": "galvatronus",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Cyclonus",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Corrupt Autobot High Council member who is secretly a Decepticon. Forms the torso of Galvatronus. Series: RiD 2015",
+      "slug": "cyclonus-aligned",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Cyberwarp",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Corrupt council member who combines as part of Galvatronus. Space-fighter scout who forms an arm. Series: RiD 2015",
+      "slug": "cyberwarp",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Skyjack",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Corrupt council member who combines as part of Galvatronus. Space-fighter scout who forms an arm. Series: RiD 2015",
+      "slug": "skyjack",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Treadshock",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Corrupt council member who combines as part of Galvatronus. Ground-vehicle scout who forms a leg. Series: RiD 2015",
+      "slug": "treadshock",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Riotgear",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": false,
+      "notes": "Corrupt council member who combines as part of Galvatronus. Ground-vehicle scout who forms a leg. Series: RiD 2015",
+      "slug": "riotgear",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "aligned",
+      "franchise_slug": "transformers"
+    }
+  ]
+}

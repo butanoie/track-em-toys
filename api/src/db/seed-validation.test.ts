@@ -42,10 +42,7 @@ interface CharacterRecord {
   character_type: string;
   is_combined_form: boolean;
   faction_slug: string | null;
-  combined_form_slug: string | null;
-  combiner_role: string | null;
   sub_group_slugs: string[];
-  component_slugs?: string[];
   [key: string]: unknown;
 }
 
@@ -92,6 +89,24 @@ interface AppearanceFile {
   data: AppearanceRecord[];
 }
 
+interface RelationshipEntity {
+  slug: string;
+  role: string | null;
+}
+
+interface RelationshipRecord {
+  type: string;
+  subtype: string | null;
+  entity1: RelationshipEntity;
+  entity2: RelationshipEntity;
+  metadata: Record<string, unknown>;
+}
+
+interface RelationshipFile {
+  _metadata: { total: number; [key: string]: unknown };
+  relationships: RelationshipRecord[];
+}
+
 // ─── Loaders ─────────────────────────────────────────────────────────────────
 
 function loadRef<T extends ReferenceRecord>(relPath: string): ReferenceFile<T> {
@@ -108,6 +123,10 @@ function loadItemFile(relPath: string): ItemFile {
 
 function loadAppearanceFile(relPath: string): AppearanceFile {
   return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as AppearanceFile;
+}
+
+function loadRelationshipFile(relPath: string): RelationshipFile {
+  return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as RelationshipFile;
 }
 
 // ─── Load all seed data at module scope ──────────────────────────────────────
@@ -130,6 +149,9 @@ const CHARACTER_FILES = [
   'characters/gi-joe-movieverse-characters.json',
   'characters/movieverse-characters.json',
   'characters/animated-characters.json',
+  'characters/arah-gi-joe-vehicles.json',
+  'characters/arah-cobra-vehicles.json',
+  'characters/aligned-characters.json',
 ] as const;
 
 const charFiles = CHARACTER_FILES.map((f) => ({
@@ -167,6 +189,21 @@ const appearanceFiles = APPEARANCE_FILES.map((f) => ({
   ...loadAppearanceFile(f),
 }));
 
+// Dynamically discover relationship files — no manual registration needed
+const RELATIONSHIPS_DIR = path.join(SEED_DIR, 'relationships');
+const RELATIONSHIP_FILES = fs.existsSync(RELATIONSHIPS_DIR)
+  ? fs
+      .readdirSync(RELATIONSHIPS_DIR)
+      .filter((f) => f.endsWith('.json'))
+      .sort()
+      .map((f) => `relationships/${f}`)
+  : [];
+
+const relationshipFiles = RELATIONSHIP_FILES.map((f) => ({
+  file: f,
+  ...loadRelationshipFile(f),
+}));
+
 // ─── Derived lookup sets ─────────────────────────────────────────────────────
 
 const franchiseSlugs = new Set(franchises.data.map((r) => r.slug));
@@ -178,12 +215,16 @@ const toyLineSlugs = new Set(toyLines.data.map((r) => r.slug));
 const allCharacters = charFiles.flatMap(({ characters }) => characters);
 const allCharacterSlugs = new Set(allCharacters.map((c) => c.slug));
 const allAppearanceSlugs = new Set(appearanceFiles.flatMap(({ data }) => data.map((a) => a.slug)));
+const allRelationships = relationshipFiles.flatMap(({ relationships }) => relationships);
+const charBySlugGlobal = new Map(allCharacters.map((c) => [c.slug, c]));
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const VALID_COMBINER_ROLES = new Set([
+// ─── Relationship type registry ─────────────────────────────────────────────
+
+const COMBINER_BODY_ROLES = new Set([
   'torso',
   'right arm',
   'left arm',
@@ -201,6 +242,101 @@ const VALID_COMBINER_ROLES = new Set([
   'back-mounted weapon',
   'back',
 ]);
+
+interface RelationshipTypeSpec {
+  entity1Roles: Set<string>;
+  entity2Roles: Set<string> | null; // null = any string or null allowed
+  requiredSubtypes: Set<string> | null; // null = no subtypes (must be null)
+  optionalSubtypes: Set<string> | null; // null = no optional subtypes
+  symmetric: boolean;
+}
+
+const RELATIONSHIP_TYPE_REGISTRY = new Map<string, RelationshipTypeSpec>([
+  [
+    'combiner-component',
+    {
+      entity1Roles: new Set(['gestalt']),
+      entity2Roles: COMBINER_BODY_ROLES, // null roles also allowed (checked separately)
+      requiredSubtypes: null,
+      optionalSubtypes: null,
+      symmetric: false,
+    },
+  ],
+  [
+    'binary-bond',
+    {
+      entity1Roles: new Set(['host']),
+      entity2Roles: new Set([
+        'head-partner',
+        'weapon-partner',
+        'engine-partner',
+        'face-partner',
+        'transtector-partner',
+      ]),
+      requiredSubtypes: new Set([
+        'headmaster',
+        'targetmaster',
+        'powermaster',
+        'brainmaster',
+        'godmaster',
+      ]),
+      optionalSubtypes: null,
+      symmetric: false,
+    },
+  ],
+  [
+    'vehicle-crew',
+    {
+      entity1Roles: new Set(['vehicle']),
+      entity2Roles: new Set(['driver', 'pilot', 'gunner', 'commander', 'crew']),
+      requiredSubtypes: null,
+      optionalSubtypes: new Set(['packaged-with', 'media-assigned']),
+      symmetric: false,
+    },
+  ],
+  [
+    'rival',
+    {
+      entity1Roles: new Set(['rival']),
+      entity2Roles: new Set(['rival']),
+      requiredSubtypes: null,
+      optionalSubtypes: null,
+      symmetric: true,
+    },
+  ],
+  [
+    'sibling',
+    {
+      entity1Roles: new Set(['sibling', 'twin']),
+      entity2Roles: new Set(['sibling', 'twin']),
+      requiredSubtypes: null,
+      optionalSubtypes: new Set(['twin', 'clone']),
+      symmetric: true,
+    },
+  ],
+  [
+    'mentor-student',
+    {
+      entity1Roles: new Set(['mentor']),
+      entity2Roles: new Set(['student']),
+      requiredSubtypes: null,
+      optionalSubtypes: null,
+      symmetric: false,
+    },
+  ],
+  [
+    'evolution',
+    {
+      entity1Roles: new Set(['base-form']),
+      entity2Roles: new Set(['evolved-form']),
+      requiredSubtypes: null,
+      optionalSubtypes: new Set(['upgrade', 'reformatting', 'reconstruction']),
+      symmetric: false,
+    },
+  ],
+]);
+
+const VALID_RELATIONSHIP_TYPES = new Set(RELATIONSHIP_TYPE_REGISTRY.keys());
 
 const REQUIRED_CHAR_FIELDS = [
   'name',
@@ -391,25 +527,6 @@ describe('seed data validation', () => {
       }
     });
 
-    it.each(charFiles)('$file: combined_form_slug resolves to a character', ({ file, characters }) => {
-      for (const c of characters) {
-        if (c.combined_form_slug === null) continue;
-        expect(
-          allCharacterSlugs.has(c.combined_form_slug),
-          `${file} > "${c.name}" (${c.slug}): unknown combined_form_slug "${c.combined_form_slug}"`
-        ).toBe(true);
-      }
-    });
-    it.each(charFiles)('$file: combiner_role values are valid', ({ file, characters }) => {
-      for (const c of characters) {
-        if (c.combiner_role === null) continue;
-        expect(
-          VALID_COMBINER_ROLES.has(c.combiner_role),
-          `${file} > "${c.name}" (${c.slug}): unknown combiner_role "${c.combiner_role}"`
-        ).toBe(true);
-      }
-    });
-
     it.each(charFiles)('$file: continuity_family_slug resolves to continuity_families', ({ file, characters }) => {
       for (const c of characters) {
         expect(
@@ -429,61 +546,8 @@ describe('seed data validation', () => {
     });
   });
 
-  // ── 5. Combiner consistency ────────────────────────────────────────────
-
-  describe('combiner consistency', () => {
-    const combinedForms = allCharacters.filter((c) => c.is_combined_form);
-    const charBySlug = new Map(allCharacters.map((c) => [c.slug, c]));
-
-    it('combined forms with component_slugs: each component exists', () => {
-      for (const form of combinedForms) {
-        if (!form.component_slugs) continue;
-        for (const compSlug of form.component_slugs) {
-          expect(
-            allCharacterSlugs.has(compSlug),
-            `Combined form "${form.slug}": component "${compSlug}" does not exist`
-          ).toBe(true);
-        }
-      }
-    });
-
-    it('combined forms with component_slugs: each component points back', () => {
-      for (const form of combinedForms) {
-        if (!form.component_slugs) continue;
-        for (const compSlug of form.component_slugs) {
-          const comp = charBySlug.get(compSlug);
-          if (!comp) continue; // caught by previous test
-          expect(
-            comp.combined_form_slug,
-            `"${compSlug}" is in "${form.slug}".component_slugs but has combined_form_slug "${comp.combined_form_slug}"`
-          ).toBe(form.slug);
-        }
-      }
-    });
-
-    it('characters with combined_form_slug: target has is_combined_form=true', () => {
-      for (const c of allCharacters) {
-        if (c.combined_form_slug === null) continue;
-        const form = charBySlug.get(c.combined_form_slug);
-        expect(
-          form?.is_combined_form,
-          `"${c.slug}" has combined_form_slug "${c.combined_form_slug}" but that character has is_combined_form=${form?.is_combined_form}`
-        ).toBe(true);
-      }
-    });
-
-    it("characters with combined_form_slug: listed in form's component_slugs when present", () => {
-      for (const c of allCharacters) {
-        if (c.combined_form_slug === null) continue;
-        const form = charBySlug.get(c.combined_form_slug);
-        if (!form?.component_slugs) continue;
-        expect(
-          form.component_slugs.includes(c.slug),
-          `"${c.slug}" points to "${c.combined_form_slug}" but is not in its component_slugs`
-        ).toBe(true);
-      }
-    });
-  });
+  // ── 5. Combiner/vehicle consistency (now validated via relationship files) ──
+  // Old inline combiner/vehicle tests removed — replaced by section 10 (relationship validation)
 
   // ── 6. Required character fields ───────────────────────────────────────
 
@@ -674,6 +738,201 @@ describe('seed data validation', () => {
         for (const field of REQUIRED_APPEARANCE_FIELDS) {
           expect(field in a, `${file} > "${a.slug}": missing required field "${field}"`).toBe(true);
         }
+      }
+    });
+  });
+
+  // ── 10. Character relationship seed files ──────────────────────────────────
+
+  describe('character relationship seed files', () => {
+    // Relationship files are auto-discovered; tests naturally produce 0 iterations when empty
+    it.each(relationshipFiles)(
+      '$file: _metadata.total matches relationships array length',
+      ({ file, _metadata, relationships }) => {
+        expect(
+          relationships.length,
+          `${file}: _metadata.total is ${_metadata.total} but has ${relationships.length} entries`
+        ).toBe(_metadata.total);
+      }
+    );
+
+    it.each(relationshipFiles)('$file: required relationship fields present', ({ file, relationships }) => {
+      for (const r of relationships) {
+        expect('type' in r, `${file}: missing required field "type"`).toBe(true);
+        expect('entity1' in r, `${file}: missing required field "entity1"`).toBe(true);
+        expect('entity2' in r, `${file}: missing required field "entity2"`).toBe(true);
+        expect(
+          typeof r.metadata === 'object' && r.metadata !== null,
+          `${file}: metadata must be an object`
+        ).toBe(true);
+        expect('slug' in r.entity1, `${file}: entity1 missing "slug"`).toBe(true);
+        expect('role' in r.entity1, `${file}: entity1 missing "role"`).toBe(true);
+        expect('slug' in r.entity2, `${file}: entity2 missing "slug"`).toBe(true);
+        expect('role' in r.entity2, `${file}: entity2 missing "role"`).toBe(true);
+      }
+    });
+
+    it.each(relationshipFiles)('$file: relationship type is valid', ({ file, relationships }) => {
+      for (const r of relationships) {
+        expect(
+          VALID_RELATIONSHIP_TYPES.has(r.type),
+          `${file}: unknown relationship type "${r.type}"`
+        ).toBe(true);
+      }
+    });
+
+    it.each(relationshipFiles)('$file: entity slugs resolve to characters', ({ file, relationships }) => {
+      for (const r of relationships) {
+        expect(
+          allCharacterSlugs.has(r.entity1.slug),
+          `${file}: entity1.slug "${r.entity1.slug}" does not exist in character data`
+        ).toBe(true);
+        expect(
+          allCharacterSlugs.has(r.entity2.slug),
+          `${file}: entity2.slug "${r.entity2.slug}" does not exist in character data`
+        ).toBe(true);
+      }
+    });
+
+    it.each(relationshipFiles)('$file: no self-referential relationships', ({ file, relationships }) => {
+      for (const r of relationships) {
+        expect(
+          r.entity1.slug,
+          `${file}: self-referential relationship: "${r.entity1.slug}" (type: ${r.type})`
+        ).not.toBe(r.entity2.slug);
+      }
+    });
+
+    it.each(relationshipFiles)(
+      '$file: entity1.role and entity2.role valid for relationship type',
+      ({ file, relationships }) => {
+        for (const r of relationships) {
+          const spec = RELATIONSHIP_TYPE_REGISTRY.get(r.type);
+          if (!spec) continue; // caught by type validation test
+
+          expect(
+            spec.entity1Roles.has(r.entity1.role ?? ''),
+            `${file}: entity1.role "${r.entity1.role}" invalid for type "${r.type}". Expected one of: ${[...spec.entity1Roles].join(', ')}`
+          ).toBe(true);
+
+          // entity2.role: null is allowed (e.g. combiner-component undocumented roles);
+          // when non-null and spec defines an allowlist, validate against it
+          if (r.entity2.role !== null && spec.entity2Roles !== null) {
+            expect(
+              spec.entity2Roles.has(r.entity2.role),
+              `${file}: entity2.role "${r.entity2.role}" invalid for type "${r.type}". Expected one of: ${[...spec.entity2Roles].join(', ')}`
+            ).toBe(true);
+          }
+        }
+      }
+    );
+
+    it.each(relationshipFiles)(
+      '$file: subtype valid for relationship type',
+      ({ file, relationships }) => {
+        for (const r of relationships) {
+          const spec = RELATIONSHIP_TYPE_REGISTRY.get(r.type);
+          if (!spec) continue;
+
+          if (spec.requiredSubtypes) {
+            // Subtype is required
+            expect(
+              r.subtype !== null && spec.requiredSubtypes.has(r.subtype),
+              `${file}: type "${r.type}" requires subtype from: ${[...spec.requiredSubtypes].join(', ')}. Got: "${r.subtype}"`
+            ).toBe(true);
+          } else if (spec.optionalSubtypes) {
+            // Subtype is optional but must be valid if present
+            if (r.subtype !== null) {
+              expect(
+                spec.optionalSubtypes.has(r.subtype),
+                `${file}: type "${r.type}" subtype "${r.subtype}" invalid. Expected one of: ${[...spec.optionalSubtypes].join(', ')}`
+              ).toBe(true);
+            }
+          } else {
+            // No subtypes allowed
+            expect(
+              r.subtype === null || r.subtype === undefined,
+              `${file}: type "${r.type}" does not support subtypes, but got "${r.subtype}"`
+            ).toBe(true);
+          }
+        }
+      }
+    );
+
+    it.each(relationshipFiles)(
+      '$file: symmetric types have alphabetically ordered entity slugs',
+      ({ file, relationships }) => {
+        for (const r of relationships) {
+          const spec = RELATIONSHIP_TYPE_REGISTRY.get(r.type);
+          if (!spec?.symmetric) continue;
+          expect(
+            r.entity1.slug < r.entity2.slug,
+            `${file}: symmetric type "${r.type}" requires entity1.slug < entity2.slug alphabetically. Got "${r.entity1.slug}" and "${r.entity2.slug}"`
+          ).toBe(true);
+        }
+      }
+    );
+
+    it('no duplicate (type, entity1.slug, entity2.slug) tuples across all files', () => {
+      const seen = new Map<string, string>();
+      for (const { file, relationships } of relationshipFiles) {
+        for (const r of relationships) {
+          const key = `${r.type}|${r.entity1.slug}|${r.entity2.slug}`;
+          const existing = seen.get(key);
+          expect(
+            existing,
+            `Duplicate relationship: ${key} in "${file}" — already in "${existing}"`
+          ).toBeUndefined();
+          seen.set(key, file);
+        }
+      }
+    });
+
+    it('combiner-component: each component (entity2) in at most one combiner', () => {
+      const componentToGestalt = new Map<string, string>();
+      for (const r of allRelationships) {
+        if (r.type !== 'combiner-component') continue;
+        const existing = componentToGestalt.get(r.entity2.slug);
+        expect(
+          existing,
+          `Component "${r.entity2.slug}" is in combiner "${r.entity1.slug}" but already assigned to "${existing}"`
+        ).toBeUndefined();
+        componentToGestalt.set(r.entity2.slug, r.entity1.slug);
+      }
+    });
+
+    it('combiner-component: entity1 must have is_combined_form=true', () => {
+      for (const r of allRelationships) {
+        if (r.type !== 'combiner-component') continue;
+        const gestalt = charBySlugGlobal.get(r.entity1.slug);
+        expect(
+          gestalt?.is_combined_form,
+          `Combiner gestalt "${r.entity1.slug}" must have is_combined_form=true`
+        ).toBe(true);
+      }
+    });
+
+    it('is_combined_form=true characters must have combiner-component relationships', () => {
+      const gestaltsInRelationships = new Set(
+        allRelationships.filter((r) => r.type === 'combiner-component').map((r) => r.entity1.slug)
+      );
+      for (const c of allCharacters) {
+        if (!c.is_combined_form) continue;
+        expect(
+          gestaltsInRelationships.has(c.slug),
+          `Character "${c.slug}" has is_combined_form=true but no combiner-component relationships target it`
+        ).toBe(true);
+      }
+    });
+
+    it('vehicle-crew: entity1 must have character_type=Vehicle', () => {
+      for (const r of allRelationships) {
+        if (r.type !== 'vehicle-crew') continue;
+        const vehicle = charBySlugGlobal.get(r.entity1.slug);
+        expect(
+          vehicle?.character_type,
+          `Vehicle-crew entity1 "${r.entity1.slug}" must have character_type="Vehicle", got "${vehicle?.character_type}"`
+        ).toBe('Vehicle');
       }
     });
   });

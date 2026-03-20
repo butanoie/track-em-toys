@@ -1,0 +1,229 @@
+{
+  "_metadata": {
+    "description": "Character relationships for beast-era continuity family",
+    "total": 17
+  },
+  "relationships": [
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "god-neptune",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "coelagon",
+        "role": "left arm"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "god-neptune",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "halfshell",
+        "role": "torso"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "god-neptune",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "scylla",
+        "role": "left leg"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "god-neptune",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "sea-phantom",
+        "role": "right arm"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "god-neptune",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "terrormander",
+        "role": "right leg"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "magmatron",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "landsaurus",
+        "role": "torso"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "magmatron",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "seasaurus",
+        "role": "weapon"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "magmatron",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "skysaurus",
+        "role": "right arm"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "magnaboss",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "ironhide-bw",
+        "role": "right leg"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "magnaboss",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "prowl-bw",
+        "role": "left leg"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "magnaboss",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "silverbolt-magnaboss",
+        "role": "torso"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "magnaboss-bwii",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "lio-junior",
+        "role": "torso"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "magnaboss-bwii",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "santon",
+        "role": "torso"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "magnaboss-bwii",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "skywarp-bwii",
+        "role": "torso"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "tripredacus",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "cicadacon",
+        "role": "left leg"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "tripredacus",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "ram-horn",
+        "role": "right leg"
+      },
+      "metadata": {}
+    },
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": {
+        "slug": "tripredacus",
+        "role": "gestalt"
+      },
+      "entity2": {
+        "slug": "sea-clamp",
+        "role": "torso"
+      },
+      "metadata": {}
+    }
+  ]
+}

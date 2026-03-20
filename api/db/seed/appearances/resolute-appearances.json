@@ -1,0 +1,228 @@
+{
+  "_metadata": {
+    "description": "Character appearance seed data for G.I. Joe: Resolute (2009) — gritty reimagining web/TV mini-series by Warren Ellis",
+    "total": 20
+  },
+  "data": [
+    {
+      "slug": "duke-resolute",
+      "name": "Duke (Resolute)",
+      "character_slug": "duke",
+      "description": "Gritty realistic military figure in dark green tactical vest over black shirt with khaki cargo pants. Short blond buzz cut. Lean muscular build with combat harness and holstered sidearm. Darker, more serious portrayal than ARAH cartoon",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "snake-eyes-resolute",
+      "name": "Snake Eyes (Resolute)",
+      "character_slug": "snake-eyes",
+      "description": "Dark tactical ninja in all-black form-fitting combat suit with minimal gear. Sleek visor and commando mask. Lean athletic build optimized for close combat. Dual katanas with realistic military knife. Gritty, lethal portrayal",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "scarlett-resolute",
+      "name": "Scarlett (Resolute)",
+      "character_slug": "scarlett",
+      "description": "Athletic woman in dark gray tactical bodysuit with red hair pulled back tightly. Realistic military build with combat webbing and crossbow. More grounded and lethal design than ARAH counterpart. Darker color palette",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "roadblock-resolute",
+      "name": "Roadblock (Resolute)",
+      "character_slug": "roadblock-gijoe",
+      "description": "Large African American heavy weapons specialist in dark green tactical gear with black body armor. Muscular build carrying realistic M2 Browning heavy machine gun. Shaved head with serious expression. Gritty military design",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "stalker-resolute",
+      "name": "Stalker (Resolute)",
+      "character_slug": "stalker",
+      "description": "African American ranger in dark camouflage tactical gear with beret. Athletic build with combat vest and assault rifle. Realistic military design with subdued color palette. Experienced, battle-hardened appearance",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "flint-resolute",
+      "name": "Flint (Resolute)",
+      "character_slug": "flint",
+      "description": "Warrant officer in dark olive tactical gear with signature black beret. Athletic build with combat harness and shotgun. Realistic military design with muted earth tones. Stern, determined expression",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "tunnel-rat-resolute",
+      "name": "Tunnel Rat (Resolute)",
+      "character_slug": "tunnel-rat",
+      "description": "Asian American demolitions expert in dark tactical gear with goggles pushed up on forehead. Wiry build carrying explosives and compact weapons. Realistic combat engineer design with subdued urban color palette",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "gung-ho-resolute",
+      "name": "Gung-Ho (Resolute)",
+      "character_slug": "gung-ho",
+      "description": "Muscular Marine in dark green tank top and tactical pants with Marine Corps tattoo on chest. Bald head with strong jawline. Carries grenade launcher and combat knife. Gritty, no-nonsense military design",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "beach-head-resolute",
+      "name": "Beach Head (Resolute)",
+      "character_slug": "beach-head",
+      "description": "Ranger instructor in dark green tactical gear with signature balaclava mask covering face. Muscular build with combat vest and assault rifle. Realistic military design with muted color palette",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "dial-tone-resolute",
+      "name": "Dial-Tone (Resolute)",
+      "character_slug": "dial-tone",
+      "description": "Communications specialist in olive tactical gear with headset and radio equipment. Average build with technical equipment vest. Realistic military support design. Killed early in the series, establishing the gritty tone",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "heavy-duty-resolute",
+      "name": "Heavy Duty (Resolute)",
+      "character_slug": "heavy-duty",
+      "description": "Large African American heavy weapons specialist in dark tactical gear with body armor. Muscular build with heavy machine gun and ammunition belts. Realistic military design with dark color palette",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "cobra-commander-resolute",
+      "name": "Cobra Commander (Resolute)",
+      "character_slug": "cobra-commander",
+      "description": "Menacing figure in dark blue military uniform with chrome face plate helmet. Tall imposing build with dramatic cape over tactical armor. Far more competent and terrifying than ARAH portrayal. Personally kills Bazooka in cold blood, establishing lethal threat",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "storm-shadow-resolute",
+      "name": "Storm Shadow (Resolute)",
+      "character_slug": "storm-shadow",
+      "description": "Ninja assassin in white tactical combat suit with realistic body armor elements. Athletic muscular build with katana and combat knife. Face exposed with white hair. Gritty, lethal portrayal focused on the Snake Eyes rivalry",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "destro-resolute",
+      "name": "Destro (Resolute)",
+      "character_slug": "destro",
+      "description": "Arms dealer in dark red military jacket with silver metal battle mask. Broad-shouldered imposing build with high-tech wrist weapons. More realistic and threatening design than ARAH cartoon. Schemes independently of Cobra Commander",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "baroness-resolute",
+      "name": "Baroness (Resolute)",
+      "character_slug": "baroness",
+      "description": "Intelligence operative in black tactical bodysuit with signature glasses and long dark hair. Athletic build with realistic weaponry. More dangerous and competent portrayal. Darker, more grounded design",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "zartan-resolute",
+      "name": "Zartan (Resolute)",
+      "character_slug": "zartan",
+      "description": "Master of disguise in dark brown and green tactical gear with hood. Athletic build with realistic camouflage and infiltration equipment. More grounded take on the shapeshifting concept with tech-based disguises",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "firefly-resolute",
+      "name": "Firefly (Resolute)",
+      "character_slug": "firefly",
+      "description": "Saboteur in dark gray and black tactical gear with face-concealing balaclava. Medium build carrying realistic demolition charges and detonators. Gritty, professional mercenary design with military-grade equipment",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "major-bludd-resolute",
+      "name": "Major Bludd (Resolute)",
+      "character_slug": "major-bludd",
+      "description": "Australian mercenary in dark tactical gear with eye patch and cybernetic arm. Grizzled appearance with weathered combat armor. Armed with realistic weapons. Gritty, battle-scarred mercenary design",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "cobra-trooper-resolute",
+      "name": "Cobra Trooper (Resolute)",
+      "character_slug": "cobra-trooper",
+      "description": "Generic Cobra infantry in dark blue tactical body armor with face-concealing helmet and red Cobra insignia. Standard military build with assault rifle. More threatening and competent than ARAH cartoon troopers",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    },
+    {
+      "slug": "alley-viper-resolute",
+      "name": "Alley Viper (Resolute)",
+      "character_slug": "alley-viper",
+      "description": "Elite Cobra urban assault trooper in dark blue and orange tactical armor with face shield helmet. Heavy build with riot shield and submachine gun. More militaristic design than ARAH with subdued color palette",
+      "source_media": "TV",
+      "source_name": "G.I. Joe: Resolute",
+      "year_start": 2009,
+      "year_end": 2009,
+      "metadata": {}
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "_metadata": {
     "table": "continuity_families",
     "description": "Seed data for the continuity_families reference table",
-    "total": 10,
+    "total": 15,
     "import_order": 0
   },
   "data": [
@@ -75,6 +75,41 @@
       "sort_order": 100,
       "notes": "Transformers One (2024). Animated theatrical film depicting the pre-war origin of Optimus Prime and Megatron on Cybertron. Own continuity.",
       "franchise_slug": "transformers"
+    },
+    {
+      "name": "A Real American Hero",
+      "slug": "arah",
+      "sort_order": 10,
+      "notes": "Original 1982-1994 continuity. Encompasses Sunbow cartoon (1983-1986), DIC cartoon (1989-1992), Marvel Comics (1982-1994), and the complete 3.75\" toy line. The definitive G.I. Joe continuity.",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Sigma 6",
+      "slug": "sigma-6",
+      "sort_order": 20,
+      "notes": "Anime-influenced 8\" figure reboot (2005-2007). Distinct character designs with exaggerated proportions. Accompanied by an animated series on 4Kids TV.",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Resolute",
+      "slug": "resolute",
+      "sort_order": 30,
+      "notes": "Warren Ellis adult-oriented web miniseries (2009). Grittier, more lethal take on ARAH characters where characters die permanently.",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "Renegades",
+      "slug": "renegades",
+      "sort_order": 40,
+      "notes": "Hub Network animated series (2010-2011). A-Team inspired premise with the Joe team framed as fugitives. Modernized character designs.",
+      "franchise_slug": "gi-joe"
+    },
+    {
+      "name": "G.I. Joe Movies",
+      "slug": "gi-joe-movieverse",
+      "sort_order": 50,
+      "notes": "Live-action film series. The Rise of Cobra (2009), Retaliation (2013), Snake Eyes (2021). Realistic military designs with sci-fi elements.",
+      "franchise_slug": "gi-joe"
     }
   ]
 }
