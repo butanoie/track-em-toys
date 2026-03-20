@@ -4,9 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { PhotoGallery } from '../PhotoGallery';
 
 const mockPhotos = [
-  { id: 'p-1', url: '/photo-1.jpg', caption: 'Front view', is_primary: true },
-  { id: 'p-2', url: '/photo-2.jpg', caption: 'Side view', is_primary: false },
-  { id: 'p-3', url: '/photo-3.jpg', caption: null, is_primary: false },
+  { id: 'p-1', url: '/photo-1.jpg', caption: 'Front view', is_primary: true, sort_order: 1 },
+  { id: 'p-2', url: '/photo-2.jpg', caption: 'Side view', is_primary: false, sort_order: 2 },
+  { id: 'p-3', url: '/photo-3.jpg', caption: null, is_primary: false, sort_order: 3 },
 ];
 
 // Suppress React/Radix Dialog warnings in jsdom
@@ -24,7 +24,7 @@ describe('PhotoGallery', () => {
   });
 
   it('uses itemName when caption is null for primary photo', () => {
-    const photos = [{ id: 'p-1', url: '/photo.jpg', caption: null, is_primary: true }];
+    const photos = [{ id: 'p-1', url: '/photo.jpg', caption: null, is_primary: true, sort_order: 1 }];
     render(<PhotoGallery photos={photos} itemName="Optimus Prime" />);
     expect(screen.getByRole('button', { name: 'View photo: Optimus Prime' })).toBeInTheDocument();
   });

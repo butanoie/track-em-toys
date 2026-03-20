@@ -4,6 +4,7 @@ import type { ItemFilters } from './queries.js';
 import { listItemsSchema, getItemSchema, getItemFacetsSchema } from './schemas.js';
 import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js';
 import { formatListItem, formatDetail } from '../shared/formatters.js';
+import { photoRoutes } from '../photos/routes.js';
 
 interface FranchiseParams {
   franchise: string;
@@ -47,7 +48,6 @@ const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as c
  * @param fastify - Fastify instance
  * @param _opts - Fastify plugin options (unused)
  */
-// eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function itemRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   fastify.get<{ Params: FranchiseParams; Querystring: ItemsListQuery }>(
     '/',
@@ -94,4 +94,7 @@ export async function itemRoutes(fastify: FastifyInstance, _opts: object): Promi
       return formatDetail(detail);
     }
   );
+
+  // Photo management routes (curator role required)
+  await fastify.register(photoRoutes, { prefix: '/:slug/photos' });
 }

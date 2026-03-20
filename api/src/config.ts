@@ -139,6 +139,12 @@ export const config = {
     certFile: optionalOrUndefined('TLS_CERT_FILE'),
     keyFile: optionalOrUndefined('TLS_KEY_FILE'),
   },
+
+  photos: {
+    storagePath: required('PHOTO_STORAGE_PATH'),
+    baseUrl: optional('PHOTO_BASE_URL', 'http://localhost:3010/photos'),
+    maxSizeMb: optionalInt('PHOTO_MAX_SIZE_MB', 10, 1, 100),
+  },
 } as const;
 
 // Startup validation: TLS requires both cert and key, or neither.

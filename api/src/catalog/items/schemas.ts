@@ -7,6 +7,7 @@ import {
   itemListItem,
   facetValueItem,
   cursorListResponse,
+  photoItem,
 } from '../shared/schemas.js';
 
 const appearanceRef = {
@@ -18,18 +19,6 @@ const appearanceRef = {
     name: { type: 'string' },
     source_media: { type: ['string', 'null'] },
     source_name: { type: ['string', 'null'] },
-  },
-} as const;
-
-const photoItem = {
-  type: 'object',
-  required: ['id', 'url', 'caption', 'is_primary'],
-  additionalProperties: false,
-  properties: {
-    id: { type: 'string' },
-    url: { type: 'string' },
-    caption: { type: ['string', 'null'] },
-    is_primary: { type: 'boolean' },
   },
 } as const;
 

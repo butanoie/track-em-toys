@@ -93,6 +93,18 @@ Two distinct photo types:
 - **User collection photos** (future, post-ML): Private, RLS-protected. Separate table with `user_id` + RLS policy using `(SELECT current_app_user_id())`.
 - `item_photos` does NOT have RLS — this is intentional. Catalog photos are app-managed content visible to all users.
 
+### Photo Upload API (Phase 1.9+)
+
+- Photo routes live in `src/catalog/photos/` registered as a sub-plugin of `itemRoutes` at `/:slug/photos`
+- `@fastify/multipart` registered inside the photo plugin (scoped) — coexists with JSON body parsing (different content types, no conflict)
+- Upload route processes all files into memory buffers first, then writes to disk + inserts to DB (atomic batch)
+- Thumbnail pipeline: `sharp` converts to WebP at 3 sizes (200×200 thumb, 800×800 gallery, lossless original)
+- File naming: `{itemId}/{photoId}-{size}.webp`, relative URL stored in DB
+- `@fastify/static` registered in development mode only (`config.nodeEnv === 'development'`) with `decorateReply: false, index: false`
+- `PHOTO_STORAGE_PATH` startup validation skips in test environment (`config.nodeEnv !== 'test'`)
+- Adding a new required config property (e.g., `config.photos`) breaks ALL test files that mock `config.js` — add the property to every mock config across the test suite
+- `QueryOnlyClient` type exported from `db/pool.ts` — use `satisfies pool.QueryOnlyClient` in test mocks instead of `as unknown as PoolClient`
+
 ### Cookie Handling
 
 - Cookies are signed via `@fastify/cookie` with `signed: true`

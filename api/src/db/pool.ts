@@ -39,6 +39,7 @@ pool.on('error', (err) => {
 });
 
 export type PoolClient = pg.PoolClient;
+export type QueryOnlyClient = Pick<PoolClient, 'query'>;
 
 /**
  * Execute a function within a database transaction, with automatic

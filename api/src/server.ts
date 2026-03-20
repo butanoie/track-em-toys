@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, accessSync, constants as fsConstants } from 'node:fs';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import type { Secret } from '@fastify/jwt';
 import Fastify from 'fastify';
@@ -225,6 +225,32 @@ export async function buildServer(): Promise<FastifyInstance> {
   // ─── Admin routes ───────────────────────────────────────────────────────
 
   await fastify.register(adminRoutes, { prefix: '/admin' });
+
+  // ─── Photo storage validation ──────────────────────────────────────────
+  // Validate storage path exists and is writable at startup (all environments).
+  // Upload routes write to disk in all environments; only static serving is dev-only.
+
+  if (config.nodeEnv !== 'test') {
+    try {
+      accessSync(config.photos.storagePath, fsConstants.R_OK | fsConstants.W_OK);
+    } catch {
+      throw new Error(`PHOTO_STORAGE_PATH "${config.photos.storagePath}" does not exist or is not writable`);
+    }
+  }
+
+  // ─── Photo static serving (development only) ─────────────────────────
+  // In production, photos are served by a CDN. In development, the API
+  // serves them directly from PHOTO_STORAGE_PATH via @fastify/static.
+
+  if (config.nodeEnv === 'development') {
+    const fastifyStatic = await import('@fastify/static');
+    await fastify.register(fastifyStatic.default, {
+      root: config.photos.storagePath,
+      prefix: '/photos/',
+      decorateReply: false,
+      index: false,
+    });
+  }
 
   // NOTE: RLS context (app.user_id) is set inside withTransaction() on the
   // same connection that executes business logic, not via a global hook.

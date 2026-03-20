@@ -135,6 +135,7 @@ export const CatalogItemDetailSchema = CatalogItemSchema.extend({
       url: z.string(),
       caption: z.string().nullable(),
       is_primary: z.boolean(),
+      sort_order: z.number().int(),
     })
   ),
   metadata: z.record(z.unknown()),

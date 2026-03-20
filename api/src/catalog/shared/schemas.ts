@@ -107,6 +107,20 @@ export const facetValueItem = {
   },
 } as const;
 
+/** Shared photo item shape for read and write responses. */
+export const photoItem = {
+  type: 'object',
+  required: ['id', 'url', 'caption', 'is_primary', 'sort_order'],
+  additionalProperties: false,
+  properties: {
+    id: { type: 'string' },
+    url: { type: 'string' },
+    caption: { type: ['string', 'null'] },
+    is_primary: { type: 'boolean' },
+    sort_order: { type: 'integer' },
+  },
+} as const;
+
 /**
  * Cursor-paginated list response wrapper.
  *

@@ -258,6 +258,8 @@ export interface Item {
   updated_at: string;
 }
 
+export type PhotoStatus = 'pending' | 'approved' | 'rejected';
+
 export interface ItemPhoto {
   id: string;
   item_id: string;
@@ -265,7 +267,10 @@ export interface ItemPhoto {
   caption: string | null;
   uploaded_by: string | null;
   is_primary: boolean;
+  status: PhotoStatus;
+  sort_order: number;
   created_at: string;
+  updated_at: string;
 }
 
 export type CatalogEditType = 'create' | 'update' | 'merge' | 'delete';
