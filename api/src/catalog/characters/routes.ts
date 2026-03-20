@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
-import { listCharacters, getCharacterBySlug } from './queries.js';
-import type { CharacterListRow, CharacterDetail } from './queries.js';
-import { listCharactersSchema, getCharacterSchema } from './schemas.js';
+import { listCharacters, getCharacterBySlug, getCharacterFacets } from './queries.js';
+import type { CharacterListRow, CharacterDetail, CharacterFilters } from './queries.js';
+import { listCharactersSchema, getCharacterSchema, getCharacterFacetsSchema } from './schemas.js';
 import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js';
 
 interface FranchiseParams {
@@ -11,9 +11,27 @@ interface FranchiseSlugParams {
   franchise: string;
   slug: string;
 }
-interface PaginationQuery {
+interface CharactersListQuery {
   limit?: number;
   cursor?: string;
+  continuity_family?: string;
+  faction?: string;
+  character_type?: string;
+  sub_group?: string;
+}
+
+/**
+ * Extract character filters from validated querystring params.
+ *
+ * @param query - Validated query params
+ */
+function extractCharacterFilters(query: CharactersListQuery | CharacterFilters): CharacterFilters {
+  const filters: CharacterFilters = {};
+  if (query.continuity_family !== undefined) filters.continuity_family = query.continuity_family;
+  if (query.faction !== undefined) filters.faction = query.faction;
+  if (query.character_type !== undefined) filters.character_type = query.character_type;
+  if (query.sub_group !== undefined) filters.sub_group = query.sub_group;
+  return filters;
 }
 
 /**
@@ -41,11 +59,12 @@ function formatListItem(row: CharacterListRow) {
  * @param detail - Character detail to format
  */
 function formatDetail(detail: CharacterDetail) {
-  const { base, subGroups, appearances } = detail;
+  const { base, subGroups, appearances, componentCharacters } = detail;
   return {
     ...formatListItem(base),
     combiner_role: base.combiner_role,
     combined_form: base.combined_form_slug ? { slug: base.combined_form_slug, name: base.combined_form_name! } : null,
+    component_characters: componentCharacters,
     sub_groups: subGroups,
     appearances,
     metadata: base.metadata,
@@ -64,7 +83,7 @@ const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as c
  */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function characterRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
-  fastify.get<{ Params: FranchiseParams; Querystring: PaginationQuery }>(
+  fastify.get<{ Params: FranchiseParams; Querystring: CharactersListQuery }>(
     '/',
     { schema: listCharactersSchema, config: rateLimitConfig },
     async (request, reply) => {
@@ -76,14 +95,27 @@ export async function characterRoutes(fastify: FastifyInstance, _opts: object): 
         if (!cursor) return reply.code(400).send({ error: 'Invalid cursor' });
       }
 
+      const filters = extractCharacterFilters(request.query);
+
       const { rows, totalCount } = await listCharacters({
         franchiseSlug: request.params.franchise,
         limit,
         cursor,
+        filters,
       });
 
       const page = buildCursorPage(rows.map(formatListItem), limit);
       return { ...page, total_count: totalCount };
+    }
+  );
+
+  // Facets must be registered before /:slug to prevent Fastify matching "facets" as a slug
+  fastify.get<{ Params: FranchiseParams; Querystring: CharacterFilters }>(
+    '/facets',
+    { schema: getCharacterFacetsSchema, config: rateLimitConfig },
+    async (request) => {
+      const filters = extractCharacterFilters(request.query);
+      return getCharacterFacets(request.params.franchise, filters);
     }
   );
 

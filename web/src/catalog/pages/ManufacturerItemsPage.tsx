@@ -149,7 +149,7 @@ export function ManufacturerItemsPage() {
         <AppHeader title="Track'em Toys" />
         <MainNav />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h2 className="text-xl font-semibold text-foreground mb-2">Manufacturer not found</h2>
+          <h1 className="text-xl font-semibold text-foreground mb-2">Manufacturer not found</h1>
           <Link to="/catalog/manufacturers" className="text-primary hover:underline">
             Back to Manufacturers
           </Link>

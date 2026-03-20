@@ -93,6 +93,7 @@ const itemsListQuerystring = {
     toy_line: { type: 'string', minLength: 1, maxLength: 120 },
     continuity_family: { type: 'string', minLength: 1, maxLength: 120 },
     is_third_party: { type: 'boolean' },
+    character: { type: 'string', minLength: 1, maxLength: 120 },
   },
 } as const;
 
@@ -105,6 +106,7 @@ const itemFiltersQuerystring = {
     toy_line: { type: 'string', minLength: 1, maxLength: 120 },
     continuity_family: { type: 'string', minLength: 1, maxLength: 120 },
     is_third_party: { type: 'boolean' },
+    character: { type: 'string', minLength: 1, maxLength: 120 },
   },
 } as const;
 

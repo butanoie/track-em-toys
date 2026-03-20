@@ -6,6 +6,9 @@ import {
   CatalogItemDetailSchema,
   ItemFacetsSchema,
   ContinuityFamilyListSchema,
+  CharacterDetailSchema,
+  CharacterListSchema,
+  CharacterFacetsSchema,
   ManufacturerDetailSchema,
   ManufacturerStatsListSchema,
   ManufacturerItemFacetsSchema,
@@ -16,18 +19,25 @@ import {
   type CatalogItemDetail,
   type ItemFacets,
   type ContinuityFamilyList,
+  type CharacterDetail,
+  type CharacterList,
+  type CharacterFacets,
   type ManufacturerDetail,
   type ManufacturerStatsList,
   type ManufacturerItemFacets,
   type CatalogSearchResponse,
 } from '@/lib/zod-schemas';
 
-export interface ItemFilters {
-  manufacturer?: string;
+interface BaseItemFilters {
   size_class?: string;
   toy_line?: string;
   continuity_family?: string;
   is_third_party?: boolean;
+}
+
+export interface ItemFilters extends BaseItemFilters {
+  manufacturer?: string;
+  character?: string;
 }
 
 export interface ListItemsParams {
@@ -37,7 +47,7 @@ export interface ListItemsParams {
   limit?: number;
 }
 
-function buildFilterParams(filters?: ItemFilters | ManufacturerItemFilters): URLSearchParams {
+function buildFilterParams(filters?: ItemFilters | ManufacturerItemFilters | CharacterFilters): URLSearchParams {
   const params = new URLSearchParams();
   if (!filters) return params;
   for (const [key, value] of Object.entries(filters)) {
@@ -68,6 +78,47 @@ export async function getCatalogItemDetail(franchise: string, slug: string): Pro
     `/catalog/franchises/${encodeURIComponent(franchise)}/items/${encodeURIComponent(slug)}`,
     CatalogItemDetailSchema
   );
+}
+
+export async function getCharacterDetail(franchise: string, slug: string): Promise<CharacterDetail> {
+  return apiFetchJson(
+    `/catalog/franchises/${encodeURIComponent(franchise)}/characters/${encodeURIComponent(slug)}`,
+    CharacterDetailSchema
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Character browsing
+// ---------------------------------------------------------------------------
+
+export interface CharacterFilters {
+  continuity_family?: string;
+  faction?: string;
+  character_type?: string;
+  sub_group?: string;
+}
+
+export interface ListCharactersParams {
+  franchise: string;
+  filters?: CharacterFilters;
+  cursor?: string;
+  limit?: number;
+}
+
+export async function listCharacters(params: ListCharactersParams): Promise<CharacterList> {
+  const searchParams = buildFilterParams(params.filters);
+  if (params.cursor) searchParams.set('cursor', params.cursor);
+  if (params.limit) searchParams.set('limit', String(params.limit));
+  const qs = searchParams.toString();
+  const url = `/catalog/franchises/${encodeURIComponent(params.franchise)}/characters${qs ? `?${qs}` : ''}`;
+  return apiFetchJson(url, CharacterListSchema);
+}
+
+export async function getCharacterFacets(franchise: string, filters?: CharacterFilters): Promise<CharacterFacets> {
+  const searchParams = buildFilterParams(filters);
+  const qs = searchParams.toString();
+  const url = `/catalog/franchises/${encodeURIComponent(franchise)}/characters/facets${qs ? `?${qs}` : ''}`;
+  return apiFetchJson(url, CharacterFacetsSchema);
 }
 
 export async function getItemFacets(franchise: string, filters?: ItemFilters): Promise<ItemFacets> {
@@ -107,12 +158,8 @@ export async function searchCatalog(params: SearchParams): Promise<CatalogSearch
 // Manufacturer-scoped API
 // ---------------------------------------------------------------------------
 
-export interface ManufacturerItemFilters {
+export interface ManufacturerItemFilters extends BaseItemFilters {
   franchise?: string;
-  size_class?: string;
-  toy_line?: string;
-  continuity_family?: string;
-  is_third_party?: boolean;
 }
 
 export interface ListManufacturerItemsParams {

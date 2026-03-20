@@ -57,6 +57,7 @@ export interface ItemFilters {
   toy_line?: string;
   continuity_family?: string;
   is_third_party?: boolean;
+  character?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -112,6 +113,11 @@ function buildItemsQuery(
   if (filters?.is_third_party !== undefined) {
     clauses.push(`i.is_third_party = $${idx}`);
     params.push(filters.is_third_party);
+    idx++;
+  }
+  if (filters?.character !== undefined) {
+    clauses.push(`ch.slug = $${idx}`);
+    params.push(filters.character);
   }
 
   const joins = `

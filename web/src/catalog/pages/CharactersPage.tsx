@@ -1,21 +1,21 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { ChevronRight, SlidersHorizontal, X } from 'lucide-react';
-import { Route } from '@/routes/_authenticated/catalog/$franchise/items/index';
+import { Route } from '@/routes/_authenticated/catalog/$franchise/characters/index';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { useItems } from '@/catalog/hooks/useItems';
-import { useItemFacets } from '@/catalog/hooks/useItemFacets';
+import { useCharacters } from '@/catalog/hooks/useCharacters';
+import { useCharacterFacets } from '@/catalog/hooks/useCharacterFacets';
 import { useFranchiseDetail } from '@/catalog/hooks/useFranchiseDetail';
 import { FacetSidebar, type FacetGroupConfig } from '@/catalog/components/FacetSidebar';
-import { ItemList } from '@/catalog/components/ItemList';
-import { ItemDetailPanel } from '@/catalog/components/ItemDetailPanel';
+import { CharacterList } from '@/catalog/components/CharacterList';
+import { CharacterDetailPanel } from '@/catalog/components/CharacterDetailPanel';
 import { ApiError } from '@/lib/api-client';
-import type { ItemFilters } from '@/catalog/api';
+import type { CharacterFilters } from '@/catalog/api';
 
-export function ItemsPage() {
+export function CharactersPage() {
   const { franchise } = useParams({ strict: false });
   const franchiseSlug = franchise ?? '';
   const search = Route.useSearch();
@@ -28,65 +28,49 @@ export function ItemsPage() {
 
   const { data: detail, error: detailError } = useFranchiseDetail(franchiseSlug);
 
-  const filters: ItemFilters = useMemo(() => {
-    const f: ItemFilters = {};
-    if (search.manufacturer) f.manufacturer = search.manufacturer;
-    if (search.size_class) f.size_class = search.size_class;
-    if (search.toy_line) f.toy_line = search.toy_line;
+  const filters: CharacterFilters = useMemo(() => {
+    const f: CharacterFilters = {};
     if (search.continuity_family) f.continuity_family = search.continuity_family;
-    if (search.is_third_party !== undefined) f.is_third_party = search.is_third_party;
-    if (search.character) f.character = search.character;
+    if (search.faction) f.faction = search.faction;
+    if (search.character_type) f.character_type = search.character_type;
+    if (search.sub_group) f.sub_group = search.sub_group;
     return f;
-  }, [
-    search.manufacturer,
-    search.size_class,
-    search.toy_line,
-    search.continuity_family,
-    search.is_third_party,
-    search.character,
-  ]);
+  }, [search.continuity_family, search.faction, search.character_type, search.sub_group]);
 
   const hasActiveFilters = Object.keys(filters).length > 0;
 
-  const { data: itemsData, isPending: itemsPending } = useItems(franchiseSlug, filters, search.cursor);
-  const { data: facetsData } = useItemFacets(franchiseSlug, filters);
+  const { data: charactersData, isPending: charactersPending } = useCharacters(franchiseSlug, filters, search.cursor);
+  const { data: facetsData } = useCharacterFacets(franchiseSlug, filters);
 
   const facetGroups: FacetGroupConfig[] = useMemo(() => {
     if (!facetsData) return [];
     return [
       {
-        label: 'Continuity',
-        values: facetsData.continuity_families,
-        filterKey: 'continuity_family',
-        activeValue: filters.continuity_family,
+        label: 'Faction',
+        values: facetsData.factions,
+        filterKey: 'faction',
+        activeValue: filters.faction,
       },
       {
-        label: 'Manufacturer',
-        values: facetsData.manufacturers,
-        filterKey: 'manufacturer',
-        activeValue: filters.manufacturer,
-      },
-      { label: 'Toy Line', values: facetsData.toy_lines, filterKey: 'toy_line', activeValue: filters.toy_line },
-      {
-        label: 'Size Class',
-        values: facetsData.size_classes,
-        filterKey: 'size_class',
-        activeValue: filters.size_class,
+        label: 'Character Type',
+        values: facetsData.character_types,
+        filterKey: 'character_type',
+        activeValue: filters.character_type,
       },
       {
-        label: 'Type',
-        values: facetsData.is_third_party,
-        filterKey: 'is_third_party',
-        activeValue: filters.is_third_party,
+        label: 'Sub-group',
+        values: facetsData.sub_groups,
+        filterKey: 'sub_group',
+        activeValue: filters.sub_group,
       },
     ];
   }, [facetsData, filters]);
 
   const setFilter = useCallback(
-    (key: keyof ItemFilters, value: string | boolean | undefined) => {
+    (key: keyof CharacterFilters, value: string | boolean | undefined) => {
       setCursorStack([]);
       void navigate({
-        to: '/catalog/$franchise/items',
+        to: '/catalog/$franchise/characters',
         params: { franchise: franchiseSlug },
         search: (prev) => {
           const next = { ...prev, [key]: value, cursor: undefined, selected: undefined };
@@ -105,16 +89,16 @@ export function ItemsPage() {
   const clearFilters = useCallback(() => {
     setCursorStack([]);
     void navigate({
-      to: '/catalog/$franchise/items',
+      to: '/catalog/$franchise/characters',
       params: { franchise: franchiseSlug },
       search: {},
     });
   }, [navigate, franchiseSlug]);
 
-  const selectItem = useCallback(
+  const selectCharacter = useCallback(
     (slug: string | undefined) => {
       void navigate({
-        to: '/catalog/$franchise/items',
+        to: '/catalog/$franchise/characters',
         params: { franchise: franchiseSlug },
         search: (prev) => {
           const next = { ...prev, selected: slug };
@@ -127,22 +111,22 @@ export function ItemsPage() {
   );
 
   const loadNextPage = useCallback(() => {
-    if (itemsData?.next_cursor) {
+    if (charactersData?.next_cursor) {
       setCursorStack((prev) => [...prev, search.cursor]);
       void navigate({
-        to: '/catalog/$franchise/items',
+        to: '/catalog/$franchise/characters',
         params: { franchise: franchiseSlug },
-        search: (prev) => ({ ...prev, cursor: itemsData.next_cursor ?? undefined, selected: undefined }),
+        search: (prev) => ({ ...prev, cursor: charactersData.next_cursor ?? undefined, selected: undefined }),
       });
     }
-  }, [navigate, franchiseSlug, itemsData?.next_cursor, search.cursor]);
+  }, [navigate, franchiseSlug, charactersData?.next_cursor, search.cursor]);
 
   const loadPreviousPage = useCallback(() => {
     if (cursorStack.length > 0) {
       const previousCursor = cursorStack[cursorStack.length - 1];
       setCursorStack((prev) => prev.slice(0, -1));
       void navigate({
-        to: '/catalog/$franchise/items',
+        to: '/catalog/$franchise/characters',
         params: { franchise: franchiseSlug },
         search: (prev) => {
           const next = { ...prev, selected: undefined, cursor: previousCursor };
@@ -153,7 +137,6 @@ export function ItemsPage() {
     }
   }, [navigate, franchiseSlug, cursorStack]);
 
-  // Franchise not found
   if (detailError instanceof ApiError && detailError.status === 404) {
     return (
       <div className="min-h-screen bg-background">
@@ -199,7 +182,7 @@ export function ItemsPage() {
               <ChevronRight className="h-3.5 w-3.5" />
             </li>
             <li className="text-foreground font-medium" aria-current="page">
-              Items
+              Characters
             </li>
           </ol>
         </nav>
@@ -214,7 +197,7 @@ export function ItemsPage() {
                 variant="secondary"
                 size="sm"
                 className="h-7 text-xs gap-1"
-                onClick={() => setFilter(key as keyof ItemFilters, undefined)}
+                onClick={() => setFilter(key as keyof CharacterFilters, undefined)}
                 aria-label={`Remove filter: ${key.replace(/_/g, ' ')}: ${String(value)}`}
               >
                 {key.replace(/_/g, ' ')}: {String(value)}
@@ -234,7 +217,7 @@ export function ItemsPage() {
             {facetsData ? (
               <FacetSidebar
                 groups={facetGroups}
-                onFilterChange={(key, value) => setFilter(key as keyof ItemFilters, value)}
+                onFilterChange={(key, value) => setFilter(key as keyof CharacterFilters, value)}
               />
             ) : (
               <div className="space-y-4">
@@ -245,18 +228,18 @@ export function ItemsPage() {
             )}
           </div>
 
-          {/* Center: item list */}
+          {/* Center: character list */}
           <div className="min-w-0">
-            {itemsPending && !itemsData ? (
+            {charactersPending && !charactersData ? (
               <LoadingSpinner className="py-16" />
-            ) : itemsData ? (
-              <ItemList
-                items={itemsData.data}
+            ) : charactersData ? (
+              <CharacterList
+                characters={charactersData.data}
                 selectedSlug={search.selected}
-                onSelect={selectItem}
-                totalCount={itemsData.total_count}
+                onSelect={selectCharacter}
+                totalCount={charactersData.total_count}
                 paginationControls={
-                  cursorStack.length > 0 || itemsData.next_cursor ? (
+                  cursorStack.length > 0 || charactersData.next_cursor ? (
                     <>
                       <Button
                         variant="outline"
@@ -266,7 +249,7 @@ export function ItemsPage() {
                       >
                         Previous
                       </Button>
-                      <Button variant="outline" size="sm" onClick={loadNextPage} disabled={!itemsData.next_cursor}>
+                      <Button variant="outline" size="sm" onClick={loadNextPage} disabled={!charactersData.next_cursor}>
                         Next
                       </Button>
                     </>
@@ -278,10 +261,10 @@ export function ItemsPage() {
 
           {/* Right: detail panel */}
           <div className="hidden lg:block border-l border-border min-h-[400px]">
-            <ItemDetailPanel
+            <CharacterDetailPanel
               franchise={franchiseSlug}
-              itemSlug={search.selected}
-              onClose={() => selectItem(undefined)}
+              characterSlug={search.selected}
+              onClose={() => selectCharacter(undefined)}
             />
           </div>
         </div>

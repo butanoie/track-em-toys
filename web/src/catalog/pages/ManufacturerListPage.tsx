@@ -22,7 +22,7 @@ export function ManufacturerListPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-semibold text-foreground">Manufacturers</h2>
+            <h1 className="text-2xl font-semibold text-foreground">Manufacturers</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Browse toy manufacturers{' '}
               <Link to="/catalog" className="text-primary hover:underline">

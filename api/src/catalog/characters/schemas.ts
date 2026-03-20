@@ -2,10 +2,10 @@ import {
   errorResponse,
   franchiseParam,
   franchiseSlugParams,
-  paginationQuery,
   slugNameRef,
   nullableSlugNameRef,
   cursorListResponse,
+  facetValueItem,
 } from '../shared/schemas.js';
 
 const characterListItem = {
@@ -51,6 +51,18 @@ const appearanceItem = {
   },
 } as const;
 
+const componentCharacterItem = {
+  type: 'object',
+  required: ['slug', 'name', 'combiner_role', 'alt_mode'],
+  additionalProperties: false,
+  properties: {
+    slug: { type: 'string' },
+    name: { type: 'string' },
+    combiner_role: { type: ['string', 'null'] },
+    alt_mode: { type: ['string', 'null'] },
+  },
+} as const;
+
 const characterDetail = {
   type: 'object',
   required: [
@@ -65,6 +77,7 @@ const characterDetail = {
     'is_combined_form',
     'combiner_role',
     'combined_form',
+    'component_characters',
     'sub_groups',
     'appearances',
     'metadata',
@@ -84,6 +97,7 @@ const characterDetail = {
     is_combined_form: { type: 'boolean' },
     combiner_role: { type: ['string', 'null'] },
     combined_form: nullableSlugNameRef,
+    component_characters: { type: 'array', items: componentCharacterItem },
     sub_groups: { type: 'array', items: slugNameRef },
     appearances: { type: 'array', items: appearanceItem },
     metadata: { type: 'object', additionalProperties: true },
@@ -92,16 +106,63 @@ const characterDetail = {
   },
 } as const;
 
+/** Querystring for character list: pagination + filter fields. */
+const characterListQuerystring = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+    cursor: { type: 'string', maxLength: 512 },
+    continuity_family: { type: 'string', minLength: 1, maxLength: 120 },
+    faction: { type: 'string', minLength: 1, maxLength: 120 },
+    character_type: { type: 'string', minLength: 1, maxLength: 120 },
+    sub_group: { type: 'string', minLength: 1, maxLength: 120 },
+  },
+} as const;
+
+/** Querystring for character facets: filter fields only (no pagination). */
+const characterFiltersQuerystring = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    continuity_family: { type: 'string', minLength: 1, maxLength: 120 },
+    faction: { type: 'string', minLength: 1, maxLength: 120 },
+    character_type: { type: 'string', minLength: 1, maxLength: 120 },
+    sub_group: { type: 'string', minLength: 1, maxLength: 120 },
+  },
+} as const;
+
 export const listCharactersSchema = {
-  description: 'List characters in a franchise with cursor-based pagination.',
+  description: 'List characters in a franchise with cursor-based pagination and optional filters.',
   tags: ['catalog'],
   summary: 'List characters',
   params: franchiseParam,
-  querystring: paginationQuery,
+  querystring: characterListQuerystring,
   response: {
     200: cursorListResponse(characterListItem),
     400: errorResponse,
     404: errorResponse,
+    500: errorResponse,
+  },
+} as const;
+
+export const getCharacterFacetsSchema = {
+  description: 'Get facet counts for characters in a franchise, with cross-filtering.',
+  tags: ['catalog'],
+  summary: 'Get character facets',
+  params: franchiseParam,
+  querystring: characterFiltersQuerystring,
+  response: {
+    200: {
+      type: 'object',
+      required: ['factions', 'character_types', 'sub_groups'],
+      additionalProperties: false,
+      properties: {
+        factions: { type: 'array', items: facetValueItem },
+        character_types: { type: 'array', items: facetValueItem },
+        sub_groups: { type: 'array', items: facetValueItem },
+      },
+    },
     500: errorResponse,
   },
 } as const;

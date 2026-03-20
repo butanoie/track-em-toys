@@ -112,13 +112,123 @@ describe('character routes (franchise-scoped)', () => {
       expect(body.data).toHaveLength(0);
       expect(body.total_count).toBe(0);
     });
+
+    it('should accept filter parameters', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [charListRow] }).mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters?continuity_family=g1&faction=autobot',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ data: unknown[]; total_count: number }>();
+      expect(body.data).toHaveLength(1);
+      expect(body.total_count).toBe(1);
+    });
+
+    it('should accept sub_group filter', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [charListRow] }).mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters?sub_group=dinobots',
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.json<{ data: unknown[] }>().data).toHaveLength(1);
+    });
+
+    it('should accept character_type filter', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ total_count: 0 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters?character_type=Pretender',
+      });
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('should accept all filters combined with cursor', async () => {
+      const cursor = encodeCursor('Alpha', 'c-1');
+      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ total_count: 0 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: `/catalog/franchises/transformers/characters?continuity_family=g1&faction=autobot&character_type=Transformer&sub_group=dinobots&cursor=${cursor}`,
+      });
+      expect(res.statusCode).toBe(200);
+    });
+  });
+
+  // ─── Facets ─────────────────────────────────────────────────────
+
+  describe('GET /catalog/franchises/:franchise/characters/facets', () => {
+    const facetRow = { value: 'autobot', label: 'Autobot', count: 10 };
+
+    it('should return 200 with facet counts', async () => {
+      // 3 facet queries in Promise.all: factions, character_types, sub_groups
+      mockQuery
+        .mockResolvedValueOnce({ rows: [facetRow] })
+        .mockResolvedValueOnce({ rows: [{ value: 'Transformer', label: 'Transformer', count: 50 }] })
+        .mockResolvedValueOnce({ rows: [{ value: 'dinobots', label: 'Dinobots', count: 5 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters/facets',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{
+        factions: Array<{ value: string; label: string; count: number }>;
+        character_types: Array<{ value: string; label: string; count: number }>;
+        sub_groups: Array<{ value: string; label: string; count: number }>;
+      }>();
+      expect(body.factions).toHaveLength(1);
+      expect(body.factions[0]?.value).toBe('autobot');
+      expect(body.character_types).toHaveLength(1);
+      expect(body.character_types[0]?.value).toBe('Transformer');
+      expect(body.sub_groups).toHaveLength(1);
+      expect(body.sub_groups[0]?.value).toBe('dinobots');
+    });
+
+    it('should accept filter parameters for cross-filtering', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [facetRow] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters/facets?continuity_family=g1&faction=autobot',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ factions: unknown[]; character_types: unknown[]; sub_groups: unknown[] }>();
+      expect(body.factions).toHaveLength(1);
+      expect(body.character_types).toHaveLength(0);
+      expect(body.sub_groups).toHaveLength(0);
+    });
+
+    it('should return empty arrays when no data exists', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters/facets',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ factions: unknown[]; character_types: unknown[]; sub_groups: unknown[] }>();
+      expect(body.factions).toHaveLength(0);
+      expect(body.character_types).toHaveLength(0);
+      expect(body.sub_groups).toHaveLength(0);
+    });
   });
 
   // ─── Detail ───────────────────────────────────────────────────────
 
   describe('GET /catalog/franchises/:franchise/characters/:slug', () => {
     it('should return 200 with full character detail', async () => {
-      // 3-query pattern: base, sub-groups, appearances
+      // base query, then Promise.all([sub-groups, appearances, component_characters (skipped — not combined form)])
       mockQuery
         .mockResolvedValueOnce({ rows: [charBaseRow] })
         .mockResolvedValueOnce({ rows: [{ slug: 'dinobots', name: 'Dinobots' }] })
@@ -155,6 +265,7 @@ describe('character routes (franchise-scoped)', () => {
       expect(body.sub_groups[0]?.slug).toBe('dinobots');
       expect(body.appearances).toHaveLength(1);
       expect(body.metadata.japanese_name).toBe('コンボイ');
+      expect(res.json<{ component_characters: unknown[] }>().component_characters).toEqual([]);
     });
 
     it('should return 404 when character not found', async () => {
@@ -195,6 +306,43 @@ describe('character routes (franchise-scoped)', () => {
       const body = res.json<{ faction: null; sub_groups: unknown[] }>();
       expect(body.faction).toBeNull();
       expect(body.sub_groups).toHaveLength(0);
+    });
+
+    it('should include component_characters when character is a combined form', async () => {
+      const gestaltRow = {
+        ...charBaseRow,
+        name: 'Devastator',
+        slug: 'devastator',
+        is_combined_form: true,
+      };
+      const components = [
+        { slug: 'bonecrusher', name: 'Bonecrusher', combiner_role: 'left arm', alt_mode: 'bulldozer' },
+        { slug: 'mixmaster', name: 'Mixmaster', combiner_role: 'left leg', alt_mode: 'cement mixer' },
+        { slug: 'scrapper', name: 'Scrapper', combiner_role: 'right leg', alt_mode: 'front-end loader' },
+      ];
+      mockQuery
+        .mockResolvedValueOnce({ rows: [gestaltRow] })
+        .mockResolvedValueOnce({ rows: [] }) // sub-groups
+        .mockResolvedValueOnce({ rows: [] }) // appearances
+        .mockResolvedValueOnce({ rows: components }); // component characters
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters/devastator',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{
+        is_combined_form: boolean;
+        component_characters: Array<{ slug: string; name: string; combiner_role: string; alt_mode: string }>;
+      }>();
+      expect(body.is_combined_form).toBe(true);
+      expect(body.component_characters).toHaveLength(3);
+      expect(body.component_characters[0]).toEqual({
+        slug: 'bonecrusher',
+        name: 'Bonecrusher',
+        combiner_role: 'left arm',
+        alt_mode: 'bulldozer',
+      });
     });
 
     it('should include combined_form when character is a combiner component', async () => {

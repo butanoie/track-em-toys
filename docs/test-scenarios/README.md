@@ -28,6 +28,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | [INT_USER_ROLES.md](INT_USER_ROLES.md)                       | `api/src/auth/role.test.ts`, `api/src/admin/routes.test.ts`         | ✅ Implemented              |
 | [E2E_CATALOG_MANUFACTURERS.md](E2E_CATALOG_MANUFACTURERS.md) | `web/e2e/catalog-manufacturers.spec.ts`                             | Scenarios written           |
 | [E2E_CATALOG_SEARCH.md](E2E_CATALOG_SEARCH.md)               | `web/e2e/catalog-search.spec.ts`                                    | ✅ Implemented              |
+| [E2E_CATALOG_DETAIL_PAGES.md](E2E_CATALOG_DETAIL_PAGES.md)   | `web/e2e/catalog-detail-pages.spec.ts`                              | Scenarios written           |
 | E2E_CATALOG_BROWSING.md                                      | 1.7 Web Catalog UI                                                  | Not started                 |
 | E2E_PHOTO_UPLOAD.md                                          | 1.9 Photo Management (curator role)                                 | Not started                 |
 | [E2E_ADMIN_DASHBOARD.md](E2E_ADMIN_DASHBOARD.md)             | `web/src/admin/__tests__/*.test.tsx`, `web/e2e/admin-users.spec.ts` | ✅ Implemented (mocked API) |

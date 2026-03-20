@@ -242,7 +242,78 @@ export const CatalogSearchResponseSchema = z.object({
   total_count: z.number().int(),
 });
 
+// Character detail (GET /catalog/franchises/:franchise/characters/:slug)
+export const CharacterAppearanceSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  source_media: z.string().nullable(),
+  source_name: z.string().nullable(),
+  year_start: z.number().int().nullable(),
+  year_end: z.number().int().nullable(),
+  description: z.string().nullable(),
+});
+
+export const ComponentCharacterRefSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  combiner_role: z.string().nullable(),
+  alt_mode: z.string().nullable(),
+});
+
+export const CharacterDetailSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  franchise: SlugNameRefSchema,
+  faction: NullableSlugNameRefSchema,
+  continuity_family: SlugNameRefSchema,
+  character_type: z.string().nullable(),
+  alt_mode: z.string().nullable(),
+  is_combined_form: z.boolean(),
+  combiner_role: z.string().nullable(),
+  combined_form: NullableSlugNameRefSchema,
+  component_characters: z.array(ComponentCharacterRefSchema),
+  sub_groups: z.array(SlugNameRefSchema),
+  appearances: z.array(CharacterAppearanceSchema),
+  metadata: z.record(z.unknown()),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+// Character list item (GET /catalog/franchises/:franchise/characters)
+export const CharacterListItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  franchise: SlugNameRefSchema,
+  faction: NullableSlugNameRefSchema,
+  continuity_family: SlugNameRefSchema,
+  character_type: z.string().nullable(),
+  alt_mode: z.string().nullable(),
+  is_combined_form: z.boolean(),
+});
+
+export const CharacterListSchema = z.object({
+  data: z.array(CharacterListItemSchema),
+  next_cursor: z.string().nullable(),
+  total_count: z.number().int(),
+});
+
+// Character facets (GET /catalog/franchises/:franchise/characters/facets)
+export const CharacterFacetsSchema = z.object({
+  factions: z.array(FacetValueSchema),
+  character_types: z.array(FacetValueSchema),
+  sub_groups: z.array(FacetValueSchema),
+});
+
 // Catalog types
+export type CharacterListItem = z.infer<typeof CharacterListItemSchema>;
+export type CharacterList = z.infer<typeof CharacterListSchema>;
+export type CharacterFacets = z.infer<typeof CharacterFacetsSchema>;
+export type CharacterAppearance = z.infer<typeof CharacterAppearanceSchema>;
+export type ComponentCharacterRef = z.infer<typeof ComponentCharacterRefSchema>;
+export type CharacterDetail = z.infer<typeof CharacterDetailSchema>;
 export type SearchCharacterResult = z.infer<typeof SearchCharacterResultSchema>;
 export type SearchItemResult = z.infer<typeof SearchItemResultSchema>;
 export type SearchResult = z.infer<typeof SearchResultSchema>;

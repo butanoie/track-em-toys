@@ -40,14 +40,15 @@ Scenario: User selects an item search result
   And the URL updates with selected and selected_type params
 ```
 
-### Happy Path: Character stub panel opens
+### Happy Path: Character detail panel opens
 
 ```gherkin
 Scenario: User selects a character search result
   Given the user is on the search results page with character results
   When they click a character result
-  Then a stub panel opens showing the character name and franchise
-  And the panel displays "Character detail pages coming soon"
+  Then the character detail panel opens showing full character information
+  And the panel shows faction, continuity family, and character type
+  And a "View full profile" link is available
 ```
 
 ### Happy Path: Page-number pagination

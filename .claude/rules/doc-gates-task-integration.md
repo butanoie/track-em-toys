@@ -2,10 +2,10 @@ When creating a task list for non-trivial feature development (via /feature-dev 
 
 Required gate tasks:
 
-1. **"Architecture Review & Audit"** — after Architecture Design, before documentation. Blocks documentation. Use `/ralph-loop:ralph-loop` with 5 iterations to review the design for consistency, security, data model correctness, dependency conflicts, edge cases, and scope creep. Present the results to the user for confirmation before proceeding.
+1. **"Architecture Review & Audit"** — after Architecture Design, before documentation. Blocks documentation. Perform 5 sequential review passes over the design, each focusing on a different lens: (1) consistency & completeness, (2) security & auth, (3) data model correctness, (4) dependency conflicts & edge cases, (5) scope creep. After each pass, note any issues found. After all 5 passes, present a consolidated list of findings to the user for confirmation before proceeding.
 2. **"Post-Architecture Documentation Gate"** — after Architecture Review & Audit passes, before Implementation. Blocks implementation.
 3. **"Verification Gate: run /run-checks"** — after Implementation, before Quality Review.
-4. **"Code Simplification: run code-simplifier agent"** — after Quality Review, before Post-Review Documentation Gate. Use `/ralph-loop:ralph-loop` with 2 iterations to simplify and refine recently written code via the `code-simplifier:code-simplifier` agent. Present the results to the user for confirmation before proceeding.
+4. **"Code Simplification: run code-simplifier agent"** — after Quality Review, before Post-Review Documentation Gate. Run the `code-simplifier:code-simplifier` agent on recently written code, then perform a second pass to catch anything the first pass missed. Present the combined simplification results to the user for confirmation before proceeding.
 5. **"Post-Review Documentation Gate"** — after Code Simplification, before Summary. Blocks summary.
 6. **"Run /changelog"** — after Summary. Create a changelog entry documenting the work.
 7. **"Run /claude-md-management:revise-claude-md"** — after Summary. Review session for CLAUDE.md improvements.

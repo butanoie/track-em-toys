@@ -136,6 +136,17 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `MainNav` component (`src/components/MainNav.tsx`) renders on all non-admin pages — when adding it to a page, update that page's test file to mock `useRouterState` in the `@tanstack/react-router` mock
 - URL search params drive all catalog filter/pagination state — `useMemo` the filters object to prevent TanStack Query key instability
 - Item detail panel reads `selected` slug from URL, fetches independently via `useItemDetail`
+- Character and item detail pages share content components (`ItemDetailContent`, `CharacterDetailContent`) between sidebar panels and standalone pages
+- TanStack Router: a flat route file (e.g., `items.tsx`) becomes a layout parent if a child directory (`items/`) is added alongside it. To add child routes without a layout, move the flat file to `items/index.tsx` first — both become flat siblings under `AuthenticatedRoute`. The `createFileRoute` path gains a trailing slash for index files (e.g., `'/_authenticated/catalog/$franchise/items/'`)
+- Item detail route uses directory structure: `$franchise/items/index.tsx` (browse) + `$franchise/items/$slug.tsx` (detail) — NOT a layout route
+- Character browse route: `$franchise/characters/index.tsx` (browse with faceted filters) + `$franchise/characters/$slug.tsx` (detail) — same directory structure as items
+- Character browse page uses three-column layout (FacetSidebar | CharacterList | CharacterDetailPanel) matching the items browse pattern
+- Character facets: faction, character_type, sub_group — continuity_family is a fixed scope filter (set from hub navigation), not a facet dimension
+- Franchise hub page has Items/Characters toggle via `?view=characters` search param; characters view mounts `CharactersHubView` sub-component (avoids conditional hook calls)
+- Photo lightbox uses Shadcn `Dialog` for focus trap, scroll lock, and ARIA modal compliance — must include `onKeyDown` for ArrowLeft/ArrowRight navigation
+- `DetailPanelShell` component handles all panel chrome (aside wrapper, focus management, Escape key, loading/error/empty states, close button) — new panels should compose it rather than duplicating the chrome
+- Panel Escape key handlers must check `e.defaultPrevented` before calling `onClose()` — Radix `Dialog` (lightbox) calls `preventDefault` on Escape, and without the check both the dialog and panel close simultaneously
+- Catalog page headings use `<h1>` for the primary page title, `<h2>` for sub-sections — no page should lack an `<h1>`
 - NEVER use `z.coerce.boolean()` for URL search params — `Boolean("false")` returns `true`. Use `z.enum(['true', 'false']).transform(v => v === 'true')` instead
 - `FacetSidebar` accepts generic `groups: FacetGroupConfig[]` + `onFilterChange: (key: string, value) => void` — callers construct the groups array and cast the key to their filter type. Do NOT add domain-specific filter types to FacetSidebar.
 - Manufacturer browsing pages live in `src/catalog/pages/Manufacturer*.tsx` with hooks in `src/catalog/hooks/useManufacturer*.ts`

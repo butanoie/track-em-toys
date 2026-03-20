@@ -129,6 +129,7 @@ Two distinct photo types:
 - FTS uses generated `search_vector tsvector STORED` columns — queries use `WHERE search_vector @@ ...`, never recompute the tsvector expression inline
 - Fastify's `fast-json-stringify` does NOT support `oneOf` for serialization — use a flat superset schema with nullable fields instead. Apply discriminated unions at the web Zod layer, not the Fastify schema layer
 - Cursor pagination encodes `{ v: 1, name, id }` as base64url — always include version field
+- `buildItemsQuery` parameter indexing: each filter block uses `$${idx}` and increments `idx++` — except the LAST filter (ESLint `no-useless-assignment` flags it). When adding a new filter, add `idx++` to the previously-last filter block
 - Cursor UUID comparison uses `$N::uuid`, not text cast
 - Error responses use `reply.code(N).send({ error: '...' })` — no HttpError (no transactions)
 - CRITICAL: Every property in a response schema's `properties` MUST appear in `required` — Fastify's fast-json-stringify silently DROPS unrequired null fields from the response body, so clients never see them
@@ -144,6 +145,8 @@ Two distinct photo types:
 - Facets use unified `{ value: string, label: string, count: number }` shape — slug-based facets use `value=slug, label=name`; free-text facets use `value=label=raw_value`; boolean facets use `value="true"/"false", label="Third Party"/"Official"`
 - NULL values excluded from facets: manufacturer facet uses `AND mfr.id IS NOT NULL`, size_class uses `AND i.size_class IS NOT NULL`
 - Stats queries with multiple independent aggregates (e.g., item count + toy line count) must use subquery JOINs — dual LEFT JOINs from the same anchor table produce Cartesian products
+- Character filters & facets follow the same pattern as items: `buildCharactersQuery()` in `characters/queries.ts`, `getCharacterFacets()` with 3-way cross-filtering (factions, character_types, sub_groups)
+- Many-to-many facet pattern (sub-groups): the **filter** uses `EXISTS (SELECT 1 FROM junction...)` to avoid row multiplication; the **facet** uses `JOIN` + `COUNT(DISTINCT c.id)` since it needs `sg.slug`/`sg.name` for GROUP BY
 
 ### Catalog Shared Modules
 
