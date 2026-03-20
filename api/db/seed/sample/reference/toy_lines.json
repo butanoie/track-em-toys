@@ -1,0 +1,29 @@
+{
+  "_metadata": {
+    "table": "toy_lines",
+    "description": "Sample toy lines — one official G1 line, one third-party line",
+    "total": 2,
+    "import_order": 4,
+    "references": [
+      "manufacturers (via manufacturer_slug)"
+    ]
+  },
+  "data": [
+    {
+      "name": "The Transformers (G1)",
+      "slug": "the-transformers-g1",
+      "scale": "Various",
+      "description": "Original Hasbro G1 toyline (1984-1990).",
+      "manufacturer_slug": "hasbro",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "FansToys Mainline",
+      "slug": "fanstoys-mainline",
+      "scale": "Masterpiece",
+      "description": "Primary FT-numbered product line.",
+      "manufacturer_slug": "fanstoys",
+      "franchise_slug": "transformers"
+    }
+  ]
+}

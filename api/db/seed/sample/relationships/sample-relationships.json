@@ -1,0 +1,22 @@
+{
+  "_metadata": {
+    "description": "Sample relationships — combiner-component and mentor-student to exercise distinct validator branches",
+    "total": 2
+  },
+  "relationships": [
+    {
+      "type": "combiner-component",
+      "subtype": null,
+      "entity1": { "slug": "devastator", "role": "gestalt" },
+      "entity2": { "slug": "scrapper", "role": "right leg" },
+      "metadata": {}
+    },
+    {
+      "type": "mentor-student",
+      "subtype": null,
+      "entity1": { "slug": "optimus-prime", "role": "mentor" },
+      "entity2": { "slug": "bumblebee", "role": "student" },
+      "metadata": {}
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_metadata": {
+    "table": "franchises",
+    "description": "Sample franchises — two franchises to exercise franchise-scoped slug uniqueness",
+    "total": 2,
+    "import_order": -1
+  },
+  "data": [
+    {
+      "name": "Transformers",
+      "slug": "transformers",
+      "sort_order": 1,
+      "notes": "Hasbro/Takara Tomy transforming robot franchise."
+    },
+    {
+      "name": "G.I. Joe",
+      "slug": "gi-joe",
+      "sort_order": 2,
+      "notes": "Hasbro military action figure franchise."
+    }
+  ]
+}

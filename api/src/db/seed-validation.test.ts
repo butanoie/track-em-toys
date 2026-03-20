@@ -12,7 +12,10 @@ import { fileURLToPath } from 'node:url';
 // ─── Path setup ──────────────────────────────────────────────────────────────
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SEED_DIR = path.resolve(__dirname, '../../db/seed');
+const DEFAULT_SEED_DIR = path.resolve(__dirname, '../../db/seed/sample');
+const SEED_DIR = process.env['SEED_DATA_PATH']
+  ? path.resolve(process.env['SEED_DATA_PATH'])
+  : DEFAULT_SEED_DIR;
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -109,24 +112,31 @@ interface RelationshipFile {
 
 // ─── Loaders ─────────────────────────────────────────────────────────────────
 
+function loadSeedFile<T>(relPath: string): T {
+  return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as T;
+}
+
 function loadRef<T extends ReferenceRecord>(relPath: string): ReferenceFile<T> {
-  return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as ReferenceFile<T>;
+  return loadSeedFile<ReferenceFile<T>>(relPath);
 }
 
-function loadCharFile(relPath: string): CharacterFile {
-  return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as CharacterFile;
+// ─── Auto-discovery helper ───────────────────────────────────────────────────
+
+function discoverJsonFiles(subdir: string, options?: { recursive: boolean }): string[] {
+  const dir = path.join(SEED_DIR, subdir);
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir, { recursive: options?.recursive ?? false })
+    .filter((f): f is string => typeof f === 'string' && f.endsWith('.json'))
+    .sort()
+    .map((f) => path.join(subdir, f));
 }
 
-function loadItemFile(relPath: string): ItemFile {
-  return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as ItemFile;
-}
-
-function loadAppearanceFile(relPath: string): AppearanceFile {
-  return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as AppearanceFile;
-}
-
-function loadRelationshipFile(relPath: string): RelationshipFile {
-  return JSON.parse(fs.readFileSync(path.join(SEED_DIR, relPath), 'utf-8')) as RelationshipFile;
+function discoverAndLoad<T>(subdir: string, options?: { recursive: boolean }): Array<{ file: string } & T> {
+  return discoverJsonFiles(subdir, options).map((f) => ({
+    file: f,
+    ...loadSeedFile<T>(f),
+  }));
 }
 
 // ─── Load all seed data at module scope ──────────────────────────────────────
@@ -138,71 +148,10 @@ const subGroups = loadRef<SubGroupRecord>('reference/sub_groups.json');
 const manufacturers = loadRef('reference/manufacturers.json');
 const toyLines = loadRef<ToyLineRecord>('reference/toy_lines.json');
 
-const CHARACTER_FILES = [
-  'characters/g1-characters.json',
-  'characters/beast-era-characters.json',
-  'characters/robots-in-disguise-2001-characters.json',
-  'characters/unicron-trilogy-characters.json',
-  'characters/arah-gi-joe-characters.json',
-  'characters/arah-cobra-characters.json',
-  'characters/sigma-6-characters.json',
-  'characters/gi-joe-movieverse-characters.json',
-  'characters/movieverse-characters.json',
-  'characters/animated-characters.json',
-  'characters/arah-gi-joe-vehicles.json',
-  'characters/arah-cobra-vehicles.json',
-  'characters/aligned-characters.json',
-] as const;
-
-const charFiles = CHARACTER_FILES.map((f) => ({
-  file: f,
-  ...loadCharFile(f),
-}));
-
-const ITEM_FILES = [
-  'items/fanstoys/fanstoys.json',
-  'items/hasbro/g1-items.json',
-  'items/hasbro/beast-wars-items.json',
-  'items/takara-tomy/beast-wars-takara-items.json',
-  'items/takara-tomy/beast-wars-ii-items.json',
-  'items/takara-tomy/beast-wars-neo-items.json',
-  'items/takara-tomy/beast-wars-metals-items.json',
-] as const;
-
-const itemFiles = ITEM_FILES.map((f) => ({
-  file: f,
-  ...loadItemFile(f),
-}));
-
-// Dynamically discover appearance files — no manual registration needed
-const APPEARANCES_DIR = path.join(SEED_DIR, 'appearances');
-const APPEARANCE_FILES = fs.existsSync(APPEARANCES_DIR)
-  ? fs
-      .readdirSync(APPEARANCES_DIR)
-      .filter((f) => f.endsWith('.json'))
-      .sort()
-      .map((f) => `appearances/${f}`)
-  : [];
-
-const appearanceFiles = APPEARANCE_FILES.map((f) => ({
-  file: f,
-  ...loadAppearanceFile(f),
-}));
-
-// Dynamically discover relationship files — no manual registration needed
-const RELATIONSHIPS_DIR = path.join(SEED_DIR, 'relationships');
-const RELATIONSHIP_FILES = fs.existsSync(RELATIONSHIPS_DIR)
-  ? fs
-      .readdirSync(RELATIONSHIPS_DIR)
-      .filter((f) => f.endsWith('.json'))
-      .sort()
-      .map((f) => `relationships/${f}`)
-  : [];
-
-const relationshipFiles = RELATIONSHIP_FILES.map((f) => ({
-  file: f,
-  ...loadRelationshipFile(f),
-}));
+const charFiles = discoverAndLoad<CharacterFile>('characters');
+const itemFiles = discoverAndLoad<ItemFile>('items', { recursive: true });
+const appearanceFiles = discoverAndLoad<AppearanceFile>('appearances');
+const relationshipFiles = discoverAndLoad<RelationshipFile>('relationships');
 
 // ─── Derived lookup sets ─────────────────────────────────────────────────────
 

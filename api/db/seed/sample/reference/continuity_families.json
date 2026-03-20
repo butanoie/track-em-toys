@@ -1,0 +1,24 @@
+{
+  "_metadata": {
+    "table": "continuity_families",
+    "description": "Sample continuity families — one per franchise",
+    "total": 2,
+    "import_order": 0
+  },
+  "data": [
+    {
+      "name": "Generation 1",
+      "slug": "g1",
+      "sort_order": 10,
+      "notes": "Original 1984 G1 continuity.",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "A Real American Hero",
+      "slug": "arah",
+      "sort_order": 10,
+      "notes": "Original 1982-1994 GI Joe continuity.",
+      "franchise_slug": "gi-joe"
+    }
+  ]
+}
