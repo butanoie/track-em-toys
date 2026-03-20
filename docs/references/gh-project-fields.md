@@ -48,22 +48,23 @@ gh project item-edit --project-id PVT_kwHODzcfkc4BR7mS --id <ITEM_ID> \
 
 ### Phase
 
-| Value              | Option ID |
-| ------------------ | --------- |
-| 1.4 Seed           | b093ae15  |
-| 1.5 Catalog API    | f3ce6de3  |
-| 1.5b Roles & Admin | 08508f52  |
-| 1.7 Catalog UI     | 4de93c31  |
-| 1.9 Photos         | 422665a3  |
-| 1.12 GDPR          | afe95509  |
-| 4.0 ML             | da0a83fc  |
-| 2.0 iOS            | f517f05c  |
-| 1.6 Collection API | d48fbcc5  |
-| 1.8 Collection UI  | 1486b874  |
-| 1.10 CSV Import    | 8a2dc389  |
-| 1.11 Reporting     | dea7d4a2  |
-| 3.0 Pricing        | 5705530f  |
-| 5.0 Polish         | 6e677cfb  |
+| Value                   | Option ID |
+| ----------------------- | --------- |
+| 1.4 Seed                | 74e97b2b  |
+| 1.5 Catalog API         | 75369da0  |
+| 1.5b Roles & Admin      | fd432c26  |
+| 1.7 Catalog UI          | 9faa4a41  |
+| 1.9 Photos              | ec5183b7  |
+| 1.9b Photo Enhancements | 5a605023  |
+| 1.12 GDPR               | 4390d2cd  |
+| 4.0 ML                  | 9d1743d2  |
+| 2.0 iOS                 | 5a04eca1  |
+| 1.6 Collection API      | e78d21c2  |
+| 1.8 Collection UI       | 3784752e  |
+| 1.10 CSV Import         | 8123d91b  |
+| 1.11 Reporting          | 02382acf  |
+| 3.0 Pricing             | dce6d4f6  |
+| 5.0 Polish              | c9134170  |
 
 ### Track
 

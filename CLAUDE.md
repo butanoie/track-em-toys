@@ -80,6 +80,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 
 - ML-accelerated, web-first roadmap: 1.4 (Seed) → 1.5 (Catalog API) → 1.5b (Roles) → 1.9 (Photos) → 4.0 (ML) → 2.0 (iOS)
 - Collection features (private items, pricing, tags, CSV import, reporting) deferred until post-ML
+- Photo enhancements (moderation, soft delete, captions, approval dashboard) deferred to Phase 1.9b (post-ML)
 - See `docs/plans/Development_Roadmap_v1_0.md` for full roadmap
 - See `docs/decisions/2026-03-16_roadmap_session_decisions.md` for architectural decisions
 
