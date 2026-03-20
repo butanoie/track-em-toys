@@ -139,7 +139,10 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Character and item detail pages share content components (`ItemDetailContent`, `CharacterDetailContent`) between sidebar panels and standalone pages
 - TanStack Router: a flat route file (e.g., `items.tsx`) becomes a layout parent if a child directory (`items/`) is added alongside it. To add child routes without a layout, move the flat file to `items/index.tsx` first — both become flat siblings under `AuthenticatedRoute`. The `createFileRoute` path gains a trailing slash for index files (e.g., `'/_authenticated/catalog/$franchise/items/'`)
 - Item detail route uses directory structure: `$franchise/items/index.tsx` (browse) + `$franchise/items/$slug.tsx` (detail) — NOT a layout route
-- Character detail route: `$franchise/characters/$slug.tsx` (no existing characters route to conflict with)
+- Character browse route: `$franchise/characters/index.tsx` (browse with faceted filters) + `$franchise/characters/$slug.tsx` (detail) — same directory structure as items
+- Character browse page uses three-column layout (FacetSidebar | CharacterList | CharacterDetailPanel) matching the items browse pattern
+- Character facets: faction, character_type, sub_group — continuity_family is a fixed scope filter (set from hub navigation), not a facet dimension
+- Franchise hub page has Items/Characters toggle via `?view=characters` search param; characters view mounts `CharactersHubView` sub-component (avoids conditional hook calls)
 - Photo lightbox uses Shadcn `Dialog` for focus trap, scroll lock, and ARIA modal compliance — must include `onKeyDown` for ArrowLeft/ArrowRight navigation
 - `DetailPanelShell` component handles all panel chrome (aside wrapper, focus management, Escape key, loading/error/empty states, close button) — new panels should compose it rather than duplicating the chrome
 - Panel Escape key handlers must check `e.defaultPrevented` before calling `onClose()` — Radix `Dialog` (lightbox) calls `preventDefault` on Escape, and without the check both the dialog and panel close simultaneously

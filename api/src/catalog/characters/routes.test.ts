@@ -112,6 +112,116 @@ describe('character routes (franchise-scoped)', () => {
       expect(body.data).toHaveLength(0);
       expect(body.total_count).toBe(0);
     });
+
+    it('should accept filter parameters', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [charListRow] }).mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters?continuity_family=g1&faction=autobot',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ data: unknown[]; total_count: number }>();
+      expect(body.data).toHaveLength(1);
+      expect(body.total_count).toBe(1);
+    });
+
+    it('should accept sub_group filter', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [charListRow] }).mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters?sub_group=dinobots',
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.json<{ data: unknown[] }>().data).toHaveLength(1);
+    });
+
+    it('should accept character_type filter', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ total_count: 0 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters?character_type=Pretender',
+      });
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('should accept all filters combined with cursor', async () => {
+      const cursor = encodeCursor('Alpha', 'c-1');
+      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ total_count: 0 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: `/catalog/franchises/transformers/characters?continuity_family=g1&faction=autobot&character_type=Transformer&sub_group=dinobots&cursor=${cursor}`,
+      });
+      expect(res.statusCode).toBe(200);
+    });
+  });
+
+  // ─── Facets ─────────────────────────────────────────────────────
+
+  describe('GET /catalog/franchises/:franchise/characters/facets', () => {
+    const facetRow = { value: 'autobot', label: 'Autobot', count: 10 };
+
+    it('should return 200 with facet counts', async () => {
+      // 3 facet queries in Promise.all: factions, character_types, sub_groups
+      mockQuery
+        .mockResolvedValueOnce({ rows: [facetRow] })
+        .mockResolvedValueOnce({ rows: [{ value: 'Transformer', label: 'Transformer', count: 50 }] })
+        .mockResolvedValueOnce({ rows: [{ value: 'dinobots', label: 'Dinobots', count: 5 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters/facets',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{
+        factions: Array<{ value: string; label: string; count: number }>;
+        character_types: Array<{ value: string; label: string; count: number }>;
+        sub_groups: Array<{ value: string; label: string; count: number }>;
+      }>();
+      expect(body.factions).toHaveLength(1);
+      expect(body.factions[0]?.value).toBe('autobot');
+      expect(body.character_types).toHaveLength(1);
+      expect(body.character_types[0]?.value).toBe('Transformer');
+      expect(body.sub_groups).toHaveLength(1);
+      expect(body.sub_groups[0]?.value).toBe('dinobots');
+    });
+
+    it('should accept filter parameters for cross-filtering', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [facetRow] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters/facets?continuity_family=g1&faction=autobot',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ factions: unknown[]; character_types: unknown[]; sub_groups: unknown[] }>();
+      expect(body.factions).toHaveLength(1);
+      expect(body.character_types).toHaveLength(0);
+      expect(body.sub_groups).toHaveLength(0);
+    });
+
+    it('should return empty arrays when no data exists', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/franchises/transformers/characters/facets',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ factions: unknown[]; character_types: unknown[]; sub_groups: unknown[] }>();
+      expect(body.factions).toHaveLength(0);
+      expect(body.character_types).toHaveLength(0);
+      expect(body.sub_groups).toHaveLength(0);
+    });
   });
 
   // ─── Detail ───────────────────────────────────────────────────────

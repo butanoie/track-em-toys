@@ -22,6 +22,7 @@ import { Route as AuthenticatedCatalogManufacturersIndexRouteImport } from './ro
 import { Route as AuthenticatedCatalogFranchiseIndexRouteImport } from './routes/_authenticated/catalog/$franchise/index'
 import { Route as AuthenticatedCatalogManufacturersSlugIndexRouteImport } from './routes/_authenticated/catalog/manufacturers/$slug/index'
 import { Route as AuthenticatedCatalogFranchiseItemsIndexRouteImport } from './routes/_authenticated/catalog/$franchise/items/index'
+import { Route as AuthenticatedCatalogFranchiseCharactersIndexRouteImport } from './routes/_authenticated/catalog/$franchise/characters/index'
 import { Route as AuthenticatedCatalogManufacturersSlugItemsRouteImport } from './routes/_authenticated/catalog/manufacturers/$slug/items'
 import { Route as AuthenticatedCatalogFranchiseItemsSlugRouteImport } from './routes/_authenticated/catalog/$franchise/items/$slug'
 import { Route as AuthenticatedCatalogFranchiseCharactersSlugRouteImport } from './routes/_authenticated/catalog/$franchise/characters/$slug'
@@ -96,6 +97,12 @@ const AuthenticatedCatalogFranchiseItemsIndexRoute =
     path: '/catalog/$franchise/items/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedCatalogFranchiseCharactersIndexRoute =
+  AuthenticatedCatalogFranchiseCharactersIndexRouteImport.update({
+    id: '/catalog/$franchise/characters/',
+    path: '/catalog/$franchise/characters/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedCatalogManufacturersSlugItemsRoute =
   AuthenticatedCatalogManufacturersSlugItemsRouteImport.update({
     id: '/catalog/manufacturers/$slug/items',
@@ -129,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/catalog/$franchise/characters/$slug': typeof AuthenticatedCatalogFranchiseCharactersSlugRoute
   '/catalog/$franchise/items/$slug': typeof AuthenticatedCatalogFranchiseItemsSlugRoute
   '/catalog/manufacturers/$slug/items': typeof AuthenticatedCatalogManufacturersSlugItemsRoute
+  '/catalog/$franchise/characters/': typeof AuthenticatedCatalogFranchiseCharactersIndexRoute
   '/catalog/$franchise/items/': typeof AuthenticatedCatalogFranchiseItemsIndexRoute
   '/catalog/manufacturers/$slug/': typeof AuthenticatedCatalogManufacturersSlugIndexRoute
 }
@@ -145,6 +153,7 @@ export interface FileRoutesByTo {
   '/catalog/$franchise/characters/$slug': typeof AuthenticatedCatalogFranchiseCharactersSlugRoute
   '/catalog/$franchise/items/$slug': typeof AuthenticatedCatalogFranchiseItemsSlugRoute
   '/catalog/manufacturers/$slug/items': typeof AuthenticatedCatalogManufacturersSlugItemsRoute
+  '/catalog/$franchise/characters': typeof AuthenticatedCatalogFranchiseCharactersIndexRoute
   '/catalog/$franchise/items': typeof AuthenticatedCatalogFranchiseItemsIndexRoute
   '/catalog/manufacturers/$slug': typeof AuthenticatedCatalogManufacturersSlugIndexRoute
 }
@@ -164,6 +173,7 @@ export interface FileRoutesById {
   '/_authenticated/catalog/$franchise/characters/$slug': typeof AuthenticatedCatalogFranchiseCharactersSlugRoute
   '/_authenticated/catalog/$franchise/items/$slug': typeof AuthenticatedCatalogFranchiseItemsSlugRoute
   '/_authenticated/catalog/manufacturers/$slug/items': typeof AuthenticatedCatalogManufacturersSlugItemsRoute
+  '/_authenticated/catalog/$franchise/characters/': typeof AuthenticatedCatalogFranchiseCharactersIndexRoute
   '/_authenticated/catalog/$franchise/items/': typeof AuthenticatedCatalogFranchiseItemsIndexRoute
   '/_authenticated/catalog/manufacturers/$slug/': typeof AuthenticatedCatalogManufacturersSlugIndexRoute
 }
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/catalog/$franchise/characters/$slug'
     | '/catalog/$franchise/items/$slug'
     | '/catalog/manufacturers/$slug/items'
+    | '/catalog/$franchise/characters/'
     | '/catalog/$franchise/items/'
     | '/catalog/manufacturers/$slug/'
   fileRoutesByTo: FileRoutesByTo
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/catalog/$franchise/characters/$slug'
     | '/catalog/$franchise/items/$slug'
     | '/catalog/manufacturers/$slug/items'
+    | '/catalog/$franchise/characters'
     | '/catalog/$franchise/items'
     | '/catalog/manufacturers/$slug'
   id:
@@ -217,6 +229,7 @@ export interface FileRouteTypes {
     | '/_authenticated/catalog/$franchise/characters/$slug'
     | '/_authenticated/catalog/$franchise/items/$slug'
     | '/_authenticated/catalog/manufacturers/$slug/items'
+    | '/_authenticated/catalog/$franchise/characters/'
     | '/_authenticated/catalog/$franchise/items/'
     | '/_authenticated/catalog/manufacturers/$slug/'
   fileRoutesById: FileRoutesById
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCatalogFranchiseItemsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/catalog/$franchise/characters/': {
+      id: '/_authenticated/catalog/$franchise/characters/'
+      path: '/catalog/$franchise/characters'
+      fullPath: '/catalog/$franchise/characters/'
+      preLoaderRoute: typeof AuthenticatedCatalogFranchiseCharactersIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/catalog/manufacturers/$slug/items': {
       id: '/_authenticated/catalog/manufacturers/$slug/items'
       path: '/catalog/manufacturers/$slug/items'
@@ -367,6 +387,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCatalogFranchiseCharactersSlugRoute: typeof AuthenticatedCatalogFranchiseCharactersSlugRoute
   AuthenticatedCatalogFranchiseItemsSlugRoute: typeof AuthenticatedCatalogFranchiseItemsSlugRoute
   AuthenticatedCatalogManufacturersSlugItemsRoute: typeof AuthenticatedCatalogManufacturersSlugItemsRoute
+  AuthenticatedCatalogFranchiseCharactersIndexRoute: typeof AuthenticatedCatalogFranchiseCharactersIndexRoute
   AuthenticatedCatalogFranchiseItemsIndexRoute: typeof AuthenticatedCatalogFranchiseItemsIndexRoute
   AuthenticatedCatalogManufacturersSlugIndexRoute: typeof AuthenticatedCatalogManufacturersSlugIndexRoute
 }
@@ -387,6 +408,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedCatalogFranchiseItemsSlugRoute,
   AuthenticatedCatalogManufacturersSlugItemsRoute:
     AuthenticatedCatalogManufacturersSlugItemsRoute,
+  AuthenticatedCatalogFranchiseCharactersIndexRoute:
+    AuthenticatedCatalogFranchiseCharactersIndexRoute,
   AuthenticatedCatalogFranchiseItemsIndexRoute:
     AuthenticatedCatalogFranchiseItemsIndexRoute,
   AuthenticatedCatalogManufacturersSlugIndexRoute:

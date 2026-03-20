@@ -281,7 +281,36 @@ export const CharacterDetailSchema = z.object({
   updated_at: z.string(),
 });
 
+// Character list item (GET /catalog/franchises/:franchise/characters)
+export const CharacterListItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  franchise: SlugNameRefSchema,
+  faction: NullableSlugNameRefSchema,
+  continuity_family: SlugNameRefSchema,
+  character_type: z.string().nullable(),
+  alt_mode: z.string().nullable(),
+  is_combined_form: z.boolean(),
+});
+
+export const CharacterListSchema = z.object({
+  data: z.array(CharacterListItemSchema),
+  next_cursor: z.string().nullable(),
+  total_count: z.number().int(),
+});
+
+// Character facets (GET /catalog/franchises/:franchise/characters/facets)
+export const CharacterFacetsSchema = z.object({
+  factions: z.array(FacetValueSchema),
+  character_types: z.array(FacetValueSchema),
+  sub_groups: z.array(FacetValueSchema),
+});
+
 // Catalog types
+export type CharacterListItem = z.infer<typeof CharacterListItemSchema>;
+export type CharacterList = z.infer<typeof CharacterListSchema>;
+export type CharacterFacets = z.infer<typeof CharacterFacetsSchema>;
 export type CharacterAppearance = z.infer<typeof CharacterAppearanceSchema>;
 export type ComponentCharacterRef = z.infer<typeof ComponentCharacterRefSchema>;
 export type CharacterDetail = z.infer<typeof CharacterDetailSchema>;

@@ -145,6 +145,8 @@ Two distinct photo types:
 - Facets use unified `{ value: string, label: string, count: number }` shape — slug-based facets use `value=slug, label=name`; free-text facets use `value=label=raw_value`; boolean facets use `value="true"/"false", label="Third Party"/"Official"`
 - NULL values excluded from facets: manufacturer facet uses `AND mfr.id IS NOT NULL`, size_class uses `AND i.size_class IS NOT NULL`
 - Stats queries with multiple independent aggregates (e.g., item count + toy line count) must use subquery JOINs — dual LEFT JOINs from the same anchor table produce Cartesian products
+- Character filters & facets follow the same pattern as items: `buildCharactersQuery()` in `characters/queries.ts`, `getCharacterFacets()` with 3-way cross-filtering (factions, character_types, sub_groups)
+- Many-to-many facet pattern (sub-groups): the **filter** uses `EXISTS (SELECT 1 FROM junction...)` to avoid row multiplication; the **facet** uses `JOIN` + `COUNT(DISTINCT c.id)` since it needs `sg.slug`/`sg.name` for GROUP BY
 
 ### Catalog Shared Modules
 
