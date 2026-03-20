@@ -1,0 +1,701 @@
+{
+  "_metadata": {
+    "description": "Takara Beast Wars II (Second) items — C-12 through C-28 (Cybertron/Maximal), D-12 through D-26 (Destron/Predacon), X-series specials, and VS multi-packs. Japan-exclusive 1998 toyline",
+    "generated": "2026-03-19T210000Z",
+    "total_items": 31,
+    "skipped_items": [
+      {
+        "product_code": "C-17",
+        "name": "Bigmos",
+        "reason": "No character slug exists for Bigmos (Insectron)"
+      },
+      {
+        "product_code": "C-18",
+        "name": "Powerhug",
+        "reason": "No character slug exists for Powerhug (Insectron)"
+      },
+      {
+        "product_code": "C-19",
+        "name": "Tonbot",
+        "reason": "No character slug exists for Tonbot (Insectron)"
+      },
+      {
+        "product_code": "C-20",
+        "name": "Mantis",
+        "reason": "No character slug exists for Mantis (Insectron)"
+      },
+      {
+        "product_code": "C-21",
+        "name": "Drill Nuts",
+        "reason": "No character slug exists for Drill Nuts (Jointron)"
+      },
+      {
+        "product_code": "C-22",
+        "name": "Scissor Boy",
+        "reason": "No character slug exists for Scissor Boy (Jointron)"
+      },
+      {
+        "product_code": "C-23",
+        "name": "DJ",
+        "reason": "No character slug exists for DJ (Jointron)"
+      },
+      {
+        "product_code": "C-24",
+        "name": "Motorarm",
+        "reason": "No character slug exists for Motorarm (Jointron)"
+      },
+      {
+        "product_code": "C-25",
+        "name": "Gimlet",
+        "reason": "No character slug exists for Gimlet (Jointron)"
+      },
+      {
+        "product_code": "X-3",
+        "name": "Tripledacus",
+        "reason": "No character slug exists for Tripledacus (Jointron combiner)"
+      },
+      {
+        "product_code": "VS-17",
+        "name": "Bigmos vs Autostinger",
+        "reason": "Primary character Bigmos has no slug (Insectron)"
+      },
+      {
+        "product_code": "VS-18",
+        "name": "Powerhug vs Autocrusher",
+        "reason": "Primary character Powerhug has no slug (Insectron)"
+      },
+      {
+        "product_code": "VS-19",
+        "name": "Tonbot vs Autojetter",
+        "reason": "Primary character Tonbot has no slug (Insectron)"
+      },
+      {
+        "product_code": "VS-20",
+        "name": "Mantis vs Autolauncher",
+        "reason": "Primary character Mantis has no slug (Insectron)"
+      }
+    ],
+    "unresolved_characters": [
+      "bigmos",
+      "powerhug",
+      "tonbot",
+      "mantis",
+      "drill-nuts",
+      "scissor-boy",
+      "dj",
+      "motorarm",
+      "gimlet",
+      "tripledacus"
+    ],
+    "schema_target": "items table from migrations 011 + 013",
+    "import_instructions": [
+      "1. Ensure continuity_families, factions, sub_groups, manufacturers, toy_lines, characters, character_appearances are seeded",
+      "2. For each item: resolve manufacturer_slug, toy_line_slug, character_slug, character_appearance_slug to UUIDs",
+      "3. Insert into items table",
+      "4. metadata JSONB holds: status, variant_type, base_product_code, sub_brand, notes"
+    ],
+    "stats": {
+      "by_year": {
+        "1998": 31
+      },
+      "by_faction": {
+        "cybertron": 16,
+        "destron": 15
+      },
+      "year_range": "1998"
+    },
+    "fk_convention": "slug-based — see api/db/seed/README.md",
+    "product_code_source": "Takara C/D/X/VS-series numbering from Beast Wars II Japanese toyline. Confirmed via TFWiki."
+  },
+  "items": [
+    {
+      "product_code": "C-12",
+      "name": "Apache",
+      "slug": "c-12-apache",
+      "character_slug": "apache",
+      "character_appearance_slug": "apache-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Mandrill Maximal. Wave 1 (March 1998). Lio Convoy's second-in-command"
+      }
+    },
+    {
+      "product_code": "C-13",
+      "name": "Bighorn",
+      "slug": "c-13-bighorn",
+      "character_slug": "bighorn",
+      "character_appearance_slug": "bighorn-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Bison Maximal. Wave 1 (March 1998)"
+      }
+    },
+    {
+      "product_code": "C-14",
+      "name": "Tasmania Kid",
+      "slug": "c-14-tasmania-kid",
+      "character_slug": "tasmania-kid",
+      "character_appearance_slug": "tasmania-kid-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Tasmanian devil Maximal. Wave 1 (March 1998)"
+      }
+    },
+    {
+      "product_code": "C-15",
+      "name": "Scuba",
+      "slug": "c-15-scuba",
+      "character_slug": "scuba",
+      "character_appearance_slug": "scuba-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Squid Maximal. Wave 1 (March 1998)"
+      }
+    },
+    {
+      "product_code": "C-16",
+      "name": "Lio Convoy",
+      "slug": "c-16-lio-convoy",
+      "character_slug": "lio-convoy",
+      "character_appearance_slug": "lio-convoy-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "White lion Maximal Supreme Commander. Wave 2 (April 1998). Main protagonist of Beast Wars II"
+      }
+    },
+    {
+      "product_code": "C-26",
+      "name": "Lio Junior",
+      "slug": "c-26-lio-junior",
+      "character_slug": "lio-junior",
+      "character_appearance_slug": "lio-junior-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Lion cub Maximal, 'son' of Lio Convoy. Wave 8 (September 1998). Component of Magnaboss"
+      }
+    },
+    {
+      "product_code": "C-27",
+      "name": "Skywarp",
+      "slug": "c-27-skywarp",
+      "character_slug": "skywarp-bwii",
+      "character_appearance_slug": "skywarp-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Eagle Maximal. Wave 8 (September 1998). Component of Magnaboss. Shares name with G1 Decepticon but is a different character"
+      }
+    },
+    {
+      "product_code": "C-28",
+      "name": "Santon",
+      "slug": "c-28-santon",
+      "character_slug": "santon",
+      "character_appearance_slug": "santon-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Elephant Maximal. Wave 8 (September 1998). Component of Magnaboss"
+      }
+    },
+    {
+      "product_code": "D-12",
+      "name": "Megastorm",
+      "slug": "d-12-megastorm",
+      "character_slug": "megastorm",
+      "character_appearance_slug": "megastorm-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Tank Predacon, Galvatron's brother. Wave 1 (March 1998). Later upgraded to Gigastorm"
+      }
+    },
+    {
+      "product_code": "D-13",
+      "name": "Starscream & BB",
+      "slug": "d-13-starscream-and-bb",
+      "character_slug": "starscream-bwii",
+      "character_appearance_slug": "starscream-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Two-pack containing Starscream (jet) and BB (tank). Wave 1 (March 1998). Starscream later upgraded to Hellscream, BB to Max-B. Secondary character: bb"
+      }
+    },
+    {
+      "product_code": "D-14",
+      "name": "Dirge",
+      "slug": "d-14-dirge",
+      "character_slug": "dirge-bwii",
+      "character_appearance_slug": "dirge-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Wasp Predacon. Wave 1 (March 1998). Later upgraded to Dirgegun"
+      }
+    },
+    {
+      "product_code": "D-15",
+      "name": "Thrust",
+      "slug": "d-15-thrust",
+      "character_slug": "thrust-bwii",
+      "character_appearance_slug": "thrust-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Stag beetle Predacon. Wave 1 (March 1998). Later upgraded to Thrustor"
+      }
+    },
+    {
+      "product_code": "D-16",
+      "name": "Galvatron",
+      "slug": "d-16-galvatron",
+      "character_slug": "galvatron-bwii",
+      "character_appearance_slug": "galvatron-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Dragon/drill tank Predacon Emperor of Destruction. Wave 4 (May 1998). Triple changer. Main antagonist of Beast Wars II"
+      }
+    },
+    {
+      "product_code": "D-17",
+      "name": "Autostinger",
+      "slug": "d-17-autostinger",
+      "character_slug": "autostinger",
+      "character_appearance_slug": "autostinger-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Autoroller Predacon. Wave 3 (April 1998). Cyborg vehicle with automatic transformation gimmick"
+      }
+    },
+    {
+      "product_code": "D-18",
+      "name": "Autocrusher",
+      "slug": "d-18-autocrusher",
+      "character_slug": "autocrusher",
+      "character_appearance_slug": "autocrusher-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Autoroller Predacon. Wave 3 (April 1998). Cyborg vehicle with automatic transformation gimmick"
+      }
+    },
+    {
+      "product_code": "D-19",
+      "name": "Autojetter",
+      "slug": "d-19-autojetter",
+      "character_slug": "autojetter",
+      "character_appearance_slug": "autojetter-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Autoroller Predacon. Wave 3 (April 1998). Cyborg vehicle with automatic transformation gimmick"
+      }
+    },
+    {
+      "product_code": "D-20",
+      "name": "Autolauncher",
+      "slug": "d-20-autolauncher",
+      "character_slug": "autolauncher",
+      "character_appearance_slug": "autolauncher-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Autoroller Predacon. Wave 3 (April 1998). Cyborg vehicle with automatic transformation gimmick"
+      }
+    },
+    {
+      "product_code": "D-21",
+      "name": "God Neptune",
+      "slug": "d-21-god-neptune",
+      "character_slug": "god-neptune",
+      "character_appearance_slug": "god-neptune-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Seacon combiner giftset. Wave 7 (August 1998). Contains Coelagon, Halfshell, Scylla (Skyulle), Sea Phantom, and Terrormander. Components not sold individually"
+      }
+    },
+    {
+      "product_code": "D-22",
+      "name": "Gigastorm",
+      "slug": "d-22-gigastorm",
+      "character_slug": "gigastorm",
+      "character_appearance_slug": "gigastorm-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Upgraded form of Megastorm. Dinosaur/battleship/fortress triple changer. Wave 9 (October 1998)"
+      }
+    },
+    {
+      "product_code": "D-23",
+      "name": "Hellscream",
+      "slug": "d-23-hellscream",
+      "character_slug": "hellscream",
+      "character_appearance_slug": "hellscream-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Upgraded form of Starscream (BW II). Cybershark repaint/retool. Wave 10 (November 1998)"
+      }
+    },
+    {
+      "product_code": "D-24",
+      "name": "Max-B",
+      "slug": "d-24-max-b",
+      "character_slug": "max-b",
+      "character_appearance_slug": "max-b-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Upgraded form of BB. Wolf Predacon. Wave 10 (November 1998)"
+      }
+    },
+    {
+      "product_code": "D-25",
+      "name": "Dirgegun",
+      "slug": "d-25-dirgegun",
+      "character_slug": "dirgegun",
+      "character_appearance_slug": "dirgegun-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Upgraded form of Dirge. Wave 10 (November 1998)"
+      }
+    },
+    {
+      "product_code": "D-26",
+      "name": "Thrustor",
+      "slug": "d-26-thrustor",
+      "character_slug": "thrustor",
+      "character_appearance_slug": "thrustor-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Upgraded form of Thrust. Wave 10 (November 1998)"
+      }
+    },
+    {
+      "product_code": "X-2",
+      "name": "Diver & Niagara Base",
+      "slug": "x-2-diver",
+      "character_slug": "diver-bwii",
+      "character_appearance_slug": "diver-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Frog Maximal with Niagara Base playset. Wave 1 (March 1998). Only release of Diver figure"
+      }
+    },
+    {
+      "product_code": "X-4",
+      "name": "Magnaboss",
+      "slug": "x-4-magnaboss",
+      "character_slug": "magnaboss-bwii",
+      "character_appearance_slug": "magnaboss-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Maximal combiner giftset. Wave 8 (September 1998). Combines Lio Junior (C-26), Skywarp (C-27), and Santon (C-28). Also sold as individual components"
+      }
+    },
+    {
+      "product_code": "X-5",
+      "name": "Ikard & Tako Tank",
+      "slug": "x-5-ikard",
+      "character_slug": "ikard",
+      "character_appearance_slug": "ikard-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "Ikard (parrot) with Tako Tank vehicle. Wave 9 (October 1998). Companion character to Lio Convoy"
+      }
+    },
+    {
+      "product_code": "VS-12",
+      "name": "Apache vs Megastorm",
+      "slug": "vs-12-apache-vs-megastorm",
+      "character_slug": "apache",
+      "character_appearance_slug": "apache-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": "multi-pack",
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "VS two-pack. Wave 1 (March 1998). Contains C-12 Apache and D-12 Megastorm. Secondary character: megastorm"
+      }
+    },
+    {
+      "product_code": "VS-13",
+      "name": "Bighorn vs Starscream & BB",
+      "slug": "vs-13-bighorn-vs-starscream-bb",
+      "character_slug": "bighorn",
+      "character_appearance_slug": "bighorn-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": "multi-pack",
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "VS two-pack. Wave 1 (March 1998). Contains C-13 Bighorn and D-13 Starscream & BB. Secondary characters: starscream-bwii, bb"
+      }
+    },
+    {
+      "product_code": "VS-14",
+      "name": "Tasmania Kid vs Dirge",
+      "slug": "vs-14-tasmania-kid-vs-dirge",
+      "character_slug": "tasmania-kid",
+      "character_appearance_slug": "tasmania-kid-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": "multi-pack",
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "VS two-pack. Wave 1 (March 1998). Contains C-14 Tasmania Kid and D-14 Dirge. Secondary character: dirge-bwii"
+      }
+    },
+    {
+      "product_code": "VS-15",
+      "name": "Scuba vs Thrust",
+      "slug": "vs-15-scuba-vs-thrust",
+      "character_slug": "scuba",
+      "character_appearance_slug": "scuba-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": "multi-pack",
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "VS two-pack. Wave 1 (March 1998). Contains C-15 Scuba and D-15 Thrust. Secondary character: thrust-bwii"
+      }
+    },
+    {
+      "product_code": "VS-16",
+      "name": "Lio Convoy vs Galvatron",
+      "slug": "vs-16-lio-convoy-vs-galvatron",
+      "character_slug": "lio-convoy",
+      "character_appearance_slug": "lio-convoy-bwii-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-ii",
+      "metadata": {
+        "status": "released",
+        "variant_type": "multi-pack",
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Second",
+        "notes": "VS two-pack. Wave 4 (May 1998). Contains C-16 Lio Convoy and D-16 Galvatron. Secondary character: galvatron-bwii"
+      }
+    }
+  ]
+}

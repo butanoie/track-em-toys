@@ -2,7 +2,7 @@
   "_metadata": {
     "table": "sub_groups",
     "description": "Seed data for the sub_groups reference table",
-    "total": 52,
+    "total": 55,
     "import_order": 2,
     "references": [
       "factions (via faction_slug)"
@@ -371,6 +371,27 @@
       "slug": "titans",
       "notes": "Giant city/base-forming Transformers. Transform into cities, battle stations, or planetary-scale bases. Includes G1 city-bots and Japanese-exclusive base-formers.",
       "faction_slug": null,
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Fuzors",
+      "slug": "fuzors",
+      "notes": "Beast Wars Transformers whose beast modes are hybrids of two different animals. Introduced in Season 2. Includes Silverbolt (wolf/eagle), Quickstrike (scorpion/cobra), and toy-only characters",
+      "faction_slug": null,
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Transmetals",
+      "slug": "transmetals",
+      "notes": "Beast Wars characters upgraded by the quantum surge into metallic beast modes with vehicle capabilities. Introduced in Season 2. Includes Transmetal, Transmetal 2, and Optimal forms",
+      "faction_slug": null,
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Vehicon Generals",
+      "slug": "vehicon-generals",
+      "notes": "Beast Machines: Megatron's elite Vehicon commanders. Each controls a type of drone army. Tankor (tanks), Jetstorm (aero-drones), Thrust (cycle-drones), Obsidian (copter-drones), Strika (assault vehicles)",
+      "faction_slug": "vehicon",
       "franchise_slug": "transformers"
     }
   ]

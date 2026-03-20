@@ -2,7 +2,7 @@
   "_metadata": {
     "table": "factions",
     "description": "Seed data for the factions reference table",
-    "total": 11,
+    "total": 14,
     "import_order": 1
   },
   "data": [
@@ -59,6 +59,24 @@
       "slug": "other",
       "franchise_slug": "transformers",
       "notes": "Characters from other alien races or unclassified factions"
+    },
+    {
+      "name": "Maximal",
+      "slug": "maximal",
+      "franchise_slug": "transformers",
+      "notes": "Heroic faction in Beast Era. Descendants of the Autobots. Transform into organic beast modes"
+    },
+    {
+      "name": "Predacon",
+      "slug": "predacon",
+      "franchise_slug": "transformers",
+      "notes": "Villainous faction in Beast Era. Descendants of the Decepticons. Transform into organic beast modes. Not to be confused with the G1 Predacons sub-group"
+    },
+    {
+      "name": "Vehicon",
+      "slug": "vehicon",
+      "franchise_slug": "transformers",
+      "notes": "Megatron's army of spark-less drones in Beast Machines. Generals include Tankor, Jetstorm, Thrust, Obsidian, and Strika"
     },
     {
       "name": "G.I. Joe",
