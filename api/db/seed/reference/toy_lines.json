@@ -2,7 +2,7 @@
   "_metadata": {
     "table": "toy_lines",
     "description": "Seed data for the toy_lines table",
-    "total": 18,
+    "total": 22,
     "import_order": 4,
     "references": [
       "manufacturers (via manufacturer_slug)"
@@ -151,6 +151,38 @@
       "scale": "Various",
       "description": "Hasbro Beast Machines toyline (2000-2001). Techno-organic Maximals and mechanical Vehicons. Successor to Beast Wars",
       "manufacturer_slug": "hasbro",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Beast Wars (Takara)",
+      "slug": "beast-wars-takara",
+      "scale": "Various",
+      "description": "Takara Japanese Beast Wars toyline (1997-1998). C/D-1 through C/D-11 numbering. Mostly repackaged Kenner molds with Japanese packaging and show-accurate decos. 6 waves",
+      "manufacturer_slug": "takara-tomy",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Beast Wars II",
+      "slug": "beast-wars-ii",
+      "scale": "Various",
+      "description": "Takara Beast Wars Second toyline (1998). C/D-12 through C/D-28 numbering. Japan-exclusive series with original characters (Lio Convoy, Galvatron) alongside repurposed G1/G2 molds. 10 waves",
+      "manufacturer_slug": "takara-tomy",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Beast Wars Neo",
+      "slug": "beast-wars-neo",
+      "scale": "Various",
+      "description": "Takara Beast Wars Neo toyline (1999). C/D-29 through C/D-39 numbering. Japan-exclusive series heavy with all-new sculpts. Zoo animals vs dinosaurs theme. 5 waves",
+      "manufacturer_slug": "takara-tomy",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Beast Wars Metals",
+      "slug": "beast-wars-metals",
+      "scale": "Various",
+      "description": "Takara Beast Wars Metals toyline (1999). C/D-40 through C/D-50 numbering. Japanese release of Transmetals/TM2 figures with show-accurate decos and lenticular bio cards. 3 waves over 4 months (Sep-Dec 1999)",
+      "manufacturer_slug": "takara-tomy",
       "franchise_slug": "transformers"
     }
   ]

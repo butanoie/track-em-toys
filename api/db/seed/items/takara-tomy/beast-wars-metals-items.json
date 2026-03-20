@@ -1,0 +1,394 @@
+{
+  "_metadata": {
+    "description": "Beast Wars Metals (Takara, 1999) item seed data — Japanese Transmetal/TM2 releases with show-accurate decos",
+    "toy_line": "beast-wars-metals",
+    "manufacturer": "takara-tomy",
+    "id_range": "C-40 to C-50 (Cybertron), D-40 to D-48 (Destron)",
+    "year": 1999,
+    "total": 20,
+    "notes": "3 waves released Sep-Dec 1999. Same NA Beast Wars molds with show-accurate Japanese decos and lenticular bio cards. C-41 Silverbolt and D-45 Quickstrike are Fuzor molds (not Transmetals). X-9 Metals Jaguar (Ravage retool) excluded — outside requested C/D number range.",
+    "total_items": 20
+  },
+  "items": [
+    {
+      "product_code": "C-40",
+      "name": "Metals Convoy",
+      "slug": "c-40-metals-convoy",
+      "character_slug": "optimus-primal",
+      "character_appearance_slug": "optimus-primal-transmetal",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Optimus Primal with show-accurate deco and lenticular bio card. Wave 1 (Sep 1999)"
+      }
+    },
+    {
+      "product_code": "C-41",
+      "name": "Silverbolt",
+      "slug": "c-41-silverbolt",
+      "character_slug": "silverbolt-bw",
+      "character_appearance_slug": "silverbolt-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Fuzor Silverbolt mold with lighter grey plastic and painted wolf eye irises. Wave 1 (Sep 1999)"
+      }
+    },
+    {
+      "product_code": "C-42",
+      "name": "Metals Cheetus",
+      "slug": "c-42-metals-cheetus",
+      "character_slug": "cheetor",
+      "character_appearance_slug": "cheetor-transmetal",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Cheetor with show-accurate deco and lenticular bio card. Wave 1 (Sep 1999)"
+      }
+    },
+    {
+      "product_code": "C-43",
+      "name": "Metals Rattle",
+      "slug": "c-43-metals-rattle",
+      "character_slug": "rattrap",
+      "character_appearance_slug": "rattrap-transmetal",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Rattrap with show-accurate deco and lenticular bio card. Wave 1 (Sep 1999)"
+      }
+    },
+    {
+      "product_code": "C-44",
+      "name": "Metals Rhinox",
+      "slug": "c-44-metals-rhinox",
+      "character_slug": "rhinox",
+      "character_appearance_slug": "rhinox-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Rhinox with show-accurate deco and lenticular bio card. Wave 2 (Oct 1999)"
+      }
+    },
+    {
+      "product_code": "C-45",
+      "name": "Metals Airazor",
+      "slug": "c-45-metals-airazor",
+      "character_slug": "airazor",
+      "character_appearance_slug": "airazor-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Airazor with show-accurate deco and lenticular bio card. Wave 2 (Oct 1999)"
+      }
+    },
+    {
+      "product_code": "C-46",
+      "name": "Metals Depth Charge",
+      "slug": "c-46-metals-depth-charge",
+      "character_slug": "depth-charge",
+      "character_appearance_slug": "depth-charge-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Depth Charge with show-accurate deco and lenticular bio card. Wave 2 (Oct 1999)"
+      }
+    },
+    {
+      "product_code": "C-47",
+      "name": "Metals Powered Convoy",
+      "slug": "c-47-metals-powered-convoy",
+      "character_slug": "optimal-optimus",
+      "character_appearance_slug": "optimal-optimus-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Optimal Optimus mold with show-accurate deco and lenticular bio card. Wave 3 (Dec 1999)"
+      }
+    },
+    {
+      "product_code": "C-48",
+      "name": "Metals Blackwidow",
+      "slug": "c-48-metals-blackwidow",
+      "character_slug": "blackarachnia",
+      "character_appearance_slug": "blackarachnia-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal 2 Blackarachnia with show-accurate deco and lenticular bio card. Wave 3 (Dec 1999)"
+      }
+    },
+    {
+      "product_code": "C-49",
+      "name": "Metals Cheetus 2",
+      "slug": "c-49-metals-cheetus-2",
+      "character_slug": "cheetor",
+      "character_appearance_slug": "cheetor-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal 2 Cheetor with show-accurate deco and lenticular bio card. Wave 3 (Dec 1999)"
+      }
+    },
+    {
+      "product_code": "C-50",
+      "name": "Metals Tigerfalcon",
+      "slug": "c-50-metals-tigerfalcon",
+      "character_slug": "tigerhawk",
+      "character_appearance_slug": "tigerhawk-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Tigerhawk mold with show-accurate deco and lenticular bio card. Wave 3 (Dec 1999)"
+      }
+    },
+    {
+      "product_code": "D-40",
+      "name": "Metals Megatron",
+      "slug": "d-40-metals-megatron",
+      "character_slug": "megatron-bw",
+      "character_appearance_slug": "megatron-bw-transmetal",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Megatron with show-accurate deco and lenticular bio card. Wave 1 (Sep 1999)"
+      }
+    },
+    {
+      "product_code": "D-41",
+      "name": "Metals Rampage",
+      "slug": "d-41-metals-rampage",
+      "character_slug": "rampage-bw",
+      "character_appearance_slug": "rampage-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Rampage with show-accurate deco and lenticular bio card. Wave 1 (Sep 1999)"
+      }
+    },
+    {
+      "product_code": "D-42",
+      "name": "Metals Waspeeter",
+      "slug": "d-42-metals-waspeeter",
+      "character_slug": "waspinator",
+      "character_appearance_slug": "waspinator-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Waspinator with show-accurate deco and lenticular bio card. Wave 1 (Sep 1999)"
+      }
+    },
+    {
+      "product_code": "D-43",
+      "name": "Metals Terrorsaurer",
+      "slug": "d-43-metals-terrorsaurer",
+      "character_slug": "terrorsaur",
+      "character_appearance_slug": "terrorsaur-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Terrorsaur with show-accurate deco and lenticular bio card. Wave 2 (Oct 1999)"
+      }
+    },
+    {
+      "product_code": "D-44",
+      "name": "Metals Tarans",
+      "slug": "d-44-metals-tarans",
+      "character_slug": "tarantulas",
+      "character_appearance_slug": "tarantulas-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal Tarantulas with show-accurate deco and lenticular bio card. Wave 2 (Oct 1999)"
+      }
+    },
+    {
+      "product_code": "D-45",
+      "name": "Quickstrike",
+      "slug": "d-45-quickstrike",
+      "character_slug": "quickstrike",
+      "character_appearance_slug": "quickstrike-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Fuzor Quickstrike mold with show-accurate deco. Wave 2 (Oct 1999)"
+      }
+    },
+    {
+      "product_code": "D-46",
+      "name": "Metals Inferno",
+      "slug": "d-46-metals-inferno",
+      "character_slug": "inferno-bw",
+      "character_appearance_slug": "inferno-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal 2 Inferno with show-accurate deco and lenticular bio card. Wave 3 (Dec 1999)"
+      }
+    },
+    {
+      "product_code": "D-47",
+      "name": "Metals Dragon Megatron",
+      "slug": "d-47-metals-dragon-megatron",
+      "character_slug": "megatron-bw",
+      "character_appearance_slug": "megatron-bw-dragon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal 2 Megatron (dragon) with show-accurate deco and lenticular bio card. Wave 3 (Dec 1999)"
+      }
+    },
+    {
+      "product_code": "D-48",
+      "name": "Metals Dinobot",
+      "slug": "d-48-metals-dinobot",
+      "character_slug": "dinobot-ii",
+      "character_appearance_slug": "dinobot-ii-bw-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-metals",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Metals",
+        "notes": "Transmetal 2 Dinobot (Dinobot II) with show-accurate deco and lenticular bio card. Wave 3 (Dec 1999)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,446 @@
+{
+  "_metadata": {
+    "description": "Takara Beast Wars (Japanese) items — C-1 through C-11 (Cybertron/Maximal) and D-1 through D-11 (Destron/Predacon), waves 1-6 (1997-1998)",
+    "generated": "2026-03-19T180000Z",
+    "total_items": 21,
+    "skipped_items": [
+      {
+        "product_code": "D-7",
+        "name": "Shadow Panther",
+        "reason": "No character slug exists for Shadow Panther — Japan-exclusive repaint of Cheetor mold"
+      }
+    ],
+    "unresolved_characters": [
+      "shadow-panther"
+    ],
+    "schema_target": "items table from migrations 011 + 013",
+    "import_instructions": [
+      "1. Ensure continuity_families, factions, sub_groups, manufacturers, toy_lines, characters, character_appearances are seeded",
+      "2. For each item: resolve manufacturer_slug, toy_line_slug, character_slug, character_appearance_slug to UUIDs",
+      "3. Insert into items table",
+      "4. metadata JSONB holds: status, variant_type, base_product_code, sub_brand, notes"
+    ],
+    "stats": {
+      "by_year": {
+        "1997": 17,
+        "1998": 4
+      },
+      "by_wave": {
+        "1": 12,
+        "2": 1,
+        "3": 2,
+        "4": 2,
+        "5": 2,
+        "6": 2
+      },
+      "by_faction": {
+        "cybertron": 11,
+        "destron": 10
+      },
+      "year_range": "1997-1998"
+    },
+    "fk_convention": "slug-based — see api/db/seed/README.md",
+    "product_code_source": "Takara C/D-series numbering from Beast Wars: Super Lifeform Transformers Japanese toyline. Confirmed via TFWiki."
+  },
+  "items": [
+    {
+      "product_code": "C-1",
+      "name": "Convoy",
+      "slug": "c-1-convoy",
+      "character_slug": "optimus-primal",
+      "character_appearance_slug": "optimus-primal-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Optimus Primal. Ultra class gorilla mold, repackaged Kenner mold with Japanese packaging. Wave 1"
+      }
+    },
+    {
+      "product_code": "C-2",
+      "name": "White Claw",
+      "slug": "c-2-white-claw",
+      "character_slug": "polar-claw",
+      "character_appearance_slug": "polar-claw-bw-toy",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Polar Claw. Mega class polar bear mold, repackaged Kenner mold. Wave 1"
+      }
+    },
+    {
+      "product_code": "C-3",
+      "name": "Cheetus",
+      "slug": "c-3-cheetus",
+      "character_slug": "cheetor",
+      "character_appearance_slug": "cheetor-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Cheetor. Deluxe class cheetah mold, repackaged Kenner mold. Wave 1"
+      }
+    },
+    {
+      "product_code": "C-4",
+      "name": "Dinobot",
+      "slug": "c-4-dinobot",
+      "character_slug": "dinobot",
+      "character_appearance_slug": "dinobot-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Same name as English release. Deluxe class velociraptor mold, repackaged Kenner mold. Wave 1"
+      }
+    },
+    {
+      "product_code": "C-5",
+      "name": "Rattle",
+      "slug": "c-5-rattle",
+      "character_slug": "rattrap",
+      "character_appearance_slug": "rattrap-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Rattrap. Basic class rat mold, repackaged Kenner mold. Wave 1"
+      }
+    },
+    {
+      "product_code": "C-6",
+      "name": "Convoy Bat Version",
+      "slug": "c-6-convobat",
+      "character_slug": "optimus-primal",
+      "character_appearance_slug": "optimus-primal-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": "alt-mode",
+        "base_product_code": "C-1",
+        "sub_brand": "Beast Wars",
+        "notes": "Convobat — smaller basic class Optimus Primal bat mold. Different mold from C-1 gorilla. Repackaged Kenner basic Optimus Primal. Wave 1"
+      }
+    },
+    {
+      "product_code": "C-7",
+      "name": "Rhinox",
+      "slug": "c-7-rhinox",
+      "character_slug": "rhinox",
+      "character_appearance_slug": "rhinox-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Same name as English release. Mega class rhinoceros mold, repackaged Kenner mold. Wave 2"
+      }
+    },
+    {
+      "product_code": "C-8",
+      "name": "Tigatron",
+      "slug": "c-8-tigatron",
+      "character_slug": "tigatron",
+      "character_appearance_slug": "tigatron-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Same name as English release. Deluxe class white tiger mold, repackaged Kenner mold. Wave 3"
+      }
+    },
+    {
+      "product_code": "C-9",
+      "name": "Howlinger",
+      "slug": "c-9-howlinger",
+      "character_slug": "wolfang",
+      "character_appearance_slug": "wolfang-bw-toy",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Wolfang. Deluxe class wolf mold, repackaged Kenner mold. Wave 4"
+      }
+    },
+    {
+      "product_code": "C-10",
+      "name": "Airazor",
+      "slug": "c-10-airazor",
+      "character_slug": "airazor",
+      "character_appearance_slug": "airazor-bw-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Same name as English release. Deluxe class falcon mold, repackaged Kenner mold. Wave 5"
+      }
+    },
+    {
+      "product_code": "C-11",
+      "name": "Cybershark",
+      "slug": "c-11-cybershark",
+      "character_slug": "cybershark",
+      "character_appearance_slug": "cybershark-bw-toy",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Same name as English release. Deluxe class hammerhead shark mold, repackaged Kenner mold. Wave 6"
+      }
+    },
+    {
+      "product_code": "D-1",
+      "name": "Megatron",
+      "slug": "d-1-megatron",
+      "character_slug": "megatron-bw",
+      "character_appearance_slug": "megatron-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Same name as English release. Ultra class T-rex mold, repackaged Kenner mold. Wave 1"
+      }
+    },
+    {
+      "product_code": "D-2",
+      "name": "Scorpos",
+      "slug": "d-2-scorpos",
+      "character_slug": "scorponok-bw",
+      "character_appearance_slug": "scorponok-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Scorponok. Mega class scorpion mold, repackaged Kenner mold. Wave 1"
+      }
+    },
+    {
+      "product_code": "D-3",
+      "name": "Waspeeter",
+      "slug": "d-3-waspeeter",
+      "character_slug": "waspinator",
+      "character_appearance_slug": "waspinator-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Waspinator (Waspeeter/Waspitor). Deluxe class wasp mold, repackaged Kenner mold. Wave 1"
+      }
+    },
+    {
+      "product_code": "D-4",
+      "name": "Tarans",
+      "slug": "d-4-tarans",
+      "character_slug": "tarantulas",
+      "character_appearance_slug": "tarantulas-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Tarantulas. Deluxe class tarantula mold, repackaged Kenner mold. Wave 1"
+      }
+    },
+    {
+      "product_code": "D-5",
+      "name": "Terrorsaurer",
+      "slug": "d-5-terrorsaurer",
+      "character_slug": "terrorsaur",
+      "character_appearance_slug": "terrorsaur-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Terrorsaur. Basic class pteranodon mold, repackaged Kenner mold. Wave 1"
+      }
+    },
+    {
+      "product_code": "D-6",
+      "name": "Megatron Alligator Version",
+      "slug": "d-6-megalligator",
+      "character_slug": "megatron-bw",
+      "character_appearance_slug": "megatron-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": "alt-mode",
+        "base_product_code": "D-1",
+        "sub_brand": "Beast Wars",
+        "notes": "Megalligator — smaller basic class Megatron alligator mold. Different mold from D-1 T-rex. Repackaged Kenner basic Megatron. Wave 1"
+      }
+    },
+    {
+      "product_code": "D-8",
+      "name": "Blackwidow",
+      "slug": "d-8-blackwidow",
+      "character_slug": "blackarachnia",
+      "character_appearance_slug": "blackarachnia-bw-cartoon",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Blackarachnia (Blackwidow). Deluxe class black widow spider mold, repackaged Kenner mold. Wave 3"
+      }
+    },
+    {
+      "product_code": "D-9",
+      "name": "Buzz Saw",
+      "slug": "d-9-buzz-saw",
+      "character_slug": "buzz-saw-bw",
+      "character_appearance_slug": "buzz-saw-bw-toy",
+      "year_released": 1997,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Same name as English release. Deluxe class buzzard/vulture mold, repackaged Kenner mold. Wave 4"
+      }
+    },
+    {
+      "product_code": "D-10",
+      "name": "Kuwagiger",
+      "slug": "d-10-kuwagiger",
+      "character_slug": "insecticon-bw",
+      "character_appearance_slug": "insecticon-bw-toy",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Japanese name for Insecticon (Kuwagiger). Basic class stag beetle mold, repackaged Kenner mold. Wave 5"
+      }
+    },
+    {
+      "product_code": "D-11",
+      "name": "Inferno",
+      "slug": "d-11-inferno",
+      "character_slug": "inferno-bw",
+      "character_appearance_slug": "inferno-bw-cartoon",
+      "year_released": 1998,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-takara",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars",
+        "notes": "Same name as English release. Mega class fire ant mold, repackaged Kenner mold. Wave 6"
+      }
+    }
+  ]
+}

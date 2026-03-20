@@ -1,0 +1,392 @@
+{
+  "_metadata": {
+    "description": "Takara Beast Wars Neo (1999 Japan-exclusive) items — C-29 through C-39 (Cybertron/Maximal) and D-29 through D-39 (Destron/Predacon)",
+    "generated": "2026-03-19T210000Z",
+    "total_items": 17,
+    "skipped_items": [
+      {
+        "product_code": "C-38",
+        "name": "Bump",
+        "reason": "No character slug exists for Bump — BW Neo Maximal (armadillo). Redeco of BW Basic Armordillo mold"
+      },
+      {
+        "product_code": "C-39",
+        "name": "Survive",
+        "reason": "No character slug exists for Survive — BW Neo Maximal (black bear). Mega class figure"
+      },
+      {
+        "product_code": "D-37",
+        "name": "Hardhead",
+        "reason": "No character slug exists for Hardhead (BW Neo) — Predacon (pachycephalosaurus). Retooling of BW Deluxe Dinobot mold"
+      },
+      {
+        "product_code": "D-38",
+        "name": "Bazooka",
+        "reason": "No character slug exists for Bazooka — BW Neo Predacon (euoplocephalus). Basic class figure"
+      },
+      {
+        "product_code": "D-39",
+        "name": "Killer Punch",
+        "reason": "No character slug exists for Killer Punch — BW Neo Predacon (styracosaurus). Retooling of Deluxe Guiledart mold"
+      }
+    ],
+    "unresolved_characters": [
+      "bump",
+      "survive",
+      "hardhead-bwneo",
+      "bazooka-bwneo",
+      "killer-punch"
+    ],
+    "notable_exclusions": [
+      {
+        "product_code": "S-3",
+        "name": "Heinrad",
+        "reason": "Special numbering (S-series), outside C/D-29 to C/D-39 scope. Character slug 'heinrad' exists but item uses non-standard product code"
+      }
+    ],
+    "schema_target": "items table from migrations 011 + 013",
+    "import_instructions": [
+      "1. Ensure continuity_families, factions, sub_groups, manufacturers, toy_lines, characters, character_appearances are seeded",
+      "2. For each item: resolve manufacturer_slug, toy_line_slug, character_slug, character_appearance_slug to UUIDs",
+      "3. Insert into items table",
+      "4. metadata JSONB holds: status, variant_type, base_product_code, sub_brand, notes"
+    ],
+    "stats": {
+      "by_year": {
+        "1999": 17
+      },
+      "by_faction": {
+        "cybertron": 9,
+        "destron": 8
+      },
+      "year_range": "1999"
+    },
+    "fk_convention": "slug-based — see api/db/seed/README.md",
+    "product_code_source": "Takara C/D-series numbering continuing from Beast Wars / BW II. Confirmed via TFWiki Beast Wars Neo toyline page and List of Japanese ID numbers."
+  },
+  "items": [
+    {
+      "product_code": "C-29",
+      "name": "Longrack",
+      "slug": "c-29-longrack",
+      "character_slug": "longrack",
+      "character_appearance_slug": "longrack-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Giraffe Transformer. Maximal sub-commander and Big Convoy's second-in-command among the rookie team. Wave 1"
+      }
+    },
+    {
+      "product_code": "C-30",
+      "name": "Colada",
+      "slug": "c-30-colada",
+      "character_slug": "colada",
+      "character_appearance_slug": "colada-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Cobra Transformer. Arrogant Maximal recruit. Wave 1"
+      }
+    },
+    {
+      "product_code": "C-31",
+      "name": "Stampy",
+      "slug": "c-31-stampy",
+      "character_slug": "stampy",
+      "character_appearance_slug": "stampy-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Rabbit Transformer. Young, cowardly but speedy Maximal scout. Wave 1"
+      }
+    },
+    {
+      "product_code": "C-32",
+      "name": "Break",
+      "slug": "c-32-break",
+      "character_slug": "break",
+      "character_appearance_slug": "break-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Emperor penguin Transformer. Hot-blooded Maximal recruit who aspires to become Supreme Commander. Wave 1"
+      }
+    },
+    {
+      "product_code": "C-33",
+      "name": "Rockbuster",
+      "slug": "c-33-rockbuster",
+      "character_slug": "rockbuster",
+      "character_appearance_slug": "rockbuster-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Fiddler crab Transformer. Solitary Maximal warrior and Big Convoy's former partner. Wave 2"
+      }
+    },
+    {
+      "product_code": "C-34",
+      "name": "Randy",
+      "slug": "c-34-randy",
+      "character_slug": "randy",
+      "character_appearance_slug": "randy-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Wild boar Transformer. Aggressive and dedicated Maximal powerhouse. Wave 2"
+      }
+    },
+    {
+      "product_code": "C-35",
+      "name": "Big Convoy",
+      "slug": "c-35-big-convoy",
+      "character_slug": "big-convoy",
+      "character_appearance_slug": "big-convoy-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Mammoth Transformer. Gruff, solitary Maximal commander assigned by Vector Sigma to train rookies. Wields the Big Cannon. Wave 3"
+      }
+    },
+    {
+      "product_code": "C-36",
+      "name": "Mach Kick",
+      "slug": "c-36-mach-kick",
+      "character_slug": "mach-kick",
+      "character_appearance_slug": "mach-kick-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Horse Transformer. Free-spirited Maximal with genuine military experience. Wave 3"
+      }
+    },
+    {
+      "product_code": "C-37",
+      "name": "Sharp Edge",
+      "slug": "c-37-sharp-edge",
+      "character_slug": "sharp-edge",
+      "character_appearance_slug": "sharp-edge-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Sawshark Transformer. Unpredictable Maximal who views combat as his life's purpose. Wave 4"
+      }
+    },
+    {
+      "product_code": "D-29",
+      "name": "Guiledart",
+      "slug": "d-29-guiledart",
+      "character_slug": "guiledart",
+      "character_appearance_slug": "guiledart-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Triceratops Transformer. Loyal Predacon field commander who serves Magmatron faithfully. Wave 1"
+      }
+    },
+    {
+      "product_code": "D-30",
+      "name": "Saberback",
+      "slug": "d-30-saberback",
+      "character_slug": "saberback",
+      "character_appearance_slug": "saberback-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Stegosaurus Transformer. Enigmatic Predacon and compulsive liar. Wave 1"
+      }
+    },
+    {
+      "product_code": "D-31",
+      "name": "Sling",
+      "slug": "d-31-sling",
+      "character_slug": "sling",
+      "character_appearance_slug": "sling-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Dimetrodon Transformer. Naive and dim Predacon who is the butt of everyone's jokes. Wave 1"
+      }
+    },
+    {
+      "product_code": "D-32",
+      "name": "Dead End",
+      "slug": "d-32-dead-end",
+      "character_slug": "dead-end-bwneo",
+      "character_appearance_slug": "dead-end-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Ammonite Transformer. Ideal Predacon soldier content in his rank. Wave 1"
+      }
+    },
+    {
+      "product_code": "D-33",
+      "name": "Hydra",
+      "slug": "d-33-hydra",
+      "character_slug": "hydra-bwneo",
+      "character_appearance_slug": "hydra-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Pteranodon Transformer. Fastest Predacon alive with keen tactical cleverness. Wave 2"
+      }
+    },
+    {
+      "product_code": "D-34",
+      "name": "Crazybolt",
+      "slug": "d-34-crazybolt",
+      "character_slug": "crazybolt",
+      "character_appearance_slug": "crazybolt-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Frilled lizard Transformer. Habitual liar who is usually the first to flee. Wave 2"
+      }
+    },
+    {
+      "product_code": "D-35",
+      "name": "Magmatron",
+      "slug": "d-35-magmatron",
+      "character_slug": "magmatron",
+      "character_appearance_slug": "magmatron-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Combined dinosaur Transformer (Giganotosaurus/Elasmosaurus/Quetzalcoatlus). Predacon leader who separates into Landsaurus, Skysaurus, and Seasaurus. Sold as complete combiner set. Wave 3"
+      }
+    },
+    {
+      "product_code": "D-36",
+      "name": "Archadis",
+      "slug": "d-36-archadis",
+      "character_slug": "archadis",
+      "character_appearance_slug": "archadis-bwneo-cartoon",
+      "year_released": 1999,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "takara-tomy",
+      "toy_line_slug": "beast-wars-neo",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "Beast Wars Neo",
+        "notes": "Archaeopteryx Transformer. Arrogant Predacon marksman with flight capability. Wave 3"
+      }
+    }
+  ]
+}
