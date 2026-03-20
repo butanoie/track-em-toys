@@ -153,6 +153,15 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Manufacturer routes: `/catalog/manufacturers` (list), `/catalog/manufacturers/:slug` (hub), `/catalog/manufacturers/:slug/items` (items browse with filters in search params)
 - Search page uses page/offset pagination (`SearchPagination` component), not cursor-based — matching the `GET /catalog/search` API contract. Page controls are different from `ItemList`'s cursor stack pattern.
 
+### Catalog Component Tests
+
+- Shared test fixtures: `src/catalog/__tests__/catalog-test-helpers.tsx` — typed mock data for all catalog Zod types + `createCatalogTestWrapper()`. Update there when schemas change, not per-test file.
+- Page tests must mock `AppHeader` and `MainNav` — `AppHeader` calls `useAuth()` which throws without `AuthContext`. Use: `vi.mock('@/components/AppHeader', () => ({ AppHeader: () => <header data-testid="app-header" /> }))`
+- `FranchiseListPage`, `ManufacturerListPage`, `ManufacturerHubPage` do NOT import route files — no `Route.useSearch()` mock needed for these
+- `CharacterDetailPage` uses inline `useQuery` (not a custom hook) for related items — mock `listCatalogItems` from `@/catalog/api` and wrap in `createCatalogTestWrapper()`
+- `vi.advanceTimersByTime()` must be wrapped in `act()` when it triggers React state updates (e.g., `ShareLinkButton` timeout reset)
+- jsdom does not implement `navigator.clipboard` — mock with `Object.assign(navigator, { clipboard: { writeText: vi.fn() } })`
+
 ## Before Writing New Code
 
 Read existing files for patterns before writing anything new:
