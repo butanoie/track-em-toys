@@ -42,7 +42,18 @@ const baseConfig = {
   },
   apple: { bundleId: undefined, servicesId: undefined },
   google: { webClientId: undefined, iosClientId: undefined },
+  photos: {
+    storagePath: '/tmp/trackem-test-photos',
+    baseUrl: 'http://localhost:3010/photos',
+    maxSizeMb: 10,
+  },
 };
+
+// Mock node:fs to stub accessSync (photo storage startup validation in development mode)
+vi.mock('node:fs', async () => {
+  const actual = await vi.importActual<typeof import('node:fs')>('node:fs');
+  return { ...actual, accessSync: vi.fn() };
+});
 
 // Shared DB / query mocks — these modules are not exercised by docs tests
 vi.mock('../db/pool.js', () => ({

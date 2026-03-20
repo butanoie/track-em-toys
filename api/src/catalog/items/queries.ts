@@ -45,6 +45,7 @@ export interface PhotoRow {
   url: string;
   caption: string | null;
   is_primary: boolean;
+  sort_order: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -327,12 +328,33 @@ export async function getItemBySlug(franchiseSlug: string, itemSlug: string): Pr
   if (!base) return null;
 
   const { rows: photos } = await pool.query<PhotoRow>(
-    `SELECT id, url, caption, is_primary
+    `SELECT id, url, caption, is_primary, sort_order
        FROM item_photos
-      WHERE item_id = $1
-      ORDER BY is_primary DESC, created_at ASC`,
+      WHERE item_id = $1 AND status = 'approved'
+      ORDER BY is_primary DESC, sort_order ASC, created_at ASC`,
     [base.id]
   );
 
   return { base, photos };
+}
+
+// ---------------------------------------------------------------------------
+// Lightweight item ID lookup (used by photo routes)
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve an item's UUID from franchise + item slugs.
+ *
+ * @param franchiseSlug - Franchise slug
+ * @param itemSlug - Item slug within the franchise
+ */
+export async function getItemIdBySlug(franchiseSlug: string, itemSlug: string): Promise<string | null> {
+  const { rows } = await pool.query<{ id: string }>(
+    `SELECT i.id
+       FROM items i
+       JOIN franchises fr ON fr.id = i.franchise_id
+      WHERE fr.slug = $1 AND i.slug = $2`,
+    [franchiseSlug, itemSlug]
+  );
+  return rows[0]?.id ?? null;
 }

@@ -111,7 +111,9 @@ describe('item routes (franchise-scoped)', () => {
   describe('GET /catalog/franchises/:franchise/items/:slug', () => {
     it('should return 200 with full item detail', async () => {
       mockQuery.mockResolvedValueOnce({ rows: [itemBaseRow] }).mockResolvedValueOnce({
-        rows: [{ id: 'p-1', url: 'https://img.example.com/ft44.jpg', caption: 'Box art', is_primary: true }],
+        rows: [
+          { id: 'p-1', url: 'https://img.example.com/ft44.jpg', caption: 'Box art', is_primary: true, sort_order: 1 },
+        ],
       });
 
       const res = await server.inject({

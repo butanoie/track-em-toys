@@ -30,7 +30,8 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | [E2E_CATALOG_SEARCH.md](E2E_CATALOG_SEARCH.md)               | `web/e2e/catalog-search.spec.ts`                                    | ✅ Implemented              |
 | [E2E_CATALOG_DETAIL_PAGES.md](E2E_CATALOG_DETAIL_PAGES.md)   | `web/e2e/catalog-detail-pages.spec.ts`                              | Scenarios written           |
 | E2E_CATALOG_BROWSING.md                                      | 1.7 Web Catalog UI                                                  | Not started                 |
-| E2E_PHOTO_UPLOAD.md                                          | 1.9 Photo Management (curator role)                                 | Not started                 |
+| [INT_PHOTO_MANAGEMENT.md](INT_PHOTO_MANAGEMENT.md)           | `api/src/catalog/photos/routes.test.ts`                             | Scenarios written           |
+| E2E_PHOTO_UPLOAD.md                                          | 1.9 Photo Management (curator UI)                                   | Not started                 |
 | [E2E_ADMIN_DASHBOARD.md](E2E_ADMIN_DASHBOARD.md)             | `web/src/admin/__tests__/*.test.tsx`, `web/e2e/admin-users.spec.ts` | ✅ Implemented (mocked API) |
 | E2E_GDPR_DELETION.md                                         | 1.12 Account Deletion                                               | Not started                 |
 

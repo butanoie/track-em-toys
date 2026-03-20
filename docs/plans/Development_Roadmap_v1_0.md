@@ -263,6 +263,24 @@ User's **personal collection photos** (condition shots of their own items) are a
 
 ---
 
+### Phase 1.9b: Photo Enhancements (Post-ML)
+
+**Depends on:** Phase 1.9 (photo system must exist) + Phase 4.0 (ML pipeline proves the photo system works before investing in enhancements)
+
+Post-ML enhancements to the photo management system. These are not needed for ML training but improve the curator and user experience once the core photo workflow is validated.
+
+**Issues:**
+
+| Issue | Title                                              | Priority | Effort |
+| ----- | -------------------------------------------------- | -------- | ------ |
+| #71   | Photo moderation: NSFW detection + approval        | High     | L      |
+| #72   | Approval notification dashboard                    | Medium   | M      |
+| #73   | Soft delete + 30-day recycle bin                   | Medium   | M      |
+| #74   | Caption editing                                    | Low      | S      |
+| #75   | Pending photo visibility (uploader-only with badge) | Medium   | M      |
+
+---
+
 ### Phase 4.0: ML Training Pipeline
 
 **Depends on:** Phase 1.9 (sufficient photos uploaded — ~80-200 per target class)
@@ -682,15 +700,24 @@ Three templates in `.github/ISSUE_TEMPLATE/`:
 | Catalog search UI with instant results                                       | `web`, `phase:1.7`              | M      | ML Path |
 | Catalog browsing E2E tests (Playwright)                                      | `web`, `type:test`, `phase:1.7` | M      | ML Path |
 
-### Phase 1.9: Photo Management (Centrally Managed Catalog Photos) — 5 issues
+### Phase 1.9: Photo Management — 4 issues (1 epic + 3 slices)
 
-| Title                                                                                              | Labels                   | Effort | Track   |
-| -------------------------------------------------------------------------------------------------- | ------------------------ | ------ | ------- |
-| Photo storage abstraction (local filesystem + S3-compatible)                                       | `api`, `phase:1.9`       | L      | ML Path |
-| Photo upload API: POST /catalog/items/:slug/photos (multipart, authenticated, contributor tracked) | `api`, `phase:1.9`       | L      | ML Path |
-| Thumbnail generation pipeline with sharp (multiple resolutions)                                    | `api`, `phase:1.9`       | M      | ML Path |
-| Photo gallery component + primary photo selection on item detail page                              | `web`, `phase:1.9`       | M      | ML Path |
-| ML training data export: catalog photos organized by character/item class for Create ML            | `api`, `ml`, `phase:1.9` | M      | ML Path |
+| Issue | Title                                                       | Labels                          | Effort | Track   |
+| ----- | ----------------------------------------------------------- | ------------------------------- | ------ | ------- |
+| #37   | Phase 1.9: Photo Management (epic)                          | `api`, `web`, `phase:1.9`       | —      | ML Path |
+| #79   | Slice 1: Photo storage, upload API, and thumbnails          | `api`, `web`, `phase:1.9`       | L      | ML Path |
+| #77   | Slice 2: Photo upload UI for curators                       | `web`, `phase:1.9`              | L      | ML Path |
+| #78   | Slice 3: ML training data export                            | `api`, `ml`, `phase:1.9`        | M      | ML Path |
+
+### Phase 1.9b: Photo Enhancements (Post-ML) — 5 issues
+
+| Issue | Title                                                       | Labels                          | Effort | Track   |
+| ----- | ----------------------------------------------------------- | ------------------------------- | ------ | ------- |
+| #71   | Photo moderation: NSFW detection + approval                 | `api`, `web`, `phase:1.9b`      | L      | Post-ML |
+| #72   | Approval notification dashboard                             | `api`, `web`, `phase:1.9b`      | M      | Post-ML |
+| #73   | Soft delete + 30-day recycle bin                            | `api`, `web`, `phase:1.9b`      | M      | Post-ML |
+| #74   | Caption editing                                             | `api`, `web`, `phase:1.9b`      | S      | Post-ML |
+| #75   | Pending photo visibility                                    | `api`, `web`, `phase:1.9b`      | M      | Post-ML |
 
 ### Phase 1.12: Account Security & GDPR — 3 issues
 

@@ -122,6 +122,14 @@ const toyLines = loadRef<ToyLineRecord>('reference/toy_lines.json');
 const CHARACTER_FILES = [
   'characters/g1-characters.json',
   'characters/beast-era-characters.json',
+  'characters/robots-in-disguise-2001-characters.json',
+  'characters/unicron-trilogy-characters.json',
+  'characters/arah-gi-joe-characters.json',
+  'characters/arah-cobra-characters.json',
+  'characters/sigma-6-characters.json',
+  'characters/gi-joe-movieverse-characters.json',
+  'characters/movieverse-characters.json',
+  'characters/animated-characters.json',
 ] as const;
 
 const charFiles = CHARACTER_FILES.map((f) => ({

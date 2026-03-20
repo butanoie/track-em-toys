@@ -8,6 +8,7 @@ interface Photo {
   url: string;
   caption: string | null;
   is_primary: boolean;
+  sort_order: number;
 }
 
 interface PhotoGalleryProps {

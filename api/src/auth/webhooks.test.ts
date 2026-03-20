@@ -66,6 +66,11 @@ vi.mock('../config.js', () => ({
       privateKey: testPrivatePem,
     },
     google: { webClientId: 'google-web-client-id', iosClientId: undefined },
+    photos: {
+      storagePath: '/tmp/trackem-test-photos',
+      baseUrl: 'http://localhost:3010/photos',
+      maxSizeMb: 10,
+    },
   },
 }));
 

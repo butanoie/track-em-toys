@@ -52,8 +52,19 @@ vi.mock('../config.js', () => ({
     },
     apple: { bundleId: 'com.example.app', servicesId: undefined },
     google: { webClientId: 'google-web-client-id', iosClientId: undefined },
+    photos: {
+      storagePath: '/tmp/trackem-test-photos',
+      baseUrl: 'http://localhost:3010/photos',
+      maxSizeMb: 10,
+    },
   },
 }));
+
+// Mock node:fs to stub accessSync (photo storage startup validation)
+vi.mock('node:fs', async () => {
+  const actual = await vi.importActual<typeof import('node:fs')>('node:fs');
+  return { ...actual, accessSync: vi.fn() };
+});
 
 vi.mock('../db/pool.js', () => ({
   withTransaction: vi.fn(),

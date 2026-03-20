@@ -41,6 +41,11 @@ vi.mock('../../config.js', () => ({
     },
     apple: { bundleId: 'com.test' },
     google: { webClientId: 'test' },
+    photos: {
+      storagePath: '/tmp/trackem-test-photos',
+      baseUrl: 'http://localhost:3010/photos',
+      maxSizeMb: 10,
+    },
   },
 }));
 
