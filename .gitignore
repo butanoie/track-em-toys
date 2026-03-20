@@ -46,3 +46,6 @@ test-results/
 # temp claud backups
 .claude/agents.bak/
 .claude/skills.bak/
+
+# Skill evaluation workspaces (generated test outputs, not part of the skill)
+.claude/skills/*-workspace/

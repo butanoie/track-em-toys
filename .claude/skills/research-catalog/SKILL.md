@@ -1,109 +1,250 @@
 ---
 name: research-catalog
-description: Research Transformers toy and character data from web sources and generate seed JSON files for the PostgreSQL catalog. Handles characters, items, reference data, and character appearances.
+description: "MANDATORY skill for adding, researching, or populating Transformers data in api/db/seed/. This skill contains the exact JSON schemas, slug rules, FK validation logic, and file naming conventions required by seed-validation.test.ts — without it, generated seed data WILL fail validation. You MUST use this skill whenever the user asks to: add characters (e.g. 'add Beast Wars characters', 'add Jetfire'), add items or product data (e.g. 'add FansToys items', 'research product codes', 'add 1987 Headmasters items'), add or update reference data (factions, sub-groups, manufacturers, toy lines, continuity families), generate character appearances, seed or populate any continuity (e.g. 'seed Animated', 'populate Unicron Trilogy'), or build out manufacturer catalogs (e.g. 'add X-Transbots', 'build out third party manufacturers'). Also trigger when the user mentions seed files, seed data, or references specific seed file paths like g1-characters.json or fanstoys.json. Do NOT attempt to generate seed JSON without this skill — the format is non-obvious and validation is strict."
 ---
 
 # Research Catalog
 
-Research Transformers data from authoritative web sources and produce seed JSON files that
-pass `api/src/db/seed-validation.test.ts` without modification.
+Research Transformers data from authoritative sources and produce seed JSON files that pass
+`api/src/db/seed-validation.test.ts` without modification.
+
+This skill supports single-entity requests ("add Optimus Primal") through to large-scale
+batch operations ("build out Beast Era, Unicron Trilogy, and all third-party manufacturers")
+using tiered parallel orchestration.
+
+## Quick Reference
+
+- **Entity schemas & record formats**: read `references/entity-schemas.md`
+- **Research sources & URL patterns**: read `references/research-sources.md`
+- **Seed data root**: `api/db/seed/`
+- **Validation test**: `api/src/db/seed-validation.test.ts`
+
+---
 
 ## Step 1 — Classify the Request
 
-Read the user's request and determine which category applies. A single request may
-span multiple categories (e.g., "add Beast Wars characters and their appearances").
+Read the user's request and determine scope. A single request may span multiple categories
+and multiple continuity families.
 
-| Category        | Trigger phrases                                                                             | Target files                                       |
-| --------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| **characters**  | "add X characters", "add the Stunticons", "add Beast Wars cast"                             | `api/db/seed/characters/{file}.json`               |
-| **items**       | "add X-Transbots items", "add FansToys", "add Hasbro G1 items"                              | `api/db/seed/items/{mfr}/{continuity-family}.json` |
-| **reference**   | "add faction", "add sub-group", "add continuity family", "add manufacturer", "add toy line" | `api/db/seed/reference/{table}.json`               |
-| **appearances** | "add appearances", "add character appearances", explicit "appearances"                      | `api/db/seed/appearances/{source}.json`            |
+| Category | Trigger phrases | Target files |
+| --- | --- | --- |
+| **reference** | "add faction", "add sub-group", "add continuity", "add manufacturer", "add toy line" | `api/db/seed/reference/{table}.json` |
+| **characters** | "add X characters", "add the Stunticons", "add Beast Wars cast" | `api/db/seed/characters/{continuity}.json` |
+| **appearances** | "add appearances", "add character appearances" | `api/db/seed/appearances/{continuity}.json` |
+| **items** | "add X-Transbots items", "add Hasbro Beast Wars", "add third-party items" | `api/db/seed/items/{mfr}/{file}.json` |
 
-When the request includes characters, also generate appearances for those characters unless
-the user says otherwise.
+When the request includes characters, also generate appearances unless the user says otherwise.
 
-If the category is ambiguous, ask the user one clarifying question before proceeding.
+**Scope assessment** — classify as:
+- **Small** (1-5 entities): handle inline, no sub-agents needed
+- **Medium** (6-30 entities): single continuity or manufacturer, use sub-agents for research
+- **Large** (30+ entities or multi-continuity/multi-manufacturer): full tiered orchestration
+
+If the category or scope is ambiguous, ask the user one clarifying question before proceeding.
+
+---
 
 ## Step 2 — Load Existing Seed Data
 
-Before any research, read the current seed state to build duplicate-detection sets.
+Before any research, load current seed state for duplicate detection and FK validation.
 
 ### 2a — Always load ALL reference tables
 
 Read these files using the Read tool:
 
-- `/Users/buta/Repos/track-em-toys/api/db/seed/reference/continuity_families.json`
-- `/Users/buta/Repos/track-em-toys/api/db/seed/reference/factions.json`
-- `/Users/buta/Repos/track-em-toys/api/db/seed/reference/sub_groups.json`
-- `/Users/buta/Repos/track-em-toys/api/db/seed/reference/manufacturers.json`
-- `/Users/buta/Repos/track-em-toys/api/db/seed/reference/toy_lines.json`
+- `api/db/seed/reference/franchises.json`
+- `api/db/seed/reference/continuity_families.json`
+- `api/db/seed/reference/factions.json`
+- `api/db/seed/reference/sub_groups.json`
+- `api/db/seed/reference/manufacturers.json`
+- `api/db/seed/reference/toy_lines.json`
 
-### 2b — Load all character files
+Build slug sets: `existingFactionSlugs`, `existingSubGroupSlugs`,
+`existingContinuityFamilySlugs`, `existingManufacturerSlugs`, `existingToyLineSlugs`.
 
-```bash
-ls /Users/buta/Repos/track-em-toys/api/db/seed/characters/
-```
+### 2b — Load character slugs
 
-For **appearance-only** requests targeting a specific character file, read only that file
-(you need the full character records for descriptions). For all other requests, read every
-character file listed. Build these sets in working memory:
-
-- `existingCharacterSlugs` — all slugs across all character files
-- `existingCharacterKeys` — `name.toLowerCase() + "|||" + franchise.toLowerCase() + "|||" + continuity_family_slug` for each character
-
-For slug-set building when you don't need full records, extract slugs efficiently:
+For large requests, use batch extraction for efficiency:
 
 ```bash
 cd /Users/buta/Repos/track-em-toys/api/db/seed/characters && python3 -c "
 import json, glob
 slugs = set()
+keys = set()
 for f in sorted(glob.glob('*.json')):
     data = json.load(open(f))
     for c in data['characters']:
         slugs.add(c['slug'])
+        keys.add(c['name'].lower() + '|||' + c.get('franchise_slug','') + '|||' + c.get('continuity_family_slug',''))
 print(f'{len(slugs)} character slugs loaded')
 for s in sorted(slugs): print(s)
 " 2>&1 | head -5
 ```
 
-### 2c — Load all item files
+For requests that need full character records (e.g., appearance generation), read the
+character files directly.
+
+### 2c — Load item and appearance slugs
 
 ```bash
-find /Users/buta/Repos/track-em-toys/api/db/seed/items -name '*.json' -type f
+cd /Users/buta/Repos/track-em-toys/api/db/seed && python3 -c "
+import json, glob, os
+for kind, pat in [('items', 'items/**/*.json'), ('appearances', 'appearances/*.json')]:
+    slugs = set()
+    for f in sorted(glob.glob(pat, recursive=True)):
+        data = json.load(open(f))
+        arr = data.get('items') or data.get('data') or []
+        for r in arr: slugs.add(r['slug'])
+    print(f'{len(slugs)} {kind} slugs loaded')
+"
 ```
 
-Read every item file found. Build `existingItemSlugs` set.
+---
 
-### 2d — Load all appearance files
+## Step 3 — Plan the Work
 
-```bash
-ls /Users/buta/Repos/track-em-toys/api/db/seed/appearances/ 2>/dev/null || echo "(empty)"
+For **small** requests, skip to Step 5 (Research inline).
+
+For **medium** and **large** requests, produce a work plan before spawning any sub-agents.
+
+### 3a — Decompose into work units
+
+Analyze the request and identify work units organized by tier:
+
+```
+Tier 0 — Reference data: new factions, sub-groups, continuity families needed
+Tier 1 — Manufacturers & toy lines: new manufacturers, new toy lines per manufacturer
+Tier 2 — Characters: one work unit per continuity family
+Tier 3 — Appearances: one work unit per continuity family (depends on Tier 2 slugs)
+Tier 4 — Items: one work unit per manufacturer × continuity family (depends on Tier 2+3)
 ```
 
-Read any appearance files found. Build `existingAppearanceSlugs` set.
+### 3b — Estimate wave sizing
 
-### 2e — Build reference slug sets
+Cap concurrent sub-agents at **3-4 per wave** to avoid API and web-source throttling.
 
-From the reference files, build: `existingFactionSlugs`, `existingSubGroupSlugs`,
-`existingContinuityFamilySlugs`, `existingManufacturerSlugs`, `existingToyLineSlugs`.
+If a tier has more work units than the wave cap, split into sequential waves:
+```
+Tier 2 (8 character work units) → Wave A: 3 agents → Wave B: 3 agents → Wave C: 2 agents
+```
 
-## Step 3 — Research Phase
+### 3c — Present and confirm
 
-Choose the appropriate research strategy based on what you're generating:
+Show the work plan to the user:
 
-### 3a — Appearances for existing characters (no web research needed)
+```
+Work Plan:
+  Tier 0 — Reference: +2 factions (maximal, predacon), +1 continuity (beast-era already exists)
+  Tier 1 — Manufacturers: +1 (x-transbots), +2 toy lines
+  Tier 2 — Characters: beast-era (est. ~50), animated (est. ~40)
+  Tier 3 — Appearances: beast-era (est. ~50), animated (est. ~40)
+  Tier 4 — Items: x-transbots/g1 (est. ~30), hasbro/beast-era (est. ~60)
 
-When generating appearances for characters that already exist in seed data, the character
-records themselves contain everything needed: name, alt_mode, faction, character_type, and
-sub_group membership. Use this data plus well-established design knowledge to write visual
-descriptions. Do NOT waste time fetching TFWiki pages for appearance-only requests.
+  Wave sizing: 3 concurrent agents max
+  Estimated total sub-agent spawns: 8
+  Human checkpoints: plan confirmation (now), pre-write preview (end)
 
-For bulk appearance generation (e.g., "add G1 cartoon appearances for all Season 1
-characters"), use a batch extraction approach:
+Proceed? (yes/no)
+```
 
+Wait for explicit user confirmation before spawning any agents.
+
+---
+
+## Step 4 — Tiered Parallel Execution
+
+Execute the work plan tier by tier. Each tier completes before the next begins. Within
+each tier, spawn work units in parallel up to the wave size limit.
+
+### Tier execution protocol
+
+For each tier:
+
+1. **Spawn wave** — launch up to 3-4 sub-agents in parallel using the Agent tool
+2. **Collect results** — each agent returns JSON arrays + uncertainty reports
+3. **Update slug registry** — merge new slugs from this tier into the tracking sets
+4. **Check for issues** — unresolved FKs, slug collisions, UNCERTAIN flags
+5. **Proceed or pause** — if issues exist, report them before starting the next tier
+
+### Sub-agent prompt template
+
+Each sub-agent receives a self-contained prompt with everything it needs:
+
+```
+You are a seed data research agent for the Track'em Toys catalog.
+
+TASK: {specific work unit description}
+SCOPE: {what entities to research and generate}
+
+SCHEMA: {paste the relevant record format from references/entity-schemas.md}
+
+EXISTING SLUGS (do not duplicate): {relevant slug set for this entity type}
+
+RESEARCH SOURCES (read references/research-sources.md for full details):
+- Primary: {source for this entity type}
+- Fallback chain: primary → alternate URL → web search → UNCERTAIN
+
+RESILIENCE RULES:
+- If WebFetch returns 429 (rate limited): try once more after a pause. If still blocked,
+  switch to WebSearch for the same data.
+- If WebFetch returns 404: try alternate URL patterns. If all fail, flag as UNCERTAIN.
+- If data cannot be confirmed from any source: set to null, add UNCERTAIN note.
+- ALWAYS return valid JSON with whatever data you gathered. Partial results with UNCERTAIN
+  flags are better than no results.
+
+OUTPUT FORMAT:
+Return a JSON object with:
+{
+  "records": [ ...array of entity records matching the schema... ],
+  "uncertain": [ ...list of UNCERTAIN flags with entity slug and reason... ],
+  "unresolved_fks": [ ...list of FK slugs that could not be resolved... ],
+  "sources": [ ...URLs consulted... ]
+}
+```
+
+### Source-aware throttle management
+
+Track web source health across waves within a tier:
+
+- If Wave 1 agents report 429s from a specific source, adjust Wave 2:
+  - Reduce wave size to 2 for that source
+  - Switch remaining agents to WebSearch-first strategy
+  - Add a brief pause between waves
+- If a source is completely blocked, fall back to WebSearch-only for remaining work units
+
+### Tier 0 — Reference data
+
+Small, fast, no web research needed for most reference data. Generate inline (no sub-agents)
+by appending to existing reference JSON files. Run this before any other tier since all
+subsequent tiers depend on reference slugs resolving.
+
+### Tier 1 — Manufacturers & toy lines
+
+For new manufacturers: research the manufacturer's product catalog, numbering scheme, and
+sub-brands. One sub-agent per manufacturer if multiple are needed.
+
+### Tier 2 — Characters
+
+One sub-agent per continuity family. Each agent:
+- Fetches the TFWiki category page for that continuity (bulk fetch)
+- Extracts character data: faction, alt mode, sub-groups, combiner info
+- Generates character records matching the schema
+- Returns the full JSON array
+
+For very large continuity families (G1 has 440+ characters), split by era or faction:
+- "G1 Season 1 Autobots", "G1 Season 1 Decepticons", "G1 Season 2 additions", etc.
+
+### Tier 3 — Appearances
+
+One sub-agent per continuity family. Each agent:
+- Reads the character records from Tier 2 output (passed via prompt)
+- Derives visual descriptions from alt_mode, faction, and design knowledge
+- Does NOT web-fetch per character (wasteful — TFWiki has no visual descriptions)
+- Generates appearance records
+
+For bulk generation, the agent can use batch extraction from the character data:
 ```bash
-cat /Users/buta/Repos/track-em-toys/api/db/seed/characters/{file}.json | python3 -c "
+cat characters/{file}.json | python3 -c "
 import json, sys
 data = json.load(sys.stdin)
 for c in data['characters']:
@@ -111,397 +252,69 @@ for c in data['characters']:
 "
 ```
 
-This gives you everything needed to write accurate descriptions without web fetches.
+### Tier 4 — Items
 
-### 3b — New characters and items (web research required)
+One sub-agent per manufacturer × continuity family combination. Each agent:
+- Researches items from the appropriate source (TFArchive for Hasbro, manufacturer pages for third-party)
+- Resolves character_slug and character_appearance_slug against known slugs
+- Generates item records
+- For any item whose character doesn't exist in Tier 2 output or existing seed data,
+  the agent MUST also generate the character record AND at least a `Toy-only` appearance
 
-#### Primary source: tfwiki.net (characters and character data)
+**Complete chain rule**: Every item needs character → appearance → item. The existing G1 data
+has zero null `character_slug` values across 277 items — toy-only characters (no cartoon
+appearance) still get a character record and a `source_media: "Toy-only"` appearance. Tier 4
+agents must follow this pattern. If a character can't be researched, skip the item entirely
+rather than generating it with a null `character_slug`.
 
-For new characters or items, attempt a targeted fetch first:
+### Progressive enrichment (for large requests)
 
-```
-https://tfwiki.net/wiki/{EntityName}
-```
+Rather than trying to get everything perfect in one pass:
 
-Use title-case with underscores for spaces: `Optimus_Prime`, `Stunticons`, `Beast_Wars`.
+1. **First pass**: gather everything available from bulk sources (category pages, product lists)
+2. **Gap analysis**: identify entities with UNCERTAIN or null fields
+3. **Targeted follow-up**: spawn smaller agents to fill specific gaps via individual page fetches
+4. **Merge**: combine first-pass and follow-up data
 
-For disambiguation pages, append the continuity family abbreviation in parentheses:
-`https://tfwiki.net/wiki/Optimus_Prime_(G1)`,
-`https://tfwiki.net/wiki/Megatron_(BW)`.
+This minimizes total web fetches and makes the system resilient — if follow-up gets throttled,
+you still have 80%+ of the data.
 
-**URL caveats (from smoke testing):**
+---
 
-- Subpage paths like `/cartoon`, `/toys` return 404 — use only the main page URL.
-- TFWiki articles are narrative-focused (plot summaries), not visual-description-focused.
-  Visual design info is in images, not text. Do not rely on TFWiki for appearance
-  descriptions — use the character's alt_mode and faction to compose descriptions instead.
+## Step 5 — Research (Small Requests)
 
-Extract from tfwiki pages:
+For small requests (1-5 entities), research inline without sub-agents.
 
-- **Characters**: faction, alt mode, first appearance episode/issue, sub-group membership,
-  combiner role, combined form, continuity family, character type
-- **Items**: product code, release year, size class, character depicted, toy line
+Read `references/research-sources.md` for source URLs, patterns, and caveats.
 
-**IMPORTANT**: TFWiki documents **Takara** catalog numbers, NOT Hasbro product codes.
-Do NOT use TFWiki as a source for Hasbro item/stock numbers.
+### Appearances for existing characters (no web research needed)
 
-#### Primary source: TFArchive (Hasbro product codes)
+When generating appearances for characters already in seed data, the character records contain
+everything needed. Use alt_mode, faction, character_type, and well-established design knowledge
+to write visual descriptions. Do not web-fetch per character.
 
-For Hasbro item/stock numbers, fetch:
+### New characters and items (web research required)
 
-```
-https://www.tfarchive.com/toys/references/product_code_numbers.php
-```
+Follow the research source priority from `references/research-sources.md`:
+1. TFWiki for character data
+2. TFArchive for Hasbro product codes
+3. Manufacturer pages for third-party items
+4. Web search as fallback
 
-This page has comprehensive Hasbro 5-digit product codes organized by year (1984-1993).
-Extract the product codes for the specific years you need.
+---
 
-**TFArchive caveats:**
+## Step 6 — Pre-Write Integrity Check
 
-- Sections are organized by product code assignment year, which may not match retail
-  availability (e.g., Blaster cassettes coded in 1985 but shipped in 1986).
-- Some items only have assortment-level codes (shared by multiple characters in a shipping
-  case), not individual item numbers. Flag these in metadata notes.
-- Major items like Fortress Maximus, Trypticon, and some combiner giftsets may be missing.
-  Use assortment codes when available, or `"UNKNOWN"` with `hasbro-{name}-g1` slug format.
-- 1990 Action Master codes **reuse** the same 057xx range as 1984 items. Slugs disambiguate
-  via character name (e.g., `05751-sunstreaker` vs `05751-wheeljack-action-master`).
+After all research is complete (whether from sub-agents or inline), verify:
 
-#### Fallback: web search
-
-If a tfwiki page is missing or sparse, run a web search:
-
-- Characters: `"{CharacterName}" Transformers {continuity} character faction alt-mode site:tfwiki.net`
-- Items: `"{ManufacturerName}" "{ProductCode}" third party Transformers masterpiece`
-- For manufacturer items, also search the manufacturer's official product page and fan
-  databases (TFW2005.com, Seibertron.com)
-- For Hasbro product codes: search TFArchive or collector databases
-
-#### Parallel fetch for bulk requests
-
-When the request involves 3 or more independent entities (e.g., "add all Beast Wars
-Maximals"), use the Agent tool to spawn parallel fetch sub-agents — one per character
-or small batch — with `WebFetch` and `WebSearch` tools. Each sub-agent returns a
-structured data block. Collect all results before proceeding to generation.
-
-For 1-2 entities, fetch inline without spawning sub-agents.
-
-### 3c — Research discipline
-
-- Record your source URL for every data point when web-fetching.
-- When two sources conflict, flag the conflict in the `notes` field:
-  `"UNCERTAIN: tfwiki says X, TFW2005 says Y"`.
-- For release years: use the first mass-retail release date.
-- Never fabricate data you cannot source. If a data point cannot be confirmed, set it to
-  `null` and add a note.
-- For appearance descriptions: derive from the character's known alt_mode, faction colors,
-  and distinctive design features. These are factual descriptions of well-documented
-  fictional character designs, not fabricated data.
-
-## Step 4 — Generate JSON
-
-### 4a — Slug generation rules
-
-Slugs MUST match `/^[a-z0-9]+(?:-[a-z0-9]+)*$/`:
-
-- Lowercase, kebab-case
-- Strip apostrophes, periods, parentheses, special characters
-- For characters: use the character name (e.g., `optimus-prime`)
-- For items: `{product-code-lower}-{character-name}` (e.g., `ft-03-quake-wave`)
-- For appearances: `{character-slug}-{source-descriptor}` (e.g., `optimus-prime-g1-cartoon`)
-- For cross-continuity slug collisions: append continuity abbreviation
-  (e.g., `megatron-bw` for Beast Wars Megatron)
-
-Verify against `existingCharacterSlugs` / `existingItemSlugs` / `existingAppearanceSlugs`
-before use. If a collision is found, flag it and ask the user how to resolve.
-
-### 4b — Characters format
-
-Target file: `api/db/seed/characters/{continuity-source}.json`
-
-File naming convention — one file per continuity family:
-
-- G1: `g1-characters.json` (all NA cartoon, movie, toy-only, and JP series characters)
-- Beast Era: `beast-era-characters.json`
-- Other continuities: `{continuity-slug}-characters.json` (e.g., `animated-characters.json`)
-
-Characters within a file are ordered by narrative chronology (e.g., NA S1 → S2 → Movie →
-S3 → S4 → toy-only → JP series). New characters are appended at the appropriate
-chronological position, not at the end of the array.
-
-Each character record:
-
-```json
-{
-  "name": "Optimus Primal",
-  "character_type": "Transformer",
-  "alt_mode": "Western gorilla",
-  "is_combined_form": false,
-  "combiner_role": null,
-  "first_appearance": "S1E01 Beast Wars Part 1",
-  "first_appearance_season": 1,
-  "notes": "Maximal commander. Voiced by Garry Chalk",
-  "slug": "optimus-primal",
-  "franchise": "Transformers",
-  "faction_slug": "maximal",
-  "combined_form_slug": null,
-  "series": "Beast Wars: Transformers Season 1",
-  "continuity": "Beast Era",
-  "sub_group_slugs": [],
-  "continuity_family_slug": "beast-era"
-}
-```
-
-File envelope:
-
-```json
-{
-  "_metadata": {
-    "description": "{Source} character catalog — NEW characters only",
-    "generated": "{ISO timestamp from date -u '+%Y-%m-%dT%H%M%SZ'}",
-    "total_characters": 0,
-    "scope": "{Description of what's included and excluded}",
-    "schema_target": "characters table from migration 011_shared_catalog_tables.sql",
-    "table": "characters",
-    "import_order": 5,
-    "references": [
-      "factions (via faction_slug)",
-      "sub_groups (via sub_group_slugs)",
-      "characters (via combined_form_slug for combiners)",
-      "continuity_families (via continuity_family_slug)"
-    ]
-  },
-  "characters": []
-}
-```
-
-Rules:
-
-- `faction_slug` MUST resolve to `existingFactionSlugs`. If not, generate reference data first (Step 4e).
-- `continuity_family_slug` MUST resolve to `existingContinuityFamilySlugs`. Same rule.
-- Every slug in `sub_group_slugs` MUST resolve to `existingSubGroupSlugs`.
-- `series` and `continuity` are reference-only (not seeded to DB per migration 013).
-  Include for human readability.
-- `component_slugs` on combined forms is reference-only; include for documentation.
-- For combiners: include the combined form (`is_combined_form: true`) and all components
-  in the SAME file. Each component's `combined_form_slug` points to the gestalt's slug.
-- Do NOT duplicate characters in `existingCharacterSlugs` or `existingCharacterKeys`.
-
-### Valid combiner_role values
-
-`torso`, `right arm`, `left arm`, `right leg`, `left leg`,
-`upper torso`, `lower torso`, `upper body`, `lower body`,
-`torso (right half)`, `torso (left half)`,
-`main body`, `wings/booster`, `weapon`, `back-mounted weapon`, `back`
-
-### 4c — Items format
-
-Target file: `api/db/seed/items/{manufacturer-slug}/{continuity-family}.json`
-
-Each item record:
-
-```json
-{
-  "product_code": "FT-03",
-  "name": "Quake Wave",
-  "slug": "ft-03-quake-wave",
-  "character_slug": "shockwave",
-  "character_appearance_slug": "shockwave-g1-cartoon",
-  "year_released": 2014,
-  "is_third_party": true,
-  "size_class": "Masterpiece",
-  "manufacturer_slug": "fanstoys",
-  "toy_line_slug": "fanstoys-mainline",
-  "metadata": {
-    "status": "released",
-    "variant_type": null,
-    "base_product_code": null,
-    "sub_brand": "FansToys",
-    "notes": null
-  }
-}
-```
-
-Rules:
-
-- `character_slug` MUST resolve to `existingCharacterSlugs`. If not, add to
-  `_metadata.unresolved_characters` and flag for the user.
-- `character_appearance_slug` is optional (nullable). When set, MUST resolve to
-  `existingAppearanceSlugs`. Use the appearance that matches the toy's depicted design
-  (e.g., `shockwave-g1-cartoon` for a Masterpiece G1-style Shockwave). Set to `null`
-  when the item doesn't represent a specific media depiction.
-- `manufacturer_slug` and `toy_line_slug` MUST resolve. Generate reference data first if needed.
-- NEVER use integer FK fields (`manufacturer_id`, `toy_line_id`, `character_id`,
-  `character_appearance_id`).
-- For variants: set `metadata.variant_type` and `metadata.base_product_code`.
-
-### Appearance slug selection for items
-
-Choose the appearance that best matches what the physical toy depicts:
-
-| Item type                                         | Appearance to use                                                                 |
-| ------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Third-party standard (cartoon-accurate MP)        | `{char}-g1-cartoon`                                                               |
-| Third-party "Toy Deco" variant                    | `{char}-g1-toy`                                                                   |
-| Original Hasbro G1 toy (1984-1990)                | `{char}-g1-toy` if it exists (livery/design divergence), else `{char}-g1-cartoon` |
-| Action Masters (non-transforming, cartoon design) | `{char}-g1-cartoon` (always, even though they're 1990 items)                      |
-| Legends / simplified reissues                     | `{char}-g1-cartoon` (depict simplified cartoon designs)                           |
-| Targetmaster/Powermaster reissues                 | Same as base item (toy is identical with added partner)                           |
-| Characters only animated in JP series             | `{char}-jp-headmasters`, `{char}-jp-masterforce`, or `{char}-jp-victory`          |
-
-**Key characters with significant toy-vs-cartoon livery differences** (always use `-g1-toy`
-for original Hasbro items):
-
-- Jazz (Martini racing livery), Smokescreen (#38 racing), Mirage (Gitanes F1 livery),
-  Wheeljack (Alitalia livery), Prowl (police markings), Hound (military markings),
-  Tracks (flame decals), Red Alert (fire chief markings), Inferno (fire dept markings)
-- Plus existing: Ratchet, Ironhide, Bluestreak, Megatron, Jetfire, Shockwave, Swoop,
-  Astrotrain, Ultra Magnus, Galvatron (proportions/color divergence)
-
-When adding new toy-deco third-party items, also check if the corresponding `-g1-toy`
-appearance exists — if not, create it first.
-
-### Multi-character products
-
-The schema requires exactly one `character_slug` per item. For multi-character retail
-products (cassette 2-packs, combiner giftsets):
-
-- **Cassette 2-packs**: Use the first-listed character as `character_slug`. Note the
-  second character in `metadata.notes`. Example: "Ravage & Rumble" → `character_slug: "ravage"`,
-  notes: "2-pack with Rumble"
-- **Combiner giftsets**: Use the combined form's `character_slug`. Example: Devastator
-  giftset → `character_slug: "devastator"`
-- **Slug for 2-packs**: `{code}-{char1}-and-{char2}` (e.g., `05731-ravage-and-rumble`)
-
-### Official (first-party) Hasbro/Takara items
-
-For vintage Hasbro G1 items (1984-1990):
-
-- `is_third_party`: always `false`
-- `size_class`: `null` (vintage G1 predated modern size classes)
-- `manufacturer_slug`: `"hasbro"` for US-market items
-- `toy_line_slug`: `"the-transformers-g1"`
-- `metadata.sub_brand`: `"The Transformers"`
-- Product codes: use Hasbro item numbers from TFArchive. When only assortment codes are
-  available, use the assortment code and note it in metadata. When no code is documented,
-  use `"UNKNOWN"` as product_code with `hasbro-{name}-g1` slug format and add
-  `"UNCERTAIN: Hasbro product code not documented in TFArchive"` to notes.
-
-### Bulk item generation with Python
-
-For generating 50+ items, write a Python script instead of hand-crafting JSON. This is
-faster and less error-prone:
-
-```python
-import json
-
-data = json.load(open('items/{mfr}/{file}.json'))
-apps = json.load(open('appearances/{file}.json'))
-app_slugs = {a['slug'] for a in apps['data']}
-
-def item(code, name, slug, char_slug, year, app_override=None, notes="", ...):
-    """Generate a single item record."""
-    app = app_override or find_best_appearance(char_slug)
-    return { "product_code": code, "name": name, ... }
-
-new_items = [
-    item("05796", "Optimus Prime", "05796-optimus-prime", "optimus-prime", 1984, ...),
-    # ... more items
-]
-
-# Verify FKs, merge, update metadata, write
-data['items'].extend(new_items)
-data['_metadata']['total_items'] = len(data['items'])
-json.dump(data, open(..., 'w'), indent=2)
-```
-
-This approach:
-
-1. Validates all FKs before writing (catches errors early)
-2. Handles metadata count updates automatically
-3. Inserts appearances at the right position (after cartoon counterpart)
-4. Avoids JSON formatting errors from manual editing
-
-### Valid metadata.status values
-
-`released`, `pre-order`, `announced`, `unannounced`, `cancelled`, `in_development`
-
-### 4d — Character appearances format
-
-Target file: `api/db/seed/appearances/{source-slug}.json`
-
-File naming convention — one file per media source grouping:
-
-- G1 cartoon: `g1-cartoon.json` (all NA cartoon S1-S4 + Movie appearances)
-- G1 comics: `g1-comics.json` (Marvel US/UK, IDW, etc.)
-- Beast Era cartoon: `beast-era-cartoon.json`
-- Other: `{continuity-slug}-{media-type}.json` (e.g., `animated-cartoon.json`)
-
-Appearances within a file are ordered to match their character file's chronological order.
-
-Each appearance record:
-
-```json
-{
-  "slug": "optimus-prime-g1-cartoon",
-  "name": "Optimus Prime (G1 Cartoon)",
-  "character_slug": "optimus-prime",
-  "description": "Classic red-and-blue cab-over truck design with distinctive faceplate",
-  "source_media": "TV",
-  "source_name": "The Transformers",
-  "year_start": 1984,
-  "year_end": 1987,
-  "metadata": {}
-}
-```
-
-File envelope:
-
-```json
-{
-  "_metadata": {
-    "table": "character_appearances",
-    "description": "Character appearance seed data for {source description}",
-    "generated": "{ISO timestamp}",
-    "total": 0,
-    "import_order": 5.5,
-    "references": ["characters (via character_slug)"]
-  },
-  "data": []
-}
-```
-
-Rules:
-
-- `character_slug` MUST resolve to `existingCharacterSlugs`.
-- `source_media` MUST be one of: `TV`, `Comic/Manga`, `Movie`, `OVA`, `Toy-only`, `Video Game`.
-- Slug follows `{character-slug}-{source-descriptor}` convention (migration 013 comment).
-- Do not create appearances for characters not yet in seed data.
-
-### 4e — Reference data
-
-When new factions, sub_groups, manufacturers, toy_lines, or continuity_families are needed:
-
-1. Read the current reference file.
-2. Append new entries to the `data` array.
-3. Update `_metadata.total` to the new array length.
-4. Write the merged file.
-
-Generate reference data BEFORE generating characters or items that depend on it.
-
-## Step 5 — Pre-Write Integrity Check
-
-Before writing anything, verify:
-
-1. **Slug uniqueness**: Every new slug is absent from the existing slug sets.
-2. **FK resolution**: Every FK slug resolves against existing data or data being generated
-   in the same batch.
+1. **Slug uniqueness**: every new slug absent from existing slug sets
+2. **FK resolution**: every FK slug resolves to existing data or data in the same batch
 3. **Combiner consistency** (if applicable):
    - Combined forms have `is_combined_form: true`
    - Each component's `combined_form_slug` matches the combined form
    - `component_slugs` on the form lists all components
-4. **Metadata count**: `total_characters` / `total_items` / `total` equals actual array length.
-5. **Uncertain data**: List every `UNCERTAIN:` note.
+4. **Metadata counts**: `total_characters` / `total_items` / `total` equals actual array length
+5. **Uncertain data**: list every `UNCERTAIN:` note
 
 Report format:
 
@@ -514,23 +327,25 @@ Pre-write check:
 - Uncertain data points: N
 ```
 
-If there are unresolved FKs or uncertain data, pause and ask the user to confirm.
-For clean data (no issues), proceed without asking.
+If unresolved FKs or uncertain data exist, pause and ask the user.
+For clean data (no issues), proceed to preview.
 
-## Step 6 — Preview and Write
+---
 
-### 6a — Preview
+## Step 7 — Preview and Write
 
-Show a summary diff:
+### 7a — Preview
+
+Show a summary:
 
 ```
 Files to write:
-  CREATE  api/db/seed/characters/beast-wars.json  (47 characters)
-  CREATE  api/db/seed/appearances/beast-wars-cartoon.json  (47 appearances)
+  CREATE  api/db/seed/characters/beast-era-characters.json  (47 characters)
+  CREATE  api/db/seed/appearances/beast-era-appearances.json  (47 appearances)
   MODIFY  api/db/seed/reference/sub_groups.json  (+3 entries, total 55)
 
 New entries preview (first 5):
-  characters/beast-wars.json:
+  characters/beast-era-characters.json:
     + optimus-primal (Optimus Primal, Maximal, gorilla)
     + megatron-bw (Megatron, Predacon, T-rex)
     + cheetor (Cheetor, Maximal, cheetah)
@@ -543,127 +358,78 @@ Ask: **"Write these files? (yes/no)"**
 
 Do NOT proceed without explicit user confirmation.
 
-### 6b — Write
+### 7b — Write
 
-On confirmation:
+On confirmation, write in dependency order:
 
-1. **Reference files first** (if modified): read-merge-rewrite with updated `_metadata.total`.
-2. **Character files**: for new files, write the full JSON. For existing files, read-merge-rewrite
-   (append to `characters` array, update `_metadata.total_characters` and `_metadata.generated`).
-3. **Appearance files**: write full JSON (typically new files).
-4. **Item files**: for new files, create the manufacturer directory if needed. For existing
-   files, read-merge-rewrite.
+1. **Reference files** (if modified): read-merge-rewrite with updated `_metadata.total`
+2. **Character files**: new files → full JSON. Existing → read-merge-rewrite, append to
+   `characters` array, update `_metadata.total_characters`
+3. **Appearance files**: typically new files, write full JSON
+4. **Item files**: create manufacturer directory if needed. New → full JSON. Existing →
+   read-merge-rewrite
 
 Use 2-space indentation throughout (matching existing files).
 
-### 6c — Register new files in validation test
+### 7c — Register new files in validation test
 
-When a NEW character file is created (not a merge into existing), add its path to the
-`CHARACTER_FILES` array in `api/src/db/seed-validation.test.ts`:
+When a NEW character or item file is created, add its path to the appropriate array in
+`api/src/db/seed-validation.test.ts`:
 
 ```bash
-grep -n "CHARACTER_FILES\|ITEM_FILES" /Users/buta/Repos/track-em-toys/api/src/db/seed-validation.test.ts
+grep -n "CHARACTER_FILES\|ITEM_FILES" api/src/db/seed-validation.test.ts
 ```
 
-Use the Edit tool to add the new filename to the appropriate array.
+Use the Edit tool to add the new filename. Appearance files are auto-discovered and need
+no registration.
 
-New appearance files are automatically discovered by the dynamic `readdirSync` loader
-in the test file — no manual registration needed.
+### Bulk generation with Python
 
-## Step 7 — Validate
+For generating 50+ items, write a Python script instead of hand-crafting JSON. This is faster
+and less error-prone. The script should:
 
-After writing all files, run the seed validation tests:
+1. Load existing seed data for FK validation
+2. Generate records from a structured data table
+3. Verify all FKs before writing
+4. Handle metadata count updates automatically
+5. Write formatted JSON with 2-space indentation
+
+---
+
+## Step 8 — Validate
+
+Run seed validation:
 
 ```bash
 cd /Users/buta/Repos/track-em-toys/api && npx vitest run src/db/seed-validation.test.ts 2>&1 | tail -50
 ```
 
-**If validation passes:** Report "Validation passed" with test count and list of written files.
+**If validation passes:** report success with test count and list of written files.
 
 **If validation fails:**
 
-1. Show the failing test names and error messages.
-2. Diagnose which generated entries caused the failure.
-3. Fix the entries in the file(s).
-4. Re-run validation.
-5. Repeat until all tests pass, or report a blocking issue requiring human resolution.
+1. Show failing test names and errors
+2. Diagnose which entries caused the failure
+3. Fix the entries
+4. Re-run validation
+5. Repeat until all tests pass, or report a blocking issue
 
 Do NOT consider the task complete until validation passes.
 
-## Reference: Valid Values
+### Post-write audit for items
 
-### character_type (non-exhaustive — research the correct term for each character)
+After adding items for a manufacturer, audit existing items from OTHER manufacturers
+(especially third-party "Toy Deco" variants) that reference the same characters. Their
+`character_appearance_slug` may need updating to match newly created appearances.
 
-`Transformer`, `Human`, `Mini-Con`, `Predacon`, `Maximal`, `Vehicon`, `Spark`,
-`Pretender`, `Headmaster`, `Targetmaster`, `Powermaster`, `Actionmaster`,
-`Micromaster`, `Quintesson`, `Nebulan`, `Junkion`, `Lithone`, `Brainmaster`,
-`Godmaster`, `Other`
-
-### size_class (collector convention)
-
-`Masterpiece`, `Voyager`, `Deluxe`, `Leader`, `Commander`, `Titan`,
-`Legends`, `Scout`, `Basic`, `Ultra`, `Supreme`, `Core`
-
-### Continuity family slug mapping (for common request terms)
-
-| User says                               | continuity_family_slug    |
-| --------------------------------------- | ------------------------- |
-| G1, Generation 1, Season 1-4, The Movie | `g1`                      |
-| Beast Wars, Beast Machines              | `beast-era`               |
-| Armada, Energon, Cybertron              | `unicron-trilogy`         |
-| Bay movies, live-action                 | `movieverse`              |
-| Animated                                | `animated`                |
-| Prime, War for Cybertron, Rescue Bots   | `aligned`                 |
-| Cyberverse                              | `cyberverse`              |
-| EarthSpark                              | `earthspark`              |
-| Transformers One                        | `one`                     |
-| RiD 2001, Car Robots                    | `robots-in-disguise-2001` |
-
-### Slug disambiguation for cross-continuity characters
-
-When a character name exists in multiple continuity families, append the continuity
-abbreviation to the slug: `megatron-bw`, `optimus-prime-animated`, `starscream-armada`.
-
-Always check `existingCharacterKeys` (name + franchise + continuity_family_slug) first —
-if that triple is unique, the base slug may be fine. But the slug itself must still be
-globally unique across ALL files.
+---
 
 ## Notes
 
-- For new characters/items: always research before generating. Never fabricate data you
-  cannot source.
-- For appearances of existing characters: derive descriptions from the character's seed
-  data (alt_mode, faction, character_type) and well-known design features. Do not web-fetch
-  per-character — it wastes time and TFWiki articles don't contain visual descriptions.
-- **Source authority by data type**:
-  - Character data (faction, alt mode, continuity, sub-groups): **tfwiki.net**
-  - Hasbro product codes / item numbers: **TFArchive** (tfarchive.com)
-  - Third-party item data: manufacturer pages, TFW2005, Seibertron
-  - TFWiki does NOT have Hasbro stock numbers — only Takara catalog numbers
-- **TFWiki URL caveats**: Only main character page URLs work (e.g., `Optimus_Prime_(G1)`).
-  Subpage paths like `/cartoon`, `/toys`, `/Generation_1` return 404. Disambiguation
-  suffixes: `(G1)`, `(BW)`, `(Armada)`, `(Animated)`, `(Prime)`.
-- TFWiki articles are narrative-focused (plot summaries). They do NOT contain visual
-  design descriptions — visual information is conveyed through images that WebFetch
-  cannot process.
-- For third-party items, tfwiki coverage is sparse — use manufacturer product pages,
-  TFW2005 wiki, and Seibertron galleries as supplements.
-- The seed validation test runs against ALL seed files simultaneously. Adding a character
-  that references a sub_group_slug not in the reference file will fail the entire suite.
-- Do NOT modify `api/src/db/seed-validation.test.ts` validation logic unless the user
-  explicitly asks. The test is the contract; generated data must conform to it.
-- Never fetch authenticated URLs, never include credentials in URLs, never store raw
-  fetched HTML in seed files — extract only the structured data.
-- **Hasbro G1 product code scheme**: 5-digit numbers in the 057xx range. Organized by
-  sub-line category: 057xx cars, 058xx jets, 059xx minibots/cassettes, etc. Later years
-  (1988-1990) introduced new ranges (055xx for Micromasters/Pretenders). The 1990 Action
-  Masters reuse the 057xx range from 1984 — product codes are year-scoped, not globally unique.
-- **Hasbro G1 size_class**: Always `null` for vintage items. The modern size class system
-  (Deluxe, Voyager, Leader, etc.) did not exist in 1984-1990.
-- **TFArchive year sections**: May not match actual retail availability. Product code
-  assignment year can differ from when the toy shipped (e.g., Blaster cassettes coded in
-  1985 but sold in 1986 with Season 3). Use the section year by default but correct obvious
-  discrepancies (e.g., Ratbat is unambiguously 1986).
-- **After adding items for a manufacturer**: Audit existing items from OTHER manufacturers
-  (especially third-party "Toy Deco" variants) that reference the same characters. Their
-  `character_appearance_slug` may need updating to match newly created toy appearances.
+- Read `references/entity-schemas.md` for complete record formats and valid enum values
+- Read `references/research-sources.md` for web research patterns and source authority
+- The seed validation test runs against ALL seed files simultaneously — adding an entity
+  that references a slug not in seed data will fail the entire suite
+- Do NOT modify `api/src/db/seed-validation.test.ts` validation logic unless the user asks
+- Characters within a file are ordered by narrative chronology, not alphabetically
+- For combiners: combined form and all components go in the SAME character file

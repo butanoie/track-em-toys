@@ -2,7 +2,7 @@
   "_metadata": {
     "table": "toy_lines",
     "description": "Seed data for the toy_lines table",
-    "total": 16,
+    "total": 18,
     "import_order": 4,
     "references": [
       "manufacturers (via manufacturer_slug)"
@@ -135,6 +135,22 @@
       "scale": "Various",
       "description": "Takara JP toyline (1992). Guard City, Battle Gaia, Micromaster six-teams. Final JP G1 line. Extremely rare. No animated media",
       "manufacturer_slug": "takara-tomy",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Beast Wars Transformers",
+      "slug": "beast-wars-transformers",
+      "scale": "Various",
+      "description": "Kenner/Hasbro Beast Wars toyline (1996-1999). Animal-based Transformers in Basic, Deluxe, Mega, Ultra, and Super size classes. Includes Transmetals and Fuzors sub-lines",
+      "manufacturer_slug": "hasbro",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Beast Machines Transformers",
+      "slug": "beast-machines-transformers",
+      "scale": "Various",
+      "description": "Hasbro Beast Machines toyline (2000-2001). Techno-organic Maximals and mechanical Vehicons. Successor to Beast Wars",
+      "manufacturer_slug": "hasbro",
       "franchise_slug": "transformers"
     }
   ]

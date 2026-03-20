@@ -119,14 +119,21 @@ const subGroups = loadRef<SubGroupRecord>('reference/sub_groups.json');
 const manufacturers = loadRef('reference/manufacturers.json');
 const toyLines = loadRef<ToyLineRecord>('reference/toy_lines.json');
 
-const CHARACTER_FILES = ['characters/g1-characters.json'] as const;
+const CHARACTER_FILES = [
+  'characters/g1-characters.json',
+  'characters/beast-era-characters.json',
+] as const;
 
 const charFiles = CHARACTER_FILES.map((f) => ({
   file: f,
   ...loadCharFile(f),
 }));
 
-const ITEM_FILES = ['items/fanstoys/fanstoys.json', 'items/hasbro/g1-items.json'] as const;
+const ITEM_FILES = [
+  'items/fanstoys/fanstoys.json',
+  'items/hasbro/g1-items.json',
+  'items/hasbro/beast-wars-items.json',
+] as const;
 
 const itemFiles = ITEM_FILES.map((f) => ({
   file: f,

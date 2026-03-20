@@ -1,0 +1,23 @@
+{
+  "skill_name": "research-catalog",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Add Maximal and Predacon factions, and add Beast Wars continuity family to the reference data",
+      "expected_output": "Modified factions.json with 2 new entries (maximal, predacon with franchise_slug: transformers), modified continuity_families.json if beast-era doesn't exist. Correct slug format, updated _metadata.total counts.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Add the main Beast Wars Season 1 characters — both Maximals and Predacons — with their appearances",
+      "expected_output": "New beast-era-characters.json with ~12-15 main S1 characters (Optimus Primal, Megatron-BW, Cheetor, Rattrap, Dinobot, Rhinox, etc). New beast-era-appearances.json with matching appearances. Correct FKs, slug format, metadata counts. Validation passes.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Build out seed data for Beast Era: add all missing reference data, Beast Wars and Beast Machines characters, appearances, and Hasbro Beast Wars items",
+      "expected_output": "Work plan presented first. Reference data updated (factions, sub-groups). New character file with Beast Wars + Beast Machines characters. New appearance file. New items file under items/hasbro/. Tiered execution with sub-agents. Validation passes.",
+      "files": []
+    }
+  ]
+}
