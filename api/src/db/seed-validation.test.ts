@@ -212,7 +212,7 @@ const RELATIONSHIP_TYPE_REGISTRY = new Map<string, RelationshipTypeSpec>([
     },
   ],
   [
-    'binary-bond',
+    'partner-bond',
     {
       entity1Roles: new Set(['host']),
       entity2Roles: new Set([

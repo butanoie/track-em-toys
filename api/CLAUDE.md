@@ -47,7 +47,7 @@ cd api && npm run format:check # Prettier check (CI mode)
 - Seed data organization: see `api/db/seed/README.md` for directory structure, import order, and column mapping
 - Sample seed fixtures live in `api/db/seed/sample/` — minimal FK-consistent data for dev/CI. Full proprietary catalog data lives in a separate private repo (`track-em-toys-data`), activated via `SEED_DATA_PATH` env var
 - `ingest.ts` and `seed-validation.test.ts` default to `sample/` when `SEED_DATA_PATH` is unset — all file types are auto-discovered (no hardcoded file lists)
-- Character relationships (combiner, vehicle-crew, binary-bond, rival, etc.) are typed records in `relationships/*.json` — auto-discovered by validation test
+- Character relationships (combiner, vehicle-crew, partner-bond, rival, etc.) are typed records in `relationships/*.json` — auto-discovered by validation test
 - Characters do NOT have `combined_form_slug`, `combiner_role`, or `component_slugs` — these were replaced by the relationship system
 - `ingest.ts` still contains dead combiner pass-2 code (`upsertCharactersPass2`, `combined_form_slug`, `combiner_role` on `CharacterRecord`) — this is superseded by the relationship system and pending cleanup. Do not extend or fix it.
 - `ingest.ts` does not yet ingest `relationships/*.json` — the `character_relationships` DB table and ingestion step are pending (issue #80)
