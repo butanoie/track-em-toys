@@ -64,6 +64,9 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - Catalog tables use UUID primary keys with a `slug` column for stable cross-references and URL-friendly API routes
 - Catalog slugs are franchise-scoped: `UNIQUE(slug, franchise_id)` — NOT globally unique. Manufacturers and franchises remain globally unique.
 - Seed data (`api/db/seed/`) uses slug-based FK references — never integer IDs — to avoid fragile positional coupling
+- Character relationships (combiners, vehicle-crew, binary bonds) live in `api/db/seed/relationships/` — NOT inline on character records. See `entity-schemas.md` for the type registry
+- GI Joe vehicles are modeled as characters with `character_type: "Vehicle"` and `alt_mode` for vehicle description
+- Slug disambiguation: GI Joe uses `-gijoe` suffix when colliding with Transformers slugs (e.g., `overlord-gijoe`, `shockwave-gijoe`)
 - GDPR user deletion uses tombstone pattern: scrub PII (email, display_name, avatar_url), set `deleted_at`, keep the row so all FKs remain intact. NEVER use `ON DELETE CASCADE` or `ON DELETE SET NULL` on user FKs. App checks `deleted_at IS NOT NULL` to display "Deleted user". Phase 1.12 implements the deletion endpoint + UI.
 
 ## User Roles

@@ -45,7 +45,12 @@ cd api && npm run format:check # Prettier check (CI mode)
 - Catalog tables use UUID PKs with a unique `slug` column (e.g. `"optimus-prime"`) for stable references and URL-friendly routes
 - Seed data in `api/db/seed/` uses slug-based FK references between entities — NEVER integer IDs (integer IDs are positional and break when data is reordered or regenerated)
 - Seed data organization: see `api/db/seed/README.md` for directory structure, import order, and column mapping
+- Character relationships (combiner, vehicle-crew, binary-bond, rival, etc.) are stored in `api/db/seed/relationships/*.json` — auto-discovered by validation test
+- Characters do NOT have `combined_form_slug`, `combiner_role`, or `component_slugs` — these were replaced by the relationship system
+- `is_combined_form` remains on character records as a denormalized flag, cross-validated against relationship data
+- Seed validation test (`seed-validation.test.ts`) has a per-type relationship registry (`RELATIONSHIP_TYPE_REGISTRY`) with role and subtype allowlists
 - Seed `_metadata.total` must always equal the actual array length — recount after any addition or removal, never increment/decrement manually
+- Seed data (characters, appearances, relationships, items) is planned for extraction to a separate private repository — avoid adding tight coupling between seed data and application code
 - Seed FK naming: JSON uses `{table}_slug` (e.g. `franchise_slug`, `faction_slug`), DB column is `{table}_id` (UUID FK). Ingest script resolves slugs to UUIDs via `resolveSlug()` maps
 - Reference tables follow the pattern: `id UUID PK, slug TEXT UNIQUE, name TEXT, sort_order INT, notes TEXT, created_at TIMESTAMPTZ` (no `updated_at`)
 - When adding a column to a reference table: add to seed JSON, record interface in `ingest.ts`, TypeScript interface in `types/index.ts`, and validation tests in `seed-validation.test.ts`
