@@ -124,7 +124,10 @@ interface ItemFile {
 
 const log = pino({ level: process.env['LOG_LEVEL'] ?? 'info' })
 
-const SEED_DIR = path.dirname(fileURLToPath(import.meta.url))
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url))
+const SEED_DIR = process.env['SEED_DATA_PATH']
+  ? path.resolve(process.env['SEED_DATA_PATH'])
+  : path.join(SCRIPT_DIR, 'sample')
 
 const dbUrl = process.env['DATABASE_URL']
 if (!dbUrl) {
@@ -725,6 +728,8 @@ async function main(): Promise<void> {
     log.fatal('--purge requires --confirm flag to execute. This will DELETE all catalog data.')
     process.exit(1)
   }
+
+  log.info({ seedDir: SEED_DIR }, 'seed data source')
 
   const client = await pool.connect()
   try {

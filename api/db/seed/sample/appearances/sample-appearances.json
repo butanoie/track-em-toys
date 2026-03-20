@@ -1,0 +1,52 @@
+{
+  "_metadata": {
+    "description": "Sample character appearances — one per sample character",
+    "total": 4
+  },
+  "data": [
+    {
+      "slug": "optimus-prime-g1-cartoon",
+      "name": "Optimus Prime (G1 Cartoon)",
+      "character_slug": "optimus-prime",
+      "description": "Tall, broad-shouldered red and blue robot with iconic silver faceplate.",
+      "source_media": "TV",
+      "source_name": "The Transformers Season 1",
+      "year_start": 1984,
+      "year_end": 1985,
+      "metadata": {}
+    },
+    {
+      "slug": "bumblebee-g1-cartoon",
+      "name": "Bumblebee (G1 Cartoon)",
+      "character_slug": "bumblebee",
+      "description": "Small, compact yellow robot with horns on head.",
+      "source_media": "TV",
+      "source_name": "The Transformers Season 1",
+      "year_start": 1984,
+      "year_end": 1985,
+      "metadata": {}
+    },
+    {
+      "slug": "devastator-g1-cartoon",
+      "name": "Devastator (G1 Cartoon)",
+      "character_slug": "devastator",
+      "description": "Giant green and purple combiner formed from six Constructicons.",
+      "source_media": "TV",
+      "source_name": "The Transformers Season 1",
+      "year_start": 1984,
+      "year_end": 1985,
+      "metadata": {}
+    },
+    {
+      "slug": "scrapper-g1-cartoon",
+      "name": "Scrapper (G1 Cartoon)",
+      "character_slug": "scrapper",
+      "description": "Yellow and purple construction vehicle Decepticon.",
+      "source_media": "TV",
+      "source_name": "The Transformers Season 1",
+      "year_start": 1984,
+      "year_end": 1985,
+      "metadata": {}
+    }
+  ]
+}

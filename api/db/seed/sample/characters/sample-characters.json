@@ -1,0 +1,62 @@
+{
+  "_metadata": {
+    "description": "Sample characters — exercises basic character, sub_group FK, gestalt (is_combined_form=true), and combiner component",
+    "total_characters": 4
+  },
+  "characters": [
+    {
+      "name": "Optimus Prime",
+      "character_type": "Transformer",
+      "alt_mode": "Freightliner FL86 semi-truck with trailer",
+      "is_combined_form": false,
+      "notes": "Autobot leader. Voiced by Peter Cullen.",
+      "slug": "optimus-prime",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [],
+      "continuity_family_slug": "g1",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Bumblebee",
+      "character_type": "Transformer",
+      "alt_mode": "Volkswagen Beetle",
+      "is_combined_form": false,
+      "notes": "Youngest Autobot. Later reformatted as Goldbug.",
+      "slug": "bumblebee",
+      "faction_slug": "autobot",
+      "sub_group_slugs": [
+        "minibots"
+      ],
+      "continuity_family_slug": "g1",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Devastator",
+      "character_type": "Transformer",
+      "alt_mode": null,
+      "is_combined_form": true,
+      "notes": "Combined form of the six Constructicons. First combiner in Transformers history.",
+      "slug": "devastator",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "g1",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Scrapper",
+      "character_type": "Transformer",
+      "alt_mode": "Caterpillar 992C wheel loader",
+      "is_combined_form": false,
+      "notes": "Constructicon leader. Forms Devastator's right leg.",
+      "slug": "scrapper",
+      "faction_slug": "decepticon",
+      "sub_group_slugs": [
+        "constructicons"
+      ],
+      "continuity_family_slug": "g1",
+      "franchise_slug": "transformers"
+    }
+  ]
+}

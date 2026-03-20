@@ -1,0 +1,65 @@
+{
+  "_metadata": {
+    "description": "Sample items — official, third-party, and variant to exercise all item FK paths",
+    "total_items": 3
+  },
+  "items": [
+    {
+      "product_code": "05701",
+      "name": "Bumblebee",
+      "slug": "05701-bumblebee",
+      "character_slug": "bumblebee",
+      "character_appearance_slug": "bumblebee-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Mini Vehicle."
+      }
+    },
+    {
+      "product_code": "FT-32A",
+      "name": "Gehry",
+      "slug": "ft-32a-gehry",
+      "character_slug": "scrapper",
+      "character_appearance_slug": "scrapper-g1-cartoon",
+      "year_released": 2024,
+      "is_third_party": true,
+      "size_class": "Masterpiece",
+      "manufacturer_slug": "fanstoys",
+      "toy_line_slug": "fanstoys-mainline",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "FansToys",
+        "notes": "Constructicon. Named after Frank Gehry."
+      }
+    },
+    {
+      "product_code": "05796",
+      "name": "Optimus Prime",
+      "slug": "05796-optimus-prime",
+      "character_slug": "optimus-prime",
+      "character_appearance_slug": "optimus-prime-g1-cartoon",
+      "year_released": 1984,
+      "is_third_party": false,
+      "size_class": null,
+      "manufacturer_slug": "hasbro",
+      "toy_line_slug": "the-transformers-g1",
+      "metadata": {
+        "status": "released",
+        "variant_type": null,
+        "base_product_code": null,
+        "sub_brand": "The Transformers",
+        "notes": "Series 1 Autobot Commander."
+      }
+    }
+  ]
+}

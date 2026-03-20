@@ -1,0 +1,27 @@
+{
+  "_metadata": {
+    "table": "sub_groups",
+    "description": "Sample sub-groups — exercises both faction-affiliated and standalone sub-groups",
+    "total": 2,
+    "import_order": 2,
+    "references": [
+      "factions (via faction_slug)"
+    ]
+  },
+  "data": [
+    {
+      "name": "Minibots",
+      "slug": "minibots",
+      "notes": "Smaller Autobot warriors.",
+      "faction_slug": "autobot",
+      "franchise_slug": "transformers"
+    },
+    {
+      "name": "Constructicons",
+      "slug": "constructicons",
+      "notes": "Decepticon construction vehicle team. Combine to form Devastator.",
+      "faction_slug": "decepticon",
+      "franchise_slug": "transformers"
+    }
+  ]
+}

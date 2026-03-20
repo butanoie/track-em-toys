@@ -1,0 +1,28 @@
+{
+  "_metadata": {
+    "table": "manufacturers",
+    "description": "Sample manufacturers — one official licensee, one third-party",
+    "total": 2,
+    "import_order": 3
+  },
+  "data": [
+    {
+      "name": "Hasbro",
+      "slug": "hasbro",
+      "is_official_licensee": true,
+      "country": "United States",
+      "website_url": "https://www.hasbro.com",
+      "aliases": ["Hasbro Inc."],
+      "notes": null
+    },
+    {
+      "name": "FansToys",
+      "slug": "fanstoys",
+      "is_official_licensee": false,
+      "country": "China",
+      "website_url": null,
+      "aliases": ["FT", "Fans Toys"],
+      "notes": "Third-party Masterpiece-scale Transformers manufacturer."
+    }
+  ]
+}

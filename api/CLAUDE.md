@@ -43,8 +43,17 @@ cd api && npm run format:check # Prettier check (CI mode)
 - Migration filenames follow `NNN_description.sql` sequential numbering with no gaps
 - TEXT→FK column migration pattern: (1) add nullable FK column, (2) populate from existing data via UPDATE+JOIN, (3) SET NOT NULL, (4) add FK constraint, (5) drop old indexes + create new, (6) drop old TEXT column. Always include `migrate:down`.
 - Catalog tables use UUID PKs with a unique `slug` column (e.g. `"optimus-prime"`) for stable references and URL-friendly routes
-- Seed data in `api/db/seed/` uses slug-based FK references between entities — NEVER integer IDs (integer IDs are positional and break when data is reordered or regenerated)
+- Seed data uses slug-based FK references between entities — NEVER integer IDs (integer IDs are positional and break when data is reordered or regenerated)
 - Seed data organization: see `api/db/seed/README.md` for directory structure, import order, and column mapping
+- Sample seed fixtures live in `api/db/seed/sample/` — minimal FK-consistent data for dev/CI. Full proprietary catalog data lives in a separate private repo (`track-em-toys-data`), activated via `SEED_DATA_PATH` env var
+- `ingest.ts` and `seed-validation.test.ts` default to `sample/` when `SEED_DATA_PATH` is unset — all file types are auto-discovered (no hardcoded file lists)
+- Character relationships (combiner, vehicle-crew, partner-bond, rival, etc.) are typed records in `relationships/*.json` — auto-discovered by validation test
+- Characters do NOT have `combined_form_slug`, `combiner_role`, or `component_slugs` — these were replaced by the relationship system
+- `ingest.ts` still contains dead combiner pass-2 code (`upsertCharactersPass2`, `combined_form_slug`, `combiner_role` on `CharacterRecord`) — this is superseded by the relationship system and pending cleanup. Do not extend or fix it.
+- `ingest.ts` does not yet ingest `relationships/*.json` — the `character_relationships` DB table and ingestion step are pending (issue #80)
+- `is_combined_form` remains on character records as a denormalized flag, cross-validated against relationship data
+- Seed validation test (`seed-validation.test.ts`) has a per-type relationship registry (`RELATIONSHIP_TYPE_REGISTRY`) with role and subtype allowlists
+- `seed-integration.test.ts` exact row-count assertions are wrapped in `describe.skipIf(!!process.env['SEED_DATA_PATH'])` — they only run against sample data. Structural assertions (FK integrity, idempotency) run against any dataset.
 - Seed `_metadata.total` must always equal the actual array length — recount after any addition or removal, never increment/decrement manually
 - Seed FK naming: JSON uses `{table}_slug` (e.g. `franchise_slug`, `faction_slug`), DB column is `{table}_id` (UUID FK). Ingest script resolves slugs to UUIDs via `resolveSlug()` maps
 - Reference tables follow the pattern: `id UUID PK, slug TEXT UNIQUE, name TEXT, sort_order INT, notes TEXT, created_at TIMESTAMPTZ` (no `updated_at`)

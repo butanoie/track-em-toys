@@ -109,25 +109,25 @@ describe.skipIf(!DB_URL)('seed integration', () => {
     await pool.end();
   });
 
-  // ── 1. Row counts ──────────────────────────────────────────────────────
+  // ── 1. Row counts (sample data only — skipped when SEED_DATA_PATH overrides)
 
-  describe('row counts', () => {
+  describe.skipIf(!!process.env['SEED_DATA_PATH'])('row counts', () => {
     it.each([
-      { table: 'continuity_families' as CatalogTable, expected: 10 },
-      { table: 'factions' as CatalogTable, expected: 11 },
-      { table: 'sub_groups' as CatalogTable, expected: 52 },
-      { table: 'manufacturers' as CatalogTable, expected: 3 },
-      { table: 'toy_lines' as CatalogTable, expected: 16 },
+      { table: 'continuity_families' as CatalogTable, expected: 2 },
+      { table: 'factions' as CatalogTable, expected: 3 },
+      { table: 'sub_groups' as CatalogTable, expected: 2 },
+      { table: 'manufacturers' as CatalogTable, expected: 2 },
+      { table: 'toy_lines' as CatalogTable, expected: 2 },
     ])('$table has $expected rows (reference)', async ({ table, expected }) => {
       const count = await queryCount(pool, table);
       expect(count, `${table} row count`).toBe(expected);
     });
 
     it.each([
-      { table: 'characters' as CatalogTable, expected: 440 },
-      { table: 'character_sub_groups' as CatalogTable, expected: 328 },
-      { table: 'character_appearances' as CatalogTable, expected: 508 },
-      { table: 'items' as CatalogTable, expected: 395 },
+      { table: 'characters' as CatalogTable, expected: 4 },
+      { table: 'character_sub_groups' as CatalogTable, expected: 3 },
+      { table: 'character_appearances' as CatalogTable, expected: 4 },
+      { table: 'items' as CatalogTable, expected: 3 },
     ])('$table has $expected rows (entities)', async ({ table, expected }) => {
       const count = await queryCount(pool, table);
       expect(count, `${table} row count`).toBe(expected);
@@ -200,38 +200,6 @@ describe.skipIf(!DB_URL)('seed integration', () => {
   // ── 4. Combiner relationships ─────────────────────────────────────────
 
   describe('combiner relationships', () => {
-    it('Devastator has exactly 6 Constructicon components', async () => {
-      const { rows } = await pool.query<{ slug: string }>(
-        `SELECT c.slug FROM characters c
-         JOIN characters form ON form.id = c.combined_form_id
-         WHERE form.slug = 'devastator'
-         ORDER BY c.slug`
-      );
-      expect(rows.map((r) => r.slug)).toEqual([
-        'bonecrusher',
-        'hook',
-        'long-haul',
-        'mixmaster',
-        'scavenger',
-        'scrapper',
-      ]);
-    });
-
-    it.each([
-      { combiner: 'superion', expected: 5 },
-      { combiner: 'menasor', expected: 5 },
-      { combiner: 'bruticus', expected: 5 },
-      { combiner: 'defensor', expected: 5 },
-    ])('$combiner has $expected components', async ({ combiner, expected }) => {
-      const { rows } = await pool.query<{ count: string }>(
-        `SELECT COUNT(*) AS count FROM characters c
-         JOIN characters form ON form.id = c.combined_form_id
-         WHERE form.slug = $1`,
-        [combiner]
-      );
-      expect(Number(rows[0]!.count), `${combiner} component count`).toBe(expected);
-    });
-
     it('all combined_form_id targets have is_combined_form = true', async () => {
       const { rows } = await pool.query<{ slug: string }>(
         `SELECT DISTINCT form.slug FROM characters c
@@ -248,19 +216,6 @@ describe.skipIf(!DB_URL)('seed integration', () => {
   // ── 5. Junction table: character_sub_groups ───────────────────────────
 
   describe('junction table: character_sub_groups', () => {
-    it('Apeface belongs to both headmasters and horrorcons', async () => {
-      const { rows } = await pool.query<{ slug: string }>(
-        `SELECT sg.slug FROM character_sub_groups csg
-         JOIN characters c ON c.id = csg.character_id
-         JOIN sub_groups sg ON sg.id = csg.sub_group_id
-         WHERE c.slug = 'apeface'
-         ORDER BY sg.slug`
-      );
-      const slugs = rows.map((r) => r.slug);
-      expect(slugs).toContain('headmasters');
-      expect(slugs).toContain('horrorcons');
-    });
-
     it('no orphaned junction rows', async () => {
       const { rows } = await pool.query<{ count: string }>(
         `SELECT COUNT(*) AS count FROM character_sub_groups csg
@@ -284,15 +239,6 @@ describe.skipIf(!DB_URL)('seed integration', () => {
       expect(Number(rows[0]!.count), 'FansToys items with is_third_party=false').toBe(0);
     });
 
-    it('FansToys item count is 118', async () => {
-      const { rows } = await pool.query<{ count: string }>(
-        `SELECT COUNT(*) AS count FROM items i
-         JOIN manufacturers m ON m.id = i.manufacturer_id
-         WHERE m.slug = 'fanstoys'`
-      );
-      expect(Number(rows[0]!.count)).toBe(118);
-    });
-
     it('Hasbro items: all have is_third_party = false', async () => {
       const { rows } = await pool.query<{ count: string }>(
         `SELECT COUNT(*) AS count FROM items i
@@ -300,44 +246,6 @@ describe.skipIf(!DB_URL)('seed integration', () => {
          WHERE m.slug = 'hasbro' AND i.is_third_party = true`
       );
       expect(Number(rows[0]!.count), 'Hasbro items with is_third_party=true').toBe(0);
-    });
-
-    it('Hasbro item count is 277', async () => {
-      const { rows } = await pool.query<{ count: string }>(
-        `SELECT COUNT(*) AS count FROM items i
-         JOIN manufacturers m ON m.id = i.manufacturer_id
-         WHERE m.slug = 'hasbro'`
-      );
-      expect(Number(rows[0]!.count)).toBe(277);
-    });
-
-    it('FT-01 MP-1 Trailer has correct fields', async () => {
-      const { rows } = await pool.query<{
-        slug: string;
-        is_third_party: boolean;
-        year_released: number;
-        size_class: string;
-        manufacturer_slug: string;
-        character_slug: string;
-        metadata: Record<string, unknown>;
-      }>(
-        `SELECT i.slug, i.is_third_party, i.year_released, i.size_class,
-                m.slug AS manufacturer_slug, c.slug AS character_slug,
-                i.metadata
-         FROM items i
-         JOIN manufacturers m ON m.id = i.manufacturer_id
-         JOIN characters c ON c.id = i.character_id
-         WHERE i.slug = 'ft-01-mp-1-trailer'`
-      );
-      expect(rows).toHaveLength(1);
-      const item = rows[0]!;
-      expect(item.is_third_party).toBe(true);
-      expect(item.year_released).toBe(2006);
-      expect(item.size_class).toBe('Masterpiece');
-      expect(item.manufacturer_slug).toBe('fanstoys');
-      expect(item.character_slug).toBe('optimus-prime');
-      expect(item.metadata).toHaveProperty('status');
-      expect(item.metadata).toHaveProperty('sub_brand');
     });
 
     it('Hasbro Bumblebee (05701) has correct fields', async () => {
