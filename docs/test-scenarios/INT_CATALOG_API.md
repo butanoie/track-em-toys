@@ -74,8 +74,9 @@ Scenario: Get character detail by slug within franchise
   And the response includes franchise, faction, continuity_family as { slug, name } objects
   And the response includes sub_groups as an array of { slug, name }
   And the response includes appearances as an array with id, slug, name, source_media, source_name, year_start, year_end, description
-  And the response includes combiner info (combined_form or combiner_role) if applicable
+  And the response includes is_combined_form boolean
   And the response includes metadata, created_at, updated_at
+  And combiner_role, combined_form, and component_characters are NOT in the response (moved to relationships endpoint)
 ```
 
 #### Error: Character Not Found
@@ -137,7 +138,8 @@ Scenario: Franchise has no characters
 Scenario: List items in a franchise with cursor pagination
   When the client sends GET /catalog/franchises/transformers/items?limit=10
   Then a 200 response is returned
-  And each item has id, name, slug, franchise, character, manufacturer, toy_line, size_class, year_released, is_third_party, data_quality
+  And each item has id, name, slug, franchise, characters, manufacturer, toy_line, size_class, year_released, is_third_party, data_quality
+  And characters is an array where each entry has slug, name, appearance_slug, is_primary
   And next_cursor is present if more results exist
   And total_count reflects total items in this franchise
 ```
@@ -148,8 +150,8 @@ Scenario: List items in a franchise with cursor pagination
 Scenario: Get item detail by slug within franchise
   When the client sends GET /catalog/franchises/transformers/items/ft-44-thomas
   Then a 200 response is returned
-  And the response includes character, manufacturer, toy_line, franchise as { slug, name } objects
-  And the response includes appearance info if linked
+  And the response includes characters as an array of { slug, name, appearance_slug, appearance_name, is_primary }
+  And the response includes manufacturer, toy_line, franchise as { slug, name } objects
   And the response includes photos as an array with id, url, caption, is_primary
   And the response includes description, barcode, sku, product_code, metadata, created_at, updated_at
 ```

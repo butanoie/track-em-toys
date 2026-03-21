@@ -84,21 +84,21 @@ characters (
     faction_id,             -- FK → factions (SET NULL)
     character_type,         -- 'Transformer', 'Human', 'Pretender', 'Godmaster', etc.
     alt_mode,               -- 'semi-truck', 'F-15 jet', etc.
-    is_combined_form,       -- TRUE for Devastator, Superion, etc.
-    combined_form_id,       -- self-FK: component → gestalt (SET NULL)
-    combiner_role,          -- 'torso', 'right arm', 'upper body', 'weapon', etc.
+    is_combined_form,       -- TRUE for Devastator, Superion, etc. (denormalized flag)
     continuity_family_id,   -- FK → continuity_families (RESTRICT) NOT NULL
+    -- NOTE: combined_form_id and combiner_role were removed in migration 027.
+    -- Combiner data now lives in character_relationships table.
     metadata,               -- JSONB for japanese_name, first_appearance, aliases, notes
     created_at, updated_at
 )
 ```
 
-**Combiner modeling uses a self-referential FK.** Instead of a separate join table, each component character has a `combined_form_id` pointing to the gestalt character entry. This means:
+**Combiner modeling uses the `character_relationships` table** (migration 024). Each combiner-component relationship is a typed record linking the gestalt (entity1) to a component (entity2) with roles:
 
-- Devastator is a character entry with `is_combined_form = TRUE`
-- Scrapper is a character entry with `combined_form_id → Devastator.id` and `combiner_role = 'right leg'`
-- Query "all components of Devastator": `SELECT * FROM characters WHERE combined_form_id = <devastator_id>`
-- Query "what does Scrapper combine into": `SELECT c.name FROM characters c WHERE c.id = scrapper.combined_form_id`
+- Devastator is a character with `is_combined_form = TRUE` (denormalized flag on the character record)
+- Scrapper → Devastator is a `character_relationships` row with `type = 'combiner-component'`, `entity1_role = 'gestalt'`, `entity2_role = 'right leg'`
+- Query "all components of Devastator": `SELECT * FROM character_relationships WHERE type = 'combiner-component' AND entity1_id = <devastator_id>`
+- This replaced the earlier self-referential `combined_form_id` FK (removed in migration 027)
 
 **Why `character_type` is TEXT, not an enum or FK?** The set of character types includes both species (`Transformer`, `Human`, `Nebulan`) and gimmick types (`Pretender`, `Godmaster`, `Brainmaster`, `Micromaster`). TEXT keeps the migration simple — new gimmick types from future series are just new values, not schema changes.
 
@@ -148,9 +148,11 @@ character_appearances (
 
 1. **Character** (continuity family level) — "Optimus Prime (G1)" — the canonical identity
 2. **Appearance** (media depiction) — "G1 cartoon Optimus Prime" vs "IDW Optimus Prime"
-3. **Item** (specific toy product) — "MP-10 Optimus Prime" links to character + optionally to an appearance
+3. **Item** (specific toy product) — "MP-10 Optimus Prime" links to character(s) through `item_character_depictions`
 
-Items link to appearances via the optional `character_appearance_id` FK (SET NULL). Items without an appearance link are "generic depiction of this character." This supports queries like "show me all toys depicting the G1 cartoon version of Optimus Prime."
+Items link to characters through the `item_character_depictions` junction table (migration 025). Each depiction row references an `appearance_id` (FK → `character_appearances`), and the character is derived through the appearance's `character_id`. This supports multi-character items (gift sets, 2-packs) and queries like "show me all toys depicting the G1 cartoon version of Optimus Prime."
+
+**NOTE:** The previous `items.character_id` and `items.character_appearance_id` direct FKs were removed in migration 027. The `item_character_depictions` junction table replaced them.
 
 ### 3c. Size class on items
 

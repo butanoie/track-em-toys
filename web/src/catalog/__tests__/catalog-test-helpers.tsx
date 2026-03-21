@@ -80,7 +80,9 @@ export const mockCatalogItem: CatalogItem = {
   name: 'Optimus Prime',
   slug: 'optimus-prime',
   franchise: slugName('transformers', 'Transformers'),
-  character: slugName('optimus-prime', 'Optimus Prime'),
+  characters: [
+    { slug: 'optimus-prime', name: 'Optimus Prime', appearance_slug: 'optimus-prime-g1-cartoon', is_primary: true },
+  ],
   manufacturer: slugName('hasbro', 'Hasbro'),
   toy_line: slugName('generation-1', 'Generation 1'),
   size_class: 'Leader',
@@ -99,7 +101,17 @@ export const mockCatalogItemNoManufacturer: CatalogItem = {
 
 export const mockCatalogItemDetail: CatalogItemDetail = {
   ...mockCatalogItem,
-  appearance: null,
+  characters: [
+    {
+      slug: 'optimus-prime',
+      name: 'Optimus Prime',
+      appearance_slug: 'optimus-prime-g1-cartoon',
+      appearance_name: 'G1 Cartoon',
+      appearance_source_media: 'Animated Series',
+      appearance_source_name: 'The Transformers',
+      is_primary: true,
+    },
+  ],
   description: 'Leader of the Autobots',
   barcode: null,
   sku: null,
@@ -151,9 +163,6 @@ export const mockCharacterDetail: CharacterDetail = {
   character_type: 'Transformer',
   alt_mode: 'Semi-truck',
   is_combined_form: false,
-  combiner_role: null,
-  combined_form: null,
-  component_characters: [],
   sub_groups: [],
   appearances: [mockAppearance],
   metadata: {},

@@ -29,7 +29,9 @@ const mockItemList = {
       slug: 'optimus-prime',
       name: 'Optimus Prime',
       franchise: { slug: 'transformers', name: 'Transformers' },
-      character: { slug: 'optimus-prime', name: 'Optimus Prime' },
+      characters: [
+        { slug: 'optimus-prime', name: 'Optimus Prime', appearance_slug: 'optimus-prime-g1', is_primary: true },
+      ],
       manufacturer: { slug: 'hasbro', name: 'Hasbro' },
       toy_line: { slug: 'legacy', name: 'Legacy' },
       size_class: 'Voyager',

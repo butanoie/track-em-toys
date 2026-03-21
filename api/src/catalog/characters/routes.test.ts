@@ -34,10 +34,6 @@ describe('character routes (franchise-scoped)', () => {
 
   const charBaseRow = {
     ...charListRow,
-    combiner_role: null,
-    combined_form_id: null,
-    combined_form_slug: null,
-    combined_form_name: null,
     metadata: { japanese_name: 'コンボイ' },
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
@@ -228,7 +224,7 @@ describe('character routes (franchise-scoped)', () => {
 
   describe('GET /catalog/franchises/:franchise/characters/:slug', () => {
     it('should return 200 with full character detail', async () => {
-      // base query, then Promise.all([sub-groups, appearances, component_characters (skipped — not combined form)])
+      // base query, then Promise.all([sub-groups, appearances])
       mockQuery
         .mockResolvedValueOnce({ rows: [charBaseRow] })
         .mockResolvedValueOnce({ rows: [{ slug: 'dinobots', name: 'Dinobots' }] })
@@ -265,7 +261,6 @@ describe('character routes (franchise-scoped)', () => {
       expect(body.sub_groups[0]?.slug).toBe('dinobots');
       expect(body.appearances).toHaveLength(1);
       expect(body.metadata.japanese_name).toBe('コンボイ');
-      expect(res.json<{ component_characters: unknown[] }>().component_characters).toEqual([]);
     });
 
     it('should return 404 when character not found', async () => {
@@ -308,65 +303,25 @@ describe('character routes (franchise-scoped)', () => {
       expect(body.sub_groups).toHaveLength(0);
     });
 
-    it('should include component_characters when character is a combined form', async () => {
+    it('should return is_combined_form flag for combined form characters', async () => {
       const gestaltRow = {
         ...charBaseRow,
         name: 'Devastator',
         slug: 'devastator',
         is_combined_form: true,
       };
-      const components = [
-        { slug: 'bonecrusher', name: 'Bonecrusher', combiner_role: 'left arm', alt_mode: 'bulldozer' },
-        { slug: 'mixmaster', name: 'Mixmaster', combiner_role: 'left leg', alt_mode: 'cement mixer' },
-        { slug: 'scrapper', name: 'Scrapper', combiner_role: 'right leg', alt_mode: 'front-end loader' },
-      ];
       mockQuery
         .mockResolvedValueOnce({ rows: [gestaltRow] })
         .mockResolvedValueOnce({ rows: [] }) // sub-groups
-        .mockResolvedValueOnce({ rows: [] }) // appearances
-        .mockResolvedValueOnce({ rows: components }); // component characters
+        .mockResolvedValueOnce({ rows: [] }); // appearances
 
       const res = await server.inject({
         method: 'GET',
         url: '/catalog/franchises/transformers/characters/devastator',
       });
       expect(res.statusCode).toBe(200);
-      const body = res.json<{
-        is_combined_form: boolean;
-        component_characters: Array<{ slug: string; name: string; combiner_role: string; alt_mode: string }>;
-      }>();
+      const body = res.json<{ is_combined_form: boolean }>();
       expect(body.is_combined_form).toBe(true);
-      expect(body.component_characters).toHaveLength(3);
-      expect(body.component_characters[0]).toEqual({
-        slug: 'bonecrusher',
-        name: 'Bonecrusher',
-        combiner_role: 'left arm',
-        alt_mode: 'bulldozer',
-      });
-    });
-
-    it('should include combined_form when character is a combiner component', async () => {
-      const componentRow = {
-        ...charBaseRow,
-        name: 'Scrapper',
-        slug: 'scrapper',
-        combiner_role: 'right leg',
-        combined_form_slug: 'devastator',
-        combined_form_name: 'Devastator',
-      };
-      mockQuery
-        .mockResolvedValueOnce({ rows: [componentRow] })
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [] });
-
-      const res = await server.inject({
-        method: 'GET',
-        url: '/catalog/franchises/transformers/characters/scrapper',
-      });
-      expect(res.statusCode).toBe(200);
-      const body = res.json<{ combiner_role: string; combined_form: { slug: string } }>();
-      expect(body.combiner_role).toBe('right leg');
-      expect(body.combined_form).toEqual({ slug: 'devastator', name: 'Devastator' });
     });
   });
 });

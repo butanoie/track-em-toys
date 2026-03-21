@@ -5,6 +5,7 @@ import { listItemsSchema, getItemSchema, getItemFacetsSchema } from './schemas.j
 import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js';
 import { formatListItem, formatDetail } from '../shared/formatters.js';
 import { photoRoutes } from '../photos/routes.js';
+import { itemRelationshipRoutes } from '../relationships/routes.js';
 
 interface FranchiseParams {
   franchise: string;
@@ -97,4 +98,7 @@ export async function itemRoutes(fastify: FastifyInstance, _opts: object): Promi
 
   // Photo management routes (curator role required)
   await fastify.register(photoRoutes, { prefix: '/:slug/photos' });
+
+  // Item relationship routes
+  await fastify.register(itemRelationshipRoutes, { prefix: '/:slug/relationships' });
 }

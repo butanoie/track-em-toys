@@ -32,9 +32,6 @@ const mockCharacterDetail = {
   character_type: 'Transformer',
   alt_mode: 'Truck',
   is_combined_form: false,
-  combiner_role: null,
-  combined_form: null,
-  component_characters: [],
   sub_groups: [{ slug: 'convoy', name: 'Convoy' }],
   appearances: [
     {

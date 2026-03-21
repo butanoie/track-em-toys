@@ -38,36 +38,31 @@ Scenario: All foreign key references resolve to existing rows
   Given the seed has been ingested
   Then all characters.faction_id values reference valid factions
   And all characters.continuity_family_id values reference valid continuity_families
-  And all characters.combined_form_id values reference valid characters
   And all character_sub_groups entries reference valid characters and sub_groups
   And all character_appearances.character_id values reference valid characters
+  And all character_relationships.entity1_id values reference valid characters
+  And all character_relationships.entity2_id values reference valid characters
   And all sub_groups.faction_id values reference valid factions
   And all toy_lines.manufacturer_id values reference valid manufacturers
   And all items.manufacturer_id values reference valid manufacturers
   And all items.toy_line_id values reference valid toy_lines
-  And all items.character_id values reference valid characters
-  And all items.character_appearance_id values reference valid character_appearances
+  And all item_character_depictions.item_id values reference valid items
+  And all item_character_depictions.appearance_id values reference valid character_appearances
 ```
 
-### Domain: Combiner Relationships
+### Domain: Combiner Relationships (via character_relationships)
 
 ```gherkin
-Scenario: Devastator has exactly 6 Constructicon components
+Scenario: Devastator has exactly 6 combiner-component relationships
   Given the seed has been ingested
-  When querying characters with combined_form_id pointing to Devastator
-  Then exactly 6 components are found
-  And they are bonecrusher, hook, long-haul, mixmaster, scavenger, scrapper
+  When querying character_relationships with type = 'combiner-component' and entity1 = Devastator
+  Then exactly 6 component relationships are found
+  And entity2 slugs include bonecrusher, hook, long-haul, mixmaster, scavenger, scrapper
 
-Scenario: Other combiners have expected component counts
+Scenario: All combiner-component entity1 targets have is_combined_form = true
   Given the seed has been ingested
-  Then Superion has 5 components
-  And Menasor has 5 components
-  And Bruticus has 5 components
-  And Defensor has 5 components
-
-Scenario: All combined_form_id targets are marked as combined forms
-  Given the seed has been ingested
-  Then every character with a combined_form_id points to a character with is_combined_form = true
+  Then every character_relationships row with type = 'combiner-component'
+    has entity1_id pointing to a character with is_combined_form = true
 ```
 
 ### Domain: Junction Table Multi-Group Membership
@@ -97,7 +92,7 @@ Scenario: FT-01 MP-1 Trailer spot-check
   When querying the item with slug "ft-01-mp-1-trailer"
   Then is_third_party is true
   And manufacturer_slug is "fanstoys"
-  And character_slug is "optimus-prime"
+  And the item has a primary depiction linking to character "optimus-prime"
   And metadata contains status and sub_brand fields
 ```
 

@@ -30,7 +30,9 @@ const CATALOG_TABLES = [
   'characters',
   'character_sub_groups',
   'character_appearances',
+  'character_relationships',
   'items',
+  'item_character_depictions',
 ] as const;
 type CatalogTable = (typeof CATALOG_TABLES)[number];
 
@@ -101,8 +103,9 @@ describe.skipIf(!DB_URL)('seed integration', () => {
 
   afterAll(async () => {
     await pool.query(
-      `TRUNCATE items, character_appearances, character_sub_groups,
-               characters, toy_lines, manufacturers,
+      `TRUNCATE item_character_depictions, item_relationships,
+               character_relationships, items, character_appearances,
+               character_sub_groups, characters, toy_lines, manufacturers,
                sub_groups, factions, continuity_families
        CASCADE`
     );
@@ -127,7 +130,9 @@ describe.skipIf(!DB_URL)('seed integration', () => {
       { table: 'characters' as CatalogTable, expected: 4 },
       { table: 'character_sub_groups' as CatalogTable, expected: 3 },
       { table: 'character_appearances' as CatalogTable, expected: 4 },
+      { table: 'character_relationships' as CatalogTable, expected: 2 },
       { table: 'items' as CatalogTable, expected: 3 },
+      { table: 'item_character_depictions' as CatalogTable, expected: 3 },
     ])('$table has $expected rows (entities)', async ({ table, expected }) => {
       const count = await queryCount(pool, table);
       expect(count, `${table} row count`).toBe(expected);
@@ -164,10 +169,6 @@ describe.skipIf(!DB_URL)('seed integration', () => {
       expect(await queryOrphanedFKs(pool, 'characters', 'continuity_family_id', 'continuity_families')).toEqual([]);
     });
 
-    it('characters.combined_form_id → characters (self-ref)', async () => {
-      expect(await queryOrphanedFKs(pool, 'characters', 'combined_form_id', 'characters')).toEqual([]);
-    });
-
     it('character_sub_groups.character_id → characters', async () => {
       expect(await queryOrphanedFKs(pool, 'character_sub_groups', 'character_id', 'characters')).toEqual([]);
     });
@@ -188,28 +189,64 @@ describe.skipIf(!DB_URL)('seed integration', () => {
       expect(await queryOrphanedFKs(pool, 'items', 'toy_line_id', 'toy_lines')).toEqual([]);
     });
 
-    it('items.character_id → characters', async () => {
-      expect(await queryOrphanedFKs(pool, 'items', 'character_id', 'characters')).toEqual([]);
+    it('character_relationships.entity1_id → characters', async () => {
+      const { rows } = await pool.query<{ id: string }>(
+        `SELECT cr.id::text FROM character_relationships cr
+         LEFT JOIN characters c ON c.id = cr.entity1_id
+         WHERE c.id IS NULL`
+      );
+      expect(rows).toHaveLength(0);
     });
 
-    it('items.character_appearance_id → character_appearances', async () => {
-      expect(await queryOrphanedFKs(pool, 'items', 'character_appearance_id', 'character_appearances')).toEqual([]);
+    it('character_relationships.entity2_id → characters', async () => {
+      const { rows } = await pool.query<{ id: string }>(
+        `SELECT cr.id::text FROM character_relationships cr
+         LEFT JOIN characters c ON c.id = cr.entity2_id
+         WHERE c.id IS NULL`
+      );
+      expect(rows).toHaveLength(0);
+    });
+
+    it('item_character_depictions.item_id → items', async () => {
+      const { rows } = await pool.query<{ id: string }>(
+        `SELECT icd.id::text FROM item_character_depictions icd
+         LEFT JOIN items i ON i.id = icd.item_id
+         WHERE i.id IS NULL`
+      );
+      expect(rows).toHaveLength(0);
+    });
+
+    it('item_character_depictions.appearance_id → character_appearances', async () => {
+      const { rows } = await pool.query<{ id: string }>(
+        `SELECT icd.id::text FROM item_character_depictions icd
+         LEFT JOIN character_appearances ca ON ca.id = icd.appearance_id
+         WHERE ca.id IS NULL`
+      );
+      expect(rows).toHaveLength(0);
     });
   });
 
-  // ── 4. Combiner relationships ─────────────────────────────────────────
+  // ── 4. Character relationships ──────────────────────────────────────────
 
-  describe('combiner relationships', () => {
-    it('all combined_form_id targets have is_combined_form = true', async () => {
+  describe('character relationships', () => {
+    it('all combiner-component entity1 targets have is_combined_form = true', async () => {
       const { rows } = await pool.query<{ slug: string }>(
-        `SELECT DISTINCT form.slug FROM characters c
-         JOIN characters form ON form.id = c.combined_form_id
-         WHERE form.is_combined_form = false`
+        `SELECT DISTINCT c.slug
+           FROM character_relationships cr
+           JOIN characters c ON c.id = cr.entity1_id
+          WHERE cr.type = 'combiner-component' AND c.is_combined_form = false`
       );
       expect(
         rows,
-        `Characters referenced as combined forms but with is_combined_form=false: ${rows.map((r) => r.slug).join(', ')}`
+        `Combiner-component entity1 not marked is_combined_form: ${rows.map((r) => r.slug).join(', ')}`
       ).toHaveLength(0);
+    });
+
+    it('no self-referential relationships', async () => {
+      const { rows } = await pool.query<{ id: string }>(
+        `SELECT id::text FROM character_relationships WHERE entity1_id = entity2_id`
+      );
+      expect(rows).toHaveLength(0);
     });
   });
 
@@ -248,7 +285,7 @@ describe.skipIf(!DB_URL)('seed integration', () => {
       expect(Number(rows[0]!.count), 'Hasbro items with is_third_party=true').toBe(0);
     });
 
-    it('Hasbro Bumblebee (05701) has correct fields', async () => {
+    it('Hasbro Bumblebee (05701) has correct depiction', async () => {
       const { rows } = await pool.query<{
         slug: string;
         is_third_party: boolean;
@@ -257,10 +294,12 @@ describe.skipIf(!DB_URL)('seed integration', () => {
         character_slug: string;
       }>(
         `SELECT i.slug, i.is_third_party, i.year_released,
-                m.slug AS manufacturer_slug, c.slug AS character_slug
+                m.slug AS manufacturer_slug, ch.slug AS character_slug
          FROM items i
          JOIN manufacturers m ON m.id = i.manufacturer_id
-         JOIN characters c ON c.id = i.character_id
+         JOIN item_character_depictions icd ON icd.item_id = i.id AND icd.is_primary = true
+         JOIN character_appearances ca ON ca.id = icd.appearance_id
+         JOIN characters ch ON ch.id = ca.character_id
          WHERE i.slug = '05701-bumblebee'`
       );
       expect(rows).toHaveLength(1);
@@ -271,17 +310,31 @@ describe.skipIf(!DB_URL)('seed integration', () => {
       expect(item.character_slug).toBe('bumblebee');
     });
 
-    it('items with character_slug optimus-prime have valid character_id', async () => {
+    it('items depicting optimus-prime exist via depictions', async () => {
       const { rows } = await pool.query<{ count: string }>(
         `SELECT COUNT(*) AS count FROM items i
-         JOIN characters c ON c.id = i.character_id
+         JOIN item_character_depictions icd ON icd.item_id = i.id
+         JOIN character_appearances ca ON ca.id = icd.appearance_id
+         JOIN characters c ON c.id = ca.character_id
          WHERE c.slug = 'optimus-prime'`
       );
       expect(Number(rows[0]!.count)).toBeGreaterThan(0);
     });
   });
 
-  // ── 7. Idempotency ────────────────────────────────────────────────────
+  // ── 7. Item character depiction correctness ─────────────────────────────
+
+  describe('item character depiction correctness', () => {
+    it('each item has exactly one primary depiction', async () => {
+      const { rows } = await pool.query<{ count: string }>(
+        `SELECT COUNT(*)::int AS count FROM item_character_depictions WHERE is_primary = true`
+      );
+      const itemCount = await queryCount(pool, 'items');
+      expect(Number(rows[0]!.count)).toBe(itemCount);
+    });
+  });
+
+  // ── 8. Idempotency ────────────────────────────────────────────────────
 
   describe('idempotency', () => {
     it('purge + re-seed produces identical row counts', async () => {

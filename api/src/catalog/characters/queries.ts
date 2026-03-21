@@ -24,10 +24,6 @@ export interface CharacterListRow {
 // ---------------------------------------------------------------------------
 
 export interface CharacterBaseRow extends CharacterListRow {
-  combiner_role: string | null;
-  combined_form_id: string | null;
-  combined_form_slug: string | null;
-  combined_form_name: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -257,18 +253,10 @@ export async function getCharacterFacets(franchiseSlug: string, filters?: Charac
 // Get Character Detail
 // ---------------------------------------------------------------------------
 
-export interface ComponentCharacterRef {
-  slug: string;
-  name: string;
-  combiner_role: string | null;
-  alt_mode: string | null;
-}
-
 export interface CharacterDetail {
   base: CharacterBaseRow;
   subGroups: SubGroupRef[];
   appearances: AppearanceRow[];
-  componentCharacters: ComponentCharacterRef[];
 }
 
 /**
@@ -284,25 +272,22 @@ export async function getCharacterBySlug(
   const baseQuery = `
     SELECT c.id, c.name, c.slug,
            c.character_type, c.alt_mode,
-           c.is_combined_form, c.combiner_role,
-           c.combined_form_id,
+           c.is_combined_form,
            c.metadata, c.created_at, c.updated_at,
            fr.slug AS franchise_slug, fr.name AS franchise_name,
            fa.slug AS faction_slug, fa.name AS faction_name,
-           cf.slug AS continuity_family_slug, cf.name AS continuity_family_name,
-           cform.slug AS combined_form_slug, cform.name AS combined_form_name
+           cf.slug AS continuity_family_slug, cf.name AS continuity_family_name
       FROM characters c
       JOIN franchises fr ON fr.id = c.franchise_id
       LEFT JOIN factions fa ON fa.id = c.faction_id
       JOIN continuity_families cf ON cf.id = c.continuity_family_id
-      LEFT JOIN characters cform ON cform.id = c.combined_form_id
      WHERE fr.slug = $1 AND c.slug = $2`;
 
   const { rows: baseRows } = await pool.query<CharacterBaseRow>(baseQuery, [franchiseSlug, characterSlug]);
   const base = baseRows[0];
   if (!base) return null;
 
-  const [subGroupResult, appearanceResult, componentResult] = await Promise.all([
+  const [subGroupResult, appearanceResult] = await Promise.all([
     pool.query<SubGroupRef>(
       `SELECT sg.slug, sg.name
          FROM character_sub_groups csg
@@ -319,21 +304,36 @@ export async function getCharacterBySlug(
         ORDER BY year_start ASC NULLS LAST, name ASC`,
       [base.id]
     ),
-    base.is_combined_form
-      ? pool.query<ComponentCharacterRef>(
-          `SELECT slug, name, combiner_role, alt_mode
-             FROM characters
-            WHERE combined_form_id = $1
-            ORDER BY name ASC`,
-          [base.id]
-        )
-      : Promise.resolve({ rows: [] as ComponentCharacterRef[] }),
   ]);
 
   return {
     base,
     subGroups: subGroupResult.rows,
     appearances: appearanceResult.rows,
-    componentCharacters: componentResult.rows,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Lightweight character existence check (used by relationship routes)
+// ---------------------------------------------------------------------------
+
+/**
+ * Check whether a character exists by franchise and character slugs.
+ *
+ * @param franchiseSlug - Franchise slug
+ * @param characterSlug - Character slug within the franchise
+ */
+export async function characterExistsBySlug(
+  franchiseSlug: string,
+  characterSlug: string,
+): Promise<boolean> {
+  const { rows } = await pool.query<{ exists: boolean }>(
+    `SELECT EXISTS(
+       SELECT 1 FROM characters c
+       JOIN franchises fr ON fr.id = c.franchise_id
+       WHERE fr.slug = $1 AND c.slug = $2
+     ) AS exists`,
+    [franchiseSlug, characterSlug],
+  );
+  return rows[0]?.exists ?? false;
 }

@@ -94,13 +94,32 @@ export const FranchiseDetailSchema = z.object({
   created_at: z.string(),
 });
 
+// Character depiction on catalog items (list-level)
+const CharacterDepictionSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  appearance_slug: z.string(),
+  is_primary: z.boolean(),
+});
+
+// Character depiction on catalog items (detail-level, includes appearance info)
+const CharacterDepictionDetailSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  appearance_slug: z.string(),
+  appearance_name: z.string(),
+  appearance_source_media: z.string().nullable(),
+  appearance_source_name: z.string().nullable(),
+  is_primary: z.boolean(),
+});
+
 // Catalog item (list response)
 export const CatalogItemSchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
   franchise: SlugNameRefSchema,
-  character: SlugNameRefSchema,
+  characters: z.array(CharacterDepictionSchema),
   manufacturer: NullableSlugNameRefSchema,
   toy_line: SlugNameRefSchema,
   size_class: z.string().nullable(),
@@ -117,14 +136,7 @@ export const CatalogItemListSchema = z.object({
 
 // Catalog item detail (GET /catalog/franchises/:franchise/items/:slug)
 export const CatalogItemDetailSchema = CatalogItemSchema.extend({
-  appearance: z
-    .object({
-      slug: z.string(),
-      name: z.string(),
-      source_media: z.string().nullable(),
-      source_name: z.string().nullable(),
-    })
-    .nullable(),
+  characters: z.array(CharacterDepictionDetailSchema),
   description: z.string().nullable(),
   barcode: z.string().nullable(),
   sku: z.string().nullable(),
@@ -218,7 +230,7 @@ export const SearchCharacterResultSchema = z.object({
   name: z.string(),
   slug: z.string(),
   franchise: SlugNameRefSchema,
-  character: z.null(),
+  characters: z.array(CharacterDepictionSchema),
   manufacturer: z.null(),
   toy_line: z.null(),
   size_class: z.null(),
@@ -255,13 +267,6 @@ export const CharacterAppearanceSchema = z.object({
   description: z.string().nullable(),
 });
 
-export const ComponentCharacterRefSchema = z.object({
-  slug: z.string(),
-  name: z.string(),
-  combiner_role: z.string().nullable(),
-  alt_mode: z.string().nullable(),
-});
-
 export const CharacterDetailSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -272,9 +277,6 @@ export const CharacterDetailSchema = z.object({
   character_type: z.string().nullable(),
   alt_mode: z.string().nullable(),
   is_combined_form: z.boolean(),
-  combiner_role: z.string().nullable(),
-  combined_form: NullableSlugNameRefSchema,
-  component_characters: z.array(ComponentCharacterRefSchema),
   sub_groups: z.array(SlugNameRefSchema),
   appearances: z.array(CharacterAppearanceSchema),
   metadata: z.record(z.unknown()),
@@ -308,13 +310,46 @@ export const CharacterFacetsSchema = z.object({
   sub_groups: z.array(FacetValueSchema),
 });
 
+// ---------------------------------------------------------------------------
+// Relationship schemas
+// ---------------------------------------------------------------------------
+
+export const CharacterRelationshipSchema = z.object({
+  type: z.string(),
+  subtype: z.string().nullable(),
+  role: z.string().nullable(),
+  related_character: SlugNameRefSchema,
+  metadata: z.record(z.unknown()),
+});
+
+export const CharacterRelationshipsResponseSchema = z.object({
+  relationships: z.array(CharacterRelationshipSchema),
+});
+
+export const ItemRelationshipSchema = z.object({
+  type: z.string(),
+  subtype: z.string().nullable(),
+  role: z.string().nullable(),
+  related_item: SlugNameRefSchema,
+  metadata: z.record(z.unknown()),
+});
+
+export const ItemRelationshipsResponseSchema = z.object({
+  relationships: z.array(ItemRelationshipSchema),
+});
+
 // Catalog types
+export type CharacterDepiction = z.infer<typeof CharacterDepictionSchema>;
+export type CharacterDepictionDetail = z.infer<typeof CharacterDepictionDetailSchema>;
 export type CharacterListItem = z.infer<typeof CharacterListItemSchema>;
 export type CharacterList = z.infer<typeof CharacterListSchema>;
 export type CharacterFacets = z.infer<typeof CharacterFacetsSchema>;
 export type CharacterAppearance = z.infer<typeof CharacterAppearanceSchema>;
-export type ComponentCharacterRef = z.infer<typeof ComponentCharacterRefSchema>;
 export type CharacterDetail = z.infer<typeof CharacterDetailSchema>;
+export type CharacterRelationship = z.infer<typeof CharacterRelationshipSchema>;
+export type CharacterRelationshipsResponse = z.infer<typeof CharacterRelationshipsResponseSchema>;
+export type ItemRelationship = z.infer<typeof ItemRelationshipSchema>;
+export type ItemRelationshipsResponse = z.infer<typeof ItemRelationshipsResponseSchema>;
 export type SearchCharacterResult = z.infer<typeof SearchCharacterResultSchema>;
 export type SearchItemResult = z.infer<typeof SearchItemResultSchema>;
 export type SearchResult = z.infer<typeof SearchResultSchema>;

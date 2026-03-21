@@ -49,8 +49,16 @@ cd api && npm run format:check # Prettier check (CI mode)
 - `ingest.ts` and `seed-validation.test.ts` default to `sample/` when `SEED_DATA_PATH` is unset — all file types are auto-discovered (no hardcoded file lists)
 - Character relationships (combiner, vehicle-crew, partner-bond, rival, etc.) are typed records in `relationships/*.json` — auto-discovered by validation test
 - Characters do NOT have `combined_form_slug`, `combiner_role`, or `component_slugs` — these were replaced by the relationship system
-- `ingest.ts` still contains dead combiner pass-2 code (`upsertCharactersPass2`, `combined_form_slug`, `combiner_role` on `CharacterRecord`) — this is superseded by the relationship system and pending cleanup. Do not extend or fix it.
-- `ingest.ts` does not yet ingest `relationships/*.json` — the `character_relationships` DB table and ingestion step are pending (issue #80)
+- `ingest.ts` ingests `relationships/*.json` into `character_relationships` table (step 5.7) and auto-generates `item_character_depictions` rows from item `character_appearance_slug` fields (step 6b)
+- `item_character_depictions` junction table replaces the old `items.character_id` and `items.character_appearance_id` direct FKs — character is derived via `appearance_id → character_appearances.character_id`
+- Item depiction upsert uses DELETE-then-INSERT pattern (like `character_sub_groups`) to handle changed appearance slugs between seed runs
+- `character_relationships` table stores all char↔char relationships with `UNIQUE(type, entity1_id, entity2_id)` — `ON CONFLICT` target must match
+- `item_relationships` table exists (schema only, no seed data) for future mold-origin, gift-set-contents, variant relationships
+- Characters no longer have `combined_form_id` or `combiner_role` columns (dropped in migration 027) — combiner data is in `character_relationships`
+- Character detail API response no longer includes `combiner_role`, `combined_form`, or `component_characters` — use the `/:slug/relationships` endpoint instead
+- Item API responses return `characters: [{ slug, name, appearance_slug, is_primary }]` (array) instead of `character: { slug, name }` (single object)
+- Item detail includes richer depiction data: `characters: [{ slug, name, appearance_slug, appearance_name, appearance_source_media, appearance_source_name, is_primary }]`
+- Relationship API endpoints: `GET /:slug/relationships` on both characters and items — returns `{ relationships: [...] }` with bidirectional UNION ALL queries
 - `is_combined_form` remains on character records as a denormalized flag, cross-validated against relationship data
 - Seed validation test (`seed-validation.test.ts`) has a per-type relationship registry (`RELATIONSHIP_TYPE_REGISTRY`) with role and subtype allowlists
 - `seed-integration.test.ts` exact row-count assertions are wrapped in `describe.skipIf(!!process.env['SEED_DATA_PATH'])` — they only run against sample data. Structural assertions (FK integrity, idempotency) run against any dataset.

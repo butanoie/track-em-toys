@@ -54,18 +54,15 @@ describe('ItemDetailContent', () => {
     expect(screen.getByText('G1-001')).toBeInTheDocument();
   });
 
-  it('renders appearance when present', () => {
-    const data: CatalogItemDetail = {
-      ...mockCatalogItemDetail,
-      appearance: { slug: 'g1-s1', name: 'G1 Season 1', source_media: null, source_name: null },
-    };
-    render(<ItemDetailContent data={data} franchise="transformers" />);
+  it('renders appearance from primary character when present', () => {
+    render(<ItemDetailContent data={mockCatalogItemDetail} franchise="transformers" />);
     expect(screen.getByText('Appearance')).toBeInTheDocument();
-    expect(screen.getByText('G1 Season 1')).toBeInTheDocument();
+    expect(screen.getByText('G1 Cartoon')).toBeInTheDocument();
   });
 
-  it('does not render appearance when null', () => {
-    render(<ItemDetailContent data={mockCatalogItemDetail} franchise="transformers" />);
+  it('does not render appearance when characters array is empty', () => {
+    const data: CatalogItemDetail = { ...mockCatalogItemDetail, characters: [] };
+    render(<ItemDetailContent data={data} franchise="transformers" />);
     expect(screen.queryByText('Appearance')).not.toBeInTheDocument();
   });
 

@@ -22,8 +22,9 @@ describe('item routes (franchise-scoped)', () => {
     slug: 'ft-44-thomas',
     franchise_slug: 'transformers',
     franchise_name: 'Transformers',
-    character_slug: 'optimus-prime',
-    character_name: 'Optimus Prime',
+    characters: [
+      { slug: 'optimus-prime', name: 'Optimus Prime', appearance_slug: 'optimus-prime-g1-cartoon', is_primary: true },
+    ],
     manufacturer_slug: 'fanstoys',
     manufacturer_name: 'FansToys',
     toy_line_slug: 'fans-toys-masterpiece',
@@ -34,12 +35,32 @@ describe('item routes (franchise-scoped)', () => {
     data_quality: 'verified',
   };
 
+  const depictionRows = [
+    {
+      slug: 'optimus-prime',
+      name: 'Optimus Prime',
+      appearance_slug: 'g1-cartoon',
+      appearance_name: 'G1 Cartoon',
+      appearance_source_media: 'TV',
+      appearance_source_name: 'The Transformers',
+      is_primary: true,
+    },
+  ];
+
   const itemBaseRow = {
-    ...itemListRow,
-    appearance_slug: 'g1-cartoon',
-    appearance_name: 'G1 Cartoon',
-    appearance_source_media: 'TV',
-    appearance_source_name: 'The Transformers',
+    id: 'i-1',
+    name: 'FT-44 Thomas',
+    slug: 'ft-44-thomas',
+    franchise_slug: 'transformers',
+    franchise_name: 'Transformers',
+    manufacturer_slug: 'fanstoys',
+    manufacturer_name: 'FansToys',
+    toy_line_slug: 'fans-toys-masterpiece',
+    toy_line_name: 'FansToys Masterpiece',
+    size_class: 'Leader',
+    year_released: 2023,
+    is_third_party: true,
+    data_quality: 'verified',
     description: 'Third-party Optimus Prime',
     barcode: null,
     sku: null,
@@ -60,9 +81,9 @@ describe('item routes (franchise-scoped)', () => {
         url: '/catalog/franchises/transformers/items',
       });
       expect(res.statusCode).toBe(200);
-      const body = res.json<{ data: Array<{ character: { slug: string } }>; total_count: number }>();
+      const body = res.json<{ data: Array<{ characters: Array<{ slug: string }> }>; total_count: number }>();
       expect(body.data).toHaveLength(1);
-      expect(body.data[0]?.character.slug).toBe('optimus-prime');
+      expect(body.data[0]?.characters[0]?.slug).toBe('optimus-prime');
       expect(body.total_count).toBe(1);
     });
 
@@ -110,11 +131,15 @@ describe('item routes (franchise-scoped)', () => {
 
   describe('GET /catalog/franchises/:franchise/items/:slug', () => {
     it('should return 200 with full item detail', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [itemBaseRow] }).mockResolvedValueOnce({
-        rows: [
-          { id: 'p-1', url: 'https://img.example.com/ft44.jpg', caption: 'Box art', is_primary: true, sort_order: 1 },
-        ],
-      });
+      // base query, depictions query, photos query (3 queries)
+      mockQuery
+        .mockResolvedValueOnce({ rows: [itemBaseRow] })
+        .mockResolvedValueOnce({ rows: depictionRows })
+        .mockResolvedValueOnce({
+          rows: [
+            { id: 'p-1', url: 'https://img.example.com/ft44.jpg', caption: 'Box art', is_primary: true, sort_order: 1 },
+          ],
+        });
 
       const res = await server.inject({
         method: 'GET',
@@ -124,12 +149,14 @@ describe('item routes (franchise-scoped)', () => {
       const body = res.json<{
         name: string;
         product_code: string;
-        appearance: { slug: string };
+        characters: Array<{ slug: string; appearance_slug: string }>;
         photos: Array<{ is_primary: boolean }>;
       }>();
       expect(body.name).toBe('FT-44 Thomas');
       expect(body.product_code).toBe('FT-44');
-      expect(body.appearance?.slug).toBe('g1-cartoon');
+      expect(body.characters).toHaveLength(1);
+      expect(body.characters[0]?.slug).toBe('optimus-prime');
+      expect(body.characters[0]?.appearance_slug).toBe('g1-cartoon');
       expect(body.photos).toHaveLength(1);
       expect(body.photos[0]?.is_primary).toBe(true);
     });
@@ -143,22 +170,20 @@ describe('item routes (franchise-scoped)', () => {
       expect(res.statusCode).toBe(404);
     });
 
-    it('should handle null appearance', async () => {
-      const noAppearance = {
-        ...itemBaseRow,
-        appearance_slug: null,
-        appearance_name: null,
-        appearance_source_media: null,
-        appearance_source_name: null,
-      };
-      mockQuery.mockResolvedValueOnce({ rows: [noAppearance] }).mockResolvedValueOnce({ rows: [] });
+    it('should handle item with no depictions', async () => {
+      // base query, empty depictions, empty photos
+      mockQuery
+        .mockResolvedValueOnce({ rows: [itemBaseRow] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] });
 
       const res = await server.inject({
         method: 'GET',
         url: '/catalog/franchises/transformers/items/ft-44-thomas',
       });
       expect(res.statusCode).toBe(200);
-      expect(res.json<{ appearance: null }>().appearance).toBeNull();
+      const body = res.json<{ characters: unknown[] }>();
+      expect(body.characters).toHaveLength(0);
     });
   });
 

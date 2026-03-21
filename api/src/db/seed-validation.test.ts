@@ -885,4 +885,38 @@ describe('seed data validation', () => {
       }
     });
   });
+
+  // ── 11. Item character depiction coverage ─────────────────────────────────
+
+  describe('item character depiction coverage', () => {
+    it.each(itemFiles)('$file: character_appearance_slug is non-null on all items', ({ file, items }) => {
+      for (const item of items) {
+        expect(
+          item.character_appearance_slug,
+          `${file} > "${item.slug}": character_appearance_slug must not be null`
+        ).not.toBeNull();
+      }
+    });
+
+    it.each(itemFiles)(
+      '$file: appearance slug belongs to the correct character',
+      ({ file, items }) => {
+        const appearanceBySlug = new Map(
+          appearanceFiles.flatMap(({ data }) => data.map((a) => [a.slug, a] as const))
+        );
+
+        for (const item of items) {
+          if (item.character_appearance_slug === null) continue;
+          const appearance = appearanceBySlug.get(item.character_appearance_slug);
+          if (!appearance) continue; // caught by FK test in section 8
+
+          expect(
+            appearance.character_slug,
+            `${file} > "${item.slug}": appearance "${item.character_appearance_slug}" belongs to character ` +
+              `"${appearance.character_slug}" but item.character_slug is "${item.character_slug}"`
+          ).toBe(item.character_slug);
+        }
+      }
+    );
+  });
 });

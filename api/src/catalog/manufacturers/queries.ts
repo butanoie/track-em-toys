@@ -113,8 +113,6 @@ function buildManufacturerItemsQuery(
   const params: unknown[] = [manufacturerSlug];
   let idx = 2;
 
-  const needsCfJoin = filters?.continuity_family !== undefined;
-
   if (filters?.franchise !== undefined) {
     clauses.push(`fr.slug = $${idx}`);
     params.push(filters.franchise);
@@ -131,7 +129,9 @@ function buildManufacturerItemsQuery(
     idx++;
   }
   if (filters?.continuity_family !== undefined) {
-    clauses.push(`cf.slug = $${idx}`);
+    clauses.push(
+      `EXISTS (SELECT 1 FROM item_character_depictions icd JOIN character_appearances ca ON ca.id = icd.appearance_id JOIN characters ch ON ch.id = ca.character_id JOIN continuity_families cf ON cf.id = ch.continuity_family_id WHERE icd.item_id = i.id AND cf.slug = $${idx})`
+    );
     params.push(filters.continuity_family);
     idx++;
   }
@@ -144,8 +144,7 @@ function buildManufacturerItemsQuery(
       FROM items i
       INNER JOIN manufacturers mfr ON mfr.id = i.manufacturer_id
       INNER JOIN franchises fr ON fr.id = i.franchise_id
-      JOIN characters ch ON ch.id = i.character_id
-      JOIN toy_lines tl ON tl.id = i.toy_line_id${needsCfJoin ? '\n      JOIN continuity_families cf ON cf.id = ch.continuity_family_id' : ''}`;
+      JOIN toy_lines tl ON tl.id = i.toy_line_id`;
 
   return { joins, whereClause: clauses.join(' AND '), params };
 }
@@ -179,9 +178,23 @@ export async function listManufacturerItems(
     SELECT i.id, i.name, i.slug,
            i.size_class, i.year_released, i.is_third_party, i.data_quality,
            fr.slug AS franchise_slug, fr.name AS franchise_name,
-           ch.slug AS character_slug, ch.name AS character_name,
            mfr.slug AS manufacturer_slug, mfr.name AS manufacturer_name,
-           tl.slug AS toy_line_slug, tl.name AS toy_line_name
+           tl.slug AS toy_line_slug, tl.name AS toy_line_name,
+           COALESCE(
+             (SELECT json_agg(
+               json_build_object(
+                 'slug', ch.slug,
+                 'name', ch.name,
+                 'appearance_slug', ca.slug,
+                 'is_primary', icd.is_primary
+               ) ORDER BY icd.is_primary DESC, ch.name ASC
+             )
+             FROM item_character_depictions icd
+             JOIN character_appearances ca ON ca.id = icd.appearance_id
+             JOIN characters ch ON ch.id = ca.character_id
+             WHERE icd.item_id = i.id),
+             '[]'::json
+           ) AS characters
     ${joins}
      WHERE ${whereClause}
        AND ($${cursorIdx}::text IS NULL OR (i.name, i.id) > ($${cursorIdx}, $${cursorIdx + 1}::uuid))
@@ -280,17 +293,17 @@ export async function getManufacturerItemFacets(
     })(),
 
     (() => {
-      const {
-        joins: baseJoins,
-        whereClause,
-        params,
-      } = buildManufacturerItemsQuery(manufacturerSlug, filtersExcluding('continuity_family'));
-      const cfJoin = baseJoins.includes('continuity_families')
-        ? baseJoins
-        : `${baseJoins}\n      JOIN continuity_families cf ON cf.id = ch.continuity_family_id`;
+      const { joins, whereClause, params } = buildManufacturerItemsQuery(
+        manufacturerSlug,
+        filtersExcluding('continuity_family')
+      );
       return pool.query<FacetValue>(
-        `SELECT cf.slug AS value, cf.name AS label, COUNT(*)::int AS count
-         ${cfJoin}
+        `SELECT cf.slug AS value, cf.name AS label, COUNT(DISTINCT i.id)::int AS count
+         ${joins}
+         JOIN item_character_depictions icd ON icd.item_id = i.id
+         JOIN character_appearances ca ON ca.id = icd.appearance_id
+         JOIN characters ch ON ch.id = ca.character_id
+         JOIN continuity_families cf ON cf.id = ch.continuity_family_id
          WHERE ${whereClause}
          GROUP BY cf.slug, cf.name
          ORDER BY count DESC, cf.name ASC`,

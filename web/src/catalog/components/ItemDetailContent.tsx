@@ -11,20 +11,24 @@ interface ItemDetailContentProps {
 }
 
 export function ItemDetailContent({ data, franchise }: ItemDetailContentProps) {
+  const primary = data.characters.find((c) => c.is_primary) ?? data.characters[0];
+
   return (
     <>
       <PhotoGallery photos={data.photos} itemName={data.name} />
 
       <dl className="space-y-3">
-        <DetailField label="Character">
-          <Link
-            to="/catalog/$franchise/characters/$slug"
-            params={{ franchise, slug: data.character.slug }}
-            className="text-primary hover:underline"
-          >
-            {data.character.name}
-          </Link>
-        </DetailField>
+        {primary && (
+          <DetailField label="Character">
+            <Link
+              to="/catalog/$franchise/characters/$slug"
+              params={{ franchise, slug: primary.slug }}
+              className="text-primary hover:underline"
+            >
+              {primary.name}
+            </Link>
+          </DetailField>
+        )}
 
         {data.manufacturer && (
           <DetailField label="Manufacturer">
@@ -53,7 +57,7 @@ export function ItemDetailContent({ data, franchise }: ItemDetailContentProps) {
         <DetailField label="Year Released" value={data.year_released?.toString()} />
         <DetailField label="Product Code" value={data.product_code} />
 
-        {data.appearance && <DetailField label="Appearance" value={data.appearance.name} />}
+        {primary?.appearance_name && <DetailField label="Appearance" value={primary.appearance_name} />}
 
         <DetailField label="Status">
           <Badge variant="outline" className={dataQualityStyle(data.data_quality)}>

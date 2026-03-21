@@ -63,6 +63,19 @@ export const nullableSlugNameRef = {
   oneOf: [slugNameRef, { type: 'null' }],
 } as const;
 
+/** Character depiction reference for item list responses. */
+export const characterDepictionListItem = {
+  type: 'object',
+  required: ['slug', 'name', 'appearance_slug', 'is_primary'],
+  additionalProperties: false,
+  properties: {
+    slug: { type: 'string' },
+    name: { type: 'string' },
+    appearance_slug: { type: 'string' },
+    is_primary: { type: 'boolean' },
+  },
+} as const;
+
 /** Shared item shape for list responses (franchise-scoped and manufacturer-scoped). */
 export const itemListItem = {
   type: 'object',
@@ -71,7 +84,7 @@ export const itemListItem = {
     'name',
     'slug',
     'franchise',
-    'character',
+    'characters',
     'manufacturer',
     'toy_line',
     'size_class',
@@ -85,7 +98,7 @@ export const itemListItem = {
     name: { type: 'string' },
     slug: { type: 'string' },
     franchise: slugNameRef,
-    character: slugNameRef,
+    characters: { type: 'array', items: characterDepictionListItem },
     manufacturer: nullableSlugNameRef,
     toy_line: slugNameRef,
     size_class: { type: ['string', 'null'] },
