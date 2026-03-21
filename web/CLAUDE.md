@@ -117,11 +117,16 @@ cd web && npm run format:check # Prettier check (CI mode)
 
 ### Playwright E2E
 
-- E2E tests mock API responses via `page.route()` — they don't hit the real API server
+- **Real auth via storageState**: E2E tests use real JWT authentication. `globalSetup` calls `POST /auth/test-signin` (test-only, `NODE_ENV !== 'production'`) to create test users and write `storageState` files to `e2e/.auth/{role}.json`. Playwright projects load these for per-role auth.
+- **sessionStorage fixture**: `storageState` captures cookies + localStorage but NOT sessionStorage. `e2e/fixtures/e2e-fixtures.ts` extends Playwright's `test` to seed sessionStorage with the user profile via `addInitScript`. Import `test` and `expect` from `./fixtures/e2e-fixtures` (not `@playwright/test`) in authenticated tests.
+- **API data still mocked**: Auth is real but domain API data (catalog, admin) is still mocked via `page.route()`. Only auth endpoints (`/auth/refresh`, `/auth/logout`) are hit against the real API.
+- **Test-only endpoint**: `POST /auth/test-signin` accepts `{ email, role }` with `@e2e.test` TLD constraint. Returns real JWT + refresh token cookie. Gated behind `NODE_ENV !== 'production'` in `server.ts`.
+- **Four projects**: `unauthenticated` (login/redirect tests), `user` (catalog browsing, session), `admin` (admin dashboard), `curator` (future). Tests are matched to projects via `testMatch` regex.
+- **fullyParallel: false**: Authenticated projects run tests serially to avoid refresh token rotation conflicts (each test triggers `/auth/refresh` which rotates the token).
+- **Manual context for cross-role tests**: Tests that need a different role than their project (e.g., non-admin access guard in the admin spec) create a manual `browser.newContext({ storageState: 'e2e/.auth/user.json' })` and seed sessionStorage with `readTestUser('user')` from `e2e/fixtures/test-users.ts`.
+- **session-persistence.spec.ts stays mocked**: Tests that explicitly test auth failure paths (expired refresh, session expiry) keep their `page.route()` mocking approach — failure scenarios can't be deterministically triggered against a real API.
 - When mocking API paths that collide with SPA routes (e.g., `/admin/users` is both a page and an API path), filter by `resourceType`: `if (route.request().resourceType() === 'document') return route.continue()`
 - Prefer `getByRole('cell', { name: /.../ })` over `getByText()` for table data — text appears in both cell content and row accessible names, causing ambiguity
-- Admin E2E auth: use `page.addInitScript()` to set `sessionStorage` with user including `role` field before page JS runs
-- All E2E auth fixtures in `e2e/fixtures/auth.ts` — `validUser` must include `role` field to match `UserResponseSchema`
 - When a page has multiple Radix `Select` components (e.g., filter + per-row role selector), `getByRole('combobox')` fails Playwright strict mode — disambiguate with `getByRole('combobox', { name: /aria-label pattern/ })`
 
 ### Photo Domains (Web UI)
@@ -129,7 +134,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Catalog photo gallery on item detail page — shared, visible to all users
 - Photo upload UI (Phase 1.9) requires `curator` role — show/hide upload controls based on user role
 - User collection photos (private, per-item condition shots) are deferred to post-ML Phase 1.6
-- Photo URLs are stored as relative paths in the DB (e.g., `abc-123/def-456-gallery.webp`) — `buildPhotoUrl()` from `catalog/photos/api.ts` prepends `VITE_PHOTO_BASE_URL` for display
+- Photo URLs are stored as relative paths in the DB (e.g., `abc-123/def-456-original.webp`) — `buildPhotoUrl()` from `catalog/photos/api.ts` prepends `VITE_PHOTO_BASE_URL` for display
 - `VITE_PHOTO_BASE_URL` defaults to `http://localhost:3010/photos` in dev (matches `@fastify/static` route)
 - `buildHeaders()` in `api-client.ts` skips `Content-Type: application/json` when `body instanceof FormData` — required for multipart uploads
 - Photo upload uses XHR (not `fetch`) for `upload.onprogress` — the XHR wrapper in `catalog/photos/api.ts` manages its own auth header via `authStore.getToken()` and retries once on 401

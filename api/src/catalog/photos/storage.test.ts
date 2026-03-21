@@ -12,11 +12,10 @@ describe('photo storage path helpers', () => {
 
   it('builds correct file path for each size', () => {
     expect(photoPath(storagePath, itemId, photoId, 'thumb')).toBe('/data/photos/abc-123/def-456-thumb.webp');
-    expect(photoPath(storagePath, itemId, photoId, 'gallery')).toBe('/data/photos/abc-123/def-456-gallery.webp');
     expect(photoPath(storagePath, itemId, photoId, 'original')).toBe('/data/photos/abc-123/def-456-original.webp');
   });
 
   it('builds correct relative URL for database storage', () => {
-    expect(photoRelativeUrl(itemId, photoId)).toBe('abc-123/def-456-gallery.webp');
+    expect(photoRelativeUrl(itemId, photoId)).toBe('abc-123/def-456-original.webp');
   });
 });

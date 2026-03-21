@@ -116,8 +116,8 @@ Two distinct photo types:
 - Photo routes live in `src/catalog/photos/` registered as a sub-plugin of `itemRoutes` at `/:slug/photos`
 - `@fastify/multipart` registered inside the photo plugin (scoped) — coexists with JSON body parsing (different content types, no conflict)
 - Upload route processes all files into memory buffers first, then writes to disk + inserts to DB (atomic batch)
-- Thumbnail pipeline: `sharp` converts to WebP at 3 sizes (200×200 thumb, 800×800 gallery, lossless original)
-- File naming: `{itemId}/{photoId}-{size}.webp`, relative URL stored in DB
+- Thumbnail pipeline: `sharp` converts to WebP at 2 sizes (200px thumb fit-inside, 1600px original fit-inside, both q80-85). Minimum 600px on shortest edge enforced via `DimensionError`
+- File naming: `{itemId}/{photoId}-{size}.webp` (size: `thumb` | `original`), relative URL stored in DB
 - `@fastify/static` registered in development mode only (`config.nodeEnv === 'development'`) with `decorateReply: false, index: false`
 - `PHOTO_STORAGE_PATH` startup validation skips in test environment (`config.nodeEnv !== 'test'`)
 - Adding a new required config property (e.g., `config.photos`) breaks ALL test files that mock `config.js` — add the property to every mock config across the test suite
@@ -138,6 +138,17 @@ Two distinct photo types:
 - ALWAYS read signed cookies with `request.unsignCookie(request.cookies[NAME])`
 - NEVER read `request.cookies[NAME]` directly — returns raw `s:value.hmac` wire format
 - Check `.valid === true` before using the value; `.valid === false` means tampered → 401
+- `sameSite` is `'strict'` in production/staging, `'lax'` in development/test — controlled by `COOKIE_SAME_SITE` const in `cookies.ts`. The `'lax'` setting allows cross-port requests during E2E testing (web at `:4173`, API at `:3010`)
+
+### E2E Test Auth (test-signin endpoint)
+
+- `POST /auth/test-signin` — test-only endpoint in `src/auth/test-signin.ts`, registered in `server.ts` inside `config.nodeEnv !== 'production'` block via dynamic `import()`
+- Accepts `{ email, role, display_name? }` — email MUST end with `@e2e.test` (schema-enforced pattern)
+- Upserts user with `ON CONFLICT (LOWER(email))`, resets `deactivated_at`/`deleted_at` to NULL
+- Returns same shape as `POST /auth/signin`: `{ access_token, refresh_token: null, user }` + httpOnly cookie
+- No audit log entries — this is test infrastructure, not a production signin
+- Rate limit: `max: 100` (high — globalSetup calls it 3× per test run)
+- Production guard: plugin throws at registration time if `config.nodeEnv === 'production'` (defense-in-depth)
 
 ### OAuth / JWT Security
 

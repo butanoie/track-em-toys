@@ -8,7 +8,7 @@ vi.mock('../api', () => ({
   deletePhoto: vi.fn().mockResolvedValue(undefined),
   setPrimaryPhoto: vi.fn().mockResolvedValue({
     id: 'p-1',
-    url: 'test/photo-gallery.webp',
+    url: 'test/photo-original.webp',
     caption: null,
     is_primary: true,
     sort_order: 0,

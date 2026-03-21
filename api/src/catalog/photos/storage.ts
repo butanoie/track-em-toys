@@ -1,7 +1,7 @@
 import { mkdir, writeFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const SIZES = ['thumb', 'gallery', 'original'] as const;
+const SIZES = ['thumb', 'original'] as const;
 export type PhotoSize = (typeof SIZES)[number];
 
 /**
@@ -20,20 +20,20 @@ export function photoDir(storagePath: string, itemId: string): string {
  * @param storagePath - Root photo storage directory
  * @param itemId - Item UUID
  * @param photoId - Photo UUID
- * @param size - Photo size variant (thumb, gallery, original)
+ * @param size - Photo size variant (thumb, original)
  */
 export function photoPath(storagePath: string, itemId: string, photoId: string, size: PhotoSize): string {
   return join(storagePath, itemId, `${photoId}-${size}.webp`);
 }
 
 /**
- * Build the relative URL stored in the database (gallery size).
+ * Build the relative URL stored in the database (original size).
  *
  * @param itemId - Item UUID
  * @param photoId - Photo UUID
  */
 export function photoRelativeUrl(itemId: string, photoId: string): string {
-  return `${itemId}/${photoId}-gallery.webp`;
+  return `${itemId}/${photoId}-original.webp`;
 }
 
 /**

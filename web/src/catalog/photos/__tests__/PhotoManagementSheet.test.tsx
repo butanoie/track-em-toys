@@ -13,7 +13,7 @@ vi.mock('../api', () => ({
   deletePhoto: vi.fn().mockResolvedValue(undefined),
   setPrimaryPhoto: vi.fn().mockResolvedValue({
     id: 'p-1',
-    url: 'test-gallery.webp',
+    url: 'test-original.webp',
     caption: null,
     is_primary: true,
     sort_order: 0,
@@ -52,8 +52,8 @@ vi.mock('@/auth/useAuth', () => ({
 }));
 
 const mockPhotos: Photo[] = [
-  { id: 'p-1', url: 'item1/photo1-gallery.webp', caption: null, is_primary: true, sort_order: 0 },
-  { id: 'p-2', url: 'item1/photo2-gallery.webp', caption: 'Side view', is_primary: false, sort_order: 1 },
+  { id: 'p-1', url: 'item1/photo1-original.webp', caption: null, is_primary: true, sort_order: 0 },
+  { id: 'p-2', url: 'item1/photo2-original.webp', caption: 'Side view', is_primary: false, sort_order: 1 },
 ];
 
 function createWrapper() {
