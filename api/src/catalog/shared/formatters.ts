@@ -11,7 +11,7 @@ export function formatListItem(row: ItemListRow) {
     name: row.name,
     slug: row.slug,
     franchise: { slug: row.franchise_slug, name: row.franchise_name },
-    character: { slug: row.character_slug, name: row.character_name },
+    characters: row.characters,
     manufacturer: row.manufacturer_slug ? { slug: row.manufacturer_slug, name: row.manufacturer_name! } : null,
     toy_line: { slug: row.toy_line_slug, name: row.toy_line_name },
     size_class: row.size_class,
@@ -27,17 +27,10 @@ export function formatListItem(row: ItemListRow) {
  * @param detail - Item detail to format
  */
 export function formatDetail(detail: ItemDetail) {
-  const { base, photos } = detail;
+  const { base, depictions, photos } = detail;
   return {
     ...formatListItem(base),
-    appearance: base.appearance_slug
-      ? {
-          slug: base.appearance_slug,
-          name: base.appearance_name!,
-          source_media: base.appearance_source_media,
-          source_name: base.appearance_source_name,
-        }
-      : null,
+    characters: depictions,
     description: base.description,
     barcode: base.barcode,
     sku: base.sku,

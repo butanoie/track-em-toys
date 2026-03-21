@@ -44,35 +44,6 @@ describe('CharacterDetailContent', () => {
     expect(screen.queryByText('Combined Form')).not.toBeInTheDocument();
   });
 
-  it('renders component_characters list when is_combined_form with components', () => {
-    const data: CharacterDetail = {
-      ...mockCharacterDetail,
-      is_combined_form: true,
-      component_characters: [
-        { slug: 'scrapper', name: 'Scrapper', combiner_role: 'Right Leg', alt_mode: 'Payloader' },
-        { slug: 'hook', name: 'Hook', combiner_role: null, alt_mode: null },
-      ],
-    };
-    render(<CharacterDetailContent data={data} />);
-    expect(screen.getByText('Scrapper')).toBeInTheDocument();
-    expect(screen.getByText('Hook')).toBeInTheDocument();
-    expect(screen.getByText('Scrapper').closest('a')).toHaveAttribute('href', '/catalog/$franchise/characters/$slug');
-  });
-
-  it('renders combiner_role when present', () => {
-    const data: CharacterDetail = { ...mockCharacterDetail, combiner_role: 'Leader' };
-    render(<CharacterDetailContent data={data} />);
-    expect(screen.getByText('Combiner Role')).toBeInTheDocument();
-    expect(screen.getByText('Leader')).toBeInTheDocument();
-  });
-
-  it('renders combined_form link when present', () => {
-    const data: CharacterDetail = { ...mockCharacterDetail, combined_form: { slug: 'devastator', name: 'Devastator' } };
-    render(<CharacterDetailContent data={data} />);
-    expect(screen.getByText('Devastator')).toBeInTheDocument();
-    expect(screen.getByText('Devastator').closest('a')).toHaveAttribute('href', '/catalog/$franchise/characters/$slug');
-  });
-
   it('renders sub_groups when present', () => {
     const data: CharacterDetail = {
       ...mockCharacterDetail,

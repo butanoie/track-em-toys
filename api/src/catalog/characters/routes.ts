@@ -3,6 +3,7 @@ import { listCharacters, getCharacterBySlug, getCharacterFacets } from './querie
 import type { CharacterListRow, CharacterDetail, CharacterFilters } from './queries.js';
 import { listCharactersSchema, getCharacterSchema, getCharacterFacetsSchema } from './schemas.js';
 import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js';
+import { characterRelationshipRoutes } from '../relationships/routes.js';
 
 interface FranchiseParams {
   franchise: string;
@@ -59,12 +60,9 @@ function formatListItem(row: CharacterListRow) {
  * @param detail - Character detail to format
  */
 function formatDetail(detail: CharacterDetail) {
-  const { base, subGroups, appearances, componentCharacters } = detail;
+  const { base, subGroups, appearances } = detail;
   return {
     ...formatListItem(base),
-    combiner_role: base.combiner_role,
-    combined_form: base.combined_form_slug ? { slug: base.combined_form_slug, name: base.combined_form_name! } : null,
-    component_characters: componentCharacters,
     sub_groups: subGroups,
     appearances,
     metadata: base.metadata,
@@ -81,7 +79,6 @@ const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as c
  * @param fastify - Fastify instance
  * @param _opts - Fastify plugin options (unused)
  */
-// eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function characterRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   fastify.get<{ Params: FranchiseParams; Querystring: CharactersListQuery }>(
     '/',
@@ -128,4 +125,7 @@ export async function characterRoutes(fastify: FastifyInstance, _opts: object): 
       return formatDetail(detail);
     }
   );
+
+  // Character relationship routes
+  await fastify.register(characterRelationshipRoutes, { prefix: '/:slug/relationships' });
 }

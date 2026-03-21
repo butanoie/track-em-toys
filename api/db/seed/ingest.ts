@@ -64,8 +64,6 @@ interface CharacterRecord {
   character_type: string | null
   alt_mode: string | null
   is_combined_form: boolean
-  combined_form_slug: string | null
-  combiner_role: string | null
   continuity_family_slug: string
   sub_group_slugs: string[]
   notes: string | null
@@ -118,6 +116,39 @@ interface AppearanceFile {
 interface ItemFile {
   _metadata: { total_items: number; [key: string]: unknown }
   items: ItemRecord[]
+}
+
+interface RelationshipEntity {
+  slug: string
+  role: string | null
+}
+
+interface RelationshipRecord {
+  type: string
+  subtype: string | null
+  entity1: RelationshipEntity
+  entity2: RelationshipEntity
+  metadata: Record<string, unknown>
+}
+
+interface RelationshipFile {
+  _metadata: { total: number; [key: string]: unknown }
+  relationships: RelationshipRecord[]
+}
+
+interface ItemRelationshipRecord {
+  type: string
+  subtype: string | null
+  item1_slug: string
+  item1_role: string | null
+  item2_slug: string
+  item2_role: string | null
+  metadata: Record<string, unknown>
+}
+
+interface ItemRelationshipFile {
+  _metadata: { total: number; [key: string]: unknown }
+  item_relationships: ItemRelationshipRecord[]
 }
 
 // ─── Setup ──────────────────────────────────────────────────────────────────
@@ -206,7 +237,7 @@ async function buildSlugMap(
     throw new Error(`buildSlugMap: unexpected table "${table}"`)
   }
   const { rows } = await client.query<{ slug: string; id: string }>(
-    `SELECT slug, id FROM ${table}`,
+    `SELECT slug, id FROM ${pg.escapeIdentifier(table)}`,
   )
   const map = new Map<string, string>()
   for (const row of rows) {
@@ -442,17 +473,14 @@ async function upsertCharactersPass1(
     await client.query(
       `INSERT INTO characters
          (name, slug, franchise_id, faction_id, character_type, alt_mode,
-          is_combined_form, combined_form_id, combiner_role,
-          continuity_family_id, metadata)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9, $10)
+          is_combined_form, continuity_family_id, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        ON CONFLICT (slug, franchise_id) DO UPDATE SET
          name = EXCLUDED.name,
          faction_id = EXCLUDED.faction_id,
          character_type = EXCLUDED.character_type,
          alt_mode = EXCLUDED.alt_mode,
          is_combined_form = EXCLUDED.is_combined_form,
-         combined_form_id = NULL,
-         combiner_role = EXCLUDED.combiner_role,
          continuity_family_id = EXCLUDED.continuity_family_id,
          metadata = EXCLUDED.metadata,
          updated_at = now()`,
@@ -464,7 +492,6 @@ async function upsertCharactersPass1(
         c.character_type ?? null,
         c.alt_mode ?? null,
         c.is_combined_form,
-        c.combiner_role ?? null,
         continuityFamilyId,
         JSON.stringify(metadata),
       ],
@@ -513,30 +540,47 @@ async function upsertCharacterSubGroups(
   return count
 }
 
-async function upsertCharactersPass2(
+// ─── Character relationship upserts ─────────────────────────────────────────
+
+async function upsertCharacterRelationships(
   client: pg.PoolClient,
-  allCharacters: CharacterRecord[],
   characterMap: Map<string, string>,
 ): Promise<number> {
-  let count = 0
-  for (const c of allCharacters) {
-    if (c.combined_form_slug == null) continue
+  const files = discoverJsonFiles(path.join(SEED_DIR, 'relationships'))
+  let totalCount = 0
 
-    const combinedFormId = resolveSlug(
-      characterMap,
-      c.combined_form_slug,
-      `characters pass 2 > "${c.slug}" > combined_form_slug`,
-    )
+  for (const filePath of files) {
+    const file = loadJson<RelationshipFile>(filePath)
+    for (const r of file.relationships) {
+      const ctx = `relationships > "${r.type}" > "${r.entity1.slug}"-"${r.entity2.slug}"`
+      const entity1Id = resolveSlug(characterMap, r.entity1.slug, ctx)
+      const entity2Id = resolveSlug(characterMap, r.entity2.slug, ctx)
 
-    await client.query(
-      `UPDATE characters SET combined_form_id = $1, updated_at = now()
-       WHERE slug = $2`,
-      [combinedFormId, c.slug],
-    )
-    count++
+      await client.query(
+        `INSERT INTO character_relationships
+           (type, subtype, entity1_id, entity1_role, entity2_id, entity2_role, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (type, entity1_id, entity2_id) DO UPDATE SET
+           subtype = EXCLUDED.subtype,
+           entity1_role = EXCLUDED.entity1_role,
+           entity2_role = EXCLUDED.entity2_role,
+           metadata = EXCLUDED.metadata`,
+        [
+          r.type,
+          r.subtype ?? null,
+          entity1Id,
+          r.entity1.role ?? null,
+          entity2Id,
+          r.entity2.role ?? null,
+          JSON.stringify(r.metadata ?? {}),
+        ],
+      )
+    }
+    totalCount += file.relationships.length
   }
-  log.info({ table: 'characters', count, pass: 2 }, 'updated combined_form_id')
-  return count
+
+  log.info({ table: 'character_relationships', count: totalCount }, 'upserted')
+  return totalCount
 }
 
 // ─── Appearance upserts ─────────────────────────────────────────────────────
@@ -596,50 +640,41 @@ async function upsertItems(
   client: pg.PoolClient,
   manufacturerMap: Map<string, string>,
   toyLineMap: Map<string, string>,
-  characterMap: Map<string, string>,
-  appearanceMap: Map<string, string>,
-): Promise<number> {
+): Promise<{ allItems: ItemRecord[]; itemMap: Map<string, string> }> {
   const files = discoverJsonFilesRecursive(path.join(SEED_DIR, 'items'))
-  let totalCount = 0
+  const allItems: ItemRecord[] = []
+  const itemMap = new Map<string, string>()
 
   for (const filePath of files) {
     const file = loadJson<ItemFile>(filePath)
+    if (!Array.isArray(file.items)) continue
     for (const item of file.items) {
       const ctx = `items > "${item.slug}"`
       const manufacturerId = resolveSlug(manufacturerMap, item.manufacturer_slug, ctx)
       const toyLineId = resolveSlug(toyLineMap, item.toy_line_slug, ctx)
-      const characterId = resolveSlug(characterMap, item.character_slug, ctx)
-      const appearanceId = resolveOptionalSlug(
-        appearanceMap,
-        item.character_appearance_slug,
-        ctx,
-      )
 
-      await client.query(
+      const result = await client.query<{ id: string; slug: string }>(
         `INSERT INTO items
-           (name, slug, manufacturer_id, character_id, toy_line_id,
-            character_appearance_id, size_class, year_released,
+           (name, slug, manufacturer_id, toy_line_id,
+            size_class, year_released,
             product_code, is_third_party, metadata)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          ON CONFLICT (slug, franchise_id) DO UPDATE SET
            name = EXCLUDED.name,
            manufacturer_id = EXCLUDED.manufacturer_id,
-           character_id = EXCLUDED.character_id,
            toy_line_id = EXCLUDED.toy_line_id,
-           character_appearance_id = EXCLUDED.character_appearance_id,
            size_class = EXCLUDED.size_class,
            year_released = EXCLUDED.year_released,
            product_code = EXCLUDED.product_code,
            is_third_party = EXCLUDED.is_third_party,
            metadata = EXCLUDED.metadata,
-           updated_at = now()`,
+           updated_at = now()
+         RETURNING id, slug`,
         [
           item.name,
           item.slug,
           manufacturerId,
-          characterId,
           toyLineId,
-          appearanceId,
           item.size_class ?? null,
           item.year_released ?? null,
           item.product_code ?? null,
@@ -647,11 +682,93 @@ async function upsertItems(
           JSON.stringify(item.metadata),
         ],
       )
+
+      const row = result.rows[0]!
+      itemMap.set(row.slug, row.id)
+      allItems.push(item)
     }
-    totalCount += file.items.length
   }
 
-  log.info({ table: 'items', count: totalCount }, 'upserted')
+  log.info({ table: 'items', count: allItems.length }, 'upserted')
+  return { allItems, itemMap }
+}
+
+// ─── Item character depiction upserts ───────────────────────────────────────
+
+async function upsertItemCharacterDepictions(
+  client: pg.PoolClient,
+  allItems: ItemRecord[],
+  appearanceMap: Map<string, string>,
+  itemMap: Map<string, string>,
+): Promise<number> {
+  let count = 0
+
+  for (const item of allItems) {
+    if (item.character_appearance_slug == null) continue
+
+    const ctx = `item_character_depictions > "${item.slug}"`
+    const itemId = resolveSlug(itemMap, item.slug, ctx)
+    const appearanceId = resolveSlug(appearanceMap, item.character_appearance_slug, ctx)
+
+    // Delete existing depictions so changed appearance slugs are cleaned up in upsert mode
+    await client.query(
+      'DELETE FROM item_character_depictions WHERE item_id = $1',
+      [itemId],
+    )
+
+    await client.query(
+      `INSERT INTO item_character_depictions
+         (item_id, appearance_id, is_primary)
+       VALUES ($1, $2, TRUE)`,
+      [itemId, appearanceId],
+    )
+    count++
+  }
+
+  log.info({ table: 'item_character_depictions', count }, 'upserted')
+  return count
+}
+
+// ─── Item relationship upserts ───────────────────────────────────────────
+
+async function upsertItemRelationships(
+  client: pg.PoolClient,
+  itemMap: Map<string, string>,
+): Promise<number> {
+  const files = discoverJsonFiles(path.join(SEED_DIR, 'item_relationships'))
+  let totalCount = 0
+
+  for (const filePath of files) {
+    const file = loadJson<ItemRelationshipFile>(filePath)
+    for (const r of file.item_relationships) {
+      const ctx = `item_relationships > "${r.type}" > "${r.item1_slug}"-"${r.item2_slug}"`
+      const item1Id = resolveSlug(itemMap, r.item1_slug, ctx)
+      const item2Id = resolveSlug(itemMap, r.item2_slug, ctx)
+
+      await client.query(
+        `INSERT INTO item_relationships
+           (type, subtype, item1_id, item1_role, item2_id, item2_role, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (type, item1_id, item2_id) DO UPDATE SET
+           subtype = EXCLUDED.subtype,
+           item1_role = EXCLUDED.item1_role,
+           item2_role = EXCLUDED.item2_role,
+           metadata = EXCLUDED.metadata`,
+        [
+          r.type,
+          r.subtype ?? null,
+          item1Id,
+          r.item1_role ?? null,
+          item2Id,
+          r.item2_role ?? null,
+          JSON.stringify(r.metadata ?? {}),
+        ],
+      )
+    }
+    totalCount += file.item_relationships.length
+  }
+
+  log.info({ table: 'item_relationships', count: totalCount }, 'upserted')
   return totalCount
 }
 
@@ -661,6 +778,9 @@ async function runPurge(client: pg.PoolClient): Promise<void> {
   log.warn({ mode: 'purge' }, 'truncating all catalog tables')
   await client.query(
     `TRUNCATE
+       item_character_depictions,
+       item_relationships,
+       character_relationships,
        items,
        character_appearances,
        character_sub_groups,
@@ -689,7 +809,7 @@ async function runSeed(client: pg.PoolClient): Promise<void> {
   const manufacturerMap = await upsertManufacturers(client)
   const toyLineMap = await upsertToyLines(client, manufacturerMap, franchiseMap)
 
-  // 5: Characters — load all files, then two-pass insert
+  // 5: Characters — load all files and insert
   const charFiles = discoverJsonFiles(path.join(SEED_DIR, 'characters'))
   const allCharacters: CharacterRecord[] = []
   for (const filePath of charFiles) {
@@ -709,14 +829,20 @@ async function runSeed(client: pg.PoolClient): Promise<void> {
   // 5b: Character sub-groups junction
   await upsertCharacterSubGroups(client, allCharacters, characterMap, subGroupMap)
 
-  // 5 pass 2: Resolve combined_form_slug self-references
-  await upsertCharactersPass2(client, allCharacters, characterMap)
-
   // 5.5: Character appearances
   const appearanceMap = await upsertAppearances(client, characterMap)
 
+  // 5.7: Character relationships
+  await upsertCharacterRelationships(client, characterMap)
+
   // 6: Items
-  await upsertItems(client, manufacturerMap, toyLineMap, characterMap, appearanceMap)
+  const { allItems, itemMap } = await upsertItems(client, manufacturerMap, toyLineMap)
+
+  // 6b: Item character depictions (auto-generated from character_appearance_slug on items)
+  await upsertItemCharacterDepictions(client, allItems, appearanceMap, itemMap)
+
+  // 6c: Item relationships
+  await upsertItemRelationships(client, itemMap)
 }
 
 async function main(): Promise<void> {
@@ -737,10 +863,8 @@ async function main(): Promise<void> {
 
     if (isPurge) {
       await runPurge(client)
-      await runSeed(client)
-    } else {
-      await runSeed(client)
     }
+    await runSeed(client)
 
     await client.query('COMMIT')
     log.info('seed complete')

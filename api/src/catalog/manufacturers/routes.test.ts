@@ -84,8 +84,9 @@ describe('manufacturer routes', () => {
       slug: 'mp-44-optimus-prime',
       franchise_slug: 'transformers',
       franchise_name: 'Transformers',
-      character_slug: 'optimus-prime',
-      character_name: 'Optimus Prime',
+      characters: [
+        { slug: 'optimus-prime', name: 'Optimus Prime', appearance_slug: 'optimus-prime-g1-cartoon', is_primary: true },
+      ],
       manufacturer_slug: 'fanstoys',
       manufacturer_name: 'FansToys',
       toy_line_slug: 'masterpiece',

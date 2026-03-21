@@ -32,43 +32,6 @@ export function CharacterDetailContent({ data, relatedItems, relatedItemsCount }
             </Badge>
           </div>
         )}
-
-        {data.is_combined_form && data.component_characters.length > 0 && (
-          <DetailField label="Component Characters">
-            <ul className="space-y-1">
-              {data.component_characters.map((comp) => (
-                <li key={comp.slug} className="text-sm">
-                  <Link
-                    to="/catalog/$franchise/characters/$slug"
-                    params={{ franchise, slug: comp.slug }}
-                    className="text-primary hover:underline"
-                  >
-                    {comp.name}
-                  </Link>
-                  {(comp.combiner_role || comp.alt_mode) && (
-                    <span className="text-xs text-muted-foreground ml-1.5">
-                      ({[comp.combiner_role, comp.alt_mode].filter(Boolean).join(' · ')})
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </DetailField>
-        )}
-
-        {data.combiner_role && <DetailField label="Combiner Role" value={data.combiner_role} />}
-
-        {data.combined_form && (
-          <DetailField label="Combined Form">
-            <Link
-              to="/catalog/$franchise/characters/$slug"
-              params={{ franchise, slug: data.combined_form.slug }}
-              className="text-primary hover:underline"
-            >
-              {data.combined_form.name}
-            </Link>
-          </DetailField>
-        )}
       </dl>
 
       {data.sub_groups.length > 0 && (

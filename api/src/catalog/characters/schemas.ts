@@ -51,18 +51,6 @@ const appearanceItem = {
   },
 } as const;
 
-const componentCharacterItem = {
-  type: 'object',
-  required: ['slug', 'name', 'combiner_role', 'alt_mode'],
-  additionalProperties: false,
-  properties: {
-    slug: { type: 'string' },
-    name: { type: 'string' },
-    combiner_role: { type: ['string', 'null'] },
-    alt_mode: { type: ['string', 'null'] },
-  },
-} as const;
-
 const characterDetail = {
   type: 'object',
   required: [
@@ -75,9 +63,6 @@ const characterDetail = {
     'character_type',
     'alt_mode',
     'is_combined_form',
-    'combiner_role',
-    'combined_form',
-    'component_characters',
     'sub_groups',
     'appearances',
     'metadata',
@@ -95,9 +80,6 @@ const characterDetail = {
     character_type: { type: ['string', 'null'] },
     alt_mode: { type: ['string', 'null'] },
     is_combined_form: { type: 'boolean' },
-    combiner_role: { type: ['string', 'null'] },
-    combined_form: nullableSlugNameRef,
-    component_characters: { type: 'array', items: componentCharacterItem },
     sub_groups: { type: 'array', items: slugNameRef },
     appearances: { type: 'array', items: appearanceItem },
     metadata: { type: 'object', additionalProperties: true },
@@ -168,7 +150,7 @@ export const getCharacterFacetsSchema = {
 } as const;
 
 export const getCharacterSchema = {
-  description: 'Get a character by slug within a franchise, including sub-groups, appearances, and combiner info.',
+  description: 'Get a character by slug within a franchise, including sub-groups and appearances.',
   tags: ['catalog'],
   summary: 'Get character',
   params: franchiseSlugParams,

@@ -4,14 +4,20 @@ import { pool } from '../../db/pool.js';
 // List query row type
 // ---------------------------------------------------------------------------
 
+export interface CharacterDepiction {
+  slug: string;
+  name: string;
+  appearance_slug: string;
+  is_primary: boolean;
+}
+
 export interface ItemListRow {
   id: string;
   name: string;
   slug: string;
   franchise_slug: string;
   franchise_name: string;
-  character_slug: string;
-  character_name: string;
+  characters: CharacterDepiction[];
   manufacturer_slug: string | null;
   manufacturer_name: string | null;
   toy_line_slug: string;
@@ -27,10 +33,6 @@ export interface ItemListRow {
 // ---------------------------------------------------------------------------
 
 export interface ItemBaseRow extends ItemListRow {
-  appearance_slug: string | null;
-  appearance_name: string | null;
-  appearance_source_media: string | null;
-  appearance_source_name: string | null;
   description: string | null;
   barcode: string | null;
   sku: string | null;
@@ -38,6 +40,16 @@ export interface ItemBaseRow extends ItemListRow {
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+}
+
+export interface DepictionDetailRow {
+  slug: string;
+  name: string;
+  appearance_slug: string;
+  appearance_name: string;
+  appearance_source_media: string | null;
+  appearance_source_name: string | null;
+  is_primary: boolean;
 }
 
 export interface PhotoRow {
@@ -87,10 +99,6 @@ function buildItemsQuery(
   const params: unknown[] = [franchiseSlug];
   let idx = 2;
 
-  // Continuity family filter requires JOIN through characters → continuity_families.
-  // Always include the JOIN since characters is already INNER JOINed.
-  const needsCfJoin = filters?.continuity_family !== undefined;
-
   if (filters?.manufacturer !== undefined) {
     clauses.push(`mfr.slug = $${idx}`);
     params.push(filters.manufacturer);
@@ -107,7 +115,9 @@ function buildItemsQuery(
     idx++;
   }
   if (filters?.continuity_family !== undefined) {
-    clauses.push(`cf.slug = $${idx}`);
+    clauses.push(
+      `EXISTS (SELECT 1 FROM item_character_depictions icd JOIN character_appearances ca ON ca.id = icd.appearance_id JOIN characters ch ON ch.id = ca.character_id JOIN continuity_families cf ON cf.id = ch.continuity_family_id WHERE icd.item_id = i.id AND cf.slug = $${idx})`
+    );
     params.push(filters.continuity_family);
     idx++;
   }
@@ -117,16 +127,17 @@ function buildItemsQuery(
     idx++;
   }
   if (filters?.character !== undefined) {
-    clauses.push(`ch.slug = $${idx}`);
+    clauses.push(
+      `EXISTS (SELECT 1 FROM item_character_depictions icd JOIN character_appearances ca ON ca.id = icd.appearance_id JOIN characters ch ON ch.id = ca.character_id WHERE icd.item_id = i.id AND ch.slug = $${idx})`
+    );
     params.push(filters.character);
   }
 
   const joins = `
       FROM items i
       JOIN franchises fr ON fr.id = i.franchise_id
-      JOIN characters ch ON ch.id = i.character_id
       LEFT JOIN manufacturers mfr ON mfr.id = i.manufacturer_id
-      JOIN toy_lines tl ON tl.id = i.toy_line_id${needsCfJoin ? '\n      JOIN continuity_families cf ON cf.id = ch.continuity_family_id' : ''}`;
+      JOIN toy_lines tl ON tl.id = i.toy_line_id`;
 
   return { joins, whereClause: clauses.join(' AND '), params };
 }
@@ -147,9 +158,23 @@ export async function listItems(params: ListItemsParams): Promise<{ rows: ItemLi
     SELECT i.id, i.name, i.slug,
            i.size_class, i.year_released, i.is_third_party, i.data_quality,
            fr.slug AS franchise_slug, fr.name AS franchise_name,
-           ch.slug AS character_slug, ch.name AS character_name,
            mfr.slug AS manufacturer_slug, mfr.name AS manufacturer_name,
-           tl.slug AS toy_line_slug, tl.name AS toy_line_name
+           tl.slug AS toy_line_slug, tl.name AS toy_line_name,
+           COALESCE(
+             (SELECT json_agg(
+               json_build_object(
+                 'slug', ch.slug,
+                 'name', ch.name,
+                 'appearance_slug', ca.slug,
+                 'is_primary', icd.is_primary
+               ) ORDER BY icd.is_primary DESC, ch.name ASC
+             )
+             FROM item_character_depictions icd
+             JOIN character_appearances ca ON ca.id = icd.appearance_id
+             JOIN characters ch ON ch.id = ca.character_id
+             WHERE icd.item_id = i.id),
+             '[]'::json
+           ) AS characters
     ${joins}
      WHERE ${whereClause}
        AND ($${cursorIdx}::text IS NULL OR (i.name, i.id) > ($${cursorIdx}, $${cursorIdx + 1}::uuid))
@@ -245,17 +270,14 @@ export async function getItemFacets(franchiseSlug: string, filters?: ItemFilters
     })(),
 
     (() => {
-      const {
-        joins: baseJoins,
-        whereClause,
-        params,
-      } = buildItemsQuery(franchiseSlug, filtersExcluding('continuity_family'));
-      const cfJoin = baseJoins.includes('continuity_families')
-        ? baseJoins
-        : `${baseJoins}\n      JOIN continuity_families cf ON cf.id = ch.continuity_family_id`;
+      const { joins, whereClause, params } = buildItemsQuery(franchiseSlug, filtersExcluding('continuity_family'));
       return pool.query<FacetValue>(
-        `SELECT cf.slug AS value, cf.name AS label, COUNT(*)::int AS count
-         ${cfJoin}
+        `SELECT cf.slug AS value, cf.name AS label, COUNT(DISTINCT i.id)::int AS count
+         ${joins}
+         JOIN item_character_depictions icd ON icd.item_id = i.id
+         JOIN character_appearances ca ON ca.id = icd.appearance_id
+         JOIN characters ch ON ch.id = ca.character_id
+         JOIN continuity_families cf ON cf.id = ch.continuity_family_id
          WHERE ${whereClause}
          GROUP BY cf.slug, cf.name
          ORDER BY count DESC, cf.name ASC`,
@@ -293,6 +315,7 @@ export async function getItemFacets(franchiseSlug: string, filters?: ItemFilters
 
 export interface ItemDetail {
   base: ItemBaseRow;
+  depictions: DepictionDetailRow[];
   photos: PhotoRow[];
 }
 
@@ -309,33 +332,57 @@ export async function getItemBySlug(franchiseSlug: string, itemSlug: string): Pr
            i.description, i.barcode, i.sku, i.product_code,
            i.metadata, i.created_at, i.updated_at,
            fr.slug AS franchise_slug, fr.name AS franchise_name,
-           ch.slug AS character_slug, ch.name AS character_name,
            mfr.slug AS manufacturer_slug, mfr.name AS manufacturer_name,
            tl.slug AS toy_line_slug, tl.name AS toy_line_name,
-           ca.slug AS appearance_slug, ca.name AS appearance_name,
-           ca.source_media AS appearance_source_media,
-           ca.source_name AS appearance_source_name
+           COALESCE(
+             (SELECT json_agg(
+               json_build_object(
+                 'slug', ch.slug,
+                 'name', ch.name,
+                 'appearance_slug', ca.slug,
+                 'is_primary', icd.is_primary
+               ) ORDER BY icd.is_primary DESC, ch.name ASC
+             )
+             FROM item_character_depictions icd
+             JOIN character_appearances ca ON ca.id = icd.appearance_id
+             JOIN characters ch ON ch.id = ca.character_id
+             WHERE icd.item_id = i.id),
+             '[]'::json
+           ) AS characters
       FROM items i
       JOIN franchises fr ON fr.id = i.franchise_id
-      JOIN characters ch ON ch.id = i.character_id
       LEFT JOIN manufacturers mfr ON mfr.id = i.manufacturer_id
       JOIN toy_lines tl ON tl.id = i.toy_line_id
-      LEFT JOIN character_appearances ca ON ca.id = i.character_appearance_id
      WHERE fr.slug = $1 AND i.slug = $2`;
 
   const { rows: baseRows } = await pool.query<ItemBaseRow>(baseQuery, [franchiseSlug, itemSlug]);
   const base = baseRows[0];
   if (!base) return null;
 
-  const { rows: photos } = await pool.query<PhotoRow>(
-    `SELECT id, url, caption, is_primary, sort_order
-       FROM item_photos
-      WHERE item_id = $1 AND status = 'approved'
-      ORDER BY is_primary DESC, sort_order ASC, created_at ASC`,
-    [base.id]
-  );
+  const [depictionResult, photoResult] = await Promise.all([
+    pool.query<DepictionDetailRow>(
+      `SELECT ch.slug, ch.name,
+              ca.slug AS appearance_slug, ca.name AS appearance_name,
+              ca.source_media AS appearance_source_media,
+              ca.source_name AS appearance_source_name,
+              icd.is_primary
+         FROM item_character_depictions icd
+         JOIN character_appearances ca ON ca.id = icd.appearance_id
+         JOIN characters ch ON ch.id = ca.character_id
+        WHERE icd.item_id = $1
+        ORDER BY icd.is_primary DESC, ch.name ASC`,
+      [base.id]
+    ),
+    pool.query<PhotoRow>(
+      `SELECT id, url, caption, is_primary, sort_order
+         FROM item_photos
+        WHERE item_id = $1 AND status = 'approved'
+        ORDER BY is_primary DESC, sort_order ASC, created_at ASC`,
+      [base.id]
+    ),
+  ]);
 
-  return { base, photos };
+  return { base, depictions: depictionResult.rows, photos: photoResult.rows };
 }
 
 // ---------------------------------------------------------------------------

@@ -25,6 +25,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | Scenario Document                                            | Phase                                                               | Status                      |
 | ------------------------------------------------------------ | ------------------------------------------------------------------- | --------------------------- |
 | [INT_CATALOG_API.md](INT_CATALOG_API.md)                     | `api/src/catalog/*/routes.test.ts`                                  | ✅ Implemented              |
+| [INT_ENTITY_RELATIONSHIPS.md](INT_ENTITY_RELATIONSHIPS.md)   | `api/src/catalog/relationships/routes.test.ts`, `api/src/db/seed-integration.test.ts` | Scenarios written |
 | [INT_USER_ROLES.md](INT_USER_ROLES.md)                       | `api/src/auth/role.test.ts`, `api/src/admin/routes.test.ts`         | ✅ Implemented              |
 | [E2E_CATALOG_MANUFACTURERS.md](E2E_CATALOG_MANUFACTURERS.md) | `web/e2e/catalog-manufacturers.spec.ts`                             | Scenarios written           |
 | [E2E_CATALOG_SEARCH.md](E2E_CATALOG_SEARCH.md)               | `web/e2e/catalog-search.spec.ts`                                    | ✅ Implemented              |

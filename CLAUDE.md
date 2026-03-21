@@ -65,7 +65,9 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - Catalog slugs are franchise-scoped: `UNIQUE(slug, franchise_id)` — NOT globally unique. Manufacturers and franchises remain globally unique.
 - Seed data uses slug-based FK references — never integer IDs — to avoid fragile positional coupling
 - Sample seed fixtures live in `api/db/seed/sample/`; full proprietary catalog data lives in a separate private repo activated via `SEED_DATA_PATH` env var
-- Character relationships (combiners, vehicle-crew, binary bonds) are typed records in `relationships/*.json` — NOT inline on character records. See `RELATIONSHIP_TYPE_REGISTRY` in `seed-validation.test.ts`
+- Character relationships (combiners, vehicle-crew, binary bonds) are typed records in `relationships/*.json` and ingested into the `character_relationships` DB table. See `RELATIONSHIP_TYPE_REGISTRY` in `seed-validation.test.ts`
+- Item-character associations use `item_character_depictions` junction table (through `character_appearances`) — NOT a direct FK on `items`. Items JSON keeps `character_slug` + `character_appearance_slug` for readability; ingest auto-generates depiction rows
+- Item-to-item relationships (`item_relationships` table) support mold-origin, gift-set-contents, variant types. Seed data in `item_relationships/*.json`, ingested at step 6c
 - The `research-catalog` skill was moved to the private data repo — it no longer exists in `.claude/skills/`
 - GI Joe vehicles are modeled as characters with `character_type: "Vehicle"` and `alt_mode` for vehicle description
 - Slug disambiguation: GI Joe uses `-gijoe` suffix when colliding with Transformers slugs (e.g., `overlord-gijoe`, `shockwave-gijoe`)
