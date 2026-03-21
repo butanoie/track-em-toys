@@ -9,6 +9,8 @@ export interface ProcessedPhoto {
 /**
  * Process an uploaded image into three WebP variants:
  * thumb (200x200 cover crop), gallery (800x800 max, no upscale), original (lossless).
+ *
+ * @param inputBuffer - Raw image buffer from the upload
  */
 export async function processUpload(inputBuffer: Buffer): Promise<ProcessedPhoto> {
   const image = sharp(inputBuffer);

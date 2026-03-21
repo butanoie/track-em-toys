@@ -8,6 +8,8 @@ export interface SearchResultRow {
   franchise_slug: string;
   franchise_name: string;
   rank: number;
+  continuity_family_slug: string | null;
+  continuity_family_name: string | null;
   character_slug: string | null;
   character_name: string | null;
   manufacturer_slug: string | null;
@@ -72,6 +74,7 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
 
   const dataQuery = `
     SELECT entity_type, id, name, slug, franchise_slug, franchise_name, rank,
+           continuity_family_slug, continuity_family_name,
            character_slug, character_name,
            manufacturer_slug, manufacturer_name,
            toy_line_slug, toy_line_name,
@@ -81,6 +84,7 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
              c.id, c.name, c.slug,
              fr.slug AS franchise_slug, fr.name AS franchise_name,
              ts_rank(c.search_vector, to_tsquery('simple', $1)) AS rank,
+             cf.slug AS continuity_family_slug, cf.name AS continuity_family_name,
              NULL::text AS character_slug, NULL::text AS character_name,
              NULL::text AS manufacturer_slug, NULL::text AS manufacturer_name,
              NULL::text AS toy_line_slug, NULL::text AS toy_line_name,
@@ -88,6 +92,7 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
              NULL::boolean AS is_third_party, NULL::text AS data_quality
         FROM characters c
         JOIN franchises fr ON fr.id = c.franchise_id
+        JOIN continuity_families cf ON cf.id = c.continuity_family_id
        WHERE c.search_vector @@ to_tsquery('simple', $1)
          AND ($2::text IS NULL OR fr.slug = $2)
 
@@ -97,14 +102,17 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
              i.id, i.name, i.slug,
              fr.slug AS franchise_slug, fr.name AS franchise_name,
              GREATEST(ts_rank(i.search_vector, to_tsquery('simple', $1)),
-                      ts_rank(ch.search_vector, to_tsquery('simple', $1))) AS rank,
+                      COALESCE(ts_rank(ch.search_vector, to_tsquery('simple', $1)), 0)) AS rank,
+             NULL::text AS continuity_family_slug, NULL::text AS continuity_family_name,
              ch.slug AS character_slug, ch.name AS character_name,
              mfr.slug AS manufacturer_slug, mfr.name AS manufacturer_name,
              tl.slug AS toy_line_slug, tl.name AS toy_line_name,
              i.size_class, i.year_released, i.is_third_party, i.data_quality
         FROM items i
         JOIN franchises fr ON fr.id = i.franchise_id
-        JOIN characters ch ON ch.id = i.character_id
+        LEFT JOIN item_character_depictions icd ON icd.item_id = i.id AND icd.is_primary = true
+        LEFT JOIN character_appearances ca ON ca.id = icd.appearance_id
+        LEFT JOIN characters ch ON ch.id = ca.character_id
         LEFT JOIN manufacturers mfr ON mfr.id = i.manufacturer_id
         JOIN toy_lines tl ON tl.id = i.toy_line_id
        WHERE (i.search_vector @@ to_tsquery('simple', $1)
@@ -125,7 +133,9 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
       (SELECT COUNT(*)::int
          FROM items i
          JOIN franchises fr ON fr.id = i.franchise_id
-         JOIN characters ch ON ch.id = i.character_id
+         LEFT JOIN item_character_depictions icd ON icd.item_id = i.id AND icd.is_primary = true
+         LEFT JOIN character_appearances ca ON ca.id = icd.appearance_id
+         LEFT JOIN characters ch ON ch.id = ca.character_id
         WHERE (i.search_vector @@ to_tsquery('simple', $1)
                OR ch.search_vector @@ to_tsquery('simple', $1))
           AND ($2::text IS NULL OR fr.slug = $2))

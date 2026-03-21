@@ -1,7 +1,7 @@
+import { Link } from '@tanstack/react-router';
 import { useItemDetail } from '@/catalog/hooks/useItemDetail';
 import { DetailPanelShell } from '@/catalog/components/DetailPanelShell';
 import { ItemDetailContent } from '@/catalog/components/ItemDetailContent';
-import { ShareLinkButton } from '@/catalog/components/ShareLinkButton';
 
 interface ItemDetailPanelProps {
   franchise: string;
@@ -12,10 +12,6 @@ interface ItemDetailPanelProps {
 export function ItemDetailPanel({ franchise, itemSlug, onClose }: ItemDetailPanelProps) {
   const { data, isPending, isError } = useItemDetail(franchise, itemSlug);
 
-  const shareUrl = data
-    ? `${window.location.origin}/catalog/${encodeURIComponent(franchise)}/items/${encodeURIComponent(data.slug)}`
-    : undefined;
-
   return (
     <DetailPanelShell
       entityType="Item"
@@ -25,9 +21,21 @@ export function ItemDetailPanel({ franchise, itemSlug, onClose }: ItemDetailPane
       isPending={isPending}
       isError={isError}
       onClose={onClose}
-      actions={shareUrl ? <ShareLinkButton url={shareUrl} /> : undefined}
     >
-      {data && <ItemDetailContent data={data} franchise={franchise} />}
+      {data && (
+        <>
+          <ItemDetailContent data={data} franchise={franchise} />
+          <div className="mt-6">
+            <Link
+              to="/catalog/$franchise/items/$slug"
+              params={{ franchise, slug: data.slug }}
+              className="text-sm text-primary hover:underline"
+            >
+              View full details &rarr;
+            </Link>
+          </div>
+        </>
+      )}
     </DetailPanelShell>
   );
 }

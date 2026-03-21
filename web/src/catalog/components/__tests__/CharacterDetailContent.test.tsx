@@ -13,6 +13,10 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }));
 
+vi.mock('@/catalog/components/CharacterRelationships', () => ({
+  CharacterRelationships: () => null,
+}));
+
 describe('CharacterDetailContent', () => {
   it('renders franchise, continuity, character_type, and alt_mode fields', () => {
     render(<CharacterDetailContent data={mockCharacterDetail} />);

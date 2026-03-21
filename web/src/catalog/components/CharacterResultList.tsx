@@ -66,7 +66,10 @@ export function CharacterResultList({ results, selectedSlug, onSelect }: Charact
             }`}
           >
             <p className="text-sm font-medium text-foreground">{result.name}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{result.franchise.name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {result.franchise.name}
+              {result.continuity_family && ` · ${result.continuity_family.name}`}
+            </p>
           </li>
         );
       })}

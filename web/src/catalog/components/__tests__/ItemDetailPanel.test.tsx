@@ -13,6 +13,10 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }));
 
+vi.mock('@/catalog/components/ItemRelationships', () => ({
+  ItemRelationships: () => null,
+}));
+
 const mockUseItemDetail = vi.fn();
 vi.mock('@/catalog/hooks/useItemDetail', () => ({
   useItemDetail: (...args: unknown[]) => mockUseItemDetail(...args),
@@ -47,10 +51,11 @@ describe('ItemDetailPanel', () => {
     expect(screen.getByRole('heading', { name: 'Optimus Prime' })).toBeInTheDocument();
   });
 
-  it('renders ShareLinkButton when data is present', () => {
+  it('renders "View full details" link when data is present', () => {
     mockUseItemDetail.mockReturnValue({ data: mockCatalogItemDetail, isPending: false, isError: false });
     render(<ItemDetailPanel franchise="transformers" itemSlug="optimus-prime" onClose={vi.fn()} />);
-    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
+    const link = screen.getByText(/View full details/);
+    expect(link.closest('a')).toHaveAttribute('href', '/catalog/$franchise/items/$slug');
   });
 
   it('close button calls onClose', async () => {

@@ -9,6 +9,8 @@ import type {
   CharacterDetail,
   CharacterListItem,
   CharacterAppearance,
+  CharacterRelationship,
+  ItemRelationship,
   FacetValue,
   ItemFacets,
   CharacterFacets,
@@ -193,6 +195,49 @@ export const mockManufacturerItemFacets: ManufacturerItemFacets = {
   continuity_families: [makeFacetValue('g1', 'Generation 1', 30)],
   is_third_party: [makeFacetValue('false', 'Official', 45)],
 };
+
+// --- Relationship fixtures ---
+
+export const mockCharacterRelationships: CharacterRelationship[] = [
+  {
+    type: 'combiner-component',
+    subtype: null,
+    role: 'right leg',
+    related_character: { slug: 'scrapper', name: 'Scrapper' },
+    metadata: {},
+  },
+  {
+    type: 'combiner-component',
+    subtype: null,
+    role: 'left shoulder',
+    related_character: { slug: 'hook', name: 'Hook' },
+    metadata: {},
+  },
+  {
+    type: 'rival',
+    subtype: null,
+    role: 'rival',
+    related_character: { slug: 'omega-supreme', name: 'Omega Supreme' },
+    metadata: {},
+  },
+];
+
+export const mockItemRelationships: ItemRelationship[] = [
+  {
+    type: 'variant',
+    subtype: 'exclusive_repaint',
+    role: 'variant',
+    related_item: { slug: 'red-optimus', name: 'Red Optimus Prime' },
+    metadata: {},
+  },
+  {
+    type: 'mold-origin',
+    subtype: null,
+    role: 'original',
+    related_item: { slug: 'optimus-prime-g1', name: 'Optimus Prime (1984)' },
+    metadata: {},
+  },
+];
 
 // --- Test wrapper ---
 

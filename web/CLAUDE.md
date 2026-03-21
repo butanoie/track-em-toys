@@ -152,6 +152,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Manufacturer browsing pages live in `src/catalog/pages/Manufacturer*.tsx` with hooks in `src/catalog/hooks/useManufacturer*.ts`
 - Manufacturer routes: `/catalog/manufacturers` (list), `/catalog/manufacturers/:slug` (hub), `/catalog/manufacturers/:slug/items` (items browse with filters in search params)
 - Search page uses page/offset pagination (`SearchPagination` component), not cursor-based — matching the `GET /catalog/search` API contract. Page controls are different from `ItemList`'s cursor stack pattern.
+- Domain-scoped pure utilities (no React imports) live in `src/catalog/lib/` — e.g., `relationship-utils.ts` for grouping/formatting logic. Keep these independently unit-testable.
 
 ### Catalog Component Tests
 
@@ -161,6 +162,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `CharacterDetailPage` uses inline `useQuery` (not a custom hook) for related items — mock `listCatalogItems` from `@/catalog/api` and wrap in `createCatalogTestWrapper()`
 - `vi.advanceTimersByTime()` must be wrapped in `act()` when it triggers React state updates (e.g., `ShareLinkButton` timeout reset)
 - jsdom does not implement `navigator.clipboard` — mock with `Object.assign(navigator, { clipboard: { writeText: vi.fn() } })`
+- Integration components that own their own fetch (e.g., `CharacterRelationships`, `ItemRelationships`) require `vi.mock` in parent component tests — otherwise the hook fires without a QueryClient and crashes. Mock pattern: `vi.mock('@/catalog/components/CharacterRelationships', () => ({ CharacterRelationships: () => null }))`
 
 ## Before Writing New Code
 

@@ -23,6 +23,8 @@ const APPROVED_ORDER = `is_primary DESC, sort_order ASC, created_at ASC`;
 /**
  * Insert a photo row. The sort_order is provided by the caller (computed
  * from MAX(sort_order) + offset for batch inserts).
+ *
+ * @param params - Photo insert parameters (id, itemId, url, uploadedBy, sortOrder)
  */
 export async function insertPhoto(params: InsertPhotoParams): Promise<PhotoWriteRow> {
   const { rows } = await pool.query<PhotoWriteRow>(
@@ -38,6 +40,8 @@ export async function insertPhoto(params: InsertPhotoParams): Promise<PhotoWrite
  * Get the current maximum sort_order for an item's photos.
  * Intentionally unfiltered by status — sort_order must be globally unique
  * per item to avoid collisions when pending photos become approved.
+ *
+ * @param itemId - Item UUID
  */
 export async function getMaxSortOrder(itemId: string): Promise<number> {
   const { rows } = await pool.query<{ max: number | null }>(
@@ -47,12 +51,23 @@ export async function getMaxSortOrder(itemId: string): Promise<number> {
   return rows[0]?.max ?? 0;
 }
 
+/**
+ * Delete a photo by ID and item ID. Returns true if a row was deleted.
+ *
+ * @param photoId - Photo UUID
+ * @param itemId - Item UUID
+ */
 export async function deletePhoto(photoId: string, itemId: string): Promise<boolean> {
   const { rowCount } = await pool.query(`DELETE FROM item_photos WHERE id = $1 AND item_id = $2`, [photoId, itemId]);
   return (rowCount ?? 0) > 0;
 }
 
-/** Atomically clear the existing primary photo and set a new one. */
+/**
+ * Atomically clear the existing primary photo and set a new one.
+ *
+ * @param photoId - Photo UUID to promote
+ * @param itemId - Item UUID
+ */
 export async function setPhotoAsPrimary(photoId: string, itemId: string): Promise<PhotoWriteRow | null> {
   return withTransaction(async (client) => {
     await client.query(`UPDATE item_photos SET is_primary = false WHERE item_id = $1 AND is_primary = true`, [itemId]);
@@ -66,7 +81,12 @@ export async function setPhotoAsPrimary(photoId: string, itemId: string): Promis
   });
 }
 
-/** Bulk-update sort_order for photos of an item, returning the reordered approved list. */
+/**
+ * Bulk-update sort_order for photos of an item, returning the reordered approved list.
+ *
+ * @param itemId - Item UUID
+ * @param order - Array of photo ID + new sort_order pairs
+ */
 export async function reorderPhotos(
   itemId: string,
   order: Array<{ id: string; sort_order: number }>
@@ -94,7 +114,11 @@ export async function reorderPhotos(
   });
 }
 
-/** Fetch all approved photos for an item, ordered for display. */
+/**
+ * Fetch all approved photos for an item, ordered for display.
+ *
+ * @param itemId - Item UUID
+ */
 export async function listPhotos(itemId: string): Promise<PhotoWriteRow[]> {
   const { rows } = await pool.query<PhotoWriteRow>(
     `SELECT ${PHOTO_COLUMNS} FROM item_photos

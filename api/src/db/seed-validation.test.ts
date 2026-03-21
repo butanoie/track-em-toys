@@ -185,7 +185,6 @@ const allAppearanceSlugs = new Set(appearanceFiles.flatMap(({ data }) => data.ma
 const allItems = itemFiles.flatMap(({ items }) => items);
 const allItemSlugs = new Set(allItems.map((i) => i.slug));
 const allRelationships = relationshipFiles.flatMap(({ relationships }) => relationships);
-const allItemRelationships = itemRelationshipFiles.flatMap(({ item_relationships }) => item_relationships);
 const charBySlugGlobal = new Map(allCharacters.map((c) => [c.slug, c]));
 
 // ─── Constants ───────────────────────────────────────────────────────────────

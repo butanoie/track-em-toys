@@ -1,9 +1,17 @@
 import { useCallback, useRef, useEffect, type ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
-import type { CatalogItem } from '@/lib/zod-schemas';
+interface ItemListItem {
+  id: string;
+  slug: string;
+  name: string;
+  manufacturer: { name: string } | null;
+  toy_line: { name: string } | null;
+  size_class: string | null;
+  year_released: number | null;
+}
 
 interface ItemListProps {
-  items: CatalogItem[];
+  items: ItemListItem[];
   selectedSlug: string | undefined;
   onSelect: (slug: string | undefined) => void;
   totalCount: number;
@@ -86,7 +94,7 @@ export function ItemList({ items, selectedSlug, onSelect, totalCount, pagination
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {item.manufacturer?.name ?? 'Unknown'} · {item.toy_line.name}
+                      {item.manufacturer?.name ?? 'Unknown'} · {item.toy_line?.name ?? ''}
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">

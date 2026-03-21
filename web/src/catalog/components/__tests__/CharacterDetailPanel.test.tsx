@@ -13,6 +13,10 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }));
 
+vi.mock('@/catalog/components/CharacterRelationships', () => ({
+  CharacterRelationships: () => null,
+}));
+
 const mockUseCharacterDetail = vi.fn();
 vi.mock('@/catalog/hooks/useCharacterDetail', () => ({
   useCharacterDetail: (...args: unknown[]) => mockUseCharacterDetail(...args),

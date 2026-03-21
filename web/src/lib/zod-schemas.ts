@@ -224,22 +224,27 @@ export const ManufacturerItemFacetsSchema = z.object({
 });
 
 // Catalog search (GET /catalog/search)
-export const SearchCharacterResultSchema = z.object({
-  entity_type: z.literal('character'),
+const SearchResultBaseSchema = z.object({
+  entity_type: z.string(),
   id: z.string(),
   name: z.string(),
   slug: z.string(),
   franchise: SlugNameRefSchema,
-  characters: z.array(CharacterDepictionSchema),
-  manufacturer: z.null(),
-  toy_line: z.null(),
-  size_class: z.null(),
-  year_released: z.null(),
-  is_third_party: z.null(),
-  data_quality: z.null(),
+  continuity_family: NullableSlugNameRefSchema,
+  character: NullableSlugNameRefSchema,
+  manufacturer: NullableSlugNameRefSchema,
+  toy_line: NullableSlugNameRefSchema,
+  size_class: z.string().nullable(),
+  year_released: z.number().int().nullable(),
+  is_third_party: z.boolean().nullable(),
+  data_quality: z.string().nullable(),
 });
 
-export const SearchItemResultSchema = CatalogItemSchema.extend({
+export const SearchCharacterResultSchema = SearchResultBaseSchema.extend({
+  entity_type: z.literal('character'),
+});
+
+export const SearchItemResultSchema = SearchResultBaseSchema.extend({
   entity_type: z.literal('item'),
 });
 
