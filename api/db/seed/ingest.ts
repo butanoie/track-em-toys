@@ -632,6 +632,7 @@ async function upsertItems(
 
   for (const filePath of files) {
     const file = loadJson<ItemFile>(filePath)
+    if (!Array.isArray(file.items)) continue
     for (const item of file.items) {
       const ctx = `items > "${item.slug}"`
       const manufacturerId = resolveSlug(manufacturerMap, item.manufacturer_slug, ctx)
