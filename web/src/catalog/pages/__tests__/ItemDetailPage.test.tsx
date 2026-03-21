@@ -21,6 +21,14 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }));
 
+vi.mock('@/catalog/components/ItemRelationships', () => ({
+  ItemRelationships: () => null,
+}));
+
+vi.mock('@/catalog/components/CharacterRelationships', () => ({
+  CharacterRelationships: () => null,
+}));
+
 vi.mock('@/routes/_authenticated/catalog/$franchise/items/$slug', () => ({
   Route: { useParams: () => ({ franchise: 'transformers', slug: 'optimus-prime' }) },
 }));
@@ -35,9 +43,15 @@ vi.mock('@/catalog/hooks/useFranchiseDetail', () => ({
   useFranchiseDetail: (...args: unknown[]) => mockUseFranchiseDetail(...args),
 }));
 
+const mockUseCharacterDetail = vi.fn();
+vi.mock('@/catalog/hooks/useCharacterDetail', () => ({
+  useCharacterDetail: (...args: unknown[]) => mockUseCharacterDetail(...args),
+}));
+
 function setupDefaults() {
   mockUseItemDetail.mockReturnValue({ data: mockCatalogItemDetail, isPending: false, error: null });
   mockUseFranchiseDetail.mockReturnValue({ data: mockFranchiseDetail });
+  mockUseCharacterDetail.mockReturnValue({ data: undefined });
 }
 
 describe('ItemDetailPage', () => {
@@ -48,6 +62,7 @@ describe('ItemDetailPage', () => {
   it('renders loading spinner while pending', () => {
     mockUseItemDetail.mockReturnValue({ data: undefined, isPending: true, error: null });
     mockUseFranchiseDetail.mockReturnValue({ data: undefined });
+    mockUseCharacterDetail.mockReturnValue({ data: undefined });
     render(<ItemDetailPage />);
     expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
   });
@@ -72,6 +87,7 @@ describe('ItemDetailPage', () => {
       error: new ApiError(404, { error: 'Not found' }),
     });
     mockUseFranchiseDetail.mockReturnValue({ data: mockFranchiseDetail });
+    mockUseCharacterDetail.mockReturnValue({ data: undefined });
     render(<ItemDetailPage />);
     expect(screen.getByRole('heading', { name: 'Item not found' })).toBeInTheDocument();
   });
@@ -83,6 +99,7 @@ describe('ItemDetailPage', () => {
       error: new Error('Server error'),
     });
     mockUseFranchiseDetail.mockReturnValue({ data: mockFranchiseDetail });
+    mockUseCharacterDetail.mockReturnValue({ data: undefined });
     render(<ItemDetailPage />);
     expect(screen.getByText('Failed to load item details.')).toBeInTheDocument();
   });

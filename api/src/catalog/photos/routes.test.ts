@@ -67,14 +67,14 @@ function mockItemLookup(found = true) {
 }
 
 function mockTx() {
-  const fakeClient = {
-    query: vi.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
-  } satisfies pool.QueryOnlyClient;
-  vi.mocked(pool.withTransaction).mockImplementation(
-    // fakeClient cast is safe: all query functions are mocked, no real DB method is called
-    async (fn) => fn(fakeClient as pool.PoolClient)
-  );
-  return fakeClient;
+  const clientQuery = vi.fn().mockResolvedValue({ rows: [], rowCount: 0 });
+  // All query functions are vi.mock'd at the module boundary. withTransaction receives a
+  // passthrough whose .query is only used when tests configure per-call return values
+  // (e.g. setPrimary chain). The empty-satisfies + cast matches the admin routes pattern.
+  const passthrough = {} satisfies Pick<pool.PoolClient, never>;
+  Object.assign(passthrough, { query: clientQuery });
+  vi.mocked(pool.withTransaction).mockImplementation(async (fn) => fn(passthrough as pool.PoolClient));
+  return { query: clientQuery };
 }
 
 function buildMultipartBody(filename: string, mimetype: string, content: Buffer): { body: Buffer; boundary: string } {

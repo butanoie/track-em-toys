@@ -13,6 +13,10 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }));
 
+vi.mock('@/catalog/components/ItemRelationships', () => ({
+  ItemRelationships: () => null,
+}));
+
 describe('ItemDetailContent', () => {
   it('renders character link', () => {
     render(<ItemDetailContent data={mockCatalogItemDetail} franchise="transformers" />);

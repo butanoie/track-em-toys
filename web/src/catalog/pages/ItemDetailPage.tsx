@@ -7,7 +7,9 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Separator } from '@/components/ui/separator';
 import { useItemDetail } from '@/catalog/hooks/useItemDetail';
 import { useFranchiseDetail } from '@/catalog/hooks/useFranchiseDetail';
+import { useCharacterDetail } from '@/catalog/hooks/useCharacterDetail';
 import { ItemDetailContent } from '@/catalog/components/ItemDetailContent';
+import { CharacterDetailContent } from '@/catalog/components/CharacterDetailContent';
 import { ShareLinkButton } from '@/catalog/components/ShareLinkButton';
 import { ApiError } from '@/lib/api-client';
 
@@ -16,6 +18,9 @@ export function ItemDetailPage() {
 
   const { data, isPending, error } = useItemDetail(franchiseSlug, itemSlug);
   const { data: franchiseDetail } = useFranchiseDetail(franchiseSlug);
+
+  const primaryCharacterSlug = data?.characters.find((c) => c.is_primary)?.slug ?? data?.characters[0]?.slug;
+  const { data: characterData } = useCharacterDetail(franchiseSlug, primaryCharacterSlug);
 
   if (error instanceof ApiError && error.status === 404) {
     return (
@@ -103,7 +108,7 @@ export function ItemDetailPage() {
         {isPending && !data && <LoadingSpinner className="py-16" />}
 
         {data && (
-          <div className="max-w-2xl">
+          <>
             <div className="flex items-start justify-between gap-2 mb-4">
               <h1 className="text-2xl font-semibold text-foreground">{data.name}</h1>
               <ShareLinkButton />
@@ -111,8 +116,27 @@ export function ItemDetailPage() {
 
             <Separator className="mb-6" />
 
-            <ItemDetailContent data={data} franchise={franchiseSlug} />
-          </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div>
+                <ItemDetailContent data={data} franchise={franchiseSlug} />
+              </div>
+
+              {characterData && (
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground mb-4">
+                    <Link
+                      to="/catalog/$franchise/characters/$slug"
+                      params={{ franchise: franchiseSlug, slug: characterData.slug }}
+                      className="text-primary hover:underline"
+                    >
+                      {characterData.name}
+                    </Link>
+                  </h2>
+                  <CharacterDetailContent data={characterData} />
+                </div>
+              )}
+            </div>
+          </>
         )}
       </main>
     </div>

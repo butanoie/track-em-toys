@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { Badge } from '@/components/ui/badge';
 import { DetailField } from '@/catalog/components/DetailField';
 import { AppearancesTable } from '@/catalog/components/AppearancesTable';
+import { CharacterRelationships } from '@/catalog/components/CharacterRelationships';
 import type { CharacterDetail, CatalogItem } from '@/lib/zod-schemas';
 
 interface CharacterDetailContentProps {
@@ -46,6 +47,8 @@ export function CharacterDetailContent({ data, relatedItems, relatedItemsCount }
           </div>
         </section>
       )}
+
+      <CharacterRelationships franchise={franchise} characterSlug={data.slug} />
 
       <section className="mt-6">
         <h3 className="text-sm font-semibold text-foreground mb-2">Appearances</h3>

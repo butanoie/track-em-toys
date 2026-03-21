@@ -68,6 +68,8 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - Character relationships (combiners, vehicle-crew, binary bonds) are typed records in `relationships/*.json` and ingested into the `character_relationships` DB table. See `RELATIONSHIP_TYPE_REGISTRY` in `seed-validation.test.ts`
 - Item-character associations use `item_character_depictions` junction table (through `character_appearances`) — NOT a direct FK on `items`. Items JSON keeps `character_slug` + `character_appearance_slug` for readability; ingest auto-generates depiction rows
 - Item-to-item relationships (`item_relationships` table) support mold-origin, gift-set-contents, variant types. Seed data in `item_relationships/*.json`, ingested at step 6c
+- Character symmetric relationship types: only `rival` and `sibling` (both sides have identical roles). Item relationships have NO symmetric types — `variant` uses `base`/`variant`, `mold-origin` uses directional roles, `gift-set-contents` uses `set`/`contents`
+- Relationship API `role` field always describes the **related** entity (not the current entity) — consequence of the UNION ALL query returning the other side's role
 - The `research-catalog` skill was moved to the private data repo — it no longer exists in `.claude/skills/`
 - GI Joe vehicles are modeled as characters with `character_type: "Vehicle"` and `alt_mode` for vehicle description
 - Slug disambiguation: GI Joe uses `-gijoe` suffix when colliding with Transformers slugs (e.g., `overlord-gijoe`, `shockwave-gijoe`)

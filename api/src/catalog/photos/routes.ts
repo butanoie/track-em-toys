@@ -27,7 +27,12 @@ interface ReorderBody {
   photos: Array<{ id: string; sort_order: number }>;
 }
 
-/** Register photo management routes under /:slug/photos. */
+/**
+ * Register photo management routes under /:slug/photos.
+ *
+ * @param fastify - Fastify instance
+ * @param _opts - Plugin options (unused)
+ */
 export async function photoRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   await fastify.register(multipart, {
     limits: {

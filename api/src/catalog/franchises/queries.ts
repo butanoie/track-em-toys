@@ -38,8 +38,8 @@ export interface FranchiseStatsRow {
 /**
  * List all franchises with aggregate item/CF/manufacturer counts.
  *
- * Uses a single GROUP BY query. JOINs through items → characters →
- * continuity_families so counts reflect only entities that have items.
+ * Uses a single GROUP BY query. JOINs through items → item_character_depictions →
+ * character_appearances → characters → continuity_families.
  */
 export async function listFranchiseStats(): Promise<FranchiseStatsRow[]> {
   const { rows } = await pool.query<FranchiseStatsRow>(
@@ -49,7 +49,9 @@ export async function listFranchiseStats(): Promise<FranchiseStatsRow[]> {
             COUNT(DISTINCT i.manufacturer_id)::int AS manufacturer_count
        FROM franchises fr
        LEFT JOIN items i ON i.franchise_id = fr.id
-       LEFT JOIN characters ch ON ch.id = i.character_id
+       LEFT JOIN item_character_depictions icd ON icd.item_id = i.id AND icd.is_primary = true
+       LEFT JOIN character_appearances ca ON ca.id = icd.appearance_id
+       LEFT JOIN characters ch ON ch.id = ca.character_id
        LEFT JOIN continuity_families cf ON cf.id = ch.continuity_family_id
       GROUP BY fr.id, fr.slug, fr.name, fr.sort_order, fr.notes
       ORDER BY fr.sort_order ASC NULLS LAST, fr.name ASC`

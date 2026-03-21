@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { DetailField } from '@/catalog/components/DetailField';
 import { dataQualityStyle } from '@/catalog/components/data-quality-style';
 import { PhotoGallery } from '@/catalog/components/PhotoGallery';
+import { ItemRelationships } from '@/catalog/components/ItemRelationships';
 import type { CatalogItemDetail } from '@/lib/zod-schemas';
 
 interface ItemDetailContentProps {
@@ -78,6 +79,8 @@ export function ItemDetailContent({ data, franchise }: ItemDetailContentProps) {
 
         {data.description && <DetailField label="Description">{data.description}</DetailField>}
       </dl>
+
+      <ItemRelationships franchise={franchise} itemSlug={data.slug} />
     </>
   );
 }

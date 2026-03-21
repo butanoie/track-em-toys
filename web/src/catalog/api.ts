@@ -7,11 +7,13 @@ import {
   ItemFacetsSchema,
   ContinuityFamilyListSchema,
   CharacterDetailSchema,
+  CharacterRelationshipsResponseSchema,
   CharacterListSchema,
   CharacterFacetsSchema,
   ManufacturerDetailSchema,
   ManufacturerStatsListSchema,
   ManufacturerItemFacetsSchema,
+  ItemRelationshipsResponseSchema,
   CatalogSearchResponseSchema,
   type FranchiseStatsList,
   type FranchiseDetail,
@@ -20,11 +22,13 @@ import {
   type ItemFacets,
   type ContinuityFamilyList,
   type CharacterDetail,
+  type CharacterRelationshipsResponse,
   type CharacterList,
   type CharacterFacets,
   type ManufacturerDetail,
   type ManufacturerStatsList,
   type ManufacturerItemFacets,
+  type ItemRelationshipsResponse,
   type CatalogSearchResponse,
 } from '@/lib/zod-schemas';
 
@@ -84,6 +88,23 @@ export async function getCharacterDetail(franchise: string, slug: string): Promi
   return apiFetchJson(
     `/catalog/franchises/${encodeURIComponent(franchise)}/characters/${encodeURIComponent(slug)}`,
     CharacterDetailSchema
+  );
+}
+
+export async function getCharacterRelationships(
+  franchise: string,
+  slug: string
+): Promise<CharacterRelationshipsResponse> {
+  return apiFetchJson(
+    `/catalog/franchises/${encodeURIComponent(franchise)}/characters/${encodeURIComponent(slug)}/relationships`,
+    CharacterRelationshipsResponseSchema
+  );
+}
+
+export async function getItemRelationships(franchise: string, slug: string): Promise<ItemRelationshipsResponse> {
+  return apiFetchJson(
+    `/catalog/franchises/${encodeURIComponent(franchise)}/items/${encodeURIComponent(slug)}/relationships`,
+    ItemRelationshipsResponseSchema
   );
 }
 

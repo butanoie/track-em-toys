@@ -21,6 +21,9 @@ function formatResult(row: SearchResultRow) {
     name: row.name,
     slug: row.slug,
     franchise: { slug: row.franchise_slug, name: row.franchise_name },
+    continuity_family: row.continuity_family_slug
+      ? { slug: row.continuity_family_slug, name: row.continuity_family_name! }
+      : null,
     character: row.character_slug ? { slug: row.character_slug, name: row.character_name! } : null,
     manufacturer: row.manufacturer_slug ? { slug: row.manufacturer_slug, name: row.manufacturer_name! } : null,
     toy_line: row.toy_line_slug ? { slug: row.toy_line_slug, name: row.toy_line_name! } : null,
