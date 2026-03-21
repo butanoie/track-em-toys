@@ -110,6 +110,49 @@ Scenario: Character filter works through depictions junction
   And all returned items have a characters array containing a character with slug "bumblebee"
 ```
 
+### Web UI: Combiner Sibling Expansion (Issue #86)
+
+```gherkin
+Background:
+  Given the CharacterRelationships component is rendered
+  And the character is a combiner component (e.g., Scrapper)
+  And the primary fetch returns a combiner-component relationship with role "gestalt"
+
+Scenario: Sibling components are listed under the gestalt heading
+  When the secondary fetch for the gestalt's relationships resolves
+  Then the combiner section heading is the gestalt's name (e.g., "Devastator")
+  And the heading is a clickable link to the gestalt's character page
+  And all combiner components are listed alphabetically
+
+Scenario: Current character appears in the siblings list as selected
+  When the secondary fetch resolves
+  Then the current character appears in the list with aria-current="true"
+  And the current character's link has visually distinct styling (muted foreground, font-medium)
+  And the current character's body-part role is shown in parentheses
+
+Scenario: Other siblings are normal links
+  When the secondary fetch resolves
+  Then sibling characters (not the current one) render as standard primary-color links
+  And each sibling's body-part role is shown in parentheses
+
+Scenario: Gestalt entry shown as fallback while loading
+  When the secondary fetch has not yet resolved
+  Then the primary combiner-component entry (gestalt with role "gestalt") is shown
+  And once the secondary fetch resolves, it is replaced with the full siblings list
+
+Scenario: Gestalt character page shows components normally
+  Given the character is a gestalt (e.g., Devastator)
+  And the primary fetch returns combiner-component relationships with body-part roles
+  Then the section heading is "Combiner Components" (standard heading)
+  And no secondary fetch is triggered
+  And all components are listed as standard links
+
+Scenario: Non-combiner relationship groups are unaffected
+  Given the character has both combiner-component and rival relationships
+  When the combiner expansion occurs
+  Then the rival group renders unchanged with standard heading and links
+```
+
 ### Idempotency
 
 ```gherkin

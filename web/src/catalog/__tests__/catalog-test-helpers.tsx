@@ -198,6 +198,7 @@ export const mockManufacturerItemFacets: ManufacturerItemFacets = {
 
 // --- Relationship fixtures ---
 
+/** Relationships as seen from Devastator's perspective (the gestalt viewing its components). */
 export const mockCharacterRelationships: CharacterRelationship[] = [
   {
     type: 'combiner-component',
@@ -218,6 +219,70 @@ export const mockCharacterRelationships: CharacterRelationship[] = [
     subtype: null,
     role: 'rival',
     related_character: { slug: 'omega-supreme', name: 'Omega Supreme' },
+    metadata: {},
+  },
+];
+
+/** Relationships as seen from a component's perspective (e.g., Scrapper viewing its gestalt). */
+export const mockComponentRelationships: CharacterRelationship[] = [
+  {
+    type: 'combiner-component',
+    subtype: null,
+    role: 'gestalt',
+    related_character: { slug: 'devastator', name: 'Devastator' },
+    metadata: {},
+  },
+  {
+    type: 'rival',
+    subtype: null,
+    role: 'rival',
+    related_character: { slug: 'omega-supreme', name: 'Omega Supreme' },
+    metadata: {},
+  },
+];
+
+/** Gestalt's relationships response — used as secondary fetch data for sibling expansion. */
+export const mockGestaltRelationships: CharacterRelationship[] = [
+  {
+    type: 'combiner-component',
+    subtype: null,
+    role: 'left leg',
+    related_character: { slug: 'bonecrusher', name: 'Bonecrusher' },
+    metadata: {},
+  },
+  {
+    type: 'combiner-component',
+    subtype: null,
+    role: 'left shoulder',
+    related_character: { slug: 'hook', name: 'Hook' },
+    metadata: {},
+  },
+  {
+    type: 'combiner-component',
+    subtype: null,
+    role: 'lower torso',
+    related_character: { slug: 'long-haul', name: 'Long Haul' },
+    metadata: {},
+  },
+  {
+    type: 'combiner-component',
+    subtype: null,
+    role: 'right arm',
+    related_character: { slug: 'mixmaster', name: 'Mixmaster' },
+    metadata: {},
+  },
+  {
+    type: 'combiner-component',
+    subtype: null,
+    role: 'left arm',
+    related_character: { slug: 'scavenger', name: 'Scavenger' },
+    metadata: {},
+  },
+  {
+    type: 'combiner-component',
+    subtype: null,
+    role: 'right leg',
+    related_character: { slug: 'scrapper', name: 'Scrapper' },
     metadata: {},
   },
 ];

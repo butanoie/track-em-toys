@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { RelationshipSection } from '../RelationshipSection';
 import type { RelationshipGroup } from '../RelationshipSection';
@@ -84,5 +84,76 @@ describe('RelationshipSection', () => {
     // Only the heading text should be present, no badges
     expect(screen.queryByText('headmaster')).not.toBeInTheDocument();
     expect(screen.queryByText('targetmaster')).not.toBeInTheDocument();
+  });
+
+  it('uses renderHeading callback when provided', () => {
+    const group = makeGroup({
+      renderHeading: () => <a href="/devastator">Devastator</a>,
+    });
+    render(<RelationshipSection groups={[group]} />);
+    const link = screen.getByRole('link', { name: 'Devastator' });
+    expect(link).toHaveAttribute('href', '/devastator');
+  });
+
+  it('falls back to heading text when renderHeading is not provided', () => {
+    const group = makeGroup({ heading: 'Combiner Components' });
+    render(<RelationshipSection groups={[group]} />);
+    expect(screen.getByText('Combiner Components')).toBeInTheDocument();
+  });
+
+  it('renders isCurrent item with aria-current and distinct styling', () => {
+    const group = makeGroup({
+      items: [
+        {
+          key: 'scrapper',
+          name: 'Scrapper',
+          role: 'right leg',
+          subtype: null,
+          isCurrent: true,
+          renderLink: () => <a href="/scrapper">Scrapper</a>,
+        },
+      ],
+    });
+    render(<RelationshipSection groups={[group]} />);
+    const currentEl = screen.getByText('Scrapper');
+    expect(currentEl).toHaveAttribute('aria-current', 'true');
+    expect(currentEl.tagName).toBe('SPAN');
+    expect(currentEl).toHaveClass('text-muted-foreground', 'font-medium');
+  });
+
+  it('still renders role for isCurrent item', () => {
+    const group = makeGroup({
+      items: [
+        {
+          key: 'scrapper',
+          name: 'Scrapper',
+          role: 'right leg',
+          subtype: null,
+          isCurrent: true,
+          renderLink: () => <a href="/scrapper">Scrapper</a>,
+        },
+      ],
+    });
+    render(<RelationshipSection groups={[group]} />);
+    expect(screen.getByText('(right leg)')).toBeInTheDocument();
+  });
+
+  it('does not use renderLink for isCurrent items', () => {
+    const renderLink = vi.fn(() => <a href="/scrapper">Scrapper Link</a>);
+    const group = makeGroup({
+      items: [
+        {
+          key: 'scrapper',
+          name: 'Scrapper',
+          role: null,
+          subtype: null,
+          isCurrent: true,
+          renderLink,
+        },
+      ],
+    });
+    render(<RelationshipSection groups={[group]} />);
+    expect(renderLink).not.toHaveBeenCalled();
+    expect(screen.getByText('Scrapper')).toBeInTheDocument();
   });
 });

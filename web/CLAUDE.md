@@ -153,6 +153,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Manufacturer routes: `/catalog/manufacturers` (list), `/catalog/manufacturers/:slug` (hub), `/catalog/manufacturers/:slug/items` (items browse with filters in search params)
 - Search page uses page/offset pagination (`SearchPagination` component), not cursor-based — matching the `GET /catalog/search` API contract. Page controls are different from `ItemList`'s cursor stack pattern.
 - Domain-scoped pure utilities (no React imports) live in `src/catalog/lib/` — e.g., `relationship-utils.ts` for grouping/formatting logic. Keep these independently unit-testable.
+- `RelationshipSection` supports `isCurrent?: boolean` on items (renders as non-interactive `<span>` with `aria-current="true"`) and `renderHeading?: () => ReactNode` on groups (renders custom heading, e.g., a `<Link>`). Both are optional — `ItemRelationships` does not use them.
 
 ### Catalog Component Tests
 
