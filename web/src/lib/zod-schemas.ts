@@ -401,3 +401,29 @@ export type ManufacturerStatsList = z.infer<typeof ManufacturerStatsListSchema>;
 export type ManufacturerItemFacets = z.infer<typeof ManufacturerItemFacetsSchema>;
 export type Photo = z.infer<typeof PhotoSchema>;
 export type PhotoWriteItem = z.infer<typeof PhotoWriteItemSchema>;
+
+// ---------------------------------------------------------------------------
+// ML Export
+// ---------------------------------------------------------------------------
+
+const MlExportWarningSchema = z.object({
+  label: z.string(),
+  photo_count: z.number().int(),
+  message: z.string(),
+});
+
+const MlExportStatsSchema = z.object({
+  total_photos: z.number().int(),
+  items: z.number().int(),
+  franchises: z.number().int(),
+  low_photo_items: z.number().int(),
+});
+
+export const MlExportResponseSchema = z.object({
+  exported_at: z.string(),
+  filename: z.string(),
+  stats: MlExportStatsSchema,
+  warnings: z.array(MlExportWarningSchema),
+});
+
+export type MlExportResponse = z.infer<typeof MlExportResponseSchema>;

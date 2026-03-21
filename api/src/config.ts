@@ -145,6 +145,10 @@ export const config = {
     baseUrl: optional('PHOTO_BASE_URL', 'http://localhost:3010/photos'),
     maxSizeMb: optionalInt('PHOTO_MAX_SIZE_MB', 10, 1, 100),
   },
+
+  ml: {
+    exportPath: optionalOrUndefined('ML_EXPORT_PATH'),
+  },
 } as const;
 
 // Startup validation: TLS requires both cert and key, or neither.

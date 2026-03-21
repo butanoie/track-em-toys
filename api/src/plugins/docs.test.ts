@@ -47,6 +47,9 @@ const baseConfig = {
     baseUrl: 'http://localhost:3010/photos',
     maxSizeMb: 10,
   },
+  ml: {
+    exportPath: '/tmp/trackem-test-ml-export',
+  },
 };
 
 // Mock node:fs to stub accessSync (photo storage startup validation in development mode)

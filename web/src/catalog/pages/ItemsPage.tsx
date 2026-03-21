@@ -1,14 +1,18 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
-import { ChevronRight, SlidersHorizontal, X } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { ChevronRight, Download, SlidersHorizontal, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { Route } from '@/routes/_authenticated/catalog/$franchise/items/index';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { useAuth } from '@/auth/useAuth';
 import { useItems } from '@/catalog/hooks/useItems';
 import { useItemFacets } from '@/catalog/hooks/useItemFacets';
 import { useFranchiseDetail } from '@/catalog/hooks/useFranchiseDetail';
+import { exportForMl } from '@/catalog/api';
 import { FacetSidebar, type FacetGroupConfig } from '@/catalog/components/FacetSidebar';
 import { ItemList } from '@/catalog/components/ItemList';
 import { ItemDetailPanel } from '@/catalog/components/ItemDetailPanel';
@@ -20,6 +24,7 @@ export function ItemsPage() {
   const franchiseSlug = franchise ?? '';
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Cursor stack enables "Previous page" with cursor-based pagination.
   // Each "Next" pushes the current cursor; "Previous" pops the last one.
@@ -47,6 +52,18 @@ export function ItemsPage() {
   ]);
 
   const hasActiveFilters = Object.keys(filters).length > 0;
+
+  const exportMutation = useMutation({
+    mutationFn: () => exportForMl({ franchise: franchiseSlug, filters }),
+    onSuccess: (result) => {
+      toast.success(
+        `Export complete — ${result.stats.total_photos} photos, ${result.stats.items} items → ${result.filename}`
+      );
+    },
+    onError: () => {
+      toast.error('ML export failed. Check server logs.');
+    },
+  });
 
   const { data: itemsData, isPending: itemsPending } = useItems(franchiseSlug, filters, search.cursor);
   const { data: facetsData } = useItemFacets(franchiseSlug, filters);
@@ -247,6 +264,19 @@ export function ItemsPage() {
 
           {/* Center: item list */}
           <div className="min-w-0">
+            {user?.role === 'admin' && itemsData && (
+              <div className="flex justify-end mb-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { void exportMutation.mutate(); }}
+                  disabled={exportMutation.isPending}
+                >
+                  <Download className="h-4 w-4 mr-1.5" />
+                  {exportMutation.isPending ? 'Exporting...' : 'Export for ML'}
+                </Button>
+              </div>
+            )}
             {itemsPending && !itemsData ? (
               <LoadingSpinner className="py-16" />
             ) : itemsData ? (

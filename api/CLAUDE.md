@@ -123,6 +123,15 @@ Two distinct photo types:
 - Adding a new required config property (e.g., `config.photos`) breaks ALL test files that mock `config.js` — add the property to every mock config across the test suite
 - `QueryOnlyClient` type exported from `db/pool.ts` — use `satisfies pool.QueryOnlyClient` in test mocks instead of `as unknown as PoolClient`
 
+### ML Export (Phase 1.9 Slice 3)
+
+- ML export route lives in `src/catalog/ml-export/` — registered at `/catalog/ml-export` (unscoped, not franchise-scoped)
+- Uses full-text search (same FTS as `search/queries.ts`) to find items, JOINs `item_photos` for approved photos
+- Writes a manifest JSON to `ML_EXPORT_PATH` with timestamped filenames (e.g., `20260321T154530Z.json`)
+- `ML_EXPORT_PATH` is `optionalOrUndefined` in config — the route returns 500 if not configured. Made optional to avoid breaking all test mocks that don't need ML export.
+- Requires `admin` role (not `curator`) — this is an ML pipeline operation, not catalog curation
+- Web: "Export for ML" button on the search results page, visible only to admins when item results exist
+
 ### Cookie Handling
 
 - Cookies are signed via `@fastify/cookie` with `signed: true`
@@ -400,6 +409,7 @@ Every new route handler must have `fastify.inject()` tests covering:
 - Each distinct conditional branch (e.g. new user vs. existing user)
 - Non-fatal audit log failure (mock `logAuthEvent` to throw, assert success + `log.error`)
 - Network error 503 for every `isNetworkError` check
+- `server.jwt.sign()` is **synchronous** in tests — returns `string`, not `Promise<string>`. Use `function tokenHelper(): string` (not `async`). Using `await` silently wraps the string in a resolved promise that `Bearer ${token}` converts to `Bearer [object Promise]`, causing 401s.
 
 ### 21. Security-critical audit logging
 
@@ -439,6 +449,7 @@ grep -rEn "fastify\.(get|post|put|delete|patch)" src/ --include="*.ts"
 Every route listed must have `config: { rateLimit: { max: N, timeWindow: '1 minute' } }` in
 its options object (may be on a different line — verify manually for each result).
 Auth routes: 5-20 req/min. Public reads: up to 100 req/min.
+Route rate limits must be high enough for integration tests — all tests share one server and IP. A route with `max: 10` and 11+ tests will cause 429 failures. Use `max: 20` minimum for routes with extensive test coverage.
 
 ### 25. email_verified upgrade path
 

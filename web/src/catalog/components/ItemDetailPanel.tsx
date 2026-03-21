@@ -4,7 +4,6 @@ import { Link } from '@tanstack/react-router';
 import { useItemDetail } from '@/catalog/hooks/useItemDetail';
 import { DetailPanelShell } from '@/catalog/components/DetailPanelShell';
 import { ItemDetailContent } from '@/catalog/components/ItemDetailContent';
-import { ShareLinkButton } from '@/catalog/components/ShareLinkButton';
 import { PhotoManagementSheet } from '@/catalog/photos/PhotoManagementSheet';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/auth/useAuth';
