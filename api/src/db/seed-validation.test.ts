@@ -110,6 +110,21 @@ interface RelationshipFile {
   relationships: RelationshipRecord[];
 }
 
+interface ItemRelationshipRecord {
+  type: string;
+  subtype: string | null;
+  item1_slug: string;
+  item1_role: string | null;
+  item2_slug: string;
+  item2_role: string | null;
+  metadata: Record<string, unknown>;
+}
+
+interface ItemRelationshipFile {
+  _metadata: { total: number; [key: string]: unknown };
+  item_relationships: ItemRelationshipRecord[];
+}
+
 // ─── Loaders ─────────────────────────────────────────────────────────────────
 
 function loadSeedFile<T>(relPath: string): T {
@@ -154,6 +169,7 @@ const itemFiles = discoverAndLoad<ItemFile>('items', { recursive: true }).filter
 );
 const appearanceFiles = discoverAndLoad<AppearanceFile>('appearances');
 const relationshipFiles = discoverAndLoad<RelationshipFile>('relationships');
+const itemRelationshipFiles = discoverAndLoad<ItemRelationshipFile>('item_relationships');
 
 // ─── Derived lookup sets ─────────────────────────────────────────────────────
 
@@ -166,7 +182,10 @@ const toyLineSlugs = new Set(toyLines.data.map((r) => r.slug));
 const allCharacters = charFiles.flatMap(({ characters }) => characters);
 const allCharacterSlugs = new Set(allCharacters.map((c) => c.slug));
 const allAppearanceSlugs = new Set(appearanceFiles.flatMap(({ data }) => data.map((a) => a.slug)));
+const allItems = itemFiles.flatMap(({ items }) => items);
+const allItemSlugs = new Set(allItems.map((i) => i.slug));
 const allRelationships = relationshipFiles.flatMap(({ relationships }) => relationships);
+const allItemRelationships = itemRelationshipFiles.flatMap(({ item_relationships }) => item_relationships);
 const charBySlugGlobal = new Map(allCharacters.map((c) => [c.slug, c]));
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -299,6 +318,9 @@ const REQUIRED_CHAR_FIELDS = [
 ] as const;
 
 const VALID_SOURCE_MEDIA = new Set(['TV', 'Comic/Manga', 'Movie', 'OVA', 'Toy-only', 'Video Game']);
+
+// Must match DB CHECK constraint in migration 026
+const VALID_ITEM_RELATIONSHIP_TYPES = new Set(['mold-origin', 'gift-set-contents', 'variant']);
 
 const REQUIRED_APPEARANCE_FIELDS = ['slug', 'name', 'character_slug', 'source_media', 'source_name'] as const;
 
@@ -920,5 +942,85 @@ describe('seed data validation', () => {
         }
       }
     );
+  });
+
+  // ── 12. Item relationship seed files ──────────────────────────────────────
+
+  describe('item relationship seed files', () => {
+    // Item relationship files are auto-discovered; tests naturally produce 0 iterations when empty
+    it.each(itemRelationshipFiles)(
+      '$file: _metadata.total matches item_relationships array length',
+      ({ file, _metadata, item_relationships }) => {
+        expect(
+          item_relationships.length,
+          `${file}: _metadata.total is ${_metadata.total} but has ${item_relationships.length} entries`
+        ).toBe(_metadata.total);
+      }
+    );
+
+    it.each(itemRelationshipFiles)('$file: required fields present', ({ file, item_relationships }) => {
+      for (const r of item_relationships) {
+        expect('type' in r, `${file}: missing required field "type"`).toBe(true);
+        expect('item1_slug' in r, `${file}: missing required field "item1_slug"`).toBe(true);
+        expect('item2_slug' in r, `${file}: missing required field "item2_slug"`).toBe(true);
+        expect(
+          typeof r.metadata === 'object' && r.metadata !== null,
+          `${file}: metadata must be an object`
+        ).toBe(true);
+      }
+    });
+
+    it.each(itemRelationshipFiles)('$file: relationship type is valid', ({ file, item_relationships }) => {
+      for (const r of item_relationships) {
+        expect(
+          VALID_ITEM_RELATIONSHIP_TYPES.has(r.type),
+          `${file}: unknown item relationship type "${r.type}". Expected one of: ${[...VALID_ITEM_RELATIONSHIP_TYPES].join(', ')}`
+        ).toBe(true);
+      }
+    });
+
+    it.each(itemRelationshipFiles)('$file: item slugs resolve to items', ({ file, item_relationships }) => {
+      for (const r of item_relationships) {
+        expect(
+          allItemSlugs.has(r.item1_slug),
+          `${file}: item1_slug "${r.item1_slug}" does not exist in item data`
+        ).toBe(true);
+        expect(
+          allItemSlugs.has(r.item2_slug),
+          `${file}: item2_slug "${r.item2_slug}" does not exist in item data`
+        ).toBe(true);
+      }
+    });
+
+    it.each(itemRelationshipFiles)('$file: no self-referential relationships', ({ file, item_relationships }) => {
+      for (const r of item_relationships) {
+        expect(
+          r.item1_slug,
+          `${file}: self-referential item relationship: "${r.item1_slug}" (type: ${r.type})`
+        ).not.toBe(r.item2_slug);
+      }
+    });
+
+    it.each(itemRelationshipFiles)('$file: all item slugs match kebab-case format', ({ file, item_relationships }) => {
+      for (const r of item_relationships) {
+        expect(SLUG_RE.test(r.item1_slug), `${file}: invalid item1_slug "${r.item1_slug}"`).toBe(true);
+        expect(SLUG_RE.test(r.item2_slug), `${file}: invalid item2_slug "${r.item2_slug}"`).toBe(true);
+      }
+    });
+
+    it('no duplicate (type, item1_slug, item2_slug) tuples across all files', () => {
+      const seen = new Map<string, string>();
+      for (const { file, item_relationships } of itemRelationshipFiles) {
+        for (const r of item_relationships) {
+          const key = `${r.type}|${r.item1_slug}|${r.item2_slug}`;
+          const existing = seen.get(key);
+          expect(
+            existing,
+            `Duplicate item relationship: ${key} in "${file}" — already in "${existing}"`
+          ).toBeUndefined();
+          seen.set(key, file);
+        }
+      }
+    });
   });
 });

@@ -53,7 +53,8 @@ cd api && npm run format:check # Prettier check (CI mode)
 - `item_character_depictions` junction table replaces the old `items.character_id` and `items.character_appearance_id` direct FKs — character is derived via `appearance_id → character_appearances.character_id`
 - Item depiction upsert uses DELETE-then-INSERT pattern (like `character_sub_groups`) to handle changed appearance slugs between seed runs
 - `character_relationships` table stores all char↔char relationships with `UNIQUE(type, entity1_id, entity2_id)` — `ON CONFLICT` target must match
-- `item_relationships` table exists (schema only, no seed data) for future mold-origin, gift-set-contents, variant relationships
+- `item_relationships` table stores item-to-item relationships (mold-origin, gift-set-contents, variant). Seed data in `item_relationships/*.json`, ingested at step 6c after item_character_depictions
+- Item relationship seed records use flat fields (`item1_slug`, `item2_slug`, `item1_role`, `item2_role`) — NOT nested entities like character relationships
 - Characters no longer have `combined_form_id` or `combiner_role` columns (dropped in migration 027) — combiner data is in `character_relationships`
 - Character detail API response no longer includes `combiner_role`, `combined_form`, or `component_characters` — use the `/:slug/relationships` endpoint instead
 - Item API responses return `characters: [{ slug, name, appearance_slug, is_primary }]` (array) instead of `character: { slug, name }` (single object)

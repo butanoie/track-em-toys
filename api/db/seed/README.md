@@ -42,6 +42,7 @@ Tables must be seeded in dependency order:
 | 5.7   | character_relationships | `relationships/*.json`             | characters (entity1.slug, entity2.slug)                                         |
 | 6     | items               | `items/*.json`                         | manufacturers, toy_lines (via slugs)                                            |
 | 6b    | item_character_depictions | (auto-generated from items)        | items (slug), character_appearances (character_appearance_slug from items)       |
+| 6c    | item_relationships  | `item_relationships/*.json`            | items (item1_slug, item2_slug)                                                  |
 
 ## FK Convention: Slugs, Not IDs
 

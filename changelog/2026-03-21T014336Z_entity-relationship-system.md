@@ -20,7 +20,7 @@ Four sequential migrations implementing the additive-first strategy:
 
 - **024**: `character_relationships` table — typed character-to-character relationships with `UNIQUE(type, entity1_id, entity2_id)` and self-reference prevention
 - **025**: `item_character_depictions` junction table — items link to characters through `character_appearances`, with partial unique index enforcing one primary per item. Includes backfill from existing data.
-- **026**: `item_relationships` table — schema-only for future mold-origin, gift-set-contents, variant relationships
+- **026**: `item_relationships` table — mold-origin, gift-set-contents, variant relationships. Seed data in `item_relationships/*.json`, ingested at step 6c
 - **027**: Drops legacy columns (`characters.combined_form_id`, `characters.combiner_role`, `items.character_id`, `items.character_appearance_id`)
 
 ### 2. Seed Ingestion Pipeline
@@ -87,13 +87,15 @@ pg driver auto-parses JSON columns — no manual `JSON.parse` needed.
 
 ## Validation & Testing
 
-- ✅ 621 API tests pass (30 files)
+- ✅ 630 API tests pass (31 files)
 - ✅ 463 web tests pass (62 files)
 - ✅ API typecheck clean (pre-existing photos error only)
 - ✅ Web typecheck, lint, build all clean
 - ✅ Prettier formatting passes
 - New seed validation section 11: depiction coverage + appearance-character consistency
+- New seed validation section 12: item relationship files (metadata, FK integrity, type validation, slug format, duplicates)
 - Updated integration tests: new FK integrity checks, row count assertions, depiction correctness
+- Relationship route tests: 8 tests covering happy path, 404, empty, nullable fields, multiple types
 
 ---
 
@@ -120,7 +122,7 @@ pg driver auto-parses JSON columns — no manual `JSON.parse` needed.
 
 ## Next Steps
 
-- Write relationship route tests (`api/src/catalog/relationships/routes.test.ts`)
-- Wire relationship UI into character detail page
-- Add item relationship seed data (mold-origin, gift-set-contents, variant)
+- ✅ ~~Write relationship route tests~~ — 8 tests in `api/src/catalog/relationships/routes.test.ts`
+- ✅ ~~Add item relationship seed data~~ — `item_relationships/*.json` with ingestion (step 6c) and validation (section 12)
+- Wire relationship UI into character detail page (TanStack Query hook + rendering)
 - E2E tests for updated item detail page

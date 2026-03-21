@@ -136,6 +136,21 @@ interface RelationshipFile {
   relationships: RelationshipRecord[]
 }
 
+interface ItemRelationshipRecord {
+  type: string
+  subtype: string | null
+  item1_slug: string
+  item1_role: string | null
+  item2_slug: string
+  item2_role: string | null
+  metadata: Record<string, unknown>
+}
+
+interface ItemRelationshipFile {
+  _metadata: { total: number; [key: string]: unknown }
+  item_relationships: ItemRelationshipRecord[]
+}
+
 // ─── Setup ──────────────────────────────────────────────────────────────────
 
 const log = pino({ level: process.env['LOG_LEVEL'] ?? 'info' })
@@ -714,6 +729,49 @@ async function upsertItemCharacterDepictions(
   return count
 }
 
+// ─── Item relationship upserts ───────────────────────────────────────────
+
+async function upsertItemRelationships(
+  client: pg.PoolClient,
+  itemMap: Map<string, string>,
+): Promise<number> {
+  const files = discoverJsonFiles(path.join(SEED_DIR, 'item_relationships'))
+  let totalCount = 0
+
+  for (const filePath of files) {
+    const file = loadJson<ItemRelationshipFile>(filePath)
+    for (const r of file.item_relationships) {
+      const ctx = `item_relationships > "${r.type}" > "${r.item1_slug}"-"${r.item2_slug}"`
+      const item1Id = resolveSlug(itemMap, r.item1_slug, ctx)
+      const item2Id = resolveSlug(itemMap, r.item2_slug, ctx)
+
+      await client.query(
+        `INSERT INTO item_relationships
+           (type, subtype, item1_id, item1_role, item2_id, item2_role, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (type, item1_id, item2_id) DO UPDATE SET
+           subtype = EXCLUDED.subtype,
+           item1_role = EXCLUDED.item1_role,
+           item2_role = EXCLUDED.item2_role,
+           metadata = EXCLUDED.metadata`,
+        [
+          r.type,
+          r.subtype ?? null,
+          item1Id,
+          r.item1_role ?? null,
+          item2Id,
+          r.item2_role ?? null,
+          JSON.stringify(r.metadata ?? {}),
+        ],
+      )
+    }
+    totalCount += file.item_relationships.length
+  }
+
+  log.info({ table: 'item_relationships', count: totalCount }, 'upserted')
+  return totalCount
+}
+
 // ─── Purge ──────────────────────────────────────────────────────────────────
 
 async function runPurge(client: pg.PoolClient): Promise<void> {
@@ -782,6 +840,9 @@ async function runSeed(client: pg.PoolClient): Promise<void> {
 
   // 6b: Item character depictions (auto-generated from character_appearance_slug on items)
   await upsertItemCharacterDepictions(client, allItems, appearanceMap, itemMap)
+
+  // 6c: Item relationships
+  await upsertItemRelationships(client, itemMap)
 }
 
 async function main(): Promise<void> {
