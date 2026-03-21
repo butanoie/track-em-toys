@@ -3,12 +3,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ItemsPage } from '../ItemsPage';
-import { mockFranchiseDetail, mockCatalogItem, mockItemFacets } from '@/catalog/__tests__/catalog-test-helpers';
+import {
+  mockFranchiseDetail,
+  mockCatalogItem,
+  mockItemFacets,
+  createCatalogTestWrapper,
+} from '@/catalog/__tests__/catalog-test-helpers';
 import { ApiError } from '@/lib/api-client';
 
 vi.mock('@/auth/useAuth', () => ({
   useAuth: () => ({ user: { id: 'u-1', role: 'user' }, isAuthenticated: true, isLoading: false }),
 }));
+
+vi.mock('@/catalog/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/catalog/api')>();
+  return { ...actual, exportForMl: vi.fn().mockResolvedValue({ stats: { total_photos: 0, items: 0 }, filename: 'test.json', warnings: [] }) };
+});
 
 vi.mock('@/components/AppHeader', () => ({
   AppHeader: () => <header data-testid="app-header" />,
@@ -75,7 +85,7 @@ describe('ItemsPage', () => {
 
   it('renders breadcrumb', () => {
     setupDefaults();
-    render(<ItemsPage />);
+    render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
     expect(screen.getByText('Catalog').closest('a')).toHaveAttribute('href', '/catalog');
   });
@@ -85,13 +95,13 @@ describe('ItemsPage', () => {
     mockUseItems.mockReturnValue({ data: undefined, isPending: true });
     mockUseItemFacets.mockReturnValue({ data: undefined });
     mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
-    render(<ItemsPage />);
+    render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
   });
 
   it('renders ItemList with item data', () => {
     setupDefaults();
-    render(<ItemsPage />);
+    render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     expect(screen.getByText('Optimus Prime')).toBeInTheDocument();
     expect(screen.getByText('1 item')).toBeInTheDocument();
   });
@@ -104,14 +114,14 @@ describe('ItemsPage', () => {
     mockUseItems.mockReturnValue({ data: undefined, isPending: false });
     mockUseItemFacets.mockReturnValue({ data: undefined });
     mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
-    render(<ItemsPage />);
+    render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     expect(screen.getByRole('heading', { name: 'Franchise not found' })).toBeInTheDocument();
   });
 
   it('renders active filter chips when search has filters', () => {
     mockSearch.manufacturer = 'hasbro';
     setupDefaults();
-    render(<ItemsPage />);
+    render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     expect(screen.getByRole('button', { name: /Remove filter: manufacturer: hasbro/ })).toBeInTheDocument();
     expect(screen.getByText('Clear all')).toBeInTheDocument();
   });
@@ -119,7 +129,7 @@ describe('ItemsPage', () => {
   it('clicking a filter chip calls navigate to remove that filter', async () => {
     mockSearch.manufacturer = 'hasbro';
     setupDefaults();
-    render(<ItemsPage />);
+    render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /Remove filter: manufacturer: hasbro/ }));
     expect(mockNavigate).toHaveBeenCalled();
   });
@@ -127,14 +137,14 @@ describe('ItemsPage', () => {
   it('clicking "Clear all" navigates with empty search', async () => {
     mockSearch.manufacturer = 'hasbro';
     setupDefaults();
-    render(<ItemsPage />);
+    render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     await userEvent.click(screen.getByText('Clear all'));
     expect(mockNavigate).toHaveBeenCalledWith(expect.objectContaining({ search: {} }));
   });
 
   it('does not render pagination when no next_cursor and no history', () => {
     setupDefaults();
-    render(<ItemsPage />);
+    render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     expect(screen.queryByRole('button', { name: 'Next' })).not.toBeInTheDocument();
   });
 
@@ -146,7 +156,7 @@ describe('ItemsPage', () => {
     });
     mockUseItemFacets.mockReturnValue({ data: mockItemFacets });
     mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
-    render(<ItemsPage />);
+    render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
   });

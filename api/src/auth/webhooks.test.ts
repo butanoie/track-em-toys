@@ -71,6 +71,9 @@ vi.mock('../config.js', () => ({
       baseUrl: 'http://localhost:3010/photos',
       maxSizeMb: 10,
     },
+    ml: {
+      exportPath: '/tmp/trackem-test-ml-export',
+    },
   },
 }));
 

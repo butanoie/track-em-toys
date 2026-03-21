@@ -1,11 +1,16 @@
 import { useCallback, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Search } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { Search, Download } from 'lucide-react';
+import { toast } from 'sonner';
 import { Route } from '@/routes/_authenticated/catalog/search';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/auth/useAuth';
 import { useSearch } from '@/catalog/hooks/useSearch';
+import { exportForMl } from '@/catalog/api';
 import { ItemList } from '@/catalog/components/ItemList';
 import { ItemDetailPanel } from '@/catalog/components/ItemDetailPanel';
 import { CharacterResultList } from '@/catalog/components/CharacterResultList';
@@ -16,11 +21,24 @@ import type { SearchCharacterResult, SearchItemResult } from '@/lib/zod-schemas'
 export function SearchPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const q = search.q ?? '';
   const page = search.page ?? 1;
 
   const { data, isPending } = useSearch(q, page);
+
+  const exportMutation = useMutation({
+    mutationFn: () => exportForMl({ q }),
+    onSuccess: (result) => {
+      toast.success(
+        `Export complete — ${result.stats.total_photos} photos, ${result.stats.items} items → ${result.filename}`
+      );
+    },
+    onError: () => {
+      toast.error('ML export failed. Check server logs.');
+    },
+  });
 
   const { characters, items } = useMemo(() => {
     if (!data) return { characters: [], items: [] };
@@ -138,10 +156,23 @@ export function SearchPage() {
 
               {items.length > 0 && (
                 <section>
-                  <h2 className="text-lg font-semibold text-foreground mb-3">
-                    Items{' '}
-                    <span className="text-sm font-normal text-muted-foreground tabular-nums">({items.length})</span>
-                  </h2>
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Items{' '}
+                      <span className="text-sm font-normal text-muted-foreground tabular-nums">({items.length})</span>
+                    </h2>
+                    {user?.role === 'admin' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { void exportMutation.mutate(); }}
+                        disabled={exportMutation.isPending}
+                      >
+                        <Download className="h-4 w-4 mr-1.5" />
+                        {exportMutation.isPending ? 'Exporting...' : 'Export for ML'}
+                      </Button>
+                    )}
+                  </div>
                   <ItemList
                     items={items}
                     selectedSlug={search.selected_type === 'item' ? search.selected : undefined}

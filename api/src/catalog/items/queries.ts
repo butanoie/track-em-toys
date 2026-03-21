@@ -91,7 +91,7 @@ export interface ListItemsParams {
  * @param franchiseSlug - Franchise slug filter
  * @param filters - Optional item filters
  */
-function buildItemsQuery(
+export function buildItemsQuery(
   franchiseSlug: string,
   filters?: ItemFilters
 ): { joins: string; whereClause: string; params: unknown[] } {

@@ -15,6 +15,7 @@ import {
   ManufacturerItemFacetsSchema,
   ItemRelationshipsResponseSchema,
   CatalogSearchResponseSchema,
+  MlExportResponseSchema,
   type FranchiseStatsList,
   type FranchiseDetail,
   type CatalogItemList,
@@ -30,6 +31,7 @@ import {
   type ManufacturerItemFacets,
   type ItemRelationshipsResponse,
   type CatalogSearchResponse,
+  type MlExportResponse,
 } from '@/lib/zod-schemas';
 
 interface BaseItemFilters {
@@ -215,4 +217,26 @@ export async function getManufacturerItemFacets(
   const qs = searchParams.toString();
   const url = `/catalog/manufacturers/${encodeURIComponent(manufacturer)}/items/facets${qs ? `?${qs}` : ''}`;
   return apiFetchJson(url, ManufacturerItemFacetsSchema);
+}
+
+// ---------------------------------------------------------------------------
+// ML Export
+// ---------------------------------------------------------------------------
+
+export interface MlExportParams {
+  q?: string;
+  franchise?: string;
+  filters?: ItemFilters;
+}
+
+export async function exportForMl(params: MlExportParams): Promise<MlExportResponse> {
+  const sp = new URLSearchParams();
+  if (params.q) sp.set('q', params.q);
+  if (params.franchise) sp.set('franchise', params.franchise);
+  if (params.filters) {
+    for (const [key, value] of Object.entries(params.filters)) {
+      if (value !== undefined && value !== '') sp.set(key, String(value));
+    }
+  }
+  return apiFetchJson(`/catalog/ml-export?${sp.toString()}`, MlExportResponseSchema, { method: 'POST' });
 }
