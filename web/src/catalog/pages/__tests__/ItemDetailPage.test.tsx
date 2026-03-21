@@ -5,6 +5,10 @@ import { ItemDetailPage } from '../ItemDetailPage';
 import { mockCatalogItemDetail, mockFranchiseDetail } from '@/catalog/__tests__/catalog-test-helpers';
 import { ApiError } from '@/lib/api-client';
 
+vi.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({ user: { id: 'u-1', role: 'user' }, isAuthenticated: true, isLoading: false }),
+}));
+
 vi.mock('@/components/AppHeader', () => ({
   AppHeader: () => <header data-testid="app-header" />,
 }));

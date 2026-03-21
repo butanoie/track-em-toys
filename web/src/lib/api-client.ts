@@ -65,6 +65,7 @@ function buildHeaders(url: string, init?: RequestInit): Headers {
     init?.method &&
     ['POST', 'PUT', 'PATCH'].includes(init.method.toUpperCase()) &&
     init.body !== undefined &&
+    !(init.body instanceof FormData) &&
     !headers.has('Content-Type')
   ) {
     headers.set('Content-Type', 'application/json');
