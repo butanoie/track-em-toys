@@ -5,6 +5,10 @@ import userEvent from '@testing-library/user-event';
 import { ItemDetailPanel } from '../ItemDetailPanel';
 import { mockCatalogItemDetail } from '@/catalog/__tests__/catalog-test-helpers';
 
+vi.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({ user: { id: 'u-1', role: 'user' }, isAuthenticated: true, isLoading: false }),
+}));
+
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, ...props }: { children: React.ReactNode; to: string }) => (
     <a href={to} {...props}>

@@ -129,10 +129,28 @@ Scenario: Item detail shows photo gallery
   When the item detail page loads
   Then the primary photo is displayed prominently
   And thumbnail photos are visible
-  When the user clicks a photo
-  Then a lightbox overlay opens showing the full-size photo
+  And a magnifying glass icon is shown on the displayed photo
+
+Scenario: Clicking a thumbnail changes the displayed photo
+  Given the item has multiple photos
+  When the user clicks a thumbnail
+  Then the main image area updates to show that photo
+  And the lightbox does not open
+
+Scenario: Clicking the displayed photo opens the lightbox
+  Given the item has multiple photos
+  When the user clicks the main displayed photo
+  Then a lightbox overlay opens showing the full-size photo at the selected index
   And the lightbox can be closed with the Escape key
   And focus returns to the trigger element after closing
+
+Scenario: Lightbox navigation wraps around
+  Given the lightbox is open on the last photo
+  When the user clicks Next
+  Then the lightbox shows the first photo
+  Given the lightbox is open on the first photo
+  When the user clicks Previous
+  Then the lightbox shows the last photo
 ```
 
 ### Happy Path: Item with links to related pages

@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ChevronRight } from 'lucide-react';
+import { Camera, ChevronRight } from 'lucide-react';
 import { Route } from '@/routes/_authenticated/catalog/$franchise/items/$slug';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useItemDetail } from '@/catalog/hooks/useItemDetail';
 import { useFranchiseDetail } from '@/catalog/hooks/useFranchiseDetail';
@@ -11,10 +13,16 @@ import { useCharacterDetail } from '@/catalog/hooks/useCharacterDetail';
 import { ItemDetailContent } from '@/catalog/components/ItemDetailContent';
 import { CharacterDetailContent } from '@/catalog/components/CharacterDetailContent';
 import { ShareLinkButton } from '@/catalog/components/ShareLinkButton';
+import { PhotoManagementSheet } from '@/catalog/photos/PhotoManagementSheet';
+import { useAuth } from '@/auth/useAuth';
 import { ApiError } from '@/lib/api-client';
 
 export function ItemDetailPage() {
   const { franchise: franchiseSlug, slug: itemSlug } = Route.useParams();
+
+  const { user } = useAuth();
+  const isCurator = user?.role === 'curator' || user?.role === 'admin';
+  const [photoSheetOpen, setPhotoSheetOpen] = useState(false);
 
   const { data, isPending, error } = useItemDetail(franchiseSlug, itemSlug);
   const { data: franchiseDetail } = useFranchiseDetail(franchiseSlug);
@@ -111,7 +119,19 @@ export function ItemDetailPage() {
           <>
             <div className="flex items-start justify-between gap-2 mb-4">
               <h1 className="text-2xl font-semibold text-foreground">{data.name}</h1>
-              <ShareLinkButton />
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {isCurator && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setPhotoSheetOpen(true)}
+                    aria-label="Manage photos"
+                  >
+                    <Camera className="h-4 w-4" />
+                  </Button>
+                )}
+                <ShareLinkButton />
+              </div>
             </div>
 
             <Separator className="mb-6" />
@@ -119,6 +139,17 @@ export function ItemDetailPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div>
                 <ItemDetailContent data={data} franchise={franchiseSlug} />
+    
+                {isCurator && (
+                  <PhotoManagementSheet
+                    open={photoSheetOpen}
+                    onOpenChange={setPhotoSheetOpen}
+                    franchise={franchiseSlug}
+                    itemSlug={data.slug}
+                    itemName={data.name}
+                    photos={data.photos}
+                  />
+                )}
               </div>
 
               {characterData && (

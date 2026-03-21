@@ -105,6 +105,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - CLI-generated components may import `next-themes` or `"use client"` directives — remove these for Vite projects
 - After `npx shadcn@latest add <component>`, check for unwanted dependencies in `package.json` and uninstall (e.g., `next-themes`)
 - Verify generated imports are correct — the CLI has generated circular self-imports (e.g., Sonner importing from its own path instead of the `sonner` package)
+- After `npx shadcn@latest add <component>`, verify the `cn` import uses `@/lib/utils` (not `src/lib/utils`) — the CLI sometimes generates incorrect paths
 
 ### Toast Notifications (Sonner)
 
@@ -128,6 +129,14 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Catalog photo gallery on item detail page — shared, visible to all users
 - Photo upload UI (Phase 1.9) requires `curator` role — show/hide upload controls based on user role
 - User collection photos (private, per-item condition shots) are deferred to post-ML Phase 1.6
+- Photo URLs are stored as relative paths in the DB (e.g., `abc-123/def-456-gallery.webp`) — `buildPhotoUrl()` from `catalog/photos/api.ts` prepends `VITE_PHOTO_BASE_URL` for display
+- `VITE_PHOTO_BASE_URL` defaults to `http://localhost:3010/photos` in dev (matches `@fastify/static` route)
+- `buildHeaders()` in `api-client.ts` skips `Content-Type: application/json` when `body instanceof FormData` — required for multipart uploads
+- Photo upload uses XHR (not `fetch`) for `upload.onprogress` — the XHR wrapper in `catalog/photos/api.ts` manages its own auth header via `authStore.getToken()` and retries once on 401
+- Photo management UI lives in `src/catalog/photos/` — Sheet component, DropZone, PhotoGrid, hooks, API functions
+- `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` for drag-to-reorder in PhotoGrid
+- `@dnd-kit/sortable` `useSortable` returns `attributes` that include `aria-roledescription` — do NOT set this prop explicitly on the drag surface element or TypeScript will error with TS2783 (duplicate prop)
+- PhotoGrid cards are draggable by the entire tile (not a small grip handle) — `attributes` and `listeners` are on the outer `div`, with `pointer-events-none` on the `<img>` to prevent browser default image drag. The `PointerSensor` `distance: 5` constraint lets clicks on star/delete buttons resolve without triggering a drag.
 
 ### Catalog Browsing (Phase 1.7+)
 
@@ -143,7 +152,12 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Character browse page uses three-column layout (FacetSidebar | CharacterList | CharacterDetailPanel) matching the items browse pattern
 - Character facets: faction, character_type, sub_group — continuity_family is a fixed scope filter (set from hub navigation), not a facet dimension
 - Franchise hub page has Items/Characters toggle via `?view=characters` search param; characters view mounts `CharactersHubView` sub-component (avoids conditional hook calls)
+- Photo gallery uses a two-level interaction: thumbnails change the displayed photo in-page (`selectedIndex`), clicking the displayed photo opens the lightbox (`lightboxIndex`). Lightbox navigation wraps around (last→first, first→last)
+- Photo gallery sorts photos client-side as `is_primary DESC, sort_order ASC` (matching the API query) — sorting by `sort_order` alone causes primary photo to appear out of position after set-primary mutations
+- All photo displays use `object-contain` (never `object-cover`) — no cropping of images in gallery, thumbnails, or photo manager tiles
 - Photo lightbox uses Shadcn `Dialog` for focus trap, scroll lock, and ARIA modal compliance — must include `onKeyDown` for ArrowLeft/ArrowRight navigation
+- Displayed photo has a `ZoomIn` magnifying glass icon overlay (bottom-right, opacity transitions on hover via `group`/`group-hover`)
+- Gallery main image is constrained to `max-h-[32rem]` (512px); photo manager tiles are constrained to `max-h-48`
 - `DetailPanelShell` component handles all panel chrome (aside wrapper, focus management, Escape key, loading/error/empty states, close button) — new panels should compose it rather than duplicating the chrome
 - Panel Escape key handlers must check `e.defaultPrevented` before calling `onClose()` — Radix `Dialog` (lightbox) calls `preventDefault` on Escape, and without the check both the dialog and panel close simultaneously
 - Catalog page headings use `<h1>` for the primary page title, `<h2>` for sub-sections — no page should lack an `<h1>`
@@ -161,6 +175,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Page tests must mock `AppHeader` and `MainNav` — `AppHeader` calls `useAuth()` which throws without `AuthContext`. Use: `vi.mock('@/components/AppHeader', () => ({ AppHeader: () => <header data-testid="app-header" /> }))`
 - `FranchiseListPage`, `ManufacturerListPage`, `ManufacturerHubPage` do NOT import route files — no `Route.useSearch()` mock needed for these
 - `CharacterDetailPage` uses inline `useQuery` (not a custom hook) for related items — mock `listCatalogItems` from `@/catalog/api` and wrap in `createCatalogTestWrapper()`
+- Adding `useAuth()` to a component requires adding `vi.mock('@/auth/useAuth', () => ({ useAuth: () => ({ user: { id: 'u-1', role: 'user' }, isAuthenticated: true, isLoading: false }) }))` to every test file that renders that component (including parent pages like `ItemsPage` that render `ItemDetailPanel`)
 - `vi.advanceTimersByTime()` must be wrapped in `act()` when it triggers React state updates (e.g., `ShareLinkButton` timeout reset)
 - jsdom does not implement `navigator.clipboard` — mock with `Object.assign(navigator, { clipboard: { writeText: vi.fn() } })`
 - Integration components that own their own fetch (e.g., `CharacterRelationships`, `ItemRelationships`) require `vi.mock` in parent component tests — otherwise the hook fires without a QueryClient and crashes. Mock pattern: `vi.mock('@/catalog/components/CharacterRelationships', () => ({ CharacterRelationships: () => null }))`

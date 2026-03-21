@@ -155,6 +155,32 @@ export const CatalogItemDetailSchema = CatalogItemSchema.extend({
   updated_at: z.string(),
 });
 
+// Photo read shape — extracted from CatalogItemDetailSchema for reuse
+export const PhotoSchema = CatalogItemDetailSchema.shape.photos.element;
+
+// Photo write response (POST upload, PATCH primary, PATCH reorder)
+// Includes status field returned by curator-facing endpoints
+export const PhotoWriteItemSchema = z.object({
+  id: z.string(),
+  url: z.string(),
+  caption: z.string().nullable(),
+  is_primary: z.boolean(),
+  sort_order: z.number().int(),
+  status: z.enum(['pending', 'approved', 'rejected']),
+});
+
+export const UploadPhotosResponseSchema = z.object({
+  photos: z.array(PhotoWriteItemSchema),
+});
+
+export const SetPrimaryResponseSchema = z.object({
+  photo: PhotoWriteItemSchema,
+});
+
+export const ReorderPhotosResponseSchema = z.object({
+  photos: z.array(PhotoWriteItemSchema),
+});
+
 // Facet counts (GET /catalog/franchises/:franchise/items/facets)
 export const FacetValueSchema = z.object({
   value: z.string(),
@@ -373,3 +399,5 @@ export type ManufacturerDetail = z.infer<typeof ManufacturerDetailSchema>;
 export type ManufacturerStatsItem = z.infer<typeof ManufacturerStatsItemSchema>;
 export type ManufacturerStatsList = z.infer<typeof ManufacturerStatsListSchema>;
 export type ManufacturerItemFacets = z.infer<typeof ManufacturerItemFacetsSchema>;
+export type Photo = z.infer<typeof PhotoSchema>;
+export type PhotoWriteItem = z.infer<typeof PhotoWriteItemSchema>;

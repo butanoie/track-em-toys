@@ -18,15 +18,15 @@ describe('PhotoGallery', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('renders primary photo with correct aria-label', () => {
+  it('renders displayed photo with correct aria-label', () => {
     render(<PhotoGallery photos={mockPhotos} itemName="Optimus Prime" />);
-    expect(screen.getByRole('button', { name: 'View photo: Front view' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Enlarge photo: Front view' })).toBeInTheDocument();
   });
 
-  it('uses itemName when caption is null for primary photo', () => {
+  it('uses itemName when caption is null for displayed photo', () => {
     const photos = [{ id: 'p-1', url: '/photo.jpg', caption: null, is_primary: true, sort_order: 1 }];
     render(<PhotoGallery photos={photos} itemName="Optimus Prime" />);
-    expect(screen.getByRole('button', { name: 'View photo: Optimus Prime' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Enlarge photo: Optimus Prime' })).toBeInTheDocument();
   });
 
   it('renders thumbnail strip when photos.length > 1', () => {
@@ -42,35 +42,48 @@ describe('PhotoGallery', () => {
     expect(screen.queryByRole('button', { name: /View photo 1/ })).not.toBeInTheDocument();
   });
 
-  it('clicking primary photo opens lightbox', async () => {
+  it('clicking thumbnail changes displayed photo without opening lightbox', async () => {
     render(<PhotoGallery photos={mockPhotos} itemName="Optimus Prime" />);
-    await userEvent.click(screen.getByRole('button', { name: 'View photo: Front view' }));
+    await userEvent.click(screen.getByRole('button', { name: 'View photo 2: Side view' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Enlarge photo: Side view' })).toBeInTheDocument();
+  });
+
+  it('clicking displayed photo opens lightbox', async () => {
+    render(<PhotoGallery photos={mockPhotos} itemName="Optimus Prime" />);
+    await userEvent.click(screen.getByRole('button', { name: 'Enlarge photo: Front view' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('1 / 3')).toBeInTheDocument();
   });
 
-  it('clicking thumbnail opens lightbox at that index', async () => {
+  it('clicking displayed photo opens lightbox at selected index', async () => {
     render(<PhotoGallery photos={mockPhotos} itemName="Optimus Prime" />);
     await userEvent.click(screen.getByRole('button', { name: 'View photo 2: Side view' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Enlarge photo: Side view' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('2 / 3')).toBeInTheDocument();
   });
 
-  it('Previous button is disabled at first photo', async () => {
+  it('Previous wraps from first photo to last', async () => {
     render(<PhotoGallery photos={mockPhotos} itemName="Optimus Prime" />);
-    await userEvent.click(screen.getByRole('button', { name: 'View photo: Front view' }));
-    expect(screen.getByRole('button', { name: 'Previous photo' })).toBeDisabled();
+    await userEvent.click(screen.getByRole('button', { name: 'Enlarge photo: Front view' }));
+    expect(screen.getByText('1 / 3')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Previous photo' }));
+    expect(screen.getByText('3 / 3')).toBeInTheDocument();
   });
 
-  it('Next button is disabled at last photo', async () => {
+  it('Next wraps from last photo to first', async () => {
     render(<PhotoGallery photos={mockPhotos} itemName="Optimus Prime" />);
     await userEvent.click(screen.getByRole('button', { name: 'View photo 3: Optimus Prime' }));
-    expect(screen.getByRole('button', { name: 'Next photo' })).toBeDisabled();
+    await userEvent.click(screen.getByRole('button', { name: /Enlarge photo/ }));
+    expect(screen.getByText('3 / 3')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Next photo' }));
+    expect(screen.getByText('1 / 3')).toBeInTheDocument();
   });
 
   it('clicking Next advances to next photo', async () => {
     render(<PhotoGallery photos={mockPhotos} itemName="Optimus Prime" />);
-    await userEvent.click(screen.getByRole('button', { name: 'View photo: Front view' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Enlarge photo: Front view' }));
     expect(screen.getByText('1 / 3')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Next photo' }));
     expect(screen.getByText('2 / 3')).toBeInTheDocument();
@@ -79,8 +92,15 @@ describe('PhotoGallery', () => {
   it('clicking Previous goes back', async () => {
     render(<PhotoGallery photos={mockPhotos} itemName="Optimus Prime" />);
     await userEvent.click(screen.getByRole('button', { name: 'View photo 2: Side view' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Enlarge photo: Side view' }));
     expect(screen.getByText('2 / 3')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Previous photo' }));
     expect(screen.getByText('1 / 3')).toBeInTheDocument();
+  });
+
+  it('renders magnifying glass icon on displayed photo', () => {
+    render(<PhotoGallery photos={mockPhotos} itemName="Optimus Prime" />);
+    const enlargeButton = screen.getByRole('button', { name: 'Enlarge photo: Front view' });
+    expect(enlargeButton.querySelector('svg')).toBeInTheDocument();
   });
 });
