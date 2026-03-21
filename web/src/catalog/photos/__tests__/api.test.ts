@@ -4,9 +4,9 @@ import { buildPhotoUrl, validateFile } from '../api';
 describe('buildPhotoUrl', () => {
   it('prepends VITE_PHOTO_BASE_URL to relative path', () => {
     // In test env VITE_PHOTO_BASE_URL is not set, so it returns the url as-is
-    const url = buildPhotoUrl('abc-123/def-456-gallery.webp');
+    const url = buildPhotoUrl('abc-123/def-456-original.webp');
     // Without env var, returns the relative url unchanged
-    expect(url).toContain('abc-123/def-456-gallery.webp');
+    expect(url).toContain('abc-123/def-456-original.webp');
   });
 });
 

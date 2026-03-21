@@ -15,6 +15,7 @@
     "set-role": "tsx scripts/set-role.ts",
     "seed": "tsx db/seed/ingest.ts",
     "seed:purge": "tsx db/seed/ingest.ts --purge --confirm",
+    "photos:purge": "tsx db/seed/purge-photos.ts --confirm",
     "typecheck:seed": "tsc -p tsconfig.seed.json --noEmit",
     "format": "prettier --ignore-path ../.prettierignore --write .",
     "format:check": "prettier --ignore-path ../.prettierignore --check ."

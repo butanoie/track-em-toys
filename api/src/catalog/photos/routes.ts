@@ -5,7 +5,7 @@ import { config } from '../../config.js';
 import { getItemIdBySlug } from '../items/queries.js';
 import * as photoQueries from './queries.js';
 import { photoDir, photoPath, photoRelativeUrl, ensureDir, writePhoto, deletePhotoFiles } from './storage.js';
-import { processUpload } from './thumbnails.js';
+import { processUpload, DimensionError } from './thumbnails.js';
 import { uploadPhotosSchema, deletePhotoSchema, setPrimarySchema, reorderPhotosSchema } from './schemas.js';
 
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
@@ -53,7 +53,6 @@ export async function photoRoutes(fastify: FastifyInstance, _opts: object): Prom
       const processed: Array<{
         photoId: string;
         thumb: Buffer;
-        gallery: Buffer;
         original: Buffer;
       }> = [];
 
@@ -77,7 +76,10 @@ export async function photoRoutes(fastify: FastifyInstance, _opts: object): Prom
         let result;
         try {
           result = await processUpload(inputBuffer);
-        } catch {
+        } catch (err) {
+          if (err instanceof DimensionError) {
+            return reply.code(400).send({ error: err.message });
+          }
           return reply.code(400).send({ error: 'Invalid image file' });
         }
 
@@ -92,11 +94,10 @@ export async function photoRoutes(fastify: FastifyInstance, _opts: object): Prom
       await ensureDir(dir);
 
       for (const p of processed) {
-        const path = (size: 'thumb' | 'gallery' | 'original') =>
+        const path = (size: 'thumb' | 'original') =>
           photoPath(config.photos.storagePath, itemId, p.photoId, size);
         await Promise.all([
           writePhoto(path('thumb'), p.thumb),
-          writePhoto(path('gallery'), p.gallery),
           writePhoto(path('original'), p.original),
         ]);
       }

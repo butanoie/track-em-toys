@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import sharp from 'sharp';
-import { processUpload } from './thumbnails.js';
+import { processUpload, DimensionError, MIN_DIMENSION } from './thumbnails.js';
 
-// Create a minimal 10×10 red PNG as a test fixture
-async function createTestImage(width = 10, height = 10): Promise<Buffer> {
+async function createTestImage(width = 800, height = 800): Promise<Buffer> {
   return sharp({
     create: { width, height, channels: 3, background: { r: 255, g: 0, b: 0 } },
   })
@@ -12,37 +11,63 @@ async function createTestImage(width = 10, height = 10): Promise<Buffer> {
 }
 
 describe('processUpload', () => {
-  it('produces three WebP buffers', async () => {
+  it('produces two WebP buffers', async () => {
     const input = await createTestImage();
     const result = await processUpload(input);
 
     expect(result.thumb).toBeInstanceOf(Buffer);
-    expect(result.gallery).toBeInstanceOf(Buffer);
     expect(result.original).toBeInstanceOf(Buffer);
 
-    // All outputs should be WebP (starts with RIFF...WEBP magic bytes)
-    for (const buf of [result.thumb, result.gallery, result.original]) {
+    for (const buf of [result.thumb, result.original]) {
       expect(buf.toString('ascii', 0, 4)).toBe('RIFF');
       expect(buf.toString('ascii', 8, 12)).toBe('WEBP');
     }
   });
 
-  it('produces a 200x200 thumbnail from a large image', async () => {
+  it('scales thumbnail to fit within 200x200 preserving aspect ratio', async () => {
     const input = await createTestImage(1000, 800);
     const result = await processUpload(input);
 
     const thumbMeta = await sharp(result.thumb).metadata();
     expect(thumbMeta.width).toBe(200);
-    expect(thumbMeta.height).toBe(200);
+    expect(thumbMeta.height).toBe(160);
   });
 
-  it('does not upscale a small image for gallery size', async () => {
-    const input = await createTestImage(100, 80);
+  it('does not upscale original when under 1600px', async () => {
+    const input = await createTestImage(800, 600);
     const result = await processUpload(input);
 
-    const galleryMeta = await sharp(result.gallery).metadata();
-    expect(galleryMeta.width).toBeLessThanOrEqual(100);
-    expect(galleryMeta.height).toBeLessThanOrEqual(80);
+    const originalMeta = await sharp(result.original).metadata();
+    expect(originalMeta.width).toBe(800);
+    expect(originalMeta.height).toBe(600);
+  });
+
+  it('caps original at 1600px longest edge', async () => {
+    const input = await createTestImage(3000, 2000);
+    const result = await processUpload(input);
+
+    const originalMeta = await sharp(result.original).metadata();
+    expect(originalMeta.width).toBeLessThanOrEqual(1600);
+    expect(originalMeta.height).toBeLessThanOrEqual(1600);
+  });
+
+  it('throws DimensionError when smallest edge is under minimum', async () => {
+    const input = await createTestImage(1000, 500);
+    await expect(processUpload(input)).rejects.toThrow(DimensionError);
+    await expect(processUpload(input)).rejects.toThrow(/1000x500/);
+    await expect(processUpload(input)).rejects.toThrow(new RegExp(`${MIN_DIMENSION}px`));
+  });
+
+  it('accepts image at exactly the minimum dimension', async () => {
+    const input = await createTestImage(MIN_DIMENSION, MIN_DIMENSION);
+    const result = await processUpload(input);
+    expect(result.thumb).toBeInstanceOf(Buffer);
+    expect(result.original).toBeInstanceOf(Buffer);
+  });
+
+  it('throws DimensionError when both edges are too small', async () => {
+    const input = await createTestImage(400, 300);
+    await expect(processUpload(input)).rejects.toThrow(DimensionError);
   });
 
   it('throws on invalid image data', async () => {

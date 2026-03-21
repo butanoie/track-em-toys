@@ -10,6 +10,7 @@ vi.mock('sharp', () => {
     resize: () => mockSharp(),
     webp: () => mockSharp(),
     toBuffer: () => Promise.resolve(Buffer.from('fake-webp')),
+    metadata: () => Promise.resolve({ width: 1000, height: 800 }),
   });
   return { default: mockSharp };
 });
@@ -43,7 +44,7 @@ const PHOTO_ID = 'd4e5f6a7-b8c9-0123-defa-234567890123';
 
 const mockPhotoRow = {
   id: PHOTO_ID,
-  url: `${ITEM_ID}/${PHOTO_ID}-gallery.webp`,
+  url: `${ITEM_ID}/${PHOTO_ID}-original.webp`,
   caption: null,
   is_primary: false,
   sort_order: 1,

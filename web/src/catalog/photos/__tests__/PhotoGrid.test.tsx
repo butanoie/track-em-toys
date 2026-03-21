@@ -8,9 +8,9 @@ vi.mock('../api', () => ({
 }));
 
 const mockPhotos: Photo[] = [
-  { id: 'p-1', url: 'item1/photo1-gallery.webp', caption: null, is_primary: true, sort_order: 0 },
-  { id: 'p-2', url: 'item1/photo2-gallery.webp', caption: 'Side view', is_primary: false, sort_order: 1 },
-  { id: 'p-3', url: 'item1/photo3-gallery.webp', caption: null, is_primary: false, sort_order: 2 },
+  { id: 'p-1', url: 'item1/photo1-original.webp', caption: null, is_primary: true, sort_order: 0 },
+  { id: 'p-2', url: 'item1/photo2-original.webp', caption: 'Side view', is_primary: false, sort_order: 1 },
+  { id: 'p-3', url: 'item1/photo3-original.webp', caption: null, is_primary: false, sort_order: 2 },
 ];
 
 describe('PhotoGrid', () => {
@@ -64,7 +64,7 @@ describe('PhotoGrid', () => {
     render(<PhotoGrid photos={mockPhotos} onReorder={vi.fn()} onSetPrimary={vi.fn()} onDelete={vi.fn()} />);
 
     const images = screen.getAllByRole('img');
-    expect(images[0]).toHaveAttribute('src', 'http://localhost:3010/photos/item1/photo1-gallery.webp');
+    expect(images[0]).toHaveAttribute('src', 'http://localhost:3010/photos/item1/photo1-original.webp');
   });
 
   it('uses caption as alt text when available', () => {
