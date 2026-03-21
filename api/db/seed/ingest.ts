@@ -237,7 +237,7 @@ async function buildSlugMap(
     throw new Error(`buildSlugMap: unexpected table "${table}"`)
   }
   const { rows } = await client.query<{ slug: string; id: string }>(
-    `SELECT slug, id FROM ${table}`,
+    `SELECT slug, id FROM ${pg.escapeIdentifier(table)}`,
   )
   const map = new Map<string, string>()
   for (const row of rows) {
