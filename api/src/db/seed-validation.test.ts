@@ -149,7 +149,9 @@ const manufacturers = loadRef('reference/manufacturers.json');
 const toyLines = loadRef<ToyLineRecord>('reference/toy_lines.json');
 
 const charFiles = discoverAndLoad<CharacterFile>('characters');
-const itemFiles = discoverAndLoad<ItemFile>('items', { recursive: true });
+const itemFiles = discoverAndLoad<ItemFile>('items', { recursive: true }).filter(
+  (f) => Array.isArray(f.items)
+);
 const appearanceFiles = discoverAndLoad<AppearanceFile>('appearances');
 const relationshipFiles = discoverAndLoad<RelationshipFile>('relationships');
 
