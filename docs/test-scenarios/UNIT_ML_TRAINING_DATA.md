@@ -7,6 +7,66 @@ And a valid manifest JSON exists with photo entries
 
 ## Scenarios
 
+### Directory Scanning
+
+#### Happy Path: Scan both tiers
+
+```gherkin
+Scenario: Discover images from catalog and training-only tiers
+  Given a source directory with catalog/ and training-only/ tiers
+  And catalog/transformers/mmc/r-03-bovis/ has 3 images
+  And training-only/transformers/mmc/r-03-bovis/ has 2 images
+  When scanSourceDir is called
+  Then it returns a Manifest with 5 entries for label "transformers/r-03-bovis"
+```
+
+#### Happy Path: Correct label format
+
+```gherkin
+Scenario: Labels use franchise/item-slug format
+  Given a source directory with catalog/transformers/fanstoys/ft-04-scoria/ containing 1 image
+  When scanSourceDir is called
+  Then the entry label is "transformers/ft-04-scoria"
+  And franchise_slug is "transformers"
+  And item_slug is "ft-04-scoria"
+```
+
+#### Skip: Unmatched directories ignored
+
+```gherkin
+Scenario: _unmatched directories are skipped
+  Given a source directory with _unmatched/ containing images
+  When scanSourceDir is called
+  Then no entries reference _unmatched paths
+```
+
+#### Skip: Non-image files ignored
+
+```gherkin
+Scenario: Non-image files in item directories are skipped
+  Given an item directory containing both .jpeg and .txt files
+  When scanSourceDir is called
+  Then only .jpeg entries are included
+```
+
+#### Error: Empty source directory
+
+```gherkin
+Scenario: Throw when no images found
+  Given an empty source directory
+  When scanSourceDir is called
+  Then it throws an error mentioning "No images found"
+```
+
+#### Graceful: Missing tier
+
+```gherkin
+Scenario: Missing training-only tier does not cause failure
+  Given a source directory with only catalog/ (no training-only/)
+  When scanSourceDir is called
+  Then it returns entries from catalog/ only
+```
+
 ### Manifest Parsing
 
 #### Happy Path: Valid manifest parses correctly

@@ -2,13 +2,17 @@
 
 ## Status
 
-Implemented (2026-03-21)
+Implemented (2026-03-21), extended (2026-03-22)
 
 ## Context
 
 Phase 4.0a of the roadmap requires a training data preparation pipeline that bridges the existing ML export endpoint (`POST /catalog/ml-export`, Phase 1.9 Slice 3) and Create ML model training (Phase 4.0b). The ML export endpoint already generates manifest JSON files with photo paths and labels. The pipeline needs to transform this manifest into Create ML's expected folder-per-class structure with augmented images.
 
 Two test classes are available: Commander Stack (18 photos) and Margh (19 photos), both Transformers items.
+
+### 2026-03-22 Extension: Directory Scan Mode
+
+A `--source-dir` flag was added as an alternative to `--manifest`, allowing the pipeline to scan a seed-images directory tree directly instead of requiring an API export. This supports larger-scale training from curated image collections stored on external drives, organized as `{tier}/{franchise}/{manufacturer}/{item}/{images}`. Two tiers (`catalog/` and `training-only/`) are merged per item. Directories named `_unmatched/` are skipped.
 
 ## Decision
 
@@ -23,7 +27,8 @@ The `ml/` module gets its own `package.json` as a standalone Node.js project (no
 - `src/augment.ts` — Augmentation orchestrator (adaptive target-based)
 - `src/copy.ts` — File copy operations with idempotency
 - `src/validate.ts` — Output structure validation against Create ML format
-- `src/prepare-training-data.ts` — CLI entry point
+- `src/scan.ts` — Directory tree scanner (produces Manifest from seed-images directory)
+- `src/prepare-training-data.ts` — CLI entry point (supports `--manifest` or `--source-dir`)
 
 Each module (except entry point and types) has a companion `.test.ts` file.
 
@@ -61,6 +66,7 @@ Training data is written to `ML_TRAINING_DATA_PATH` (new env var), pointing to t
 - **Python/PIL**: Richer ML ecosystem but adds a new language dependency. Node.js/sharp keeps the toolchain unified.
 - **Symlinks instead of copies**: Less disk usage but breaks portability across machines.
 - **Database-direct queries**: Would eliminate the manifest intermediary but couples the ML pipeline to the API's database.
+- **Directory scan only (no manifest mode)**: Simpler but loses the ability to leverage API filters (franchise, search query, approval status). Both modes are retained for different workflows.
 
 ## Consequences
 
