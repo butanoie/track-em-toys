@@ -3,11 +3,7 @@ import { join } from 'node:path';
 import type { FastifyInstance } from 'fastify';
 import { config } from '../../config.js';
 import { photoPath } from '../photos/storage.js';
-import {
-  getExportableItemsBySearch,
-  getExportableItemsByFilters,
-  type ExportItemPhotoRow,
-} from './queries.js';
+import { getExportableItemsBySearch, getExportableItemsByFilters, type ExportItemPhotoRow } from './queries.js';
 import { mlExportSchema } from './schemas.js';
 
 const LOW_PHOTO_THRESHOLD = 10;
@@ -63,14 +59,8 @@ interface Manifest {
  * @param rows - Flat photo rows from the export query
  * @param storagePath - Absolute path to photo storage directory
  */
-function buildManifestData(
-  rows: ExportItemPhotoRow[],
-  storagePath: string
-): ManifestData {
-  const itemMap = new Map<
-    string,
-    { slug: string; name: string; franchiseSlug: string; photoIds: string[] }
-  >();
+function buildManifestData(rows: ExportItemPhotoRow[], storagePath: string): ManifestData {
+  const itemMap = new Map<string, { slug: string; name: string; franchiseSlug: string; photoIds: string[] }>();
 
   for (const row of rows) {
     let item = itemMap.get(row.item_id);
@@ -126,7 +116,12 @@ function buildManifestData(
  * Produces format: 20260321T154530Z.json
  */
 function generateExportFilename(): string {
-  return new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '') + '.json';
+  return (
+    new Date()
+      .toISOString()
+      .replace(/[-:]/g, '')
+      .replace(/\.\d{3}/, '') + '.json'
+  );
 }
 
 /**
@@ -199,10 +194,7 @@ export async function mlExportRoutes(fastify: FastifyInstance, _opts: object): P
 
       try {
         await mkdir(exportPath, { recursive: true });
-        await writeFile(
-          join(exportPath, filename),
-          JSON.stringify(manifest, null, 2)
-        );
+        await writeFile(join(exportPath, filename), JSON.stringify(manifest, null, 2));
       } catch (err) {
         request.log.error({ err }, 'ML export manifest write failed');
         return reply.code(500).send({ error: 'Failed to write export manifest' });

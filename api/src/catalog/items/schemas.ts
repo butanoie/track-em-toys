@@ -12,7 +12,15 @@ import {
 
 const characterDepictionDetailItem = {
   type: 'object',
-  required: ['slug', 'name', 'appearance_slug', 'appearance_name', 'appearance_source_media', 'appearance_source_name', 'is_primary'],
+  required: [
+    'slug',
+    'name',
+    'appearance_slug',
+    'appearance_name',
+    'appearance_source_media',
+    'appearance_source_name',
+    'is_primary',
+  ],
   additionalProperties: false,
   properties: {
     slug: { type: 'string' },

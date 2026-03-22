@@ -90,7 +90,8 @@ export function CharacterList({
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-foreground truncate">{char.name}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {char.continuity_family.name} · {char.faction?.name ?? 'No faction'} · {char.character_type ?? '—'}
+                      {char.continuity_family.name} · {char.faction?.name ?? 'No faction'} ·{' '}
+                      {char.character_type ?? '—'}
                     </p>
                   </div>
                   {char.alt_mode && (

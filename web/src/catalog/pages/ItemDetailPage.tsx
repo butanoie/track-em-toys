@@ -139,7 +139,7 @@ export function ItemDetailPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div>
                 <ItemDetailContent data={data} franchise={franchiseSlug} />
-    
+
                 {isCurator && (
                   <PhotoManagementSheet
                     open={photoSheetOpen}

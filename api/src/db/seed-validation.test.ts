@@ -13,9 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_SEED_DIR = path.resolve(__dirname, '../../db/seed/sample');
-const SEED_DIR = process.env['SEED_DATA_PATH']
-  ? path.resolve(process.env['SEED_DATA_PATH'])
-  : DEFAULT_SEED_DIR;
+const SEED_DIR = process.env['SEED_DATA_PATH'] ? path.resolve(process.env['SEED_DATA_PATH']) : DEFAULT_SEED_DIR;
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -164,9 +162,7 @@ const manufacturers = loadRef('reference/manufacturers.json');
 const toyLines = loadRef<ToyLineRecord>('reference/toy_lines.json');
 
 const charFiles = discoverAndLoad<CharacterFile>('characters');
-const itemFiles = discoverAndLoad<ItemFile>('items', { recursive: true }).filter(
-  (f) => Array.isArray(f.items)
-);
+const itemFiles = discoverAndLoad<ItemFile>('items', { recursive: true }).filter((f) => Array.isArray(f.items));
 const appearanceFiles = discoverAndLoad<AppearanceFile>('appearances');
 const relationshipFiles = discoverAndLoad<RelationshipFile>('relationships');
 const itemRelationshipFiles = discoverAndLoad<ItemRelationshipFile>('item_relationships');
@@ -242,13 +238,7 @@ const RELATIONSHIP_TYPE_REGISTRY = new Map<string, RelationshipTypeSpec>([
         'face-partner',
         'transtector-partner',
       ]),
-      requiredSubtypes: new Set([
-        'headmaster',
-        'targetmaster',
-        'powermaster',
-        'brainmaster',
-        'godmaster',
-      ]),
+      requiredSubtypes: new Set(['headmaster', 'targetmaster', 'powermaster', 'brainmaster', 'godmaster']),
       optionalSubtypes: null,
       symmetric: false,
     },
@@ -733,10 +723,7 @@ describe('seed data validation', () => {
         expect('type' in r, `${file}: missing required field "type"`).toBe(true);
         expect('entity1' in r, `${file}: missing required field "entity1"`).toBe(true);
         expect('entity2' in r, `${file}: missing required field "entity2"`).toBe(true);
-        expect(
-          typeof r.metadata === 'object' && r.metadata !== null,
-          `${file}: metadata must be an object`
-        ).toBe(true);
+        expect(typeof r.metadata === 'object' && r.metadata !== null, `${file}: metadata must be an object`).toBe(true);
         expect('slug' in r.entity1, `${file}: entity1 missing "slug"`).toBe(true);
         expect('role' in r.entity1, `${file}: entity1 missing "role"`).toBe(true);
         expect('slug' in r.entity2, `${file}: entity2 missing "slug"`).toBe(true);
@@ -746,10 +733,7 @@ describe('seed data validation', () => {
 
     it.each(relationshipFiles)('$file: relationship type is valid', ({ file, relationships }) => {
       for (const r of relationships) {
-        expect(
-          VALID_RELATIONSHIP_TYPES.has(r.type),
-          `${file}: unknown relationship type "${r.type}"`
-        ).toBe(true);
+        expect(VALID_RELATIONSHIP_TYPES.has(r.type), `${file}: unknown relationship type "${r.type}"`).toBe(true);
       }
     });
 
@@ -799,37 +783,34 @@ describe('seed data validation', () => {
       }
     );
 
-    it.each(relationshipFiles)(
-      '$file: subtype valid for relationship type',
-      ({ file, relationships }) => {
-        for (const r of relationships) {
-          const spec = RELATIONSHIP_TYPE_REGISTRY.get(r.type);
-          if (!spec) continue;
+    it.each(relationshipFiles)('$file: subtype valid for relationship type', ({ file, relationships }) => {
+      for (const r of relationships) {
+        const spec = RELATIONSHIP_TYPE_REGISTRY.get(r.type);
+        if (!spec) continue;
 
-          if (spec.requiredSubtypes) {
-            // Subtype is required
+        if (spec.requiredSubtypes) {
+          // Subtype is required
+          expect(
+            r.subtype !== null && spec.requiredSubtypes.has(r.subtype),
+            `${file}: type "${r.type}" requires subtype from: ${[...spec.requiredSubtypes].join(', ')}. Got: "${r.subtype}"`
+          ).toBe(true);
+        } else if (spec.optionalSubtypes) {
+          // Subtype is optional but must be valid if present
+          if (r.subtype !== null) {
             expect(
-              r.subtype !== null && spec.requiredSubtypes.has(r.subtype),
-              `${file}: type "${r.type}" requires subtype from: ${[...spec.requiredSubtypes].join(', ')}. Got: "${r.subtype}"`
-            ).toBe(true);
-          } else if (spec.optionalSubtypes) {
-            // Subtype is optional but must be valid if present
-            if (r.subtype !== null) {
-              expect(
-                spec.optionalSubtypes.has(r.subtype),
-                `${file}: type "${r.type}" subtype "${r.subtype}" invalid. Expected one of: ${[...spec.optionalSubtypes].join(', ')}`
-              ).toBe(true);
-            }
-          } else {
-            // No subtypes allowed
-            expect(
-              r.subtype === null || r.subtype === undefined,
-              `${file}: type "${r.type}" does not support subtypes, but got "${r.subtype}"`
+              spec.optionalSubtypes.has(r.subtype),
+              `${file}: type "${r.type}" subtype "${r.subtype}" invalid. Expected one of: ${[...spec.optionalSubtypes].join(', ')}`
             ).toBe(true);
           }
+        } else {
+          // No subtypes allowed
+          expect(
+            r.subtype === null || r.subtype === undefined,
+            `${file}: type "${r.type}" does not support subtypes, but got "${r.subtype}"`
+          ).toBe(true);
         }
       }
-    );
+    });
 
     it.each(relationshipFiles)(
       '$file: symmetric types have alphabetically ordered entity slugs',
@@ -851,10 +832,7 @@ describe('seed data validation', () => {
         for (const r of relationships) {
           const key = `${r.type}|${r.entity1.slug}|${r.entity2.slug}`;
           const existing = seen.get(key);
-          expect(
-            existing,
-            `Duplicate relationship: ${key} in "${file}" — already in "${existing}"`
-          ).toBeUndefined();
+          expect(existing, `Duplicate relationship: ${key} in "${file}" — already in "${existing}"`).toBeUndefined();
           seen.set(key, file);
         }
       }
@@ -877,10 +855,9 @@ describe('seed data validation', () => {
       for (const r of allRelationships) {
         if (r.type !== 'combiner-component') continue;
         const gestalt = charBySlugGlobal.get(r.entity1.slug);
-        expect(
-          gestalt?.is_combined_form,
-          `Combiner gestalt "${r.entity1.slug}" must have is_combined_form=true`
-        ).toBe(true);
+        expect(gestalt?.is_combined_form, `Combiner gestalt "${r.entity1.slug}" must have is_combined_form=true`).toBe(
+          true
+        );
       }
     });
 
@@ -921,26 +898,21 @@ describe('seed data validation', () => {
       }
     });
 
-    it.each(itemFiles)(
-      '$file: appearance slug belongs to the correct character',
-      ({ file, items }) => {
-        const appearanceBySlug = new Map(
-          appearanceFiles.flatMap(({ data }) => data.map((a) => [a.slug, a] as const))
-        );
+    it.each(itemFiles)('$file: appearance slug belongs to the correct character', ({ file, items }) => {
+      const appearanceBySlug = new Map(appearanceFiles.flatMap(({ data }) => data.map((a) => [a.slug, a] as const)));
 
-        for (const item of items) {
-          if (item.character_appearance_slug === null) continue;
-          const appearance = appearanceBySlug.get(item.character_appearance_slug);
-          if (!appearance) continue; // caught by FK test in section 8
+      for (const item of items) {
+        if (item.character_appearance_slug === null) continue;
+        const appearance = appearanceBySlug.get(item.character_appearance_slug);
+        if (!appearance) continue; // caught by FK test in section 8
 
-          expect(
-            appearance.character_slug,
-            `${file} > "${item.slug}": appearance "${item.character_appearance_slug}" belongs to character ` +
-              `"${appearance.character_slug}" but item.character_slug is "${item.character_slug}"`
-          ).toBe(item.character_slug);
-        }
+        expect(
+          appearance.character_slug,
+          `${file} > "${item.slug}": appearance "${item.character_appearance_slug}" belongs to character ` +
+            `"${appearance.character_slug}" but item.character_slug is "${item.character_slug}"`
+        ).toBe(item.character_slug);
       }
-    );
+    });
   });
 
   // ── 12. Item relationship seed files ──────────────────────────────────────
@@ -962,10 +934,7 @@ describe('seed data validation', () => {
         expect('type' in r, `${file}: missing required field "type"`).toBe(true);
         expect('item1_slug' in r, `${file}: missing required field "item1_slug"`).toBe(true);
         expect('item2_slug' in r, `${file}: missing required field "item2_slug"`).toBe(true);
-        expect(
-          typeof r.metadata === 'object' && r.metadata !== null,
-          `${file}: metadata must be an object`
-        ).toBe(true);
+        expect(typeof r.metadata === 'object' && r.metadata !== null, `${file}: metadata must be an object`).toBe(true);
       }
     });
 

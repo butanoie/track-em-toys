@@ -24,9 +24,7 @@ export async function processUpload(inputBuffer: Buffer): Promise<ProcessedPhoto
   const smallest = Math.min(width, height);
 
   if (smallest < MIN_DIMENSION) {
-    throw new DimensionError(
-      `Image too small: ${width}x${height}. Minimum ${MIN_DIMENSION}px on the shortest edge.`,
-    );
+    throw new DimensionError(`Image too small: ${width}x${height}. Minimum ${MIN_DIMENSION}px on the shortest edge.`);
   }
 
   const [thumb, original] = await Promise.all([
@@ -39,6 +37,11 @@ export async function processUpload(inputBuffer: Buffer): Promise<ProcessedPhoto
 
 /** Thrown when an uploaded image does not meet the minimum dimension requirement. */
 export class DimensionError extends Error {
+  /**
+   * Creates a DimensionError with the given message.
+   *
+   * @param message - Description of the dimension violation.
+   */
   constructor(message: string) {
     super(message);
     this.name = 'DimensionError';

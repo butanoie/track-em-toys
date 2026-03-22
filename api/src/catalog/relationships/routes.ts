@@ -18,10 +18,7 @@ const rateLimitConfig = { rateLimit: { max: 100, timeWindow: '1 minute' } } as c
  * @param _opts - Fastify plugin options (unused)
  */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
-export async function characterRelationshipRoutes(
-  fastify: FastifyInstance,
-  _opts: object,
-): Promise<void> {
+export async function characterRelationshipRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   fastify.get<{ Params: FranchiseSlugParams }>(
     '/',
     { schema: getCharacterRelationshipsSchema, config: rateLimitConfig },
@@ -31,7 +28,7 @@ export async function characterRelationshipRoutes(
       if (!exists) return reply.code(404).send({ error: 'Character not found' });
       const relationships = await getCharacterRelationships(franchise, slug);
       return { relationships };
-    },
+    }
   );
 }
 
@@ -42,10 +39,7 @@ export async function characterRelationshipRoutes(
  * @param _opts - Fastify plugin options (unused)
  */
 // eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
-export async function itemRelationshipRoutes(
-  fastify: FastifyInstance,
-  _opts: object,
-): Promise<void> {
+export async function itemRelationshipRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   fastify.get<{ Params: FranchiseSlugParams }>(
     '/',
     { schema: getItemRelationshipsSchema, config: rateLimitConfig },
@@ -55,6 +49,6 @@ export async function itemRelationshipRoutes(
       if (!itemId) return reply.code(404).send({ error: 'Item not found' });
       const relationships = await getItemRelationships(franchise, slug);
       return { relationships };
-    },
+    }
   );
 }

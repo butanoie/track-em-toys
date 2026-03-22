@@ -165,7 +165,9 @@ export function SearchPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => { void exportMutation.mutate(); }}
+                        onClick={() => {
+                          void exportMutation.mutate();
+                        }}
                         disabled={exportMutation.isPending}
                       >
                         <Download className="h-4 w-4 mr-1.5" />
