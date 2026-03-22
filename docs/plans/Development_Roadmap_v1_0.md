@@ -71,7 +71,7 @@ The project has completed its authentication foundation (Phases 1.1–1.3) and i
 | Catalog API Routes            | NOT STARTED       | Blocked by seed ingestion                  |
 | Web Catalog UI                | NOT STARTED       | Blocked by catalog API                     |
 | Photo Upload API + UI         | NOT STARTED       | Schema exists (`item_photos`), no app code |
-| ML Training Pipeline          | NOT STARTED       | Blocked by photo data                      |
+| ML Training Pipeline          | 4.0a DONE         | 4.0b ready (training data prep complete)   |
 | iOS App + On-Device Inference | NOT STARTED       | Blocked by trained model                   |
 
 ### What's Deferred (Post-ML)
@@ -289,12 +289,14 @@ Train image classification models using the collector's own catalog photos.
 
 **Sub-phases:**
 
-#### 4.0a: Training Data Preparation
+#### 4.0a: Training Data Preparation — DONE
 
-- Export script: pull labeled photos from DB/storage, organize into `ClassName/` folder structure
-- Data augmentation strategy (rotation, scale, brightness variations)
-- Class balance analysis (identify under-represented classes)
-- Minimum viable class set: start with the most-photographed characters/items
+- ✅ Export script with two input modes: API manifest (`--manifest`) and directory scan (`--source-dir`)
+- ✅ Data augmentation: 15 deterministic transforms (flip, rotation ±10°, brightness ±20%, compounds)
+- ✅ Class balance analysis with adaptive augmentation (target count per class, default 100)
+- ✅ Seed-images directory structure: `{tier}/{franchise}/{manufacturer}/{item}/` with `catalog/` and `training-only/` tiers
+- ✅ Output validation: Create ML format, minimum 10 images per class, clean-on-rerun
+- ✅ 87 unit tests across 7 test files
 
 #### 4.0b: Model Training (macOS)
 

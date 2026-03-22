@@ -1,6 +1,7 @@
 /**
  * Pipeline: prepare-training-data
- * Input:    ML export manifest JSON (produced by POST /catalog/ml-export)
+ * Input:    ML export manifest JSON  (--manifest <path>)
+ *       OR  Seed-images directory     (--source-dir <path>)
  * Output:   Create ML folder-per-class structure at ML_TRAINING_DATA_PATH
  *           Format: {outputDir}/{franchise__item-slug}/{filename}.webp
  * Time:     ~30s per 1000 photos on Apple Silicon (copy-only), ~2-5min with augmentation
@@ -11,6 +12,7 @@ import { stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import type { CliOptions } from './types.js';
 import { readManifest, groupEntriesByLabel, flattenLabel } from './manifest.js';
+import { scanSourceDir } from './scan.js';
 import { analyzeBalance, printBalanceReport } from './balance.js';
 import { TRANSFORMS } from './transforms.js';
 import { augmentClass } from './augment.js';
@@ -26,6 +28,7 @@ const CONCURRENCY_LIMIT = 5;
 function loadCliOptions(): CliOptions {
   const args = process.argv.slice(2);
   let manifestPath: string | undefined;
+  let sourceDir: string | undefined;
   let outputDir: string | undefined = process.env['ML_TRAINING_DATA_PATH'];
   let targetCount = DEFAULT_TARGET_COUNT;
   let format: 'webp' | 'jpeg' = 'webp';
@@ -36,6 +39,8 @@ function loadCliOptions(): CliOptions {
     const arg = args[i];
     if (arg === '--manifest' && i + 1 < args.length) {
       manifestPath = args[++i];
+    } else if (arg === '--source-dir' && i + 1 < args.length) {
+      sourceDir = args[++i];
     } else if (arg === '--output' && i + 1 < args.length) {
       outputDir = args[++i];
     } else if (arg === '--target-count' && i + 1 < args.length) {
@@ -58,16 +63,24 @@ function loadCliOptions(): CliOptions {
       }
     } else if (arg === '--no-clean') {
       noClean = true;
-    } else if (!arg?.startsWith('--') && !manifestPath) {
+    } else if (!arg?.startsWith('--') && !manifestPath && !sourceDir) {
       manifestPath = arg;
     }
   }
 
-  if (!manifestPath) {
-    console.error('Error: manifest path is required');
-    console.error('Usage: npm run prepare-data -- --manifest <path> [options]');
+  if (manifestPath && sourceDir) {
+    console.error('Error: --manifest and --source-dir are mutually exclusive');
+    process.exit(1);
+  }
+
+  if (!manifestPath && !sourceDir) {
+    console.error('Error: either --manifest or --source-dir is required');
+    console.error('Usage:');
+    console.error('  npm run prepare-data -- --manifest <path> [options]');
+    console.error('  npm run prepare-data -- --source-dir <path> [options]');
     console.error('Options:');
-    console.error('  --manifest <path>       Path to ML export manifest JSON (required)');
+    console.error('  --manifest <path>       Path to ML export manifest JSON');
+    console.error('  --source-dir <path>     Path to seed-images directory (catalog/ + training-only/)');
     console.error('  --output <path>         Output directory (default: ML_TRAINING_DATA_PATH env)');
     console.error('  --target-count <n>      Target images per class (default: 100)');
     console.error('  --format webp|jpeg      Output image format (default: webp)');
@@ -82,8 +95,12 @@ function loadCliOptions(): CliOptions {
     process.exit(1);
   }
 
+  const source = manifestPath
+    ? ({ mode: 'manifest' as const, manifestPath: resolve(manifestPath) })
+    : ({ mode: 'source-dir' as const, sourceDir: resolve(sourceDir!) });
+
   return {
-    manifestPath: resolve(manifestPath),
+    source,
     outputDir: resolve(outputDir),
     targetCount,
     format,
@@ -107,7 +124,7 @@ async function processBatch<T>(items: T[], limit: number, fn: (item: T) => Promi
 }
 
 /**
- * Main pipeline: read manifest, analyze balance, copy + augment, validate.
+ * Main pipeline: read manifest or scan source dir, analyze balance, copy + augment, validate.
  */
 async function main(): Promise<void> {
   const startTime = Date.now();
@@ -115,7 +132,12 @@ async function main(): Promise<void> {
 
   console.log('ML Training Data Preparation');
   console.log('═'.repeat(80));
-  console.log(`Manifest:     ${options.manifestPath}`);
+
+  if (options.source.mode === 'manifest') {
+    console.log(`Source:       manifest (${options.source.manifestPath})`);
+  } else {
+    console.log(`Source:       directory scan (${options.source.sourceDir})`);
+  }
   console.log(`Output:       ${options.outputDir}`);
   console.log(`Target/class: ${options.targetCount}`);
   console.log(`Format:       ${options.format}`);
@@ -124,17 +146,24 @@ async function main(): Promise<void> {
     console.log(`Filter:       ${options.classes.join(', ')}`);
   }
 
-  // Check manifest age
-  const manifestStat = await stat(options.manifestPath);
-  const ageMs = Date.now() - manifestStat.mtimeMs;
-  const ageHours = ageMs / (1000 * 60 * 60);
-  if (ageHours > 24) {
-    console.log(`\nWarning: Manifest is ${Math.floor(ageHours)} hours old — consider re-exporting from the API.`);
+  // Step 1: Load manifest (from file or directory scan)
+  console.log('\n[1/5] Loading image sources...');
+  let manifest;
+
+  if (options.source.mode === 'manifest') {
+    // Check manifest age
+    const manifestStat = await stat(options.source.manifestPath);
+    const ageMs = Date.now() - manifestStat.mtimeMs;
+    const ageHours = ageMs / (1000 * 60 * 60);
+    if (ageHours > 24) {
+      console.log(`  Warning: Manifest is ${Math.floor(ageHours)} hours old — consider re-exporting from the API.`);
+    }
+
+    manifest = await readManifest(options.source.manifestPath);
+  } else {
+    manifest = await scanSourceDir(options.source.sourceDir);
   }
 
-  // Step 1: Read manifest
-  console.log('\n[1/5] Reading manifest...');
-  const manifest = await readManifest(options.manifestPath);
   console.log(
     `  Found ${manifest.stats.total_photos} photos across ${manifest.stats.items} items in ${manifest.stats.franchises} franchise(s)`
   );

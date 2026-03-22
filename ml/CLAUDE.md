@@ -15,7 +15,13 @@
 
 - ML training uses **catalog photos** from the `item_photos` table (shared, app-managed reference images)
 - Catalog photos are NOT user-private PII — no consent mechanism needed
-- Training data export: `npm run prepare-data -- --manifest <path>` reads API manifest, copies photos into `ClassName/` folders at `ML_TRAINING_DATA_PATH`
+- Two input modes (mutually exclusive):
+  - `npm run prepare-data -- --manifest <path>` — reads API export manifest JSON
+  - `npm run prepare-data -- --source-dir <path>` — scans seed-images directory tree directly
+- Seed-images structure: `{sourceDir}/{tier}/{franchise}/{manufacturer}/{item}/{images}` where tier is `catalog/` or `training-only/`
+- `catalog/` images are API-importable reference photos; `training-only/` images are for ML training only
+- Both tiers are merged per item during training data preparation
+- `_unmatched/` directories are skipped at any level
 - User collection photos (private, RLS-protected) are NOT used for training
 
 ## Phase 4.0 Pipeline (planned)
@@ -150,7 +156,8 @@ Each subdirectory name becomes a class label in the trained model.
 
 ```bash
 cd ml && npm install           # Install dependencies (sharp, tsx, typescript)
-cd ml && npm run prepare-data -- --manifest <path>  # Prepare training data
+cd ml && npm run prepare-data -- --manifest <path>     # Prepare from API manifest
+cd ml && npm run prepare-data -- --source-dir <path>   # Prepare from seed-images directory
 cd ml && npm test              # Run tests + lint
 cd ml && npm run typecheck     # TypeScript check only
 cd ml && npm run lint          # ESLint only
@@ -160,7 +167,7 @@ cd ml && npm run format:check  # Prettier check (CI mode)
 
 ### Augmentation
 
-- Transforms are deterministic (no randomness) — same manifest + target produces identical output
+- Transforms are deterministic (no randomness) — same input (manifest or source-dir) + target produces identical output
 - Adaptive: classes with fewer originals get more augmentation to reach the target count
 - Compound transforms: flip+rotate, flip+brightness, etc. for diversity
 - Clean-on-rerun: class directories are wiped before repopulating to prevent orphans

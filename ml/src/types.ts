@@ -32,8 +32,12 @@ export interface Manifest {
   warnings: ManifestWarning[];
 }
 
+export type CliSource =
+  | { mode: 'manifest'; manifestPath: string }
+  | { mode: 'source-dir'; sourceDir: string };
+
 export interface CliOptions {
-  manifestPath: string;
+  source: CliSource;
   outputDir: string;
   targetCount: number;
   format: 'webp' | 'jpeg';
