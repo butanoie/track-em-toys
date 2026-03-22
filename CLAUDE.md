@@ -52,7 +52,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - iOS/macOS: Swift 6, SwiftUI, SwiftData + CloudKit sync, MVVM w/ @Observable
 - Web: React 19 + TypeScript, Shadcn/ui, Tailwind CSS 4, TanStack Query
 - Backend: Node.js 22 LTS, Fastify 5, TypeScript, PostgreSQL 17, ES256 JWT
-- ML: Core ML + Create ML, transfer learning image classification (≤ 10 MB models)
+- ML: Core ML + Create ML, transfer learning image classification (≤ 10 MB models). Create ML requires single-level directories for `.labeledDirectories(at:)` — labels use `franchise__item` (`__` delimiter, not `/`)
 
 ## Data Architecture
 
@@ -120,13 +120,14 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 ### Formatting (Prettier)
 
 - Root `package.json` is a tooling host only (husky + lint-staged + prettier) — NOT an npm workspace
+- `npm run prepare` is a reserved npm lifecycle hook (runs after `npm install`) — never use it as a custom script name
 - `.prettierignore` does NOT auto-discover from subdirectories — per-module scripts use `--ignore-path ../.prettierignore`
 - Prettier converts regex hex escapes (e.g. `\x00`) to literal bytes — place `eslint-disable` comments directly above the `.replace()` line, not above the enclosing expression
 
 ## Build Commands
 
 See each module's CLAUDE.md for build, test, lint, and typecheck commands:
-`api/CLAUDE.md`, `web/CLAUDE.md`, `ios/CLAUDE.md`
+`api/CLAUDE.md`, `web/CLAUDE.md`, `ios/CLAUDE.md`, `ml/CLAUDE.md`
 
 Root-level commands (run from repo root):
 

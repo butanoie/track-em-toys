@@ -8,9 +8,10 @@ ios/**/*.xcuserstate
 ios/track-em-toys/Info.plist
 ios/track-em-toys/*.apps.googleusercontent.com.plist
 
-# ML training data is large — consider Git LFS or exclude raw photos
+# ML training data is large — exclude raw photos
 ml/training-data/**/*.jpg
 ml/training-data/**/*.png
+ml/training-data/**/*.webp
 # But track the models themselves (they're ~7MB, worth versioning)
 !ml/models/*.mlmodel
 
@@ -28,6 +29,8 @@ coverage/
 .env.local
 api/.env
 api/.env.local
+ml/.env
+ml/.env.local
 web/.env
 web/.env.local
 
