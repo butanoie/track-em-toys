@@ -29,10 +29,7 @@ export function PhotoGrid({ photos, onReorder, onSetPrimary, onDelete, disabled 
     setOrderedPhotos(photos);
   }, [photos]);
 
-  const posOf = useCallback(
-    (id: string | number) => orderedPhotos.findIndex((p) => p.id === id) + 1,
-    [orderedPhotos]
-  );
+  const posOf = useCallback((id: string | number) => orderedPhotos.findIndex((p) => p.id === id) + 1, [orderedPhotos]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -132,7 +129,11 @@ function SortablePhotoCard({ photo, onSetPrimary, onDelete, disabled }: Sortable
       {...attributes}
       {...listeners}
     >
-      <img src={buildPhotoUrl(photo.url)} alt={photo.caption ?? 'Photo'} className="object-contain max-h-full max-w-full pointer-events-none" />
+      <img
+        src={buildPhotoUrl(photo.url)}
+        alt={photo.caption ?? 'Photo'}
+        className="object-contain max-h-full max-w-full pointer-events-none"
+      />
 
       {photo.is_primary && (
         <div

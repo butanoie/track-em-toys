@@ -19,9 +19,7 @@ export function CharacterRelationships({ franchise, characterSlug }: CharacterRe
   const { data } = useCharacterRelationships(franchise, characterSlug);
 
   const gestaltRef = useMemo(() => {
-    const rel = data?.relationships.find(
-      (r) => r.type === 'combiner-component' && r.role === 'gestalt',
-    );
+    const rel = data?.relationships.find((r) => r.type === 'combiner-component' && r.role === 'gestalt');
     return rel ? rel.related_character : undefined;
   }, [data]);
 
@@ -57,9 +55,7 @@ export function CharacterRelationships({ franchise, characterSlug }: CharacterRe
     for (const [type, rels] of grouped.entries()) {
       if (type === 'combiner-component' && gestaltRef) {
         // Build the expanded combiner group with sibling components
-        const siblings = gestaltData?.relationships.filter(
-          (r) => r.type === 'combiner-component',
-        );
+        const siblings = gestaltData?.relationships.filter((r) => r.type === 'combiner-component');
 
         // Use siblings from secondary fetch if available, otherwise fall back to
         // the primary data (gestalt-only entry) while the secondary fetch loads

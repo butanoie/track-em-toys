@@ -323,17 +323,14 @@ export async function getCharacterBySlug(
  * @param franchiseSlug - Franchise slug
  * @param characterSlug - Character slug within the franchise
  */
-export async function characterExistsBySlug(
-  franchiseSlug: string,
-  characterSlug: string,
-): Promise<boolean> {
+export async function characterExistsBySlug(franchiseSlug: string, characterSlug: string): Promise<boolean> {
   const { rows } = await pool.query<{ exists: boolean }>(
     `SELECT EXISTS(
        SELECT 1 FROM characters c
        JOIN franchises fr ON fr.id = c.franchise_id
        WHERE fr.slug = $1 AND c.slug = $2
      ) AS exists`,
-    [franchiseSlug, characterSlug],
+    [franchiseSlug, characterSlug]
   );
   return rows[0]?.exists ?? false;
 }

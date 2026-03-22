@@ -17,7 +17,12 @@ vi.mock('@/auth/useAuth', () => ({
 
 vi.mock('@/catalog/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/catalog/api')>();
-  return { ...actual, exportForMl: vi.fn().mockResolvedValue({ stats: { total_photos: 0, items: 0 }, filename: 'test.json', warnings: [] }) };
+  return {
+    ...actual,
+    exportForMl: vi
+      .fn()
+      .mockResolvedValue({ stats: { total_photos: 0, items: 0 }, filename: 'test.json', warnings: [] }),
+  };
 });
 
 vi.mock('@/components/AppHeader', () => ({

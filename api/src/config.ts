@@ -78,10 +78,20 @@ function optionalInt(name: string, fallback: number, min: number, max: number): 
   return n;
 }
 
-function loadCorsOrigin(): string {
+/**
+ * Load CORS origin(s) from the environment. Supports comma-separated values
+ * for multiple allowed origins (e.g., dev server on :5173 + preview on :4173).
+ *
+ * @returns A single origin string or an array of origin strings
+ */
+function loadCorsOrigin(): string | string[] {
   const origin = optional('CORS_ORIGIN', 'http://localhost:5173');
   if (origin === '*') {
     throw new Error('CORS_ORIGIN=* is not permitted when credentials are enabled');
+  }
+  // Support comma-separated origins for multi-port dev/E2E setups
+  if (origin.includes(',')) {
+    return origin.split(',').map((o) => o.trim());
   }
   return origin;
 }

@@ -5,8 +5,7 @@
  * See admin-users.spec.ts for the established E2E mocking pattern.
  */
 
-import { test, expect } from '@playwright/test';
-import { setupAuthenticated } from './fixtures/auth';
+import { test, expect } from './fixtures/e2e-fixtures';
 
 // --- Fixtures ---
 
@@ -66,7 +65,7 @@ const mockItems = {
       name: 'Legacy Bulkhead',
       slug: 'legacy-bulkhead',
       franchise: { slug: 'transformers', name: 'Transformers' },
-      character: { slug: 'bulkhead', name: 'Bulkhead' },
+      characters: [{ slug: 'bulkhead', name: 'Bulkhead', appearance_slug: 'animated', is_primary: true }],
       manufacturer: { slug: 'hasbro', name: 'Hasbro' },
       toy_line: { slug: 'legacy', name: 'Legacy' },
       size_class: 'Voyager',
@@ -79,7 +78,7 @@ const mockItems = {
       name: 'MP-44 Optimus Prime',
       slug: 'mp-44-optimus-prime',
       franchise: { slug: 'transformers', name: 'Transformers' },
-      character: { slug: 'optimus-prime', name: 'Optimus Prime' },
+      characters: [{ slug: 'optimus-prime', name: 'Optimus Prime', appearance_slug: 'g1-cartoon', is_primary: true }],
       manufacturer: { slug: 'takara-tomy', name: 'Takara Tomy' },
       toy_line: { slug: 'masterpiece', name: 'Masterpiece' },
       size_class: 'Leader',
@@ -94,7 +93,17 @@ const mockItems = {
 
 const mockItemDetail = {
   ...mockItems.data[0],
-  appearance: null,
+  characters: [
+    {
+      slug: 'bulkhead',
+      name: 'Bulkhead',
+      appearance_slug: 'animated',
+      appearance_name: 'Animated',
+      appearance_source_media: 'Animated Series',
+      appearance_source_name: 'Transformers Animated',
+      is_primary: true,
+    },
+  ],
   description: 'A great figure',
   barcode: null,
   sku: null,
@@ -108,7 +117,11 @@ const mockItemDetail = {
 // --- Helpers ---
 
 async function setupCatalogMocks(page: import('@playwright/test').Page) {
-  await setupAuthenticated(page);
+  // Catch-all for unhandled catalog requests — prevents hitting the real API
+  await page.route('**/catalog/**', (route) => {
+    if (route.request().resourceType() === 'document') return route.continue();
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [] }) });
+  });
 
   await page.route('**/catalog/franchises/stats', (route) => {
     if (route.request().resourceType() === 'document') return route.continue();
@@ -118,8 +131,14 @@ async function setupCatalogMocks(page: import('@playwright/test').Page) {
   await page.route('**/catalog/franchises/transformers', (route) => {
     if (route.request().resourceType() === 'document') return route.continue();
     if (route.request().url().includes('/items') || route.request().url().includes('/continuity'))
-      return route.continue();
+      return route.fallback();
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockFranchiseDetail) });
+  });
+
+  // Mock relationships endpoints (item detail panel fetches these)
+  await page.route('**/relationships', (route) => {
+    if (route.request().resourceType() === 'document') return route.continue();
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ relationships: [] }) });
   });
 
   await page.route('**/catalog/franchises/transformers/items/facets**', (route) => {

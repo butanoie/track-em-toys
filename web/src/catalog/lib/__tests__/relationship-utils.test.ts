@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  formatRelationshipType,
-  isRedundantCharacterRole,
-  groupByType,
-  getGroupSubtype,
-} from '../relationship-utils';
+import { formatRelationshipType, isRedundantCharacterRole, groupByType, getGroupSubtype } from '../relationship-utils';
 
 describe('formatRelationshipType', () => {
   it.each([

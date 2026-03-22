@@ -18,6 +18,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | [E2E_AUTHENTICATION.md](E2E_AUTHENTICATION.md)     | `web/e2e/login-page.spec.ts`                                                   | ✅ Implemented |
 | [E2E_PROTECTED_ROUTES.md](E2E_PROTECTED_ROUTES.md) | `web/e2e/protected-routes.spec.ts`                                             | ✅ Implemented |
 | [E2E_SESSION.md](E2E_SESSION.md)                   | `web/e2e/authenticated-session.spec.ts`, `web/e2e/session-persistence.spec.ts` | ✅ Implemented |
+| [E2E_REAL_AUTH.md](E2E_REAL_AUTH.md)               | `api/src/auth/test-signin.test.ts`, `web/e2e/global-setup.ts`, all E2E specs   | ✅ Implemented |
 | [INT_SEED_INGESTION.md](INT_SEED_INGESTION.md)     | `api/src/db/seed-integration.test.ts`                                          | ✅ Implemented |
 
 ### Planned Scenarios (ML-Accelerated Roadmap)
@@ -33,7 +34,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | E2E_CATALOG_BROWSING.md                                      | 1.7 Web Catalog UI                                                  | Not started                 |
 | [INT_PHOTO_MANAGEMENT.md](INT_PHOTO_MANAGEMENT.md)           | `api/src/catalog/photos/routes.test.ts`                             | Scenarios written           |
 | E2E_PHOTO_UPLOAD.md                                          | 1.9 Photo Management (curator UI)                                   | Not started                 |
-| [E2E_ADMIN_DASHBOARD.md](E2E_ADMIN_DASHBOARD.md)             | `web/src/admin/__tests__/*.test.tsx`, `web/e2e/admin-users.spec.ts` | ✅ Implemented (mocked API) |
+| [E2E_ADMIN_DASHBOARD.md](E2E_ADMIN_DASHBOARD.md)             | `web/src/admin/__tests__/*.test.tsx`, `web/e2e/admin-users.spec.ts` | ✅ Implemented (real auth, mocked data) |
 | [INT_ML_EXPORT.md](INT_ML_EXPORT.md)                                 | `api/src/catalog/ml-export/routes.test.ts`                          | ✅ Implemented              |
 | E2E_GDPR_DELETION.md                                         | 1.12 Account Deletion                                               | Not started                 |
 

@@ -34,7 +34,7 @@ interface RelationshipQueryRow {
  */
 export async function getCharacterRelationships(
   franchiseSlug: string,
-  characterSlug: string,
+  characterSlug: string
 ): Promise<CharacterRelationshipRow[]> {
   const { rows } = await pool.query<RelationshipQueryRow>(
     `SELECT cr.type, cr.subtype, cr.entity2_role AS role,
@@ -53,7 +53,7 @@ export async function getCharacterRelationships(
        JOIN franchises fr ON fr.id = c2.franchise_id
       WHERE fr.slug = $1 AND c2.slug = $2
      ORDER BY type ASC, related_name ASC`,
-    [franchiseSlug, characterSlug],
+    [franchiseSlug, characterSlug]
   );
   return rows.map((r) => ({
     type: r.type,
@@ -70,10 +70,7 @@ export async function getCharacterRelationships(
  * @param franchiseSlug - Franchise slug
  * @param itemSlug - Item slug within the franchise
  */
-export async function getItemRelationships(
-  franchiseSlug: string,
-  itemSlug: string,
-): Promise<ItemRelationshipRow[]> {
+export async function getItemRelationships(franchiseSlug: string, itemSlug: string): Promise<ItemRelationshipRow[]> {
   const { rows } = await pool.query<RelationshipQueryRow>(
     `SELECT ir.type, ir.subtype, ir.item2_role AS role,
             i2.slug AS related_slug, i2.name AS related_name, ir.metadata
@@ -91,7 +88,7 @@ export async function getItemRelationships(
        JOIN franchises fr ON fr.id = i2.franchise_id
       WHERE fr.slug = $1 AND i2.slug = $2
      ORDER BY type ASC, related_name ASC`,
-    [franchiseSlug, itemSlug],
+    [franchiseSlug, itemSlug]
   );
   return rows.map((r) => ({
     type: r.type,

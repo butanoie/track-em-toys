@@ -148,7 +148,9 @@ Two distinct photo types:
 - Returns same shape as `POST /auth/signin`: `{ access_token, refresh_token: null, user }` + httpOnly cookie
 - No audit log entries — this is test infrastructure, not a production signin
 - Rate limit: `max: 100` (high — globalSetup calls it 3× per test run)
+- E2E tests call `/auth/test-signin` + `/auth/refresh` per test. With 47+ tests sharing one IP, rate limits below 60/min cause cascading 429 failures. Current limits: test-signin `max: 100`, refresh `max: 60`
 - Production guard: plugin throws at registration time if `config.nodeEnv === 'production'` (defense-in-depth)
+- `CORS_ORIGIN` supports comma-separated values (e.g., `https://host:5173,https://host:4173`) for multi-port dev/E2E setups. Parsed in `config.ts` `loadCorsOrigin()`, returns string or string[] to `@fastify/cors`
 
 ### OAuth / JWT Security
 

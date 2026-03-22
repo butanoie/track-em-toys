@@ -4,8 +4,7 @@
  * Tests use mocked API responses (page.route()) — no real API server required.
  */
 
-import { test, expect } from '@playwright/test';
-import { setupAuthenticated } from './fixtures/auth';
+import { test, expect } from './fixtures/e2e-fixtures';
 
 // --- Fixtures ---
 
@@ -17,6 +16,7 @@ const mockSearchResults = {
       name: 'Optimus Prime',
       slug: 'optimus-prime',
       franchise: { slug: 'transformers', name: 'Transformers' },
+      continuity_family: { slug: 'g1', name: 'Generation 1' },
       character: null,
       manufacturer: null,
       toy_line: null,
@@ -31,6 +31,7 @@ const mockSearchResults = {
       name: 'MP-44 Optimus Prime',
       slug: 'mp-44-optimus-prime',
       franchise: { slug: 'transformers', name: 'Transformers' },
+      continuity_family: null,
       character: { slug: 'optimus-prime', name: 'Optimus Prime' },
       manufacturer: { slug: 'takara-tomy', name: 'Takara Tomy' },
       toy_line: { slug: 'masterpiece', name: 'Masterpiece' },
@@ -57,14 +58,23 @@ const mockItemDetail = {
   name: 'MP-44 Optimus Prime',
   slug: 'mp-44-optimus-prime',
   franchise: { slug: 'transformers', name: 'Transformers' },
-  character: { slug: 'optimus-prime', name: 'Optimus Prime' },
+  characters: [
+    {
+      slug: 'optimus-prime',
+      name: 'Optimus Prime',
+      appearance_slug: 'g1-cartoon',
+      appearance_name: 'G1 Cartoon',
+      appearance_source_media: 'Animated Series',
+      appearance_source_name: 'The Transformers',
+      is_primary: true,
+    },
+  ],
   manufacturer: { slug: 'takara-tomy', name: 'Takara Tomy' },
   toy_line: { slug: 'masterpiece', name: 'Masterpiece' },
   size_class: 'Leader',
   year_released: 2019,
   is_third_party: false,
   data_quality: 'verified',
-  appearance: null,
   description: 'Masterpiece Optimus Prime',
   barcode: null,
   sku: null,
@@ -78,7 +88,15 @@ const mockItemDetail = {
 // --- Helpers ---
 
 async function setupSearchMocks(page: import('@playwright/test').Page) {
-  await setupAuthenticated(page);
+  // Catch-all for unhandled catalog requests — prevents hitting the real API
+  await page.route('**/catalog/**', (route) => {
+    if (route.request().resourceType() === 'document') return route.continue();
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: [], relationships: [] }),
+    });
+  });
 
   await page.route('**/catalog/search**', (route) => {
     // Skip SPA page navigations — only intercept API calls
@@ -112,6 +130,12 @@ async function setupSearchMocks(page: import('@playwright/test').Page) {
     })
   );
 
+  // Mock relationships endpoints (detail panels fetch these)
+  await page.route('**/relationships', (route) => {
+    if (route.request().resourceType() === 'document') return route.continue();
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ relationships: [] }) });
+  });
+
   await page.route('**/catalog/franchises/transformers/characters/optimus-prime', (route) => {
     if (route.request().resourceType() === 'document') return route.continue();
     return route.fulfill({
@@ -127,9 +151,6 @@ async function setupSearchMocks(page: import('@playwright/test').Page) {
         character_type: 'Transformer',
         alt_mode: 'Truck',
         is_combined_form: false,
-        combiner_role: null,
-        combined_form: null,
-        component_characters: [],
         sub_groups: [],
         appearances: [],
         metadata: {},

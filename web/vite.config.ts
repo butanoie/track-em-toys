@@ -28,4 +28,12 @@ export default defineConfig({
       cert: fs.readFileSync('../.certs/cert.pem'),
     },
   },
+  preview: {
+    host: 'dev.track-em-toys.com',
+    port: 4173,
+    https: {
+      key: fs.readFileSync('../.certs/key.pem'),
+      cert: fs.readFileSync('../.certs/cert.pem'),
+    },
+  },
 });

@@ -94,12 +94,8 @@ export async function photoRoutes(fastify: FastifyInstance, _opts: object): Prom
       await ensureDir(dir);
 
       for (const p of processed) {
-        const path = (size: 'thumb' | 'original') =>
-          photoPath(config.photos.storagePath, itemId, p.photoId, size);
-        await Promise.all([
-          writePhoto(path('thumb'), p.thumb),
-          writePhoto(path('original'), p.original),
-        ]);
+        const path = (size: 'thumb' | 'original') => photoPath(config.photos.storagePath, itemId, p.photoId, size);
+        await Promise.all([writePhoto(path('thumb'), p.thumb), writePhoto(path('original'), p.original)]);
       }
 
       const maxSort = await photoQueries.getMaxSortOrder(itemId);

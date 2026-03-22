@@ -1,15 +1,14 @@
-import { test, expect } from '@playwright/test';
-import { setupAuthenticated, validUser } from './fixtures/auth';
+import { test, expect } from './fixtures/e2e-fixtures';
+import { TEST_USERS } from './fixtures/test-users';
 
 test.describe('Authenticated session', () => {
   test('Given valid session, When navigating to /, Then dashboard shows collection heading and user name', async ({
     page,
   }) => {
-    await setupAuthenticated(page);
     await page.goto('/');
 
     await expect(page.getByRole('heading', { name: /your collection/i })).toBeVisible();
-    await expect(page.getByText(validUser.display_name!)).toBeVisible();
+    await expect(page.getByText(TEST_USERS.user.display_name)).toBeVisible();
   });
 
   /**
@@ -24,7 +23,6 @@ test.describe('Authenticated session', () => {
   test('Given user on dashboard, When clicking sign out, Then redirected to /login and session cleared', async ({
     page,
   }) => {
-    await setupAuthenticated(page);
     await page.goto('/');
 
     await expect(page.getByRole('heading', { name: /your collection/i })).toBeVisible();
