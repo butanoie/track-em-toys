@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupAuthenticated } from './fixtures/auth';
+import { createAuthenticatedContext } from './fixtures/e2e-fixtures';
 
 test.describe('Protected routes', () => {
   test('Given unauthenticated user, When navigating to /, Then redirected to /login', async ({ page }) => {
@@ -17,11 +17,12 @@ test.describe('Protected routes', () => {
     await expect(page).toHaveURL(/redirect=/);
   });
 
-  test('Given authenticated user, When navigating to /, Then dashboard is displayed', async ({ page }) => {
-    await setupAuthenticated(page);
+  test('Given authenticated user, When navigating to /, Then dashboard is displayed', async ({ browser }) => {
+    const { context, page } = await createAuthenticatedContext(browser, 'user');
     await page.goto('/');
 
     await expect(page.getByRole('heading', { name: /your collection/i })).toBeVisible();
     await expect(page).toHaveURL(/\/$/);
+    await context.close();
   });
 });

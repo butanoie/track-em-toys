@@ -42,6 +42,7 @@ web/.env.local
 # Playwright
 playwright-report/
 test-results/
+web/e2e/.auth/*.json
 
 # temp claud backups
 .claude/agents.bak/

@@ -3,21 +3,13 @@
  *
  * Scenarios from docs/test-scenarios/E2E_ADMIN_DASHBOARD.md
  *
- * TODO: These tests currently use mocked API responses (page.route()).
- * A proper E2E auth strategy that authenticates against the real API
- * is needed before these provide true end-to-end confidence.
- * See: https://github.com/butanoie/track-em-toys/issues/49
+ * Auth is handled by storageState (admin project) + e2e-fixtures.
+ * API data responses are still mocked via page.route().
  */
 
-import { test, expect } from '@playwright/test';
-import { setupAuthenticated, validUser, fakeJwt } from './fixtures/auth';
+import { test, expect, createAuthenticatedContext } from './fixtures/e2e-fixtures';
 
 // --- Fixtures ---
-
-const adminUser = {
-  ...validUser,
-  role: 'admin',
-};
 
 const mockUsers = [
   {
@@ -64,25 +56,6 @@ const mockUsers = [
 
 // --- Helpers ---
 
-async function setupAdminSession(page: import('@playwright/test').Page) {
-  // Override the default user with admin role in sessionStorage
-  await page.route('**/auth/refresh', (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ access_token: fakeJwt(), refresh_token: null }),
-    })
-  );
-  await page.route('**/auth/logout', (route) => route.fulfill({ status: 204, body: '' }));
-  await page.addInitScript(
-    ({ user, flagKey, userKey }) => {
-      localStorage.setItem(flagKey, '1');
-      sessionStorage.setItem(userKey, JSON.stringify(user));
-    },
-    { user: adminUser, flagKey: 'trackem:has_session', userKey: 'trackem:user' }
-  );
-}
-
 async function mockAdminUsersEndpoint(page: import('@playwright/test').Page, users = mockUsers) {
   // Match only API fetch requests to /admin/users, not SPA page navigations.
   // The API URL differs from the SPA URL by origin (different port), but both
@@ -112,14 +85,14 @@ async function mockAdminUsersEndpoint(page: import('@playwright/test').Page, use
 // --- Access Guard ---
 
 test.describe('Admin access guard', () => {
-  test('Given non-admin user, When navigating to /admin/users, Then redirected to /', async ({ page }) => {
-    await setupAuthenticated(page); // default user has no admin role
+  test('Given non-admin user, When navigating to /admin/users, Then redirected to /', async ({ browser }) => {
+    const { context, page } = await createAuthenticatedContext(browser, 'user');
     await page.goto('/admin/users');
     await expect(page).toHaveURL('/');
+    await context.close();
   });
 
   test('Given admin user, When navigating to /admin/users, Then admin page is displayed', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page);
     await page.goto('/admin/users');
     await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
@@ -130,7 +103,6 @@ test.describe('Admin access guard', () => {
 
 test.describe('Admin navigation', () => {
   test('Given admin on dashboard, When clicking Admin link, Then navigated to /admin/users', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page);
     await page.goto('/');
     await page.getByRole('link', { name: 'Admin' }).click();
@@ -139,18 +111,18 @@ test.describe('Admin navigation', () => {
   });
 
   test('Given admin on /admin/users, When clicking Back to App, Then navigated to /', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page);
     await page.goto('/admin/users');
     await page.getByRole('link', { name: /back to app/i }).click();
     await expect(page).toHaveURL('/');
   });
 
-  test('Given non-admin user on dashboard, Then no Admin link is visible', async ({ page }) => {
-    await setupAuthenticated(page);
+  test('Given non-admin user on dashboard, Then no Admin link is visible', async ({ browser }) => {
+    const { context, page } = await createAuthenticatedContext(browser, 'user');
     await page.goto('/');
     await expect(page.getByRole('heading', { name: /your collection/i })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Admin' })).not.toBeVisible();
+    await context.close();
   });
 });
 
@@ -158,7 +130,6 @@ test.describe('Admin navigation', () => {
 
 test.describe('User list', () => {
   test('Given admin on /admin/users, Then user table displays all users', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page);
     await page.goto('/admin/users');
 
@@ -171,7 +142,6 @@ test.describe('User list', () => {
   });
 
   test('Given admin on /admin/users, Then status badges are displayed correctly', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page);
     await page.goto('/admin/users');
 
@@ -182,7 +152,6 @@ test.describe('User list', () => {
   });
 
   test('Given no users match filter, Then empty state message is shown', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page, []);
     await page.goto('/admin/users');
 
@@ -194,7 +163,6 @@ test.describe('User list', () => {
 
 test.describe('GDPR purge', () => {
   test('Given purge dialog open, When typing wrong text, Then confirm button stays disabled', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
     await page.goto('/admin/users');
 
@@ -216,7 +184,6 @@ test.describe('GDPR purge', () => {
 
 test.describe('Mutation happy paths', () => {
   test('Given admin changes role, When confirmed, Then success toast is shown', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
     await page.goto('/admin/users');
     await expect(page.getByRole('cell', { name: /Alice/ })).toBeVisible();
@@ -247,7 +214,6 @@ test.describe('Mutation happy paths', () => {
   });
 
   test('Given admin deactivates user, When confirmed, Then success toast is shown', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
     await page.goto('/admin/users');
     await expect(page.getByRole('cell', { name: /Alice/ })).toBeVisible();
@@ -273,7 +239,6 @@ test.describe('Mutation happy paths', () => {
   });
 
   test('Given admin reactivates user, When confirmed, Then success toast is shown', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page, [mockUsers[2]!]);
     await page.goto('/admin/users');
     await expect(page.getByRole('cell', { name: /Deactivated User/ })).toBeVisible();
@@ -299,7 +264,6 @@ test.describe('Mutation happy paths', () => {
   });
 
   test('Given admin purges user, When confirmed with DELETE, Then success toast is shown', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
     await page.goto('/admin/users');
     await expect(page.getByRole('cell', { name: /Alice/ })).toBeVisible();
@@ -326,7 +290,6 @@ test.describe('Mutation happy paths', () => {
 
 test.describe('Server error handling', () => {
   test('Given server returns 403, When mutation attempted, Then ErrorBanner is shown (not toast)', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
     await page.goto('/admin/users');
     await expect(page.getByRole('cell', { name: /Alice/ })).toBeVisible();
@@ -354,7 +317,6 @@ test.describe('Server error handling', () => {
   });
 
   test('Given server returns 409, When mutation attempted, Then ErrorBanner is shown (not toast)', async ({ page }) => {
-    await setupAdminSession(page);
     await mockAdminUsersEndpoint(page, [mockUsers[0]!]);
     await page.goto('/admin/users');
     await expect(page.getByRole('cell', { name: /Alice/ })).toBeVisible();

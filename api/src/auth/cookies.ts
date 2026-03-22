@@ -6,6 +6,18 @@ import { REFRESH_TOKEN_EXPIRY_DAYS } from './tokens.js';
 export const REFRESH_TOKEN_COOKIE = 'refresh_token';
 const REFRESH_TOKEN_MAX_AGE_SECONDS = REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60;
 
+/**
+ * SameSite policy for the refresh token cookie.
+ *
+ * Production/staging: 'strict' — maximum CSRF protection.
+ * Test/development: 'lax' — allows cross-port requests between the web app
+ * (localhost:4173) and API (localhost:3010) during E2E testing. Schemeful
+ * same-site rules in modern browsers treat https→http as cross-site even on
+ * localhost, so 'strict' blocks the cookie on E2E fetch() calls.
+ */
+const COOKIE_SAME_SITE: 'strict' | 'lax' =
+  config.nodeEnv === 'production' || config.nodeEnv === 'staging' ? 'strict' : 'lax';
+
 /** Narrow reply shape required by cookie helpers — only the methods actually called. */
 export type CookieReply = Pick<FastifyReply, 'setCookie' | 'clearCookie'>;
 
@@ -21,7 +33,7 @@ export function setRefreshTokenCookie(reply: CookieReply, token: string): void {
   reply.setCookie(REFRESH_TOKEN_COOKIE, token, {
     httpOnly: true,
     secure: config.secureCookies,
-    sameSite: 'strict',
+    sameSite: COOKIE_SAME_SITE,
     path: '/auth',
     maxAge: REFRESH_TOKEN_MAX_AGE_SECONDS,
     signed: true,
@@ -37,7 +49,7 @@ export function clearRefreshTokenCookie(reply: CookieReply): void {
   reply.clearCookie(REFRESH_TOKEN_COOKIE, {
     httpOnly: true,
     secure: config.secureCookies,
-    sameSite: 'strict',
+    sameSite: COOKIE_SAME_SITE,
     path: '/auth',
     signed: true,
   });

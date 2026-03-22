@@ -511,7 +511,6 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
     expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(expect.anything(), mockAppleOAuthAccount.user_id);
     // Security event must use log.error, not log.warn
     expect(errorSpy).toHaveBeenCalledWith(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
       expect.objectContaining({ err: expect.any(Error) }),
       expect.stringContaining('audit log failed for consent_revoked')
     );
@@ -543,7 +542,6 @@ describe('Apple webhook — POST /auth/webhooks/apple', () => {
     expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(expect.anything(), mockAppleOAuthAccount.user_id);
     // Security event must use log.error, not log.warn
     expect(errorSpy).toHaveBeenCalledWith(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
       expect.objectContaining({ err: expect.any(Error) }),
       expect.stringContaining('audit log failed for account_deactivated')
     );

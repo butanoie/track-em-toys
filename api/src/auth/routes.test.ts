@@ -442,7 +442,7 @@ describe('auth routes', () => {
         const cookieStr = Array.isArray(setCookieHeader) ? setCookieHeader[0] : setCookieHeader;
         expect(cookieStr).toContain('Path=/auth');
         expect(cookieStr).toContain('HttpOnly');
-        expect(cookieStr).toContain('SameSite=Strict');
+        expect(cookieStr).toContain('SameSite=Lax');
       });
 
       it('should return 403 for deactivated user', async () => {
@@ -661,7 +661,6 @@ describe('auth routes', () => {
         expect(response.statusCode).toBe(200);
         // Security event must use log.error, not log.warn
         expect(errorSpy).toHaveBeenCalledWith(
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
           expect.objectContaining({ err: expect.any(Error) }),
           expect.stringContaining('audit log failed for provider_auto_linked')
         );
@@ -974,7 +973,6 @@ describe('auth routes', () => {
 
       expect(response.statusCode).toBe(200);
       expect(errorSpy).toHaveBeenCalledWith(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
         expect.objectContaining({ err: expect.any(Error) }),
         expect.stringContaining('audit log failed for signin')
       );
@@ -1156,7 +1154,6 @@ describe('auth routes', () => {
       expect(response.statusCode).toBe(200);
       // Cleanup failure must be logged at warn level
       expect(warnSpy).toHaveBeenCalledWith(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
         expect.objectContaining({ err: expect.any(Error), orphanUserId: orphanUser.id }),
         expect.stringContaining('orphan user cleanup failed')
       );
@@ -1357,7 +1354,7 @@ describe('auth routes', () => {
       const cookieStr = Array.isArray(setCookieHeader) ? setCookieHeader[0] : setCookieHeader;
       expect(cookieStr).toContain('Path=/auth');
       expect(cookieStr).toContain('HttpOnly');
-      expect(cookieStr).toContain('SameSite=Strict');
+      expect(cookieStr).toContain('SameSite=Lax');
     });
 
     it('should return 401 and revoke all tokens when a reused (revoked) token is presented', async () => {
@@ -1536,7 +1533,6 @@ describe('auth routes', () => {
 
       expect(response.statusCode).toBe(200);
       expect(errorSpy).toHaveBeenCalledWith(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
         expect.objectContaining({ err: expect.any(Error) }),
         expect.stringContaining('audit log failed for refresh')
       );
@@ -1599,7 +1595,6 @@ describe('auth routes', () => {
       expect(queries.revokeAllUserRefreshTokens).toHaveBeenCalledWith(expect.anything(), mockUser.id);
       // Security events must use log.error, not log.warn
       expect(errorSpy).toHaveBeenCalledWith(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
         expect.objectContaining({ err: expect.any(Error) }),
         expect.stringContaining('audit log failed for token_reuse_detected')
       );
@@ -1886,7 +1881,6 @@ describe('auth routes', () => {
 
       expect(response.statusCode).toBe(204);
       expect(errorSpy).toHaveBeenCalledWith(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
         expect.objectContaining({ err: expect.any(Error) }),
         expect.stringContaining('audit log failed for logout')
       );
@@ -2451,7 +2445,6 @@ describe('auth routes', () => {
       // Business transaction will commit despite audit log failure
       expect(response.statusCode).toBe(200);
       expect(errorSpy).toHaveBeenCalledWith(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns an asymmetric matcher typed as any by vitest internals
         expect.objectContaining({ err: expect.any(Error) }),
         expect.stringContaining('audit log failed for link_account')
       );

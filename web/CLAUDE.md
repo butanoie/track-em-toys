@@ -117,17 +117,17 @@ cd web && npm run format:check # Prettier check (CI mode)
 
 ### Playwright E2E
 
-- **Real auth via storageState**: E2E tests use real JWT authentication. `globalSetup` calls `POST /auth/test-signin` (test-only, `NODE_ENV !== 'production'`) to create test users and write `storageState` files to `e2e/.auth/{role}.json`. Playwright projects load these for per-role auth.
-- **sessionStorage fixture**: `storageState` captures cookies + localStorage but NOT sessionStorage. `e2e/fixtures/e2e-fixtures.ts` extends Playwright's `test` to seed sessionStorage with the user profile via `addInitScript`. Import `test` and `expect` from `./fixtures/e2e-fixtures` (not `@playwright/test`) in authenticated tests.
-- **API data still mocked**: Auth is real but domain API data (catalog, admin) is still mocked via `page.route()`. Only auth endpoints (`/auth/refresh`, `/auth/logout`) are hit against the real API.
+- **Per-test real auth**: Each test gets a fresh refresh token via `freshTestSignin()` (Node.js `fetch()` to `POST /auth/test-signin`) + `context.addCookies()`. The `e2e-fixtures.ts` custom `test` fixture handles this automatically based on project name. Import `test` and `expect` from `./fixtures/e2e-fixtures` (not `@playwright/test`) in authenticated tests.
+- **API data still mocked**: Auth is real but domain API data (catalog, admin) is still mocked via `page.route()`. Only auth endpoints (`/auth/refresh`, `/auth/logout`) hit the real API.
 - **Test-only endpoint**: `POST /auth/test-signin` accepts `{ email, role }` with `@e2e.test` TLD constraint. Returns real JWT + refresh token cookie. Gated behind `NODE_ENV !== 'production'` in `server.ts`.
 - **Four projects**: `unauthenticated` (login/redirect tests), `user` (catalog browsing, session), `admin` (admin dashboard), `curator` (future). Tests are matched to projects via `testMatch` regex.
-- **fullyParallel: false**: Authenticated projects run tests serially to avoid refresh token rotation conflicts (each test triggers `/auth/refresh` which rotates the token).
-- **Manual context for cross-role tests**: Tests that need a different role than their project (e.g., non-admin access guard in the admin spec) create a manual `browser.newContext({ storageState: 'e2e/.auth/user.json' })` and seed sessionStorage with `readTestUser('user')` from `e2e/fixtures/test-users.ts`.
+- **Cross-role tests**: Use `createAuthenticatedContext(browser, 'user')` from `e2e-fixtures.ts` for tests that need a different role than their project (e.g., non-admin access guard in the admin spec). This handles cookie injection, `baseURL`, localStorage, and sessionStorage.
 - **session-persistence.spec.ts stays mocked**: Tests that explicitly test auth failure paths (expired refresh, session expiry) keep their `page.route()` mocking approach — failure scenarios can't be deterministically triggered against a real API.
+- NEVER use `route.continue()` as a fallthrough in catch-all `page.route()` handlers — with a real API running, it forwards the request to the server. Use `route.fallback()` to chain to the next mock handler. Add a catch-all `**/catalog/**` route (registered FIRST = lowest priority) that returns empty data for unhandled API requests.
 - When mocking API paths that collide with SPA routes (e.g., `/admin/users` is both a page and an API path), filter by `resourceType`: `if (route.request().resourceType() === 'document') return route.continue()`
 - Prefer `getByRole('cell', { name: /.../ })` over `getByText()` for table data — text appears in both cell content and row accessible names, causing ambiguity
 - When a page has multiple Radix `Select` components (e.g., filter + per-row role selector), `getByRole('combobox')` fails Playwright strict mode — disambiguate with `getByRole('combobox', { name: /aria-label pattern/ })`
+- `vite.config.ts` `preview` section does NOT inherit from `server` — host, port, and https must be set explicitly in both. Without this, preview defaults to `localhost` while dev uses the custom hostname, causing SameSite cookie mismatches in E2E tests.
 
 ### Photo Domains (Web UI)
 

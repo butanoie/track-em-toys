@@ -44,7 +44,7 @@ describe('cookies', () => {
         'test-token-value',
         expect.objectContaining({
           httpOnly: true,
-          sameSite: 'strict',
+          sameSite: 'lax',
           path: '/auth',
           signed: true,
         })
@@ -144,7 +144,7 @@ describe('cookies', () => {
         'refresh_token',
         expect.objectContaining({
           httpOnly: true,
-          sameSite: 'strict',
+          sameSite: 'lax',
           path: '/auth',
           signed: true,
         })

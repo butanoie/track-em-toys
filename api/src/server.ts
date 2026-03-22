@@ -174,6 +174,12 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   if (config.nodeEnv !== 'production') {
     await fastify.register(docsPlugin);
+
+    // Test-only signin endpoint: bypasses OAuth providers, creates test users
+    // with real JWT + refresh token cookies for E2E Playwright tests.
+    // Dynamic import ensures the module is never loaded in production builds.
+    const { testSigninRoutes } = await import('./auth/test-signin.js');
+    await fastify.register(testSigninRoutes, { prefix: '/auth' });
   }
 
   // ─── Health check ──────────────────────────────────────────────────────
