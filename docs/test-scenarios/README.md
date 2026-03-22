@@ -37,6 +37,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | [E2E_ADMIN_DASHBOARD.md](E2E_ADMIN_DASHBOARD.md)             | `web/src/admin/__tests__/*.test.tsx`, `web/e2e/admin-users.spec.ts` | ✅ Implemented (real auth, mocked data) |
 | [INT_ML_EXPORT.md](INT_ML_EXPORT.md)                                 | `api/src/catalog/ml-export/routes.test.ts`                          | ✅ Implemented              |
 | E2E_GDPR_DELETION.md                                         | 1.12 Account Deletion                                               | Not started                 |
+| [UNIT_ML_TRAINING_DATA.md](UNIT_ML_TRAINING_DATA.md)         | `ml/src/*.test.ts`                                                  | ✅ Implemented |
 
 ## Creating a New Scenario
 
