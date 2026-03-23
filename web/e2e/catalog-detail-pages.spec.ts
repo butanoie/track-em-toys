@@ -5,6 +5,7 @@
  */
 
 import { test, expect } from './fixtures/e2e-fixtures';
+import { mockEmptyCollection } from './fixtures/mock-helpers';
 
 // --- Fixtures ---
 
@@ -63,6 +64,7 @@ const mockItemDetail = {
   ],
   manufacturer: { slug: 'hasbro', name: 'Hasbro' },
   toy_line: { slug: 'legacy', name: 'Legacy' },
+  thumbnail_url: null,
   size_class: 'Voyager',
   year_released: 2023,
   is_third_party: false,
@@ -101,6 +103,7 @@ const mockRelatedItems = {
       characters: [{ slug: 'optimus-prime', name: 'Optimus Prime', appearance_slug: 'g1-cartoon', is_primary: true }],
       manufacturer: { slug: 'takara-tomy', name: 'Takara Tomy' },
       toy_line: { slug: 'masterpiece', name: 'Masterpiece' },
+      thumbnail_url: null,
       size_class: 'Leader',
       year_released: 2019,
       is_third_party: false,
@@ -178,6 +181,8 @@ async function setupDetailMocks(page: import('@playwright/test').Page) {
     if (route.request().resourceType() === 'document') return route.continue();
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ relationships: [] }) });
   });
+
+  await mockEmptyCollection(page);
 
   // Catch-all for other items requests (facets, list without character filter)
   await page.route('**/catalog/franchises/transformers/items**', (route) => {

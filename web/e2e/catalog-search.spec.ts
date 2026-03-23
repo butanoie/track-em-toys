@@ -5,6 +5,7 @@
  */
 
 import { test, expect } from './fixtures/e2e-fixtures';
+import { mockEmptyCollection } from './fixtures/mock-helpers';
 
 // --- Fixtures ---
 
@@ -20,6 +21,7 @@ const mockSearchResults = {
       character: null,
       manufacturer: null,
       toy_line: null,
+      thumbnail_url: null,
       size_class: null,
       year_released: null,
       is_third_party: null,
@@ -35,6 +37,7 @@ const mockSearchResults = {
       character: { slug: 'optimus-prime', name: 'Optimus Prime' },
       manufacturer: { slug: 'takara-tomy', name: 'Takara Tomy' },
       toy_line: { slug: 'masterpiece', name: 'Masterpiece' },
+      thumbnail_url: null,
       size_class: 'Leader',
       year_released: 2019,
       is_third_party: false,
@@ -71,6 +74,7 @@ const mockItemDetail = {
   ],
   manufacturer: { slug: 'takara-tomy', name: 'Takara Tomy' },
   toy_line: { slug: 'masterpiece', name: 'Masterpiece' },
+  thumbnail_url: null,
   size_class: 'Leader',
   year_released: 2019,
   is_third_party: false,
@@ -88,6 +92,8 @@ const mockItemDetail = {
 // --- Helpers ---
 
 async function setupSearchMocks(page: import('@playwright/test').Page) {
+  await mockEmptyCollection(page);
+
   // Catch-all for unhandled catalog requests — prevents hitting the real API
   await page.route('**/catalog/**', (route) => {
     if (route.request().resourceType() === 'document') return route.continue();

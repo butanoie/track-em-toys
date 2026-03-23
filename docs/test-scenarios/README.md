@@ -39,7 +39,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | E2E_GDPR_DELETION.md                                         | 1.12 Account Deletion                                               | Not started                 |
 | [UNIT_ML_TRAINING_DATA.md](UNIT_ML_TRAINING_DATA.md)         | `ml/src/*.test.ts`                                                  | ✅ Implemented |
 | [INT_COLLECTION_API.md](INT_COLLECTION_API.md)               | `api/src/collection/routes.test.ts`                                 | ✅ Implemented |
-| E2E_COLLECTION_MANAGEMENT.md                                 | 1.8 Web Collection UI                                               | Not started |
+| [E2E_COLLECTION_MANAGEMENT.md](E2E_COLLECTION_MANAGEMENT.md) | `web/e2e/collection.spec.ts`                                        | ✅ Implemented |
 
 ## Creating a New Scenario
 
