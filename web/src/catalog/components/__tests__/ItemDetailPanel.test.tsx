@@ -21,6 +21,23 @@ vi.mock('@/catalog/components/ItemRelationships', () => ({
   ItemRelationships: () => null,
 }));
 
+vi.mock('@/collection/hooks/useCollectionCheck', () => ({
+  useCollectionCheck: () => ({ data: undefined }),
+}));
+
+vi.mock('@/collection/hooks/useCollectionMutations', () => ({
+  useCollectionMutations: () => ({
+    add: { mutate: vi.fn(), isPending: false },
+    patch: { mutate: vi.fn(), isPending: false },
+    remove: { mutate: vi.fn(), isPending: false },
+    restore: { mutate: vi.fn(), isPending: false },
+  }),
+}));
+
+vi.mock('@/collection/components/AddToCollectionButton', () => ({
+  AddToCollectionButton: () => <button data-testid="add-to-collection">Add to Collection</button>,
+}));
+
 const mockUseItemDetail = vi.fn();
 vi.mock('@/catalog/hooks/useItemDetail', () => ({
   useItemDetail: (...args: unknown[]) => mockUseItemDetail(...args),

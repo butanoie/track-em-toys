@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Camera, ChevronRight } from 'lucide-react';
 import { Route } from '@/routes/_authenticated/catalog/$franchise/items/$slug';
@@ -14,6 +14,9 @@ import { ItemDetailContent } from '@/catalog/components/ItemDetailContent';
 import { CharacterDetailContent } from '@/catalog/components/CharacterDetailContent';
 import { ShareLinkButton } from '@/catalog/components/ShareLinkButton';
 import { PhotoManagementSheet } from '@/catalog/photos/PhotoManagementSheet';
+import { AddToCollectionButton } from '@/collection/components/AddToCollectionButton';
+import { useCollectionCheck } from '@/collection/hooks/useCollectionCheck';
+import { useCollectionMutations } from '@/collection/hooks/useCollectionMutations';
 import { useAuth } from '@/auth/useAuth';
 import { ApiError } from '@/lib/api-client';
 
@@ -29,6 +32,11 @@ export function ItemDetailPage() {
 
   const primaryCharacterSlug = data?.characters.find((c) => c.is_primary)?.slug ?? data?.characters[0]?.slug;
   const { data: characterData } = useCharacterDetail(franchiseSlug, primaryCharacterSlug);
+
+  const itemIds = useMemo(() => (data?.id ? [data.id] : []), [data?.id]);
+  const { data: checkData } = useCollectionCheck(itemIds);
+  const checkEntry = data?.id ? checkData?.items[data.id] : undefined;
+  const collectionMutations = useCollectionMutations();
 
   if (error instanceof ApiError && error.status === 404) {
     return (
@@ -132,6 +140,14 @@ export function ItemDetailPage() {
                 )}
                 <ShareLinkButton />
               </div>
+            </div>
+
+            <div className="mb-6">
+              <AddToCollectionButton
+                item={{ id: data.id, name: data.name }}
+                checkResult={checkEntry}
+                mutations={collectionMutations}
+              />
             </div>
 
             <Separator className="mb-6" />

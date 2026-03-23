@@ -99,9 +99,7 @@ describe('usePhotoUpload', () => {
   it('handles duplicate upload error with specific toast message', async () => {
     const { toast } = await import('sonner');
     const { DuplicateUploadError } = await import('../api');
-    mockUploadPhoto.mockRejectedValueOnce(
-      new DuplicateUploadError('existing-id', 'item-1/existing-id-original.webp')
-    );
+    mockUploadPhoto.mockRejectedValueOnce(new DuplicateUploadError('existing-id', 'item-1/existing-id-original.webp'));
 
     const { result } = renderHook(() => usePhotoUpload(defaultOpts));
 

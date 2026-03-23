@@ -434,3 +434,73 @@ export const MlExportResponseSchema = z.object({
 });
 
 export type MlExportResponse = z.infer<typeof MlExportResponseSchema>;
+
+// ---------------------------------------------------------------------------
+// Collection schemas
+// ---------------------------------------------------------------------------
+
+export const CollectionConditionSchema = z.enum([
+  'mint_sealed',
+  'opened_complete',
+  'opened_incomplete',
+  'loose_complete',
+  'loose_incomplete',
+  'damaged',
+  'unknown',
+]);
+
+export const CollectionItemSchema = z.object({
+  id: z.string().uuid(),
+  item_id: z.string().uuid(),
+  item_name: z.string(),
+  item_slug: z.string(),
+  franchise: SlugNameRefSchema,
+  manufacturer: SlugNameRefSchema.nullable(),
+  toy_line: SlugNameRefSchema,
+  thumbnail_url: z.string().nullable(),
+  condition: CollectionConditionSchema,
+  notes: z.string().nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export const CollectionItemListSchema = z.object({
+  data: z.array(CollectionItemSchema),
+  next_cursor: z.string().nullable(),
+  total_count: z.number().int(),
+});
+
+const CollectionFranchiseStatSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  count: z.number().int(),
+});
+
+const CollectionConditionStatSchema = z.object({
+  condition: CollectionConditionSchema,
+  count: z.number().int(),
+});
+
+export const CollectionStatsSchema = z.object({
+  total_copies: z.number().int(),
+  unique_items: z.number().int(),
+  by_franchise: z.array(CollectionFranchiseStatSchema),
+  by_condition: z.array(CollectionConditionStatSchema),
+});
+
+const CollectionCheckEntrySchema = z.object({
+  count: z.number().int(),
+  collection_ids: z.array(z.string()),
+});
+
+export const CollectionCheckResponseSchema = z.object({
+  items: z.record(CollectionCheckEntrySchema),
+});
+
+// Collection types
+export type CollectionCondition = z.infer<typeof CollectionConditionSchema>;
+export type CollectionItem = z.infer<typeof CollectionItemSchema>;
+export type CollectionItemList = z.infer<typeof CollectionItemListSchema>;
+export type CollectionStats = z.infer<typeof CollectionStatsSchema>;
+export type CollectionCheckEntry = z.infer<typeof CollectionCheckEntrySchema>;
+export type CollectionCheckResponse = z.infer<typeof CollectionCheckResponseSchema>;
