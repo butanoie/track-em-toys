@@ -421,6 +421,7 @@ CREATE TABLE public.item_photos (
     status text DEFAULT 'approved'::text NOT NULL,
     sort_order integer DEFAULT 0 NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    dhash text DEFAULT ''::text NOT NULL,
     CONSTRAINT item_photos_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text])))
 );
 
@@ -1702,4 +1703,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('025'),
     ('026'),
     ('027'),
-    ('028');
+    ('028'),
+    ('029');

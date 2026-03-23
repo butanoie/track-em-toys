@@ -18,7 +18,8 @@ type Action =
   | { type: 'PROGRESS'; id: string; percent: number }
   | { type: 'DONE'; id: string }
   | { type: 'ERROR'; id: string; message: string }
-  | { type: 'REMOVE'; id: string };
+  | { type: 'REMOVE'; id: string }
+  | { type: 'CLEAR_ERRORS' };
 
 function reducer(state: UploadItem[], action: Action): UploadItem[] {
   switch (action.type) {
@@ -44,6 +45,8 @@ function reducer(state: UploadItem[], action: Action): UploadItem[] {
       );
     case 'REMOVE':
       return state.filter((item) => item.id !== action.id);
+    case 'CLEAR_ERRORS':
+      return state.filter((item) => item.status !== 'error');
     default:
       return state;
   }
@@ -59,6 +62,8 @@ export interface UsePhotoUploadReturn {
   items: UploadItem[];
   isUploading: boolean;
   uploadFiles: (files: File[]) => void;
+  clearErrors: () => void;
+  dismissItem: (id: string) => void;
 }
 
 export function usePhotoUpload({ franchise, itemSlug, onUploadComplete }: UsePhotoUploadOptions): UsePhotoUploadReturn {
@@ -67,7 +72,16 @@ export function usePhotoUpload({ franchise, itemSlug, onUploadComplete }: UsePho
   const processingRef = useRef(false);
   const filesMapRef = useRef(new Map<string, File>());
 
+  const clearErrors = useCallback(() => {
+    dispatch({ type: 'CLEAR_ERRORS' });
+  }, []);
+
+  const dismissItem = useCallback((id: string) => {
+    dispatch({ type: 'REMOVE', id });
+  }, []);
+
   const uploadFiles = useCallback((files: File[]) => {
+    dispatch({ type: 'CLEAR_ERRORS' });
     const validItems: Array<{ id: string; fileName: string }> = [];
 
     for (const file of files) {
@@ -130,5 +144,5 @@ export function usePhotoUpload({ franchise, itemSlug, onUploadComplete }: UsePho
       });
   }, [items, franchise, itemSlug, onUploadComplete]);
 
-  return { items, isUploading, uploadFiles };
+  return { items, isUploading, uploadFiles, clearErrors, dismissItem };
 }
