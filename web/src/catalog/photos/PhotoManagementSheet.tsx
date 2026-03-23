@@ -40,6 +40,7 @@ export function PhotoManagementSheet({
     items: uploadItems,
     isUploading,
     uploadFiles,
+    dismissItem,
   } = usePhotoUpload({
     franchise,
     itemSlug,
@@ -98,7 +99,7 @@ export function PhotoManagementSheet({
           <div className="flex-1 overflow-y-auto space-y-6 py-4">
             <div className="space-y-2">
               <DropZone onFilesSelected={uploadFiles} disabled={isUploading} />
-              <UploadQueue items={uploadItems} />
+              <UploadQueue items={uploadItems} onDismiss={dismissItem} />
             </div>
 
             <PhotoGrid

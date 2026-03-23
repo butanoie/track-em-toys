@@ -22,6 +22,14 @@ vi.mock('node:fs/promises', () => ({
   unlink: vi.fn().mockResolvedValue(undefined),
 }));
 
+// Mock dhash module to avoid real Sharp calls for hash computation
+const mockComputeDHash = vi.fn();
+const mockHammingDistance = vi.fn();
+vi.mock('./dhash.js', () => ({
+  computeDHash: (...args: unknown[]) => mockComputeDHash(...args),
+  hammingDistance: (...args: unknown[]) => mockHammingDistance(...args),
+}));
+
 // Mock fs sync operations (used in server.ts startup validation)
 vi.mock('node:fs', async () => {
   const actual = await vi.importActual<typeof import('node:fs')>('node:fs');
@@ -103,6 +111,8 @@ afterAll(async () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockComputeDHash.mockResolvedValue('abcdef0123456789');
+  mockHammingDistance.mockReturnValue(64); // above threshold — no duplicate by default
 });
 
 describe('POST /catalog/franchises/:franchise/items/:slug/photos', () => {
@@ -139,6 +149,8 @@ describe('POST /catalog/franchises/:franchise/items/:slug/photos', () => {
 
   it('returns 400 for unsupported MIME type', async () => {
     mockItemLookup(true);
+    // getPhotoHashesByItem
+    mockQuery.mockResolvedValueOnce({ rows: [], rowCount: 0 });
     const { body, boundary } = buildMultipartBody('test.svg', 'image/svg+xml', Buffer.from('<svg/>'));
     const res = await server.inject({
       method: 'POST',
@@ -153,8 +165,63 @@ describe('POST /catalog/franchises/:franchise/items/:slug/photos', () => {
     expect(res.json<{ error: string }>().error).toMatch(/Unsupported image type/);
   });
 
+  it('returns 409 when duplicate photo detected', async () => {
+    mockItemLookup(true);
+    // getPhotoHashesByItem — return an existing photo with a matching hash
+    mockQuery.mockResolvedValueOnce({
+      rows: [{ id: PHOTO_ID, url: `${ITEM_ID}/${PHOTO_ID}-original.webp`, dhash: 'abcdef0123456789' }],
+      rowCount: 1,
+    });
+    // hammingDistance returns 5 (within threshold of 10)
+    mockHammingDistance.mockReturnValueOnce(5);
+
+    const { body, boundary } = buildMultipartBody('test.jpg', 'image/jpeg', Buffer.from('fake-image'));
+    const res = await server.inject({
+      method: 'POST',
+      url,
+      headers: {
+        authorization: `Bearer ${curatorToken()}`,
+        'content-type': `multipart/form-data; boundary=${boundary}`,
+      },
+      payload: body,
+    });
+    expect(res.statusCode).toBe(409);
+    const json = res.json<{ error: string; matched: { id: string; url: string } }>();
+    expect(json.error).toBe('Duplicate photo detected');
+    expect(json.matched.id).toBe(PHOTO_ID);
+  });
+
+  it('returns 201 when hash is above threshold (not a duplicate)', async () => {
+    mockItemLookup(true);
+    // getPhotoHashesByItem — return an existing photo
+    mockQuery.mockResolvedValueOnce({
+      rows: [{ id: PHOTO_ID, url: `${ITEM_ID}/${PHOTO_ID}-original.webp`, dhash: '1111111111111111' }],
+      rowCount: 1,
+    });
+    // hammingDistance returns 32 (above threshold of 10)
+    mockHammingDistance.mockReturnValueOnce(32);
+    // getMaxSortOrder
+    mockQuery.mockResolvedValueOnce({ rows: [{ max: 0 }], rowCount: 1 });
+    // insertPhoto RETURNING
+    mockQuery.mockResolvedValueOnce({ rows: [mockPhotoRow], rowCount: 1 });
+
+    const { body, boundary } = buildMultipartBody('test.jpg', 'image/jpeg', Buffer.from('fake-image'));
+    const res = await server.inject({
+      method: 'POST',
+      url,
+      headers: {
+        authorization: `Bearer ${curatorToken()}`,
+        'content-type': `multipart/form-data; boundary=${boundary}`,
+      },
+      payload: body,
+    });
+    expect(res.statusCode).toBe(201);
+  });
+
   it('returns 201 with uploaded photo on success', async () => {
     mockItemLookup(true);
+    // getPhotoHashesByItem — no existing photos
+    mockQuery.mockResolvedValueOnce({ rows: [], rowCount: 0 });
     // getMaxSortOrder
     mockQuery.mockResolvedValueOnce({ rows: [{ max: 0 }], rowCount: 1 });
     // insertPhoto RETURNING

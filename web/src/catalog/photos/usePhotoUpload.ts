@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { uploadPhoto, validateFile } from './api';
+import { uploadPhoto, validateFile, DuplicateUploadError } from './api';
 import { toast } from 'sonner';
 
 export type UploadItemStatus = 'queued' | 'uploading' | 'done' | 'error';
@@ -18,7 +18,8 @@ type Action =
   | { type: 'PROGRESS'; id: string; percent: number }
   | { type: 'DONE'; id: string }
   | { type: 'ERROR'; id: string; message: string }
-  | { type: 'REMOVE'; id: string };
+  | { type: 'REMOVE'; id: string }
+  | { type: 'CLEAR_ERRORS' };
 
 function reducer(state: UploadItem[], action: Action): UploadItem[] {
   switch (action.type) {
@@ -44,6 +45,8 @@ function reducer(state: UploadItem[], action: Action): UploadItem[] {
       );
     case 'REMOVE':
       return state.filter((item) => item.id !== action.id);
+    case 'CLEAR_ERRORS':
+      return state.filter((item) => item.status !== 'error');
     default:
       return state;
   }
@@ -59,6 +62,8 @@ export interface UsePhotoUploadReturn {
   items: UploadItem[];
   isUploading: boolean;
   uploadFiles: (files: File[]) => void;
+  clearErrors: () => void;
+  dismissItem: (id: string) => void;
 }
 
 export function usePhotoUpload({ franchise, itemSlug, onUploadComplete }: UsePhotoUploadOptions): UsePhotoUploadReturn {
@@ -67,7 +72,16 @@ export function usePhotoUpload({ franchise, itemSlug, onUploadComplete }: UsePho
   const processingRef = useRef(false);
   const filesMapRef = useRef(new Map<string, File>());
 
+  const clearErrors = useCallback(() => {
+    dispatch({ type: 'CLEAR_ERRORS' });
+  }, []);
+
+  const dismissItem = useCallback((id: string) => {
+    dispatch({ type: 'REMOVE', id });
+  }, []);
+
   const uploadFiles = useCallback((files: File[]) => {
+    dispatch({ type: 'CLEAR_ERRORS' });
     const validItems: Array<{ id: string; fileName: string }> = [];
 
     for (const file of files) {
@@ -114,12 +128,21 @@ export function usePhotoUpload({ franchise, itemSlug, onUploadComplete }: UsePho
       })
       .catch((err: unknown) => {
         processingRef.current = false;
+        filesMapRef.current.delete(nextQueued.id);
+
+        if (err instanceof DuplicateUploadError) {
+          dispatch({ type: 'ERROR', id: nextQueued.id, message: err.message });
+          toast.error(`${nextQueued.fileName} is a duplicate`, {
+            description: 'This image matches an existing photo for this item.',
+          });
+          return;
+        }
+
         const message = err instanceof Error ? err.message : 'Upload failed';
         dispatch({ type: 'ERROR', id: nextQueued.id, message });
-        filesMapRef.current.delete(nextQueued.id);
         toast.error(`Failed to upload ${nextQueued.fileName}`);
       });
   }, [items, franchise, itemSlug, onUploadComplete]);
 
-  return { items, isUploading, uploadFiles };
+  return { items, isUploading, uploadFiles, clearErrors, dismissItem };
 }

@@ -4,12 +4,15 @@ import multipart from '@fastify/multipart';
 import { config } from '../../config.js';
 import { getItemIdBySlug } from '../items/queries.js';
 import * as photoQueries from './queries.js';
+import type { PhotoHashRow } from './queries.js';
 import { photoDir, photoPath, photoRelativeUrl, ensureDir, writePhoto, deletePhotoFiles } from './storage.js';
 import { processUpload, DimensionError } from './thumbnails.js';
+import { computeDHash, hammingDistance } from './dhash.js';
 import { uploadPhotosSchema, deletePhotoSchema, setPrimarySchema, reorderPhotosSchema } from './schemas.js';
 
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const MAX_FILES = 10;
+const DHASH_THRESHOLD = 10;
 
 const writeRateLimit = { rateLimit: { max: 20, timeWindow: '1 minute' } } as const;
 const mutationRateLimit = { rateLimit: { max: 30, timeWindow: '1 minute' } } as const;
@@ -52,9 +55,13 @@ export async function photoRoutes(fastify: FastifyInstance, _opts: object): Prom
 
       const processed: Array<{
         photoId: string;
+        dhash: string;
         thumb: Buffer;
         original: Buffer;
       }> = [];
+
+      const existingHashes = await photoQueries.getPhotoHashesByItem(itemId);
+      const batchHashes: PhotoHashRow[] = [];
 
       const parts = request.parts();
       for await (const part of parts) {
@@ -73,8 +80,20 @@ export async function photoRoutes(fastify: FastifyInstance, _opts: object): Prom
           return reply.code(413).send({ error: `File exceeds maximum size of ${config.photos.maxSizeMb}MB` });
         }
 
+        let dhash: string;
         let result;
         try {
+          dhash = await computeDHash(inputBuffer);
+
+          const allHashes = [...existingHashes, ...batchHashes];
+          const match = allHashes.find((h) => hammingDistance(dhash, h.dhash) <= DHASH_THRESHOLD);
+          if (match) {
+            return reply.code(409).send({
+              error: 'Duplicate photo detected',
+              matched: { id: match.id, url: match.url },
+            });
+          }
+
           result = await processUpload(inputBuffer);
         } catch (err) {
           if (err instanceof DimensionError) {
@@ -83,7 +102,9 @@ export async function photoRoutes(fastify: FastifyInstance, _opts: object): Prom
           return reply.code(400).send({ error: 'Invalid image file' });
         }
 
-        processed.push({ photoId: randomUUID(), ...result });
+        const photoId = randomUUID();
+        batchHashes.push({ id: photoId, url: photoRelativeUrl(itemId, photoId), dhash });
+        processed.push({ photoId, dhash, ...result });
       }
 
       if (processed.length === 0) {
@@ -110,6 +131,7 @@ export async function photoRoutes(fastify: FastifyInstance, _opts: object): Prom
             url: photoRelativeUrl(itemId, p.photoId),
             uploadedBy: request.user.sub,
             sortOrder: maxSort + i + 1,
+            dhash: p.dhash,
           });
           photos.push(row);
         }

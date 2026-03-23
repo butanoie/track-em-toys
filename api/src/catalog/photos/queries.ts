@@ -15,6 +15,13 @@ export interface InsertPhotoParams {
   url: string;
   uploadedBy: string;
   sortOrder: number;
+  dhash: string;
+}
+
+export interface PhotoHashRow {
+  id: string;
+  url: string;
+  dhash: string;
 }
 
 const PHOTO_COLUMNS = 'id, url, caption, is_primary, sort_order, status';
@@ -24,16 +31,31 @@ const APPROVED_ORDER = `is_primary DESC, sort_order ASC, created_at ASC`;
  * Insert a photo row. The sort_order is provided by the caller (computed
  * from MAX(sort_order) + offset for batch inserts).
  *
- * @param params - Photo insert parameters (id, itemId, url, uploadedBy, sortOrder)
+ * @param params - Photo insert parameters (id, itemId, url, uploadedBy, sortOrder, dhash)
  */
 export async function insertPhoto(params: InsertPhotoParams): Promise<PhotoWriteRow> {
   const { rows } = await pool.query<PhotoWriteRow>(
-    `INSERT INTO item_photos (id, item_id, url, uploaded_by, sort_order)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO item_photos (id, item_id, url, uploaded_by, sort_order, dhash)
+     VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING ${PHOTO_COLUMNS}`,
-    [params.id, params.itemId, params.url, params.uploadedBy, params.sortOrder]
+    [params.id, params.itemId, params.url, params.uploadedBy, params.sortOrder, params.dhash]
   );
   return rows[0]!;
+}
+
+/**
+ * Fetch dHash values for all non-rejected photos of an item.
+ * Used by the upload handler to check for perceptual duplicates.
+ *
+ * @param itemId - Item UUID
+ */
+export async function getPhotoHashesByItem(itemId: string): Promise<PhotoHashRow[]> {
+  const { rows } = await pool.query<PhotoHashRow>(
+    `SELECT id, url, dhash FROM item_photos
+     WHERE item_id = $1 AND status != 'rejected' AND dhash != ''`,
+    [itemId]
+  );
+  return rows;
 }
 
 /**

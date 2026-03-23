@@ -181,6 +181,13 @@ export const ReorderPhotosResponseSchema = z.object({
   photos: z.array(PhotoWriteItemSchema),
 });
 
+// Duplicate photo detection (409 response from upload)
+export const DuplicatePhotoResponseSchema = z.object({
+  error: z.string(),
+  matched: z.object({ id: z.string(), url: z.string() }),
+});
+export type DuplicatePhotoResponse = z.infer<typeof DuplicatePhotoResponseSchema>;
+
 // Facet counts (GET /catalog/franchises/:franchise/items/facets)
 export const FacetValueSchema = z.object({
   value: z.string(),

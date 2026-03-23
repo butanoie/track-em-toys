@@ -142,6 +142,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` for drag-to-reorder in PhotoGrid
 - `@dnd-kit/sortable` `useSortable` returns `attributes` that include `aria-roledescription` — do NOT set this prop explicitly on the drag surface element or TypeScript will error with TS2783 (duplicate prop)
 - PhotoGrid cards are draggable by the entire tile (not a small grip handle) — `attributes` and `listeners` are on the outer `div`, with `pointer-events-none` on the `<img>` to prevent browser default image drag. The `PointerSensor` `distance: 5` constraint lets clicks on star/delete buttons resolve without triggering a drag.
+- `DuplicateUploadError` in `catalog/photos/api.ts` — thrown when XHR gets 409 from photo upload (perceptual duplicate detected). Caught in `usePhotoUpload.ts` for a specific toast message distinct from generic upload errors.
 
 ### Catalog Browsing (Phase 1.7+)
 

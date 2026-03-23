@@ -34,6 +34,28 @@ const photoWriteItem = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Duplicate detection response
+// ---------------------------------------------------------------------------
+
+const duplicatePhotoError = {
+  type: 'object',
+  required: ['error', 'matched'],
+  additionalProperties: false,
+  properties: {
+    error: { type: 'string' },
+    matched: {
+      type: 'object',
+      required: ['id', 'url'],
+      additionalProperties: false,
+      properties: {
+        id: { type: 'string' },
+        url: { type: 'string' },
+      },
+    },
+  },
+} as const;
+
+// ---------------------------------------------------------------------------
 // Route schemas
 // ---------------------------------------------------------------------------
 
@@ -56,6 +78,7 @@ export const uploadPhotosSchema = {
     401: errorResponse,
     403: errorResponse,
     404: errorResponse,
+    409: duplicatePhotoError,
     413: errorResponse,
     500: errorResponse,
   },

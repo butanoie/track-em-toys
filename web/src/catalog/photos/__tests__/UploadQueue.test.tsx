@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { UploadQueue } from '../UploadQueue';
 import type { UploadItem } from '../usePhotoUpload';
 
@@ -71,5 +72,35 @@ describe('UploadQueue', () => {
     render(<UploadQueue items={items} />);
 
     expect(screen.getByRole('alert')).toHaveTextContent('Upload failed');
+  });
+
+  it('renders dismiss button on error items when onDismiss is provided', () => {
+    const items: UploadItem[] = [
+      { id: '1', fileName: 'photo.jpg', status: 'error', progress: 0, errorMessage: 'Duplicate' },
+    ];
+    render(<UploadQueue items={items} onDismiss={vi.fn()} />);
+
+    expect(screen.getByLabelText('Dismiss photo.jpg error')).toBeInTheDocument();
+  });
+
+  it('does not render dismiss button when onDismiss is not provided', () => {
+    const items: UploadItem[] = [
+      { id: '1', fileName: 'photo.jpg', status: 'error', progress: 0, errorMessage: 'Duplicate' },
+    ];
+    render(<UploadQueue items={items} />);
+
+    expect(screen.queryByLabelText('Dismiss photo.jpg error')).not.toBeInTheDocument();
+  });
+
+  it('calls onDismiss with item id when dismiss button is clicked', async () => {
+    const user = userEvent.setup();
+    const onDismiss = vi.fn();
+    const items: UploadItem[] = [
+      { id: 'abc-123', fileName: 'photo.jpg', status: 'error', progress: 0, errorMessage: 'Duplicate' },
+    ];
+    render(<UploadQueue items={items} onDismiss={onDismiss} />);
+
+    await user.click(screen.getByLabelText('Dismiss photo.jpg error'));
+    expect(onDismiss).toHaveBeenCalledWith('abc-123');
   });
 });
