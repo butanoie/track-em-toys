@@ -87,6 +87,7 @@ export const mockCatalogItem: CatalogItem = {
   ],
   manufacturer: slugName('hasbro', 'Hasbro'),
   toy_line: slugName('generation-1', 'Generation 1'),
+  thumbnail_url: null,
   size_class: 'Leader',
   year_released: 1984,
   is_third_party: false,

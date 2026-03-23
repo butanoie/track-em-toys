@@ -5,12 +5,15 @@ import { Route } from '@/routes/_authenticated/collection';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { Button } from '@/components/ui/button';
+import { useLocalStorage } from '@/lib/use-local-storage';
 import { useCollectionItems } from '@/collection/hooks/useCollectionItems';
 import { useCollectionStats } from '@/collection/hooks/useCollectionStats';
 import { useCollectionMutations } from '@/collection/hooks/useCollectionMutations';
 import { CollectionStatsBar } from '@/collection/components/CollectionStatsBar';
 import { CollectionFilters } from '@/collection/components/CollectionFilters';
 import { CollectionGrid } from '@/collection/components/CollectionGrid';
+import { CollectionTable } from '@/collection/components/CollectionTable';
+import { ViewToggle, type CollectionViewMode } from '@/collection/components/ViewToggle';
 import { EditCollectionItemDialog } from '@/collection/components/EditCollectionItemDialog';
 import type { CollectionFilters as CollectionFiltersType } from '@/collection/api';
 import type { CollectionItem } from '@/lib/zod-schemas';
@@ -20,6 +23,7 @@ export function CollectionPage() {
   const navigate = useNavigate();
   const mutations = useCollectionMutations();
   const [editTarget, setEditTarget] = useState<CollectionItem | null>(null);
+  const [view, setView] = useLocalStorage<CollectionViewMode>('trackem:collection-view', 'grid');
 
   const [cursorStack, setCursorStack] = useState<Array<string | undefined>>([]);
 
@@ -142,19 +146,26 @@ export function CollectionPage() {
               <p className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
                 {data?.total_count ?? '—'} {data?.total_count === 1 ? 'item' : 'items'}
               </p>
-              {(cursorStack.length > 0 || data?.next_cursor) && (
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={loadPreviousPage} disabled={cursorStack.length === 0}>
-                    Previous
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={loadNextPage} disabled={!data?.next_cursor}>
-                    Next
-                  </Button>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                <ViewToggle view={view} onViewChange={setView} />
+                {(cursorStack.length > 0 || data?.next_cursor) && (
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={loadPreviousPage} disabled={cursorStack.length === 0}>
+                      Previous
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={loadNextPage} disabled={!data?.next_cursor}>
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <CollectionGrid items={data?.data ?? []} isLoading={isPending} onEdit={setEditTarget} />
+            {view === 'grid' ? (
+              <CollectionGrid items={data?.data ?? []} isLoading={isPending} onEdit={setEditTarget} />
+            ) : (
+              <CollectionTable items={data?.data ?? []} isLoading={isPending} onEdit={setEditTarget} />
+            )}
           </>
         )}
       </main>

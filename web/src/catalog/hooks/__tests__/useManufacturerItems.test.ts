@@ -34,6 +34,7 @@ const mockItemList = {
       ],
       manufacturer: { slug: 'hasbro', name: 'Hasbro' },
       toy_line: { slug: 'masterpiece', name: 'Masterpiece' },
+      thumbnail_url: null,
       size_class: 'Leader',
       year_released: 2019,
       is_third_party: false,

@@ -158,10 +158,7 @@ export async function listCollectionItems(
  * @param client - Transaction client with RLS context
  * @param id - Collection item UUID
  */
-export async function getCollectionItemById(
-  client: PoolClient,
-  id: string
-): Promise<CollectionListRow | null> {
+export async function getCollectionItemById(client: PoolClient, id: string): Promise<CollectionListRow | null> {
   const query = `${COLLECTION_ITEM_SELECT} WHERE ci.id = $1`;
   const { rows } = await client.query<CollectionListRow>(query, [id]);
   return rows[0] ?? null;
@@ -300,10 +297,7 @@ export async function getCollectionStats(client: PoolClient): Promise<Collection
  * @param client - Transaction client with RLS context
  * @param itemIds - Array of catalog item UUIDs
  */
-export async function checkCollectionItems(
-  client: PoolClient,
-  itemIds: string[]
-): Promise<CheckRow[]> {
+export async function checkCollectionItems(client: PoolClient, itemIds: string[]): Promise<CheckRow[]> {
   const { rows } = await client.query<CheckRow>(
     `SELECT
        item_id::text,
@@ -389,9 +383,6 @@ export async function softDeleteCollectionItem(client: PoolClient, id: string): 
  * @param id - Collection item UUID
  */
 export async function restoreCollectionItem(client: PoolClient, id: string): Promise<boolean> {
-  const result = await client.query(
-    `UPDATE collection_items SET deleted_at = NULL WHERE id = $1`,
-    [id]
-  );
+  const result = await client.query(`UPDATE collection_items SET deleted_at = NULL WHERE id = $1`, [id]);
   return (result.rowCount ?? 0) > 0;
 }

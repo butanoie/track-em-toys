@@ -1,11 +1,15 @@
 import { useCallback, useRef, useEffect, type ReactNode } from 'react';
+import { Package } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { buildPhotoUrl } from '@/catalog/photos/api';
+
 interface ItemListItem {
   id: string;
   slug: string;
   name: string;
   manufacturer: { name: string } | null;
   toy_line: { name: string } | null;
+  thumbnail_url?: string | null;
   size_class: string | null;
   year_released: number | null;
 }
@@ -90,7 +94,16 @@ export function ItemList({ items, selectedSlug, onSelect, totalCount, pagination
                   isSelected ? 'ring-2 ring-primary/50 bg-accent' : 'border-border/50 hover:bg-accent/50'
                 }`}
               >
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded bg-muted flex-shrink-0 overflow-hidden">
+                    {item.thumbnail_url ? (
+                      <img src={buildPhotoUrl(item.thumbnail_url)} alt="" className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="h-4 w-4 text-muted-foreground/40" />
+                      </div>
+                    )}
+                  </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">

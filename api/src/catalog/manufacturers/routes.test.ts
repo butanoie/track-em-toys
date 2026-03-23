@@ -91,6 +91,7 @@ describe('manufacturer routes', () => {
       manufacturer_name: 'FansToys',
       toy_line_slug: 'masterpiece',
       toy_line_name: 'Masterpiece',
+      thumbnail_url: null,
       size_class: 'Leader',
       year_released: 2019,
       is_third_party: false,

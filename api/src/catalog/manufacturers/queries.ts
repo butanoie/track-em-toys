@@ -144,7 +144,11 @@ function buildManufacturerItemsQuery(
       FROM items i
       INNER JOIN manufacturers mfr ON mfr.id = i.manufacturer_id
       INNER JOIN franchises fr ON fr.id = i.franchise_id
-      JOIN toy_lines tl ON tl.id = i.toy_line_id`;
+      JOIN toy_lines tl ON tl.id = i.toy_line_id
+      LEFT JOIN item_photos ip
+          ON ip.item_id = i.id
+         AND ip.is_primary = true
+         AND ip.status = 'approved'`;
 
   return { joins, whereClause: clauses.join(' AND '), params };
 }
@@ -180,6 +184,7 @@ export async function listManufacturerItems(
            fr.slug AS franchise_slug, fr.name AS franchise_name,
            mfr.slug AS manufacturer_slug, mfr.name AS manufacturer_name,
            tl.slug AS toy_line_slug, tl.name AS toy_line_name,
+           ip.url AS thumbnail_url,
            COALESCE(
              (SELECT json_agg(
                json_build_object(

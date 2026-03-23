@@ -78,4 +78,3 @@ describe('hammingDistance', () => {
     expect(hammingDistance('00000000000000ff', '0000000000000000')).toBe(8);
   });
 });
-

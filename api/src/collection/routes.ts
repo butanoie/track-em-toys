@@ -157,7 +157,10 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
     '/check',
     { schema: checkCollectionSchema, preHandler: authPreHandler, config: readRateLimit },
     async (request, reply) => {
-      const raw = request.query.itemIds.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+      const raw = request.query.itemIds
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
 
       if (raw.length === 0) {
         return reply.code(400).send({ error: 'itemIds must contain at least one UUID' });

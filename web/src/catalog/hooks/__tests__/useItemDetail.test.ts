@@ -40,6 +40,7 @@ const mockItemDetail = {
   ],
   manufacturer: { slug: 'hasbro', name: 'Hasbro' },
   toy_line: { slug: 'legacy', name: 'Legacy' },
+  thumbnail_url: null,
   size_class: 'Leader',
   year_released: 2024,
   is_third_party: false,
