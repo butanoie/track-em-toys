@@ -15,6 +15,7 @@ import { HttpError } from './auth/errors.js';
 import { docsPlugin } from './plugins/docs.js';
 import { catalogRoutes } from './catalog/routes.js';
 import { adminRoutes } from './admin/routes.js';
+import { collectionRoutes } from './collection/routes.js';
 import { requireRole } from './auth/role.js';
 import type { UserRole } from './types/index.js';
 
@@ -231,6 +232,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   // ─── Admin routes ───────────────────────────────────────────────────────
 
   await fastify.register(adminRoutes, { prefix: '/admin' });
+
+  // ─── Collection routes (first RLS-protected module) ───────────────────
+
+  await fastify.register(collectionRoutes, { prefix: '/collection' });
 
   // ─── Photo storage validation ──────────────────────────────────────────
   // Validate storage path exists and is writable at startup (all environments).

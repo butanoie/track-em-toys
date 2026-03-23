@@ -287,3 +287,27 @@ export interface CatalogEdit {
   reviewed_by: string | null;
   created_at: string;
 }
+
+// ---------------------------------------------------------------------------
+// Collection
+// ---------------------------------------------------------------------------
+
+export type ItemCondition =
+  | 'mint_sealed'
+  | 'opened_complete'
+  | 'opened_incomplete'
+  | 'loose_complete'
+  | 'loose_incomplete'
+  | 'damaged'
+  | 'unknown';
+
+export interface CollectionItem {
+  id: string;
+  user_id: string;
+  item_id: string;
+  condition: ItemCondition;
+  notes: string | null;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}

@@ -16,6 +16,21 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: item_condition; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.item_condition AS ENUM (
+    'mint_sealed',
+    'opened_complete',
+    'opened_incomplete',
+    'loose_complete',
+    'loose_incomplete',
+    'damaged',
+    'unknown'
+);
+
+
+--
 -- Name: current_app_user_id(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -252,6 +267,24 @@ COMMENT ON COLUMN public.characters.metadata IS 'Extensible JSONB for japanese_n
 --
 
 COMMENT ON COLUMN public.characters.continuity_family_id IS 'FK → continuity_families. The character identity boundary — same name in different families = different character (e.g., G1 Megatron vs Beast Wars Megatron). Replaces the free-text series and continuity columns from migration 012.';
+
+
+--
+-- Name: collection_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.collection_items (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    item_id uuid NOT NULL,
+    condition public.item_condition DEFAULT 'unknown'::public.item_condition NOT NULL,
+    notes text,
+    deleted_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE ONLY public.collection_items FORCE ROW LEVEL SECURITY;
 
 
 --
@@ -688,6 +721,14 @@ ALTER TABLE ONLY public.characters
 
 
 --
+-- Name: collection_items collection_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_items
+    ADD CONSTRAINT collection_items_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: continuity_families continuity_families_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1004,6 +1045,20 @@ CREATE INDEX idx_characters_type ON public.characters USING btree (character_typ
 
 
 --
+-- Name: idx_collection_items_user_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_collection_items_user_active ON public.collection_items USING btree (user_id, created_at DESC) WHERE (deleted_at IS NULL);
+
+
+--
+-- Name: idx_collection_items_user_item; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_collection_items_user_item ON public.collection_items USING btree (user_id, item_id) WHERE (deleted_at IS NULL);
+
+
+--
 -- Name: idx_continuity_families_franchise; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1270,6 +1325,13 @@ CREATE TRIGGER characters_updated_at BEFORE UPDATE ON public.characters FOR EACH
 
 
 --
+-- Name: collection_items collection_items_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER collection_items_updated_at BEFORE UPDATE ON public.collection_items FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
 -- Name: item_photos item_photos_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -1405,6 +1467,22 @@ ALTER TABLE ONLY public.characters
 
 ALTER TABLE ONLY public.characters
     ADD CONSTRAINT characters_franchise_id_fkey FOREIGN KEY (franchise_id) REFERENCES public.franchises(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: collection_items collection_items_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_items
+    ADD CONSTRAINT collection_items_item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: collection_items collection_items_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_items
+    ADD CONSTRAINT collection_items_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -1552,6 +1630,40 @@ ALTER TABLE ONLY public.toy_lines
 
 
 --
+-- Name: collection_items; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.collection_items ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: collection_items collection_items_delete; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY collection_items_delete ON public.collection_items FOR DELETE USING ((user_id = ( SELECT public.current_app_user_id() AS current_app_user_id)));
+
+
+--
+-- Name: collection_items collection_items_insert; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY collection_items_insert ON public.collection_items FOR INSERT WITH CHECK ((user_id = ( SELECT public.current_app_user_id() AS current_app_user_id)));
+
+
+--
+-- Name: collection_items collection_items_select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY collection_items_select ON public.collection_items FOR SELECT USING ((user_id = ( SELECT public.current_app_user_id() AS current_app_user_id)));
+
+
+--
+-- Name: collection_items collection_items_update; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY collection_items_update ON public.collection_items FOR UPDATE USING ((user_id = ( SELECT public.current_app_user_id() AS current_app_user_id))) WITH CHECK ((user_id = ( SELECT public.current_app_user_id() AS current_app_user_id)));
+
+
+--
 -- PostgreSQL database dump complete
 --
 
@@ -1589,4 +1701,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('024'),
     ('025'),
     ('026'),
-    ('027');
+    ('027'),
+    ('028');
