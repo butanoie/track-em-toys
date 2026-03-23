@@ -133,6 +133,7 @@ function SortablePhotoCard({ photo, onSetPrimary, onDelete, disabled }: Sortable
         src={buildPhotoUrl(photo.url)}
         alt={photo.caption ?? 'Photo'}
         className="object-contain max-h-full max-w-full pointer-events-none"
+        loading="lazy"
       />
 
       {photo.is_primary && (

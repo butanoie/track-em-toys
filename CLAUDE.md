@@ -92,6 +92,8 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - ML-accelerated, web-first roadmap: 1.4 (Seed) → 1.5 (Catalog API) → 1.5b (Roles) → 1.9 (Photos) → 4.0 (ML) → 2.0 (iOS)
 - Collection features (private items, pricing, tags, CSV import, reporting) deferred until post-ML
 - Photo enhancements (moderation, soft delete, captions, approval dashboard) deferred to Phase 1.9b (post-ML)
+- Photo API endpoints have no LIMIT on returned photos — curators decide photo count, no API cap (decided 2026-03-23)
+- `ADR_Performance_Scaling_Assessment.md` uses urgency-based tiers (NOW/SOON/10K users/multi-server/nice-to-have) — not all items are scale-dependent; some are pre-launch correctness fixes tracked in #109 and #110
 - See `docs/plans/Development_Roadmap_v1_0.md` for full roadmap
 - See `docs/decisions/2026-03-16_roadmap_session_decisions.md` for architectural decisions
 

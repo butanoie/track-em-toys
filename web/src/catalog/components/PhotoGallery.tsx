@@ -83,6 +83,7 @@ export function PhotoGallery({ photos, itemName }: PhotoGalleryProps) {
                   src={buildPhotoUrl(photo.url)}
                   alt={photo.caption ?? `${itemName} photo ${idx + 1}`}
                   className="object-contain max-h-full max-w-full"
+                  loading="lazy"
                 />
               </button>
             ))}

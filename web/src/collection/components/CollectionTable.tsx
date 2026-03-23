@@ -4,24 +4,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { buildPhotoUrl } from '@/catalog/photos/api';
 import { ConditionBadge } from '@/collection/components/ConditionBadge';
+import { formatRelativeDate } from '@/collection/lib/format-date';
 import type { CollectionItem } from '@/lib/zod-schemas';
 
 interface CollectionTableProps {
   items: CollectionItem[];
   isLoading: boolean;
   onEdit: (item: CollectionItem) => void;
-}
-
-function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return 'today';
-  if (diffDays === 1) return 'yesterday';
-  if (diffDays < 30) return `${diffDays}d ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
-  return `${Math.floor(diffDays / 365)}y ago`;
 }
 
 export function CollectionTable({ items, isLoading, onEdit }: CollectionTableProps) {
@@ -100,7 +89,7 @@ export function CollectionTable({ items, isLoading, onEdit }: CollectionTablePro
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded bg-muted flex-shrink-0 overflow-hidden">
                     {item.thumbnail_url ? (
-                      <img src={buildPhotoUrl(item.thumbnail_url)} alt="" className="w-full h-full object-contain" />
+                      <img src={buildPhotoUrl(item.thumbnail_url)} alt="" className="w-full h-full object-contain" loading="lazy" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Package className="h-4 w-4 text-muted-foreground/40" />

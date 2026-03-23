@@ -374,51 +374,71 @@ At 100K users, the origin server (or wherever photos are hosted) serves full-res
 
 ## Remediation Roadmap
 
-### Phase 1 — Before launch (configuration only)
+> **Updated 2026-03-23** after re-audit. Original roadmap assumed all items were scale-dependent. Re-assessment found several items are correctness or best-practice gaps that should ship before real users, regardless of scale. Reorganized into urgency tiers.
 
-| #   | Action                                              | Effort    | Files                                                               |
-| --- | --------------------------------------------------- | --------- | ------------------------------------------------------------------- |
-| 1   | Set `DB_POOL_MAX=100`                               | Env var   | `.env`                                                              |
-| 2   | Tune PostgreSQL `max_connections`                   | DB config | `postgresql.conf`                                                   |
-| 3   | Add `refetchOnWindowFocus: false` + `gcTime: 15min` | 5 min     | `web/src/routes/__root.tsx`                                         |
-| 4   | Implement `auth_events` retention cron              | 1-2 hrs   | New migration + scheduled job                                       |
-| 5   | Add CORS `maxAge: 86400`                            | 1 line    | `api/src/server.ts`                                                 |
-| 6   | Integrate error reporting (Sentry/Datadog)          | 2-4 hrs   | `web/src/components/ErrorBoundary.tsx`, `web/src/routes/__root.tsx` |
+### Tier 1 — Fix NOW (quick wins + correctness)
 
-### Phase 2 — At ~10K users (monitoring-driven)
+Items that are either one-liner config fixes or correctness bugs independent of user count.
+
+| #   | Action                                              | Effort  | Files                                                                                       | Tracking     |
+| --- | --------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------- | ------------ |
+| 1   | Add CORS `maxAge: 86400`                            | 1 line  | `api/src/server.ts`                                                                         | #109 |
+| 2   | Add `refetchOnWindowFocus: false` + `gcTime: 15min` | 5 min   | `web/src/routes/__root.tsx`                                                                 | #109 |
+| 3   | Add `loading="lazy"` to all `<img>` elements        | 30 min  | `PhotoGallery.tsx`, `ItemList.tsx`, `CollectionGrid.tsx`, `CollectionItemCard.tsx`           | #109 |
+| 4   | Fix `auth_events` FK: `ON DELETE SET NULL` → `ON DELETE RESTRICT` | 1 migration | `api/db/migrations/` (see new finding below)                            | #109 |
+| 5   | ~~Add `LIMIT` to photo subquery + `has_more_photos`~~ | — | — | Dropped — curators decide photo count; no API cap |
+
+### Tier 2 — Fix SOON (before real traffic)
+
+Not blocking current feature work, but should ship before production users.
+
+| #   | Action                                              | Effort  | Files                                                               | Tracking     |
+| --- | --------------------------------------------------- | ------- | ------------------------------------------------------------------- | ------------ |
+| 6   | Set `DB_POOL_MAX=100` + tune PG `max_connections`   | Env var | `.env`, `postgresql.conf`                                           | #110 |
+| 7   | Implement `auth_events` retention cron              | 2-4 hrs | New migration + scheduled job                                       | #110 |
+| 8   | Integrate error reporting (Sentry/Datadog)          | 2-4 hrs | `web/src/components/ErrorBoundary.tsx`, `web/src/routes/__root.tsx` | #110 |
+
+### Tier 3 — At ~10K users (monitoring-driven)
 
 | #   | Action                                                     | Effort              | Files                                             |
 | --- | ---------------------------------------------------------- | ------------------- | ------------------------------------------------- |
-| 7   | Add composite index `(franchise_id, size_class)`           | Migration           | `api/db/migrations/`                              |
-| 8   | Run `EXPLAIN ANALYZE` on search queries                    | Analysis            | —                                                 |
-| 9   | Add composite `search_vector` on items if OR scan is slow  | Migration + trigger | `api/db/migrations/`                              |
-| 10  | Add `Cache-Control` headers to manufacturer stats endpoint | 30 min              | `api/src/catalog/manufacturers/routes.ts`         |
-| 11  | Cache OAuth provider JWKS locally with TTL                 | 2-4 hrs             | `api/src/auth/apple.ts`, `api/src/auth/google.ts` |
+| 9   | Add composite index `(franchise_id, size_class)`           | Migration           | `api/db/migrations/`                              |
+| 10  | Run `EXPLAIN ANALYZE` on search queries                    | Analysis            | —                                                 |
+| 11  | Add composite `search_vector` on items if OR scan is slow  | Migration + trigger | `api/db/migrations/`                              |
+| 12  | Add `Cache-Control` headers to manufacturer stats endpoint | 30 min              | `api/src/catalog/manufacturers/routes.ts`         |
+| 13  | Cache OAuth provider JWKS locally with TTL                 | 2-4 hrs             | `api/src/auth/apple.ts`, `api/src/auth/google.ts` |
 
-### Phase 3 — Before Phase 1.9 (photo upload)
-
-| #   | Action                                                 | Effort  | Files                                            |
-| --- | ------------------------------------------------------ | ------- | ------------------------------------------------ |
-| 12  | Add `LIMIT` to photo subquery + `has_more_photos` flag | 1-2 hrs | `api/src/catalog/items/queries.ts`               |
-| 13  | Add `loading="lazy"` + `srcset` to photo images        | 2-4 hrs | `web/src/catalog/components/ItemDetailPanel.tsx` |
-| 14  | Set up CDN for image delivery with auto-resizing       | Infra   | —                                                |
-
-### Phase 4 — At multi-server scale
+### Tier 4 — At multi-server scale
 
 | #   | Action                                     | Effort  | Files                                              |
 | --- | ------------------------------------------ | ------- | -------------------------------------------------- |
-| 15  | Deploy PgBouncer for connection pooling    | Infra   | —                                                  |
-| 16  | Switch to Redis-backed rate limiting       | 2-4 hrs | `api/src/server.ts`                                |
-| 17  | Cache user status in JWT or Redis          | 4-8 hrs | `api/src/auth/routes.ts`, `api/src/auth/tokens.ts` |
-| 18  | Consider read replicas for catalog queries | Infra   | `api/src/db/pool.ts`                               |
-| 19  | Node.js cluster or container orchestration | Infra   | —                                                  |
+| 14  | Deploy PgBouncer for connection pooling    | Infra   | —                                                  |
+| 15  | Switch to Redis-backed rate limiting       | 2-4 hrs | `api/src/server.ts`                                |
+| 16  | Cache user status in JWT or Redis          | 4-8 hrs | `api/src/auth/routes.ts`, `api/src/auth/tokens.ts` |
+| 17  | Consider read replicas for catalog queries | Infra   | `api/src/db/pool.ts`                               |
+| 18  | Node.js cluster or container orchestration | Infra   | —                                                  |
 
-### Phase 5 — Nice-to-have
+### Tier 5 — Nice-to-have
 
-| #   | Action                                   | Effort   | Files                           |
-| --- | ---------------------------------------- | -------- | ------------------------------- |
-| 20  | Service worker for catalog offline cache | 8-16 hrs | New `web/src/service-worker.ts` |
-| 21  | Monitor event loop lag via `perf_hooks`  | 1-2 hrs  | `api/src/server.ts`             |
+| #   | Action                                       | Effort   | Files                           |
+| --- | -------------------------------------------- | -------- | ------------------------------- |
+| 19  | Service worker for catalog offline cache     | 8-16 hrs | New `web/src/service-worker.ts` |
+| 20  | Monitor event loop lag via `perf_hooks`      | 1-2 hrs  | `api/src/server.ts`             |
+| 21  | CDN for image delivery with auto-resizing    | Infra    | —                               |
+| 22  | `srcset` for responsive image delivery       | 2-4 hrs  | Photo components                |
+| 23  | Collection/photo grid virtualization (500+ items) | 4-8 hrs | Collection components      |
+
+---
+
+## New Finding: `auth_events` ON DELETE SET NULL (2026-03-23 audit)
+
+**Location:** `api/db/migrations/005_create_auth_events.sql:4`
+
+**Problem:** The migration defines `user_id UUID REFERENCES users(id) ON DELETE SET NULL`. This contradicts the project's GDPR tombstone pattern — user rows are never deleted, they are scrubbed and retained. If a user row were ever accidentally deleted, all their `auth_events.user_id` values would silently become NULL, breaking audit trail traceability.
+
+**Context:** Migration 021 already corrected `oauth_accounts` and `refresh_tokens` from CASCADE to RESTRICT. The `auth_events` table was missed.
+
+**Remediation:** Add a migration to change the FK to `ON DELETE RESTRICT`, consistent with all other user-referencing tables.
 
 ---
 

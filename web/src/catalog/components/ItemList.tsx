@@ -97,7 +97,7 @@ export function ItemList({ items, selectedSlug, onSelect, totalCount, pagination
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded bg-muted flex-shrink-0 overflow-hidden">
                     {item.thumbnail_url ? (
-                      <img src={buildPhotoUrl(item.thumbnail_url)} alt="" className="w-full h-full object-contain" />
+                      <img src={buildPhotoUrl(item.thumbnail_url)} alt="" className="w-full h-full object-contain" loading="lazy" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Package className="h-4 w-4 text-muted-foreground/40" />

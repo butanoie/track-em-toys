@@ -1379,7 +1379,7 @@ CREATE TRIGGER users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECU
 --
 
 ALTER TABLE ONLY public.auth_events
-    ADD CONSTRAINT auth_events_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE SET NULL;
+    ADD CONSTRAINT auth_events_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
 
 
 --
@@ -1704,4 +1704,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('026'),
     ('027'),
     ('028'),
-    ('029');
+    ('029'),
+    ('030');

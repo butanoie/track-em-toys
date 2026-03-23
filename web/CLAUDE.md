@@ -129,6 +129,12 @@ cd web && npm run format:check # Prettier check (CI mode)
 - When a page has multiple Radix `Select` components (e.g., filter + per-row role selector), `getByRole('combobox')` fails Playwright strict mode — disambiguate with `getByRole('combobox', { name: /aria-label pattern/ })`
 - `vite.config.ts` `preview` section does NOT inherit from `server` — host, port, and https must be set explicitly in both. Without this, preview defaults to `localhost` while dev uses the custom hostname, causing SameSite cookie mismatches in E2E tests.
 
+### Image Loading
+
+- All thumbnail and below-the-fold `<img>` elements must have `loading="lazy"`
+- Hero/displayed photos and lightbox images must NOT have `loading="lazy"` (above-the-fold, causes visible pop-in)
+- `collection/lib/format-date.ts` — shared `formatRelativeDate` utility for collection components. Domain-scoped pure utilities in `collection/lib/` parallel `catalog/lib/`
+
 ### Photo Domains (Web UI)
 
 - Catalog photo gallery on item detail page — shared, visible to all users
@@ -157,6 +163,8 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `buildPhotoUrl` lives in `lib/photo-url.ts` but the documented import path is `@/catalog/photos/api` (re-export) — use the re-export for convention consistency
 - Adding `useCollectionCheck` or `useCollectionMutations` to a component requires adding mocks to every test file that renders that component — search for `vi.mock.*useCollectionCheck` to find existing mock patterns
 - Route tree regeneration: `npx tsr generate` does not work standalone — use `npm run build` or `npm run dev` to trigger the TanStack Router Vite plugin
+- `CatalogItemDetailSchema` extends `CatalogItemSchema` — any field added to the base schema MUST also be added to the API's `itemDetail` Fastify schema in `api/src/catalog/items/schemas.ts` (which is hand-written, not derived from `itemListItem`)
+- `ItemListItem` interface in `ItemList.tsx` uses optional `thumbnail_url?` — search results may not include it, so the field must be optional to avoid breaking the SearchPage
 
 ### Catalog Browsing (Phase 1.7+)
 

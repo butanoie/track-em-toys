@@ -64,6 +64,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     origin: config.corsOrigin,
     credentials: true,
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    maxAge: 86400,
   });
 
   // ─── Cookies (for refresh token httpOnly cookies) ──────────────────────
