@@ -3,23 +3,12 @@ import { Pencil, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { buildPhotoUrl } from '@/catalog/photos/api';
 import { ConditionBadge } from '@/collection/components/ConditionBadge';
+import { formatRelativeDate } from '@/collection/lib/format-date';
 import type { CollectionItem } from '@/lib/zod-schemas';
 
 interface CollectionItemCardProps {
   item: CollectionItem;
   onEdit: (item: CollectionItem) => void;
-}
-
-function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return 'today';
-  if (diffDays === 1) return 'yesterday';
-  if (diffDays < 30) return `${diffDays}d ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
-  return `${Math.floor(diffDays / 365)}y ago`;
 }
 
 export function CollectionItemCard({ item, onEdit }: CollectionItemCardProps) {
@@ -28,7 +17,7 @@ export function CollectionItemCard({ item, onEdit }: CollectionItemCardProps) {
       <div className="flex gap-4 p-4">
         <div className="w-20 h-20 rounded-md bg-muted flex-shrink-0 overflow-hidden">
           {item.thumbnail_url ? (
-            <img src={buildPhotoUrl(item.thumbnail_url)} alt="" className="w-full h-full object-contain" />
+            <img src={buildPhotoUrl(item.thumbnail_url)} alt="" className="w-full h-full object-contain" loading="lazy" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Package className="h-8 w-8 text-muted-foreground/40" />

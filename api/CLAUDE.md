@@ -78,6 +78,8 @@ cd api && npm run format:check # Prettier check (CI mode)
 - Auth data (`refresh_tokens`, `oauth_accounts`) is hard-deleted during scrub — no need for tombstone on auth tables
 - GDPR purge must also scrub `auth_events` PII (`ip_address`, `user_agent`, `metadata`) — IP addresses and user agents are personal data under GDPR
 - `oauth_accounts` and `refresh_tokens` use `ON DELETE RESTRICT` (fixed in migration 021 from legacy CASCADE)
+- `auth_events.user_id` uses `ON DELETE RESTRICT` (fixed in migration 030 from legacy SET NULL) — `user_id` is nullable (some events are pre-auth/system-generated), nullability is independent of the RESTRICT constraint
+- `deleteOrphanUser` only guards against `oauth_accounts` FK — RESTRICT on other tables causes the delete to fail if rows exist, but the caller's try/catch handles this gracefully
 - When adding a new table with a user FK, no special ON DELETE clause is needed (default RESTRICT is correct)
 
 ### User Roles & Authorization
@@ -215,6 +217,19 @@ Two distinct photo types:
 - `catalog/shared/schemas.ts` — shared schema fragments: `itemListItem`, `facetValueItem`, `slugNameRef`, `nullableSlugNameRef`, `cursorListResponse`. Import these instead of defining local copies.
 - `catalog/shared/formatters.ts` — shared `formatListItem()` and `formatDetail()` for item responses. Used by both `items/routes.ts` and `manufacturers/routes.ts`.
 - Do NOT reuse `nullableSlugNameRef` from `catalog/shared/schemas.ts` in new modules — it uses `oneOf` which `fast-json-stringify` does not support. Define nullable object schemas inline with `type: ['object', 'null']` instead
+
+### Adding a Field to Item List Responses
+
+Adding a column to item list API responses requires updating ALL of these (missing any one causes silent failures):
+1. `items/queries.ts` — `ItemListRow` interface + SELECT column + any needed JOINs
+2. `shared/schemas.ts` — `itemListItem.required` + `itemListItem.properties`
+3. `shared/formatters.ts` — `formatListItem()` return object
+4. `items/schemas.ts` — `itemDetail.required` + `itemDetail.properties` (detail schema is hand-written, NOT derived from `itemListItem`)
+5. `manufacturers/queries.ts` — same JOIN + SELECT if manufacturer-scoped items also need the field
+6. `search/queries.ts` + `search/schemas.ts` + `search/routes.ts` — if search results should include it (NULL for characters, real value for items)
+7. Web `zod-schemas.ts` — `CatalogItemSchema` (and `SearchResultBaseSchema` if applicable)
+8. All test files with inline mock `ItemListRow` / `CatalogItem` objects — search for `data_quality.*verified` to find them
+- CRITICAL: `items/schemas.ts` `itemDetail` is a SEPARATE hand-written schema that does NOT reference `itemListItem`. But web `CatalogItemDetailSchema` extends `CatalogItemSchema`. If you add the field to the list schema but not the detail schema, Fastify silently drops it and Zod parse fails on the web.
 
 ### Collection API (Phase 1.8+)
 
