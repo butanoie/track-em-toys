@@ -6,6 +6,7 @@
  */
 
 import { test, expect } from './fixtures/e2e-fixtures';
+import { mockEmptyCollection } from './fixtures/mock-helpers';
 
 // --- Fixtures ---
 
@@ -68,6 +69,7 @@ const mockItems = {
       characters: [{ slug: 'bulkhead', name: 'Bulkhead', appearance_slug: 'animated', is_primary: true }],
       manufacturer: { slug: 'hasbro', name: 'Hasbro' },
       toy_line: { slug: 'legacy', name: 'Legacy' },
+      thumbnail_url: null,
       size_class: 'Voyager',
       year_released: 2023,
       is_third_party: false,
@@ -81,6 +83,7 @@ const mockItems = {
       characters: [{ slug: 'optimus-prime', name: 'Optimus Prime', appearance_slug: 'g1-cartoon', is_primary: true }],
       manufacturer: { slug: 'takara-tomy', name: 'Takara Tomy' },
       toy_line: { slug: 'masterpiece', name: 'Masterpiece' },
+      thumbnail_url: null,
       size_class: 'Leader',
       year_released: 2019,
       is_third_party: false,
@@ -117,6 +120,8 @@ const mockItemDetail = {
 // --- Helpers ---
 
 async function setupCatalogMocks(page: import('@playwright/test').Page) {
+  await mockEmptyCollection(page);
+
   // Catch-all for unhandled catalog requests — prevents hitting the real API
   await page.route('**/catalog/**', (route) => {
     if (route.request().resourceType() === 'document') return route.continue();

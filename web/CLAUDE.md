@@ -128,6 +128,10 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Prefer `getByRole('cell', { name: /.../ })` over `getByText()` for table data — text appears in both cell content and row accessible names, causing ambiguity
 - When a page has multiple Radix `Select` components (e.g., filter + per-row role selector), `getByRole('combobox')` fails Playwright strict mode — disambiguate with `getByRole('combobox', { name: /aria-label pattern/ })`
 - `vite.config.ts` `preview` section does NOT inherit from `server` — host, port, and https must be set explicitly in both. Without this, preview defaults to `localhost` while dev uses the custom hostname, causing SameSite cookie mismatches in E2E tests.
+- `mockEmptyCollection(page)` in `e2e/fixtures/mock-helpers.ts` — shared helper that mocks empty collection endpoints (check, stats, list). Required in any E2E spec that renders item detail components (they call `useCollectionCheck`).
+- `MockCollectionState` in `e2e/fixtures/mock-helpers.ts` — stateful mock for collection E2E tests. Route handlers close over the instance, so mutations (`addItem`, `removeItem`) are reflected in subsequent GET responses without re-registering routes.
+- When adding a field to a Zod schema (e.g., `CatalogItemSchema`), also update mock data in E2E spec files — E2E mocks go through Zod parse in the browser and will fail if required fields are missing.
+- `ConditionSelector` renders `<button>` elements (not Radix `Select`) — E2E tests click `getByRole('button', { name: /Opened Complete/ })`. The filter condition on the collection page uses a Radix `Select` combobox (`getByRole('combobox', { name: /Filter by condition/ })`).
 
 ### Image Loading
 
