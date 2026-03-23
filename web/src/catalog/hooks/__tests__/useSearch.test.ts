@@ -34,6 +34,7 @@ const mockSearchResponse = {
       character: { slug: 'optimus-prime', name: 'Optimus Prime' },
       manufacturer: { slug: 'takara-tomy', name: 'Takara Tomy' },
       toy_line: { slug: 'masterpiece', name: 'Masterpiece' },
+      thumbnail_url: null,
       size_class: 'Leader',
       year_released: 2019,
       is_third_party: false,

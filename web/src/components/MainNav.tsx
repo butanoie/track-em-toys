@@ -3,6 +3,7 @@ import { Link, useRouterState } from '@tanstack/react-router';
 const NAV_ITEMS = [
   { to: '/' as const, label: 'Dashboard', exact: true },
   { to: '/catalog' as const, label: 'Catalog', exact: false },
+  { to: '/collection' as const, label: 'My Collection', exact: false },
 ] as const;
 
 export function MainNav() {
@@ -30,15 +31,6 @@ export function MainNav() {
               </li>
             );
           })}
-          <li>
-            <span
-              className="inline-flex items-center px-3 py-3 text-sm font-medium border-b-2 border-transparent text-muted-foreground/50 cursor-default"
-              aria-disabled="true"
-              title="Coming soon"
-            >
-              My Collection
-            </span>
-          </li>
         </ul>
       </div>
     </nav>

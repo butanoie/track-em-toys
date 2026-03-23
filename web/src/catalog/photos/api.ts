@@ -19,14 +19,7 @@ export class DuplicateUploadError extends Error {
   }
 }
 
-const PHOTO_BASE_URL = import.meta.env.VITE_PHOTO_BASE_URL ?? '';
-
-export function buildPhotoUrl(relativeUrl: string): string {
-  if (!PHOTO_BASE_URL) return relativeUrl;
-  const base = PHOTO_BASE_URL.replace(/\/+$/, '');
-  const path = relativeUrl.replace(/^\/+/, '');
-  return `${base}/${path}`;
-}
+export { buildPhotoUrl, PHOTO_BASE_URL } from '@/lib/photo-url';
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;

@@ -9,11 +9,7 @@ import sharp from 'sharp';
  * @param buffer - Raw image buffer (any format Sharp supports)
  */
 export async function computeDHash(buffer: Buffer): Promise<string> {
-  const raw = await sharp(buffer)
-    .greyscale()
-    .resize(9, 8, { fit: 'fill' })
-    .raw()
-    .toBuffer();
+  const raw = await sharp(buffer).greyscale().resize(9, 8, { fit: 'fill' }).raw().toBuffer();
 
   let bits = 0n;
   for (let row = 0; row < 8; row++) {

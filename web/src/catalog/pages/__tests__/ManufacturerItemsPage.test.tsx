@@ -57,6 +57,23 @@ vi.mock('@/catalog/hooks/useItemDetail', () => ({
   useItemDetail: (...args: unknown[]) => mockUseItemDetail(...args),
 }));
 
+vi.mock('@/collection/hooks/useCollectionCheck', () => ({
+  useCollectionCheck: () => ({ data: undefined }),
+}));
+
+vi.mock('@/collection/hooks/useCollectionMutations', () => ({
+  useCollectionMutations: () => ({
+    add: { mutate: vi.fn(), isPending: false },
+    patch: { mutate: vi.fn(), isPending: false },
+    remove: { mutate: vi.fn(), isPending: false },
+    restore: { mutate: vi.fn(), isPending: false },
+  }),
+}));
+
+vi.mock('@/collection/components/AddToCollectionButton', () => ({
+  AddToCollectionButton: () => null,
+}));
+
 function setupDefaults() {
   mockUseManufacturerDetail.mockReturnValue({ data: mockManufacturerDetail, error: null });
   mockUseManufacturerItems.mockReturnValue({

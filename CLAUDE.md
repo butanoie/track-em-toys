@@ -109,6 +109,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 
 - `MainNav` (Dashboard | Catalog | My Collection) renders on all non-admin authenticated pages
 - Admin pages use their own sidebar layout — do NOT render MainNav on admin routes
+- Collection URLs: `/collection` (collection browse with franchise/condition/search filters in search params)
 - Catalog URLs: `/catalog` (franchise list), `/catalog/:franchise` (hub, `?view=characters` toggles to characters view), `/catalog/:franchise/items` (items browse with filters in search params), `/catalog/:franchise/items/:slug` (item detail), `/catalog/:franchise/characters` (characters browse with filters in search params), `/catalog/:franchise/characters/:slug` (character detail)
 - Manufacturer URLs: `/catalog/manufacturers` (manufacturer list), `/catalog/manufacturers/:slug` (hub), `/catalog/manufacturers/:slug/items` (items browse with filters in search params)
 

@@ -45,10 +45,16 @@ describe('MainNav', () => {
     expect(screen.getByText('Dashboard').closest('a')).not.toHaveAttribute('aria-current');
   });
 
-  it('renders "My Collection" as disabled (not a link)', () => {
+  it('renders "My Collection" as a link to /collection', () => {
     render(<MainNav />);
     const myCollection = screen.getByText('My Collection');
-    expect(myCollection).toHaveAttribute('aria-disabled', 'true');
-    expect(myCollection.closest('a')).toBeNull();
+    expect(myCollection.closest('a')).toHaveAttribute('href', '/collection');
+    expect(myCollection).not.toHaveAttribute('aria-disabled');
+  });
+
+  it('marks My Collection aria-current="page" when pathname starts with "/collection"', () => {
+    mockPathname = '/collection';
+    render(<MainNav />);
+    expect(screen.getByText('My Collection').closest('a')).toHaveAttribute('aria-current', 'page');
   });
 });

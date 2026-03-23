@@ -16,6 +16,7 @@ export interface SearchResultRow {
   manufacturer_name: string | null;
   toy_line_slug: string | null;
   toy_line_name: string | null;
+  thumbnail_url: string | null;
   size_class: string | null;
   year_released: number | null;
   is_third_party: boolean | null;
@@ -78,6 +79,7 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
            character_slug, character_name,
            manufacturer_slug, manufacturer_name,
            toy_line_slug, toy_line_name,
+           thumbnail_url,
            size_class, year_released, is_third_party, data_quality
       FROM (
       SELECT 'character'::text AS entity_type,
@@ -88,6 +90,7 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
              NULL::text AS character_slug, NULL::text AS character_name,
              NULL::text AS manufacturer_slug, NULL::text AS manufacturer_name,
              NULL::text AS toy_line_slug, NULL::text AS toy_line_name,
+             NULL::text AS thumbnail_url,
              NULL::text AS size_class, NULL::integer AS year_released,
              NULL::boolean AS is_third_party, NULL::text AS data_quality
         FROM characters c
@@ -107,6 +110,7 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
              ch.slug AS character_slug, ch.name AS character_name,
              mfr.slug AS manufacturer_slug, mfr.name AS manufacturer_name,
              tl.slug AS toy_line_slug, tl.name AS toy_line_name,
+             ip.url AS thumbnail_url,
              i.size_class, i.year_released, i.is_third_party, i.data_quality
         FROM items i
         JOIN franchises fr ON fr.id = i.franchise_id
@@ -115,6 +119,10 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
         LEFT JOIN characters ch ON ch.id = ca.character_id
         LEFT JOIN manufacturers mfr ON mfr.id = i.manufacturer_id
         JOIN toy_lines tl ON tl.id = i.toy_line_id
+        LEFT JOIN item_photos ip
+            ON ip.item_id = i.id
+           AND ip.is_primary = true
+           AND ip.status = 'approved'
        WHERE (i.search_vector @@ to_tsquery('simple', $1)
               OR ch.search_vector @@ to_tsquery('simple', $1))
          AND ($2::text IS NULL OR fr.slug = $2)

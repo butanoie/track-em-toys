@@ -33,6 +33,23 @@ vi.mock('@/catalog/components/CharacterRelationships', () => ({
   CharacterRelationships: () => null,
 }));
 
+vi.mock('@/collection/hooks/useCollectionCheck', () => ({
+  useCollectionCheck: () => ({ data: undefined }),
+}));
+
+vi.mock('@/collection/hooks/useCollectionMutations', () => ({
+  useCollectionMutations: () => ({
+    add: { mutate: vi.fn(), isPending: false },
+    patch: { mutate: vi.fn(), isPending: false },
+    remove: { mutate: vi.fn(), isPending: false },
+    restore: { mutate: vi.fn(), isPending: false },
+  }),
+}));
+
+vi.mock('@/collection/components/AddToCollectionButton', () => ({
+  AddToCollectionButton: () => <button data-testid="add-to-collection">Add to Collection</button>,
+}));
+
 vi.mock('@/routes/_authenticated/catalog/$franchise/items/$slug', () => ({
   Route: { useParams: () => ({ franchise: 'transformers', slug: 'optimus-prime' }) },
 }));

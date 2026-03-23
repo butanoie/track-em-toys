@@ -144,6 +144,20 @@ cd web && npm run format:check # Prettier check (CI mode)
 - PhotoGrid cards are draggable by the entire tile (not a small grip handle) — `attributes` and `listeners` are on the outer `div`, with `pointer-events-none` on the `<img>` to prevent browser default image drag. The `PointerSensor` `distance: 5` constraint lets clicks on star/delete buttons resolve without triggering a drag.
 - `DuplicateUploadError` in `catalog/photos/api.ts` — thrown when XHR gets 409 from photo upload (perceptual duplicate detected). Caught in `usePhotoUpload.ts` for a specific toast message distinct from generic upload errors.
 
+### Collection Module (Phase 1.8+)
+
+- Collection domain lives in `src/collection/` — parallel to `catalog/`, `admin/`, `auth/`
+- `collection/api.ts` — 7 API functions consuming `/collection` endpoints
+- Query keys: `['collection', 'items', filters]`, `['collection', 'stats']`, `['collection', 'check', itemIds]` — all mutations invalidate the `['collection']` prefix
+- `useCollectionCheck(itemIds)` is lazy (`enabled: itemIds.length > 0`) — callers MUST memoize `itemIds` with `useMemo` to prevent infinite refetch loops
+- `ConditionSelector` and `NotesField` are shared components in `collection/components/` — used by both `AddToCollectionDialog` and `EditCollectionItemDialog`
+- `ConditionBadge` uses collector short codes (MISB, OC, LC, DMG, etc.) from `collection/lib/condition-config.ts`
+- Amber accent (`amber-600`/`amber-400`) differentiates collection UI from catalog's blue/purple
+- Soft-delete uses undo toast (Sonner action button, 8s duration), NOT confirmation dialog
+- `buildPhotoUrl` lives in `lib/photo-url.ts` but the documented import path is `@/catalog/photos/api` (re-export) — use the re-export for convention consistency
+- Adding `useCollectionCheck` or `useCollectionMutations` to a component requires adding mocks to every test file that renders that component — search for `vi.mock.*useCollectionCheck` to find existing mock patterns
+- Route tree regeneration: `npx tsr generate` does not work standalone — use `npm run build` or `npm run dev` to trigger the TanStack Router Vite plugin
+
 ### Catalog Browsing (Phase 1.7+)
 
 - Catalog pages live in `src/catalog/` with `api.ts`, `hooks/`, `components/`, `pages/` sub-directories

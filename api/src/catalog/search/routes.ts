@@ -27,6 +27,7 @@ function formatResult(row: SearchResultRow) {
     character: row.character_slug ? { slug: row.character_slug, name: row.character_name! } : null,
     manufacturer: row.manufacturer_slug ? { slug: row.manufacturer_slug, name: row.manufacturer_name! } : null,
     toy_line: row.toy_line_slug ? { slug: row.toy_line_slug, name: row.toy_line_name! } : null,
+    thumbnail_url: row.thumbnail_url,
     size_class: row.size_class,
     year_released: row.year_released,
     is_third_party: row.is_third_party,

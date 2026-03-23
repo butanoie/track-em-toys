@@ -14,6 +14,7 @@ export function formatListItem(row: ItemListRow) {
     characters: row.characters,
     manufacturer: row.manufacturer_slug ? { slug: row.manufacturer_slug, name: row.manufacturer_name! } : null,
     toy_line: { slug: row.toy_line_slug, name: row.toy_line_name },
+    thumbnail_url: row.thumbnail_url,
     size_class: row.size_class,
     year_released: row.year_released,
     is_third_party: row.is_third_party,

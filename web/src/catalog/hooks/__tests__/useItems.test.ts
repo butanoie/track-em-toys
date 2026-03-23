@@ -34,6 +34,7 @@ const mockItemList = {
       ],
       manufacturer: { slug: 'hasbro', name: 'Hasbro' },
       toy_line: { slug: 'legacy', name: 'Legacy' },
+      thumbnail_url: null,
       size_class: 'Voyager',
       year_released: 2023,
       is_third_party: false,

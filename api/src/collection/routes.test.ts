@@ -127,9 +127,7 @@ function makeCollectionRow(overrides: Partial<CollectionListRow> = {}): Collecti
 const fakeClient = {} satisfies Pick<PoolClient, never>;
 
 function mockTx() {
-  vi.mocked(pool.withTransaction).mockImplementation(
-    async (fn, _userId) => fn(fakeClient as PoolClient)
-  );
+  vi.mocked(pool.withTransaction).mockImplementation(async (fn, _userId) => fn(fakeClient as PoolClient));
 }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
@@ -261,9 +259,7 @@ describe('collection routes', () => {
       mockTx();
       vi.mocked(queries.itemExists).mockResolvedValue(true);
       vi.mocked(queries.insertCollectionItem).mockResolvedValue(COLLECTION_UUID);
-      vi.mocked(queries.getCollectionItemById).mockResolvedValue(
-        makeCollectionRow({ condition: 'unknown' })
-      );
+      vi.mocked(queries.getCollectionItemById).mockResolvedValue(makeCollectionRow({ condition: 'unknown' }));
 
       const res = await server.inject({
         method: 'POST',
@@ -394,7 +390,10 @@ describe('collection routes', () => {
         total_copies: 5,
         unique_items: 3,
         by_franchise: [{ slug: 'transformers', name: 'Transformers', count: 5 }],
-        by_condition: [{ condition: 'mint_sealed', count: 3 }, { condition: 'unknown', count: 2 }],
+        by_condition: [
+          { condition: 'mint_sealed', count: 3 },
+          { condition: 'unknown', count: 2 },
+        ],
       });
 
       const res = await server.inject({
@@ -466,9 +465,9 @@ describe('collection routes', () => {
     });
 
     it('should return 400 for more than 50 item IDs', async () => {
-      const ids = Array.from({ length: 51 }, (_, i) =>
-        `00000000-0000-0000-0000-${String(i).padStart(12, '0')}`
-      ).join(',');
+      const ids = Array.from({ length: 51 }, (_, i) => `00000000-0000-0000-0000-${String(i).padStart(12, '0')}`).join(
+        ','
+      );
 
       const res = await server.inject({
         method: 'GET',
@@ -510,10 +509,7 @@ describe('collection routes', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(vi.mocked(queries.checkCollectionItems)).toHaveBeenCalledWith(
-        fakeClient,
-        [ITEM_UUID]
-      );
+      expect(vi.mocked(queries.checkCollectionItems)).toHaveBeenCalledWith(fakeClient, [ITEM_UUID]);
     });
 
     it('should return 401 without auth', async () => {
@@ -614,9 +610,7 @@ describe('collection routes', () => {
       mockTx();
       vi.mocked(queries.lockCollectionItem).mockResolvedValue({ id: COLLECTION_UUID, deleted_at: null });
       vi.mocked(queries.updateCollectionItem).mockResolvedValue(true);
-      vi.mocked(queries.getCollectionItemById).mockResolvedValue(
-        makeCollectionRow({ condition: 'damaged' })
-      );
+      vi.mocked(queries.getCollectionItemById).mockResolvedValue(makeCollectionRow({ condition: 'damaged' }));
 
       const res = await server.inject({
         method: 'PATCH',
@@ -633,9 +627,7 @@ describe('collection routes', () => {
       mockTx();
       vi.mocked(queries.lockCollectionItem).mockResolvedValue({ id: COLLECTION_UUID, deleted_at: null });
       vi.mocked(queries.updateCollectionItem).mockResolvedValue(true);
-      vi.mocked(queries.getCollectionItemById).mockResolvedValue(
-        makeCollectionRow({ notes: 'Updated notes' })
-      );
+      vi.mocked(queries.getCollectionItemById).mockResolvedValue(makeCollectionRow({ notes: 'Updated notes' }));
 
       const res = await server.inject({
         method: 'PATCH',
@@ -652,9 +644,7 @@ describe('collection routes', () => {
       mockTx();
       vi.mocked(queries.lockCollectionItem).mockResolvedValue({ id: COLLECTION_UUID, deleted_at: null });
       vi.mocked(queries.updateCollectionItem).mockResolvedValue(true);
-      vi.mocked(queries.getCollectionItemById).mockResolvedValue(
-        makeCollectionRow({ notes: null })
-      );
+      vi.mocked(queries.getCollectionItemById).mockResolvedValue(makeCollectionRow({ notes: null }));
 
       const res = await server.inject({
         method: 'PATCH',
@@ -819,9 +809,7 @@ describe('collection routes', () => {
     it('should return 200 idempotently for already-active item', async () => {
       mockTx();
       vi.mocked(queries.restoreCollectionItem).mockResolvedValue(true);
-      vi.mocked(queries.getCollectionItemById).mockResolvedValue(
-        makeCollectionRow({ deleted_at: null })
-      );
+      vi.mocked(queries.getCollectionItemById).mockResolvedValue(makeCollectionRow({ deleted_at: null }));
 
       const res = await server.inject({
         method: 'POST',
