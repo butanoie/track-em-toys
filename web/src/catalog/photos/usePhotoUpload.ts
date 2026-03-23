@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { uploadPhoto, validateFile } from './api';
+import { uploadPhoto, validateFile, DuplicateUploadError } from './api';
 import { toast } from 'sonner';
 
 export type UploadItemStatus = 'queued' | 'uploading' | 'done' | 'error';
@@ -114,9 +114,18 @@ export function usePhotoUpload({ franchise, itemSlug, onUploadComplete }: UsePho
       })
       .catch((err: unknown) => {
         processingRef.current = false;
+        filesMapRef.current.delete(nextQueued.id);
+
+        if (err instanceof DuplicateUploadError) {
+          dispatch({ type: 'ERROR', id: nextQueued.id, message: err.message });
+          toast.error(`${nextQueued.fileName} is a duplicate`, {
+            description: 'This image matches an existing photo for this item.',
+          });
+          return;
+        }
+
         const message = err instanceof Error ? err.message : 'Upload failed';
         dispatch({ type: 'ERROR', id: nextQueued.id, message });
-        filesMapRef.current.delete(nextQueued.id);
         toast.error(`Failed to upload ${nextQueued.fileName}`);
       });
   }, [items, franchise, itemSlug, onUploadComplete]);

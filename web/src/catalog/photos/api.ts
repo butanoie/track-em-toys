@@ -4,8 +4,20 @@ import {
   UploadPhotosResponseSchema,
   SetPrimaryResponseSchema,
   ReorderPhotosResponseSchema,
+  DuplicatePhotoResponseSchema,
   type PhotoWriteItem,
 } from '@/lib/zod-schemas';
+
+/** Thrown when the API rejects an upload as a perceptual duplicate (409). */
+export class DuplicateUploadError extends Error {
+  constructor(
+    public readonly matchedId: string,
+    public readonly matchedUrl: string
+  ) {
+    super('A duplicate image has already been uploaded for this item');
+    this.name = 'DuplicateUploadError';
+  }
+}
 
 const PHOTO_BASE_URL = import.meta.env.VITE_PHOTO_BASE_URL ?? '';
 
@@ -94,6 +106,19 @@ function doUpload(
             reject(e instanceof Error ? e : new Error('Auth refresh error'));
           });
         return;
+      }
+
+      if (xhr.status === 409) {
+        try {
+          const raw: unknown = JSON.parse(xhr.responseText);
+          const parsed = DuplicatePhotoResponseSchema.safeParse(raw);
+          if (parsed.success) {
+            reject(new DuplicateUploadError(parsed.data.matched.id, parsed.data.matched.url));
+            return;
+          }
+        } catch {
+          // fall through to generic error
+        }
       }
 
       reject(new Error(extractErrorMessage(xhr.responseText, xhr.status)));

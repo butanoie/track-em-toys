@@ -122,6 +122,16 @@ Two distinct photo types:
 - `PHOTO_STORAGE_PATH` startup validation skips in test environment (`config.nodeEnv !== 'test'`)
 - Adding a new required config property (e.g., `config.photos`) breaks ALL test files that mock `config.js` — add the property to every mock config across the test suite
 - `QueryOnlyClient` type exported from `db/pool.ts` — use `satisfies pool.QueryOnlyClient` in test mocks instead of `as unknown as PoolClient`
+- Photo upload route tests use positional `mockResolvedValueOnce` — adding a new DB query to the handler requires updating the mock sequence in ALL existing upload tests (e.g., `getPhotoHashesByItem` was added before `getMaxSortOrder`)
+
+### Photo Deduplication (dHash)
+
+- `item_photos.dhash` stores a 16-char hex perceptual hash (64-bit dHash) — internal column, excluded from `PHOTO_COLUMNS` and never returned to clients
+- `dhash.ts` exports `computeDHash(buffer)` and `hammingDistance(a, b)` — pure functions using Sharp, no project dependencies
+- Upload handler computes dHash on the raw buffer BEFORE `processUpload()` — duplicates are rejected before expensive Sharp processing
+- Duplicate check: Hamming distance ≤ 10 within the same item. Returns 409 `{ error, matched: { id, url } }`
+- Hashes are fetched once per request (`getPhotoHashesByItem`), plus batch tracking catches within-request duplicates
+- `DEFAULT ''` on the column — `getPhotoHashesByItem` filters `dhash != ''` to skip un-hashed legacy rows
 
 ### ML Export (Phase 1.9 Slice 3)
 

@@ -7,15 +7,28 @@ vi.mock('sonner', () => ({
 }));
 
 const mockUploadPhoto = vi.fn();
-vi.mock('../api', () => ({
-  uploadPhoto: (...args: unknown[]) => mockUploadPhoto(...args),
-  validateFile: (file: File) => {
-    if (file.type === 'image/tiff') return `${file.name} is not a supported image format`;
-    if (file.size > 10 * 1024 * 1024) return `${file.name} exceeds the 10 MB limit`;
-    return null;
-  },
-  buildPhotoUrl: (url: string) => url,
-}));
+vi.mock('../api', () => {
+  class DuplicateUploadError extends Error {
+    constructor(
+      public readonly matchedId: string,
+      public readonly matchedUrl: string
+    ) {
+      super('A duplicate image has already been uploaded for this item');
+      this.name = 'DuplicateUploadError';
+    }
+  }
+
+  return {
+    uploadPhoto: (...args: unknown[]) => mockUploadPhoto(...args),
+    validateFile: (file: File) => {
+      if (file.type === 'image/tiff') return `${file.name} is not a supported image format`;
+      if (file.size > 10 * 1024 * 1024) return `${file.name} exceeds the 10 MB limit`;
+      return null;
+    },
+    buildPhotoUrl: (url: string) => url,
+    DuplicateUploadError,
+  };
+});
 
 function makeFile(name: string, type = 'image/jpeg', size = 1024): File {
   const blob = new Blob(['x'.repeat(size)], { type });
@@ -81,6 +94,28 @@ describe('usePhotoUpload', () => {
       expect.any(File),
       expect.any(Function)
     );
+  });
+
+  it('handles duplicate upload error with specific toast message', async () => {
+    const { toast } = await import('sonner');
+    const { DuplicateUploadError } = await import('../api');
+    mockUploadPhoto.mockRejectedValueOnce(
+      new DuplicateUploadError('existing-id', 'item-1/existing-id-original.webp')
+    );
+
+    const { result } = renderHook(() => usePhotoUpload(defaultOpts));
+
+    act(() => {
+      result.current.uploadFiles([makeFile('duplicate.jpg')]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.items.find((i) => i.fileName === 'duplicate.jpg')?.status).toBe('error');
+    });
+
+    expect(toast.error).toHaveBeenCalledWith('duplicate.jpg is a duplicate', {
+      description: 'This image matches an existing photo for this item.',
+    });
   });
 
   it('handles upload error and continues processing next file', async () => {
