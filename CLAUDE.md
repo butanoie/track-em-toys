@@ -56,9 +56,11 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 
 ## Data Architecture
 
-- PostgreSQL: Shared catalog (no user_id) + private collections (user_id + RLS, deferred to post-ML)
+- PostgreSQL: Shared catalog (no user_id) + private collections (user_id + RLS)
 - SwiftData: Local-first with CloudKit sync, single-user architecture
 - RLS uses (SELECT current_app_user_id()) subselect wrapper for initPlan caching
+- `collection_items` is the first RLS-protected table — uses `FORCE ROW LEVEL SECURITY` + partial indexes on `WHERE deleted_at IS NULL`
+- User-private tables must use `FORCE ROW LEVEL SECURITY` (without it, the DB owner bypasses all policies)
 - JWT: ES256 asymmetric signing, JWKS discovery, SHA-256 refresh token hashing
 - RLS policies: always use the (SELECT ...) wrapper, never bare function calls
 - Catalog tables use UUID primary keys with a `slug` column for stable cross-references and URL-friendly API routes

@@ -204,6 +204,19 @@ Two distinct photo types:
 
 - `catalog/shared/schemas.ts` — shared schema fragments: `itemListItem`, `facetValueItem`, `slugNameRef`, `nullableSlugNameRef`, `cursorListResponse`. Import these instead of defining local copies.
 - `catalog/shared/formatters.ts` — shared `formatListItem()` and `formatDetail()` for item responses. Used by both `items/routes.ts` and `manufacturers/routes.ts`.
+- Do NOT reuse `nullableSlugNameRef` from `catalog/shared/schemas.ts` in new modules — it uses `oneOf` which `fast-json-stringify` does not support. Define nullable object schemas inline with `type: ['object', 'null']` instead
+
+### Collection API (Phase 1.8+)
+
+- Collection routes live in `src/collection/` — top-level module parallel to `catalog/`, `admin/`, `auth/`
+- **All collection queries use `withTransaction(fn, request.user.sub)`** — reads AND writes. Unlike catalog reads (`pool.query()` directly), collection data is RLS-protected and needs the `app.user_id` session variable set on every query
+- Collection query functions receive `client: PoolClient` (from withTransaction callback), never import `pool` directly
+- `FORCE ROW LEVEL SECURITY` on `collection_items` — ensures even the table owner (migration runner) is subject to RLS policies
+- Soft delete via `deleted_at` column — all list/stats/check queries filter `WHERE deleted_at IS NULL`
+- PATCH/DELETE use `SELECT ... FOR UPDATE` to serialize concurrent mutations and prevent TOCTOU races with soft-delete
+- PATCH partial updates: use `Object.hasOwn(body, 'field')` to distinguish absent key from `null` value (Fastify strips absent keys from validated body)
+- Stats query uses a single CTE for snapshot consistency — do NOT use `Promise.all` with multiple queries on a single `PoolClient` (pg does not support concurrent queries on one connection)
+- `buildCursorPage` requires rows with `{ name: string; id: string }` — queries must alias columns to match (e.g., `i.name AS name, ci.id AS id`)
 
 ## Before Writing New Code
 
