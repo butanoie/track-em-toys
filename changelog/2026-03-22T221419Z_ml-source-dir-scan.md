@@ -91,17 +91,17 @@ TypeScript: zero errors (`npm run typecheck` clean).
 
 ## Related Files
 
-| File | Change |
-|---|---|
-| `ml/src/scan.ts` | Created |
-| `ml/src/scan.test.ts` | Created |
-| `ml/src/prepare-training-data.ts` | Modified |
-| `ml/src/types.ts` | Modified |
-| `ml/CLAUDE.md` | Modified |
-| `ml/README.md` | Modified |
+| File                                                 | Change   |
+| ---------------------------------------------------- | -------- |
+| `ml/src/scan.ts`                                     | Created  |
+| `ml/src/scan.test.ts`                                | Created  |
+| `ml/src/prepare-training-data.ts`                    | Modified |
+| `ml/src/types.ts`                                    | Modified |
+| `ml/CLAUDE.md`                                       | Modified |
+| `ml/README.md`                                       | Modified |
 | `docs/decisions/ADR_ML_Training_Data_Preparation.md` | Modified |
-| `docs/plans/Development_Roadmap_v1_0.md` | Modified |
-| `docs/test-scenarios/UNIT_ML_TRAINING_DATA.md` | Modified |
+| `docs/plans/Development_Roadmap_v1_0.md`             | Modified |
+| `docs/test-scenarios/UNIT_ML_TRAINING_DATA.md`       | Modified |
 
 ---
 

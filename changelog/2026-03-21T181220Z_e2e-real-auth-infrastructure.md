@@ -19,10 +19,12 @@ Replaced mocked E2E authentication with real JWT-based auth across all Playwrigh
 Added `POST /auth/test-signin` — a Fastify plugin gated behind `NODE_ENV !== 'production'` that accepts `{ email, role }` with `@e2e.test` TLD constraint. Upserts a user and returns real JWT access token + signed httpOnly refresh token cookie, reusing existing auth infrastructure (`withTransaction`, `createAndStoreRefreshToken`, `setRefreshTokenCookie`, `reply.jwtSign`).
 
 **Created:**
+
 - `api/src/auth/test-signin.ts` — endpoint plugin with schema validation, production guard, and rate limiting
 - `api/src/auth/test-signin.test.ts` — 11 integration tests (happy path, role variants, validation, production guard, idempotency)
 
 **Modified:**
+
 - `api/src/server.ts` — conditional registration via dynamic `import()` inside `nodeEnv !== 'production'` block
 
 ### 2. Cookie & CORS Configuration
@@ -32,6 +34,7 @@ Added `POST /auth/test-signin` — a Fastify plugin gated behind `NODE_ENV !== '
 - `/auth/refresh` rate limit bumped from `max: 5` to `max: 60` to accommodate E2E test volume (each test triggers a refresh)
 
 **Modified:**
+
 - `api/src/auth/cookies.ts` — `COOKIE_SAME_SITE` constant derived from `config.nodeEnv`
 - `api/src/auth/cookies.test.ts` — updated `sameSite` assertions
 - `api/src/auth/routes.ts` — bumped refresh rate limit to 60/min
@@ -43,12 +46,14 @@ Added `POST /auth/test-signin` — a Fastify plugin gated behind `NODE_ENV !== '
 Per-test auth via `freshTestSignin()` (Node.js `fetch()`) + `context.addCookies()` + `addInitScript` for localStorage/sessionStorage. `globalSetup` seeds test users in DB and writes user JSON files. No `storageState` files needed for auth.
 
 **Created:**
+
 - `web/e2e/global-setup.ts` — health check polling, per-role user seeding via test-signin, user JSON file writing
 - `web/e2e/fixtures/e2e-fixtures.ts` — custom Playwright `test` fixture with per-test cookie injection + sessionStorage seeding + `createAuthenticatedContext()` helper for cross-role tests
 - `web/e2e/fixtures/test-users.ts` — `TEST_USERS` constants, `readTestUser()`, `TestUserResponse` type
 - `web/e2e/.auth/.gitkeep` — directory for user JSON files (gitignored)
 
 **Modified:**
+
 - `web/playwright.config.ts` — 4 projects, `globalSetup`, dual `webServer` array, `baseURL` derived from API hostname
 - `web/vite.config.ts` — added `preview` section (host, port, https) matching `server` config
 - `.gitignore` — exclude `web/e2e/.auth/*.json`
@@ -58,6 +63,7 @@ Per-test auth via `freshTestSignin()` (Node.js `fetch()`) + `context.addCookies(
 Migrated all spec files from mocked auth to real auth. Fixed stale mock fixtures where schemas had evolved (`character` → `characters` array, added `sort_order` to photos, removed `combiner_role`/`combined_form`/`component_characters`, added `continuity_family` to search results). Changed `route.continue()` to `route.fallback()` in catch-all handlers to prevent forwarding to the real API. Added `**/relationships` and `**/catalog/**` catch-all mocks for sub-resource requests.
 
 **Modified:**
+
 - `web/e2e/authenticated-session.spec.ts` — real auth via `e2e-fixtures`
 - `web/e2e/protected-routes.spec.ts` — `createAuthenticatedContext` for authenticated test
 - `web/e2e/admin-users.spec.ts` — real admin auth, `createAuthenticatedContext` for cross-role tests
@@ -70,6 +76,7 @@ Migrated all spec files from mocked auth to real auth. Fixed stale mock fixtures
 Added `no-unsafe-assignment` and `no-unsafe-member-access` to the API test file override. Removed 9 now-unnecessary `eslint-disable` comments from existing test files.
 
 **Modified:**
+
 - `api/eslint.config.js`
 - `api/src/auth/webhooks.test.ts` — removed stale eslint-disable directives
 
@@ -106,11 +113,11 @@ Per test (via e2e-fixtures.ts context fixture)
 
 ## Validation & Testing
 
-| Module | Tests | Lint | Typecheck | Format | Build |
-|--------|-------|------|-----------|--------|-------|
-| API    | ✅ 658 passed | ✅ 0 errors | ✅ | ✅ | ✅ |
-| Web    | ✅ 592 passed | ✅ 0 errors | ✅ | ✅ | ✅ |
-| E2E    | ✅ 46 passed, 1 skipped | — | — | — | — |
+| Module | Tests                   | Lint        | Typecheck | Format | Build |
+| ------ | ----------------------- | ----------- | --------- | ------ | ----- |
+| API    | ✅ 658 passed           | ✅ 0 errors | ✅        | ✅     | ✅    |
+| Web    | ✅ 592 passed           | ✅ 0 errors | ✅        | ✅     | ✅    |
+| E2E    | ✅ 46 passed, 1 skipped | —           | —         | —      | —     |
 
 ---
 

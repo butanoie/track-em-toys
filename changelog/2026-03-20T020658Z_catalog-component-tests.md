@@ -74,11 +74,11 @@ Full mock stack: hooks, Route file, TanStack Router, AppHeader/MainNav stubs.
 
 ### 3-Tier Mocking Strategy
 
-| Tier | Provider Needed | Mock Scope |
-|------|----------------|------------|
-| Pure presentational | None | Link mock only (or none) |
-| Content/Panel | QueryClient for panels | Hook mocks + Link mock |
-| Pages | QueryClient wrapper | All hooks + Route mock + navigate + AppHeader/MainNav stubs |
+| Tier                | Provider Needed        | Mock Scope                                                  |
+| ------------------- | ---------------------- | ----------------------------------------------------------- |
+| Pure presentational | None                   | Link mock only (or none)                                    |
+| Content/Panel       | QueryClient for panels | Hook mocks + Link mock                                      |
+| Pages               | QueryClient wrapper    | All hooks + Route mock + navigate + AppHeader/MainNav stubs |
 
 ### Key Architecture Finding
 
@@ -105,12 +105,12 @@ Build:      success
 
 ## Summary Statistics
 
-| Metric | Before | After |
-|--------|--------|-------|
-| Test files | 38 | 62 |
-| Total tests | 215 | 466 |
-| New tests added | — | 251 |
-| New files created | — | 25 |
+| Metric            | Before | After |
+| ----------------- | ------ | ----- |
+| Test files        | 38     | 62    |
+| Total tests       | 215    | 466   |
+| New tests added   | —      | 251   |
+| New files created | —      | 25    |
 
 ---
 

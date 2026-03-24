@@ -17,6 +17,7 @@ Added curator/admin-facing photo management UI to catalog item detail views. The
 ### 1. Photo Management Sheet
 
 Full-featured slide-out panel for curators to manage item photos:
+
 - Drag-and-drop upload zone with "or select files" link
 - Per-photo progress bars via XHR `upload.onprogress` (sequential processing)
 - Client-side MIME type and file size validation (JPEG, PNG, WebP, GIF; max 10MB)
@@ -111,29 +112,30 @@ Tests       519 passed (519) — 25 new tests across 7 new test files
 
 ### New Test Files
 
-| File | Tests | Coverage |
-|------|-------|----------|
-| `api.test.ts` | 8 | `buildPhotoUrl`, `validateFile` (MIME + size) |
-| `DropZone.test.tsx` | 7 | Render, file drop, file select, disabled state, a11y |
-| `UploadQueue.test.tsx` | 8 | All 4 status states, multiple items, a11y |
-| `PhotoGrid.test.tsx` | 12 | Primary badge, set-primary, delete, drag handles, help text |
-| `usePhotoMutations.test.ts` | 4 | All 3 mutations call correct API functions |
-| `usePhotoUpload.test.ts` | 5 | Enqueue, validation, success flow, error recovery |
-| `PhotoManagementSheet.test.tsx` | 9 | Sheet render, drop zone, photo grid, delete confirm |
+| File                            | Tests | Coverage                                                    |
+| ------------------------------- | ----- | ----------------------------------------------------------- |
+| `api.test.ts`                   | 8     | `buildPhotoUrl`, `validateFile` (MIME + size)               |
+| `DropZone.test.tsx`             | 7     | Render, file drop, file select, disabled state, a11y        |
+| `UploadQueue.test.tsx`          | 8     | All 4 status states, multiple items, a11y                   |
+| `PhotoGrid.test.tsx`            | 12    | Primary badge, set-primary, delete, drag handles, help text |
+| `usePhotoMutations.test.ts`     | 4     | All 3 mutations call correct API functions                  |
+| `usePhotoUpload.test.ts`        | 5     | Enqueue, validation, success flow, error recovery           |
+| `PhotoManagementSheet.test.tsx` | 9     | Sheet render, drop zone, photo grid, delete confirm         |
 
 ### Quality Checks
 
-| Check | Result |
-|-------|--------|
-| Web Tests | ✅ 519 passed |
-| Web Lint | ✅ 0 errors |
-| Web Typecheck | ✅ 0 errors |
-| Web Format | ✅ All files formatted |
-| Web Build | ✅ Built in 1.3s |
+| Check         | Result                 |
+| ------------- | ---------------------- |
+| Web Tests     | ✅ 519 passed          |
+| Web Lint      | ✅ 0 errors            |
+| Web Typecheck | ✅ 0 errors            |
+| Web Format    | ✅ All files formatted |
+| Web Build     | ✅ Built in 1.3s       |
 
 ### Bugs Caught in Code Review
 
 5 bugs identified and fixed during quality review:
+
 1. `onUploadComplete` was a no-op — uploads would never refresh the photo grid
 2. `processingRef` race condition — upload queue stalled after any error
 3. `attemptRefresh()` rejection unhandled — upload promise could hang forever

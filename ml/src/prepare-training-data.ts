@@ -96,8 +96,8 @@ function loadCliOptions(): CliOptions {
   }
 
   const source = manifestPath
-    ? ({ mode: 'manifest' as const, manifestPath: resolve(manifestPath) })
-    : ({ mode: 'source-dir' as const, sourceDir: resolve(sourceDir!) });
+    ? { mode: 'manifest' as const, manifestPath: resolve(manifestPath) }
+    : { mode: 'source-dir' as const, sourceDir: resolve(sourceDir!) };
 
   return {
     source,

@@ -31,7 +31,7 @@ Established `ml/` as a standalone Node.js/TypeScript project with its own `packa
 **Created:**
 
 - `ml/src/types.ts` — Shared interfaces (Manifest, CliOptions, ClassBalance, BalanceReport, AugmentedImage, CopyResult, ValidationResult)
-- `ml/src/manifest.ts` — `readManifest()`, `groupEntriesByLabel()`, `flattenLabel()` (franchise/item → franchise__item)
+- `ml/src/manifest.ts` — `readManifest()`, `groupEntriesByLabel()`, `flattenLabel()` (franchise/item → franchise\_\_item)
 - `ml/src/balance.ts` — `analyzeBalance()`, `printBalanceReport()` with viability warnings
 - `ml/src/transforms.ts` — 15 transforms via 4 builder functions: hflip, rotation(±10°), brightness(±20%), and compound combinations
 - `ml/src/augment.ts` — `augmentClass()` with deterministic transform cycling and per-file error handling
@@ -118,14 +118,14 @@ Options:
 
 ## Summary Statistics
 
-| Metric | Count |
-|--------|-------|
-| Source files created | 8 |
-| Test files created | 6 |
-| Config files created | 5 |
-| Doc files created/modified | 5 |
-| Unit tests | 78 |
-| Augmentation transforms | 15 |
+| Metric                     | Count |
+| -------------------------- | ----- |
+| Source files created       | 8     |
+| Test files created         | 6     |
+| Config files created       | 5     |
+| Doc files created/modified | 5     |
+| Unit tests                 | 78    |
+| Augmentation transforms    | 15    |
 
 ---
 

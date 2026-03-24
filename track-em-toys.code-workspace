@@ -19,12 +19,12 @@
     "eslint.useFlatConfig": true,
     "eslint.workingDirectories": [
       { "directory": "./api", "changeProcessCWD": true },
-      { "directory": "./web", "changeProcessCWD": true }
+      { "directory": "./web", "changeProcessCWD": true },
     ],
     "tailwindCSS.experimental.configFile": "./web/src/index.css",
     "typescript.preferences.importModuleSpecifier": "non-relative",
     "files.associations": {
-      "*.css": "tailwindcss"
-    }
+      "*.css": "tailwindcss",
+    },
   },
 }

@@ -36,12 +36,12 @@ Five co-located files implementing storage, processing, queries, schemas, and ro
 
 ### 3. API Endpoints
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| POST | `/:franchise/items/:slug/photos` | curator | Multi-file upload (max 10), WebP conversion |
-| DELETE | `/:franchise/items/:slug/photos/:photoId` | curator | Hard delete photo + files |
-| PATCH | `/:franchise/items/:slug/photos/:photoId/primary` | curator | Set as primary (atomic) |
-| PATCH | `/:franchise/items/:slug/photos/reorder` | curator | Bulk update sort_order |
+| Method | Path                                              | Auth    | Description                                 |
+| ------ | ------------------------------------------------- | ------- | ------------------------------------------- |
+| POST   | `/:franchise/items/:slug/photos`                  | curator | Multi-file upload (max 10), WebP conversion |
+| DELETE | `/:franchise/items/:slug/photos/:photoId`         | curator | Hard delete photo + files                   |
+| PATCH  | `/:franchise/items/:slug/photos/:photoId/primary` | curator | Set as primary (atomic)                     |
+| PATCH  | `/:franchise/items/:slug/photos/reorder`          | curator | Bulk update sort_order                      |
 
 ### 4. Infrastructure
 
@@ -104,14 +104,14 @@ Build: success
 
 ## Summary Statistics
 
-| Metric | Count |
-|--------|-------|
-| New files | 10 |
-| Modified files | 13 + 8 test config updates |
-| New API tests | 25 |
-| New endpoints | 4 |
-| New dependencies | 3 (@fastify/multipart, @fastify/static, sharp) |
-| Deferred issues created | 5 |
+| Metric                  | Count                                          |
+| ----------------------- | ---------------------------------------------- |
+| New files               | 10                                             |
+| Modified files          | 13 + 8 test config updates                     |
+| New API tests           | 25                                             |
+| New endpoints           | 4                                              |
+| New dependencies        | 3 (@fastify/multipart, @fastify/static, sharp) |
+| Deferred issues created | 5                                              |
 
 ---
 

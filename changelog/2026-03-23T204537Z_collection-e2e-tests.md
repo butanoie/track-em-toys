@@ -50,6 +50,7 @@ A stateful class where `page.route()` handlers close over the instance. Mutation
 ### Route Registration Order
 
 Playwright matches last-registered-first. The `register()` method registers:
+
 1. Catch-all `**/collection/**` (lowest priority)
 2. `**/collection` (list GET + add POST)
 3. `**/collection/stats`
@@ -69,16 +70,16 @@ Playwright matches last-registered-first. The `register()` method registers:
 
 ## Related Files
 
-| Action | File |
-|--------|------|
-| Created | `web/e2e/collection.spec.ts` |
-| Created | `web/e2e/fixtures/mock-helpers.ts` |
-| Created | `docs/test-scenarios/E2E_COLLECTION_MANAGEMENT.md` |
-| Modified | `web/e2e/catalog-browse.spec.ts` |
-| Modified | `web/e2e/catalog-detail-pages.spec.ts` |
-| Modified | `web/e2e/catalog-search.spec.ts` |
-| Modified | `web/playwright.config.ts` |
-| Modified | `docs/test-scenarios/README.md` |
+| Action   | File                                               |
+| -------- | -------------------------------------------------- |
+| Created  | `web/e2e/collection.spec.ts`                       |
+| Created  | `web/e2e/fixtures/mock-helpers.ts`                 |
+| Created  | `docs/test-scenarios/E2E_COLLECTION_MANAGEMENT.md` |
+| Modified | `web/e2e/catalog-browse.spec.ts`                   |
+| Modified | `web/e2e/catalog-detail-pages.spec.ts`             |
+| Modified | `web/e2e/catalog-search.spec.ts`                   |
+| Modified | `web/playwright.config.ts`                         |
+| Modified | `docs/test-scenarios/README.md`                    |
 
 ---
 

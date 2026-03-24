@@ -48,25 +48,25 @@ collection_items
 
 ### Alternatives Considered
 
-| Approach | Pros | Cons | Decision |
-|----------|------|------|----------|
-| UNIQUE + quantity | Simpler count, fewer rows | Can't track per-copy condition/notes | Rejected |
-| UNIQUE + separate units table | Per-unit tracking | Extra table, complex queries | Rejected |
-| One row per copy (chosen) | Per-copy condition/notes, simple queries | More rows for bulk collectors | **Accepted** |
+| Approach                      | Pros                                     | Cons                                 | Decision     |
+| ----------------------------- | ---------------------------------------- | ------------------------------------ | ------------ |
+| UNIQUE + quantity             | Simpler count, fewer rows                | Can't track per-copy condition/notes | Rejected     |
+| UNIQUE + separate units table | Per-unit tracking                        | Extra table, complex queries         | Rejected     |
+| One row per copy (chosen)     | Per-copy condition/notes, simple queries | More rows for bulk collectors        | **Accepted** |
 
 ### Condition Enum
 
 7 values chosen to distinguish **packaging status** (opened vs loose) from **completeness**:
 
-| Value | Packaging | Parts |
-|-------|-----------|-------|
-| `mint_sealed` | Factory sealed | N/A |
-| `opened_complete` | Retained | All present |
-| `opened_incomplete` | Retained | Missing parts |
-| `loose_complete` | No packaging | All present |
-| `loose_incomplete` | No packaging | Missing parts |
-| `damaged` | N/A | Significant damage |
-| `unknown` | N/A | Not assessed (default) |
+| Value               | Packaging      | Parts                  |
+| ------------------- | -------------- | ---------------------- |
+| `mint_sealed`       | Factory sealed | N/A                    |
+| `opened_complete`   | Retained       | All present            |
+| `opened_incomplete` | Retained       | Missing parts          |
+| `loose_complete`    | No packaging   | All present            |
+| `loose_incomplete`  | No packaging   | Missing parts          |
+| `damaged`           | N/A            | Significant damage     |
+| `unknown`           | N/A            | Not assessed (default) |
 
 The "opened" vs "loose" distinction matters to collectors: an opened figure with its original box is worth significantly more than a loose one.
 
@@ -137,16 +137,16 @@ Registered as a top-level module at `/collection` (parallel to `/catalog`, `/adm
 
 ### Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | /collection | List with franchise/condition/FTS filters + cursor pagination |
-| POST | /collection | Add catalog item (multiple copies allowed) |
-| GET | /collection/stats | Single CTE: total_copies, unique_items, by_franchise, by_condition |
-| GET | /collection/check | Batch check item_ids (max 50) — used by catalog UI |
-| GET | /collection/:id | Single entry (404 if soft-deleted) |
-| PATCH | /collection/:id | Update condition/notes (FOR UPDATE locking) |
-| DELETE | /collection/:id | Soft-delete |
-| POST | /collection/:id/restore | Restore (idempotent for active items) |
+| Method | Path                    | Description                                                        |
+| ------ | ----------------------- | ------------------------------------------------------------------ |
+| GET    | /collection             | List with franchise/condition/FTS filters + cursor pagination      |
+| POST   | /collection             | Add catalog item (multiple copies allowed)                         |
+| GET    | /collection/stats       | Single CTE: total_copies, unique_items, by_franchise, by_condition |
+| GET    | /collection/check       | Batch check item_ids (max 50) — used by catalog UI                 |
+| GET    | /collection/:id         | Single entry (404 if soft-deleted)                                 |
+| PATCH  | /collection/:id         | Update condition/notes (FOR UPDATE locking)                        |
+| DELETE | /collection/:id         | Soft-delete                                                        |
+| POST   | /collection/:id/restore | Restore (idempotent for active items)                              |
 
 ### Key API Decisions
 
@@ -166,15 +166,15 @@ Registered as a top-level module at `/collection` (parallel to `/catalog`, `/adm
 
 ## Future Slices (Not Yet Implemented)
 
-| Slice | Phase | Description |
-|-------|-------|-------------|
-| Web UI | 1.8 | Collection page, add-to-collection button, filters |
-| E2E Tests | 1.8 | Playwright tests for collection flows |
-| Purchase Price | 3.0 | Price paid, current value tracking |
-| CSV Import | 1.10 | Bulk import from spreadsheet |
-| Reporting | 1.11 | Collection value reports, stats |
+| Slice                  | Phase  | Description                                                        |
+| ---------------------- | ------ | ------------------------------------------------------------------ |
+| Web UI                 | 1.8    | Collection page, add-to-collection button, filters                 |
+| E2E Tests              | 1.8    | Playwright tests for collection flows                              |
+| Purchase Price         | 3.0    | Price paid, current value tracking                                 |
+| CSV Import             | 1.10   | Bulk import from spreadsheet                                       |
+| Reporting              | 1.11   | Collection value reports, stats                                    |
 | User Collection Photos | Future | Private photos per collection entry (separate from catalog photos) |
-| Tags | Future | Custom labels/categories for organizing |
+| Tags                   | Future | Custom labels/categories for organizing                            |
 
 ---
 

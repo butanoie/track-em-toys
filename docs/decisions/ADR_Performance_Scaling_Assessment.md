@@ -380,23 +380,23 @@ At 100K users, the origin server (or wherever photos are hosted) serves full-res
 
 Items that are either one-liner config fixes or correctness bugs independent of user count.
 
-| #   | Action                                              | Effort  | Files                                                                                       | Tracking     |
-| --- | --------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------- | ------------ |
-| 1   | Add CORS `maxAge: 86400`                            | 1 line  | `api/src/server.ts`                                                                         | #109 |
-| 2   | Add `refetchOnWindowFocus: false` + `gcTime: 15min` | 5 min   | `web/src/routes/__root.tsx`                                                                 | #109 |
-| 3   | Add `loading="lazy"` to all `<img>` elements        | 30 min  | `PhotoGallery.tsx`, `ItemList.tsx`, `CollectionGrid.tsx`, `CollectionItemCard.tsx`           | #109 |
-| 4   | Fix `auth_events` FK: `ON DELETE SET NULL` → `ON DELETE RESTRICT` | 1 migration | `api/db/migrations/` (see new finding below)                            | #109 |
-| 5   | ~~Add `LIMIT` to photo subquery + `has_more_photos`~~ | — | — | Dropped — curators decide photo count; no API cap |
+| #   | Action                                                            | Effort      | Files                                                                              | Tracking                                          |
+| --- | ----------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------- | ------------------------------------------------- |
+| 1   | Add CORS `maxAge: 86400`                                          | 1 line      | `api/src/server.ts`                                                                | #109                                              |
+| 2   | Add `refetchOnWindowFocus: false` + `gcTime: 15min`               | 5 min       | `web/src/routes/__root.tsx`                                                        | #109                                              |
+| 3   | Add `loading="lazy"` to all `<img>` elements                      | 30 min      | `PhotoGallery.tsx`, `ItemList.tsx`, `CollectionGrid.tsx`, `CollectionItemCard.tsx` | #109                                              |
+| 4   | Fix `auth_events` FK: `ON DELETE SET NULL` → `ON DELETE RESTRICT` | 1 migration | `api/db/migrations/` (see new finding below)                                       | #109                                              |
+| 5   | ~~Add `LIMIT` to photo subquery + `has_more_photos`~~             | —           | —                                                                                  | Dropped — curators decide photo count; no API cap |
 
 ### Tier 2 — Fix SOON (before real traffic)
 
 Not blocking current feature work, but should ship before production users.
 
-| #   | Action                                              | Effort  | Files                                                               | Tracking     |
-| --- | --------------------------------------------------- | ------- | ------------------------------------------------------------------- | ------------ |
-| 6   | Set `DB_POOL_MAX=100` + tune PG `max_connections`   | Env var | `.env`, `postgresql.conf`                                           | #110 |
-| 7   | Implement `auth_events` retention cron              | 2-4 hrs | New migration + scheduled job                                       | #110 |
-| 8   | Integrate error reporting (Sentry/Datadog)          | 2-4 hrs | `web/src/components/ErrorBoundary.tsx`, `web/src/routes/__root.tsx` | #110 |
+| #   | Action                                            | Effort  | Files                                                               | Tracking |
+| --- | ------------------------------------------------- | ------- | ------------------------------------------------------------------- | -------- |
+| 6   | Set `DB_POOL_MAX=100` + tune PG `max_connections` | Env var | `.env`, `postgresql.conf`                                           | #110     |
+| 7   | Implement `auth_events` retention cron            | 2-4 hrs | New migration + scheduled job                                       | #110     |
+| 8   | Integrate error reporting (Sentry/Datadog)        | 2-4 hrs | `web/src/components/ErrorBoundary.tsx`, `web/src/routes/__root.tsx` | #110     |
 
 ### Tier 3 — At ~10K users (monitoring-driven)
 
@@ -420,13 +420,13 @@ Not blocking current feature work, but should ship before production users.
 
 ### Tier 5 — Nice-to-have
 
-| #   | Action                                       | Effort   | Files                           |
-| --- | -------------------------------------------- | -------- | ------------------------------- |
-| 19  | Service worker for catalog offline cache     | 8-16 hrs | New `web/src/service-worker.ts` |
-| 20  | Monitor event loop lag via `perf_hooks`      | 1-2 hrs  | `api/src/server.ts`             |
-| 21  | CDN for image delivery with auto-resizing    | Infra    | —                               |
-| 22  | `srcset` for responsive image delivery       | 2-4 hrs  | Photo components                |
-| 23  | Collection/photo grid virtualization (500+ items) | 4-8 hrs | Collection components      |
+| #   | Action                                            | Effort   | Files                           |
+| --- | ------------------------------------------------- | -------- | ------------------------------- |
+| 19  | Service worker for catalog offline cache          | 8-16 hrs | New `web/src/service-worker.ts` |
+| 20  | Monitor event loop lag via `perf_hooks`           | 1-2 hrs  | `api/src/server.ts`             |
+| 21  | CDN for image delivery with auto-resizing         | Infra    | —                               |
+| 22  | `srcset` for responsive image delivery            | 2-4 hrs  | Photo components                |
+| 23  | Collection/photo grid virtualization (500+ items) | 4-8 hrs  | Collection components           |
 
 ---
 

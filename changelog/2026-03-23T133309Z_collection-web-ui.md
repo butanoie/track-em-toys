@@ -108,6 +108,7 @@ All mutations invalidate `{ queryKey: ['collection'] }` (prefix match) to refres
 ### Amber Accent Differentiation
 
 Collection UI uses amber/gold tones to visually distinguish from catalog's blue/purple primary:
+
 - Stats bar icon and franchise chip active state: `amber-600` / `amber-400` dark
 - Add to Collection button: `border-amber-300 text-amber-700`
 - Submit button: `bg-amber-600 hover:bg-amber-700`
@@ -116,6 +117,7 @@ Collection UI uses amber/gold tones to visually distinguish from catalog's blue/
 ### Undo Toast Pattern
 
 Soft-delete uses Sonner's action toast instead of a confirmation dialog:
+
 ```tsx
 toast('Removed from collection', {
   action: { label: 'Undo', onClick: () => mutations.restore.mutate(id) },
@@ -127,10 +129,10 @@ toast('Removed from collection', {
 
 ## Validation & Testing
 
-| Module | Tests | Lint | Typecheck | Format | Build |
-|--------|-------|------|-----------|--------|-------|
-| API    | ✅ 716 passed | ✅ | ✅ | ✅ | ✅ |
-| Web    | ✅ 622 passed | ✅ | ✅ | ✅ | ✅ |
+| Module | Tests         | Lint | Typecheck | Format | Build |
+| ------ | ------------- | ---- | --------- | ------ | ----- |
+| API    | ✅ 716 passed | ✅   | ✅        | ✅     | ✅    |
+| Web    | ✅ 622 passed | ✅   | ✅        | ✅     | ✅    |
 
 ---
 
