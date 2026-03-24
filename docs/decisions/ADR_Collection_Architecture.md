@@ -166,18 +166,19 @@ Registered as a top-level module at `/collection` (parallel to `/catalog`, `/adm
 
 ## Future Slices (Not Yet Implemented)
 
-| Slice                  | Phase  | Description                                                        |
-| ---------------------- | ------ | ------------------------------------------------------------------ |
-| Web UI                 | 1.8    | Collection page, add-to-collection button, filters                 |
-| E2E Tests              | 1.8    | Playwright tests for collection flows                              |
-| Purchase Price         | 3.0    | Price paid, current value tracking                                 |
-| CSV Import             | 1.10   | Bulk import from spreadsheet                                       |
-| Reporting              | 1.11   | Collection value reports, stats                                    |
-| User Collection Photos | Future | Private photos per collection entry (separate from catalog photos) |
-| Tags                   | Future | Custom labels/categories for organizing                            |
+| Slice                  | Phase  | Description                                                        | Status      |
+| ---------------------- | ------ | ------------------------------------------------------------------ | ----------- |
+| Web UI                 | 1.8    | Collection page, add-to-collection button, filters                 | ✅ Complete |
+| E2E Tests              | 1.8    | Playwright tests for collection flows                              | ✅ Complete |
+| Purchase Price         | 3.0    | Price paid, current value tracking                                 | Planned     |
+| CSV Import             | 1.10   | Bulk import from spreadsheet                                       | Planned     |
+| Reporting              | 1.11   | Collection value reports, stats                                    | Planned     |
+| User Collection Photos | Future | Private photos per collection entry (separate from catalog photos) | Planned     |
+| Tags                   | Future | Custom labels/categories for organizing                            | Planned     |
 
 ---
 
 ## Revision History
 
 - **2026-03-23:** Initial — Slice 1 (DB + API) accepted and implemented
+- **2026-03-24:** Updated future slices table — Web UI and E2E Tests marked complete. UI design decisions documented separately in `ADR_Collection_UI_Design.md`
