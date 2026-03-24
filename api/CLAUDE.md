@@ -65,9 +65,27 @@ cd api && npm run format:check # Prettier check (CI mode)
 - `seed-integration.test.ts` exact row-count assertions are wrapped in `describe.skipIf(!!process.env['SEED_DATA_PATH'])` — they only run against sample data. Structural assertions (FK integrity, idempotency) run against any dataset.
 - Seed `_metadata.total` must always equal the actual array length — recount after any addition or removal, never increment/decrement manually
 - Seed FK naming: JSON uses `{table}_slug` (e.g. `franchise_slug`, `faction_slug`), DB column is `{table}_id` (UUID FK). Ingest script resolves slugs to UUIDs via `resolveSlug()` maps
-- Reference tables follow the pattern: `id UUID PK, slug TEXT UNIQUE, name TEXT, sort_order INT, notes TEXT, created_at TIMESTAMPTZ` (no `updated_at`)
-- When adding a column to a reference table: add to seed JSON, record interface in `ingest.ts`, TypeScript interface in `types/index.ts`, and validation tests in `seed-validation.test.ts`
-- When changing a UNIQUE constraint, grep `ON CONFLICT` in `db/seed/ingest.ts` — the conflict target must match the new constraint exactly
+- Reference tables follow the pattern: `id UUID PK, slug TEXT UNIQUE, name TEXT, sort_order INT, notes TEXT, created_at TIMESTAMPTZ, updated_at TIMESTAMPTZ` (migration 031 added `updated_at` + triggers to reference tables and relationship tables for bidirectional sync)
+- When adding a column to a reference table: add to seed JSON, record interface in `seed-types.ts`, TypeScript interface in `types/index.ts`, and validation tests in `seed-validation.test.ts`
+- When changing a UNIQUE constraint, grep `ON CONFLICT` in `db/seed/ingest.ts` AND `db/seed/sync.ts` — the conflict target must match the new constraint exactly
+
+### Seed Data Sync
+
+- `npm run sync:push` — push seed records to DB where `seed.last_modified > db.updated_at`; stamps `last_modified` back to seed file after DB commit
+- `npm run sync:pull` — pull DB records to seed files where `db.updated_at > seed.last_modified`; appends new DB records to appropriate seed file
+- `npm run sync` — runs push then pull; after completion all timestamps converge
+- `npm run seed` — unchanged force-overwrite (ignores timestamps)
+- Seed JSON records have an optional `last_modified` ISO 8601 UTC field; when absent, treated as infinitely old (DB always wins on pull, seed never wins on push)
+- Shared types and helpers extracted to `db/seed/seed-types.ts` and `db/seed/seed-io.ts` — both `ingest.ts` and `sync.ts` import from these
+- `sync.ts` buffers seed file writes until after DB COMMIT — no seed file changes on DB rollback
+- JSON file writes use atomic `.tmp` + `renameSync` to prevent corruption on crash
+- `assembleCharacterMetadata()` packs `notes`/`series_year`/`year_released` into JSONB for push; `disassembleCharacterMetadata()` unpacks for pull
+- Junction tables (`character_sub_groups`, `item_character_depictions`) have no independent sync — they are derived from parent records during push and recovered via JOINs during pull
+- Deletions are warned but never acted upon — records on one side only are logged, not deleted
+- See `docs/decisions/ADR_Seed_Sync_Architecture.md` for full design rationale
+- `tsconfig.seed.json` covers `db/seed/**/*.ts` — add new seed scripts there, NOT in main `tsconfig.json` (which has `rootDir: "src"`)
+- Tests for seed modules (`db/seed/`) must live in `src/db/` (Vitest only includes `src/**/*.test.ts`), use dynamic `await import()` to cross the rootDir boundary, and be excluded from main `tsconfig.json` + added to `tsconfig.seed.json`
+- `eslint.config.js` `allowDefaultProject` lists test files excluded from main tsconfig — add new cross-root test files there
 
 ### GDPR / User Deletion (Tombstone Pattern)
 
@@ -221,6 +239,7 @@ Two distinct photo types:
 ### Adding a Field to Item List Responses
 
 Adding a column to item list API responses requires updating ALL of these (missing any one causes silent failures):
+
 1. `items/queries.ts` — `ItemListRow` interface + SELECT column + any needed JOINs
 2. `shared/schemas.ts` — `itemListItem.required` + `itemListItem.properties`
 3. `shared/formatters.ts` — `formatListItem()` return object
@@ -229,6 +248,7 @@ Adding a column to item list API responses requires updating ALL of these (missi
 6. `search/queries.ts` + `search/schemas.ts` + `search/routes.ts` — if search results should include it (NULL for characters, real value for items)
 7. Web `zod-schemas.ts` — `CatalogItemSchema` (and `SearchResultBaseSchema` if applicable)
 8. All test files with inline mock `ItemListRow` / `CatalogItem` objects — search for `data_quality.*verified` to find them
+
 - CRITICAL: `items/schemas.ts` `itemDetail` is a SEPARATE hand-written schema that does NOT reference `itemListItem`. But web `CatalogItemDetailSchema` extends `CatalogItemSchema`. If you add the field to the list schema but not the detail schema, Fastify silently drops it and Zod parse fails on the web.
 
 ### Collection API (Phase 1.8+)
