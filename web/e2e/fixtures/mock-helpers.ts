@@ -224,7 +224,84 @@ export class MockCollectionState {
       return route.fulfill(jsonResponse({ items }));
     });
 
-    // 5. POST /collection/:id/restore — must be registered before the generic :id route
+    // 5. GET /collection/export
+    await page.route('**/collection/export**', (route) => {
+      if (isDocRequest(route)) return route.continue();
+      if (route.request().method() !== 'GET') return route.fallback();
+      const url = new URL(route.request().url());
+      const includeDeleted = url.searchParams.get('include_deleted') === 'true';
+      const source = includeDeleted ? this._items : this.liveItems;
+      const payload = {
+        version: 1,
+        exported_at: new Date().toISOString(),
+        items: source.map((i) => ({
+          franchise_slug: i.franchise.slug,
+          item_slug: i.item_slug,
+          condition: i.condition,
+          notes: i.notes,
+          added_at: i.created_at,
+          deleted_at: this._deleted.has(i.id) ? i.updated_at : null,
+        })),
+      };
+      return route.fulfill(jsonResponse(payload));
+    });
+
+    // 6. POST /collection/import
+    await page.route('**/collection/import', (route) => {
+      if (isDocRequest(route)) return route.continue();
+      if (route.request().method() !== 'POST') return route.fallback();
+
+      const body = route.request().postDataJSON() as {
+        version: number;
+        mode?: 'append' | 'overwrite';
+        items: Array<{
+          franchise_slug: string;
+          item_slug: string;
+          condition: string;
+          notes?: string | null;
+          added_at?: string;
+        }>;
+      };
+
+      // Overwrite mode: soft-delete all live items first (snapshot to avoid mutation during iteration)
+      let overwrittenCount = 0;
+      if (body.mode === 'overwrite') {
+        const toRemove = this.liveItems.map((i) => i.id);
+        overwrittenCount = toRemove.length;
+        for (const id of toRemove) {
+          this.removeItem(id);
+        }
+      }
+
+      // Resolve each incoming item against known items
+      const imported: Array<{ franchise_slug: string; item_slug: string; item_name: string; condition: string }> = [];
+      const unresolved: Array<{ franchise_slug: string; item_slug: string; reason: string }> = [];
+
+      for (const entry of body.items) {
+        const match = this._items.find(
+          (i) => i.item_slug === entry.item_slug && i.franchise.slug === entry.franchise_slug
+        );
+        if (match) {
+          this.addItem({ item_id: match.item_id, condition: entry.condition, notes: entry.notes ?? undefined });
+          imported.push({
+            franchise_slug: entry.franchise_slug,
+            item_slug: entry.item_slug,
+            item_name: match.item_name,
+            condition: entry.condition,
+          });
+        } else {
+          unresolved.push({
+            franchise_slug: entry.franchise_slug,
+            item_slug: entry.item_slug,
+            reason: 'Item not found in catalog',
+          });
+        }
+      }
+
+      return route.fulfill(jsonResponse({ imported, unresolved, overwritten_count: overwrittenCount }));
+    });
+
+    // 7. POST /collection/:id/restore
     await page.route(/\/collection\/[0-9a-f-]{36}\/restore$/, (route) => {
       if (isDocRequest(route)) return route.continue();
       if (route.request().method() !== 'POST') return route.fallback();
@@ -238,7 +315,7 @@ export class MockCollectionState {
       return route.fulfill(jsonResponse({ error: 'Not found' }, 404));
     });
 
-    // 6. PATCH /collection/:id + DELETE /collection/:id
+    // 8. PATCH /collection/:id + DELETE /collection/:id
     await page.route(/\/collection\/[0-9a-f-]{36}$/, (route) => {
       if (isDocRequest(route)) return route.continue();
       const method = route.request().method();

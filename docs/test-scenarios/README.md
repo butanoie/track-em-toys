@@ -40,6 +40,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | [UNIT_ML_TRAINING_DATA.md](UNIT_ML_TRAINING_DATA.md)         | `ml/src/*.test.ts`                                                                                                                                            | ✅ Implemented                          |
 | [INT_COLLECTION_API.md](INT_COLLECTION_API.md)               | `api/src/collection/routes.test.ts`                                                                                                                           | ✅ Implemented                          |
 | [E2E_COLLECTION_MANAGEMENT.md](E2E_COLLECTION_MANAGEMENT.md) | `web/e2e/collection.spec.ts`                                                                                                                                  | ✅ Implemented                          |
+| [E2E_COLLECTION_EXPORT_IMPORT.md](E2E_COLLECTION_EXPORT_IMPORT.md) | `web/e2e/collection-export-import.spec.ts`                                                                                                              | ✅ Implemented                          |
 | [INT_Seed_Sync.md](INT_Seed_Sync.md)                         | `api/db/seed/sync.test.ts`                                                                                                                                    | Scenarios written                       |
 
 ## Creating a New Scenario

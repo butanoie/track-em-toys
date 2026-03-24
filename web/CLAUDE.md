@@ -132,6 +132,12 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `MockCollectionState` in `e2e/fixtures/mock-helpers.ts` — stateful mock for collection E2E tests. Route handlers close over the instance, so mutations (`addItem`, `removeItem`) are reflected in subsequent GET responses without re-registering routes.
 - When adding a field to a Zod schema (e.g., `CatalogItemSchema`), also update mock data in E2E spec files — E2E mocks go through Zod parse in the browser and will fail if required fields are missing.
 - `ConditionSelector` renders `<button>` elements (not Radix `Select`) — E2E tests click `getByRole('button', { name: /Opened Complete/ })`. The filter condition on the collection page uses a Radix `Select` combobox (`getByRole('combobox', { name: /Filter by condition/ })`).
+- `MockCollectionState` also handles export/import routes — `GET /collection/export` derives payload from `liveItems`, `POST /collection/import` resolves slugs against known items and mutates state. Overwrite mode snapshots + soft-deletes all live items before import.
+- File download assertions: `page.waitForEvent('download')` must be started **before** the click that triggers the download — use `Promise.all([page.waitForEvent('download'), button.click()])` or assign the promise first. Read content via `download.createReadStream()`.
+- File upload in tests: `page.locator('[role="dialog"] input[type="file"]').setInputFiles({ name, mimeType, buffer })` — the buffer form avoids temp files on disk, works on hidden inputs without `force: true`
+- Radix AlertDialog portals: scope assertions with `page.getByRole('alertdialog')` — the portal renders outside the parent `Dialog`, so `page.getByRole('dialog')` won't contain it
+- Error injection pattern: register a `page.route()` override **after** `state.register(page)` to intercept specific endpoints with error responses — Playwright's last-registered-wins rule gives the override higher priority
+- Import test helpers in `e2e/fixtures/import-helpers.ts` — `buildExportFileDescriptor`, `buildRawFileDescriptor`, `selectImportFile`, `clickAppend`/`clickReplace`, `confirmAppendDialog`/`confirmReplaceDialog`, `readDownloadJson`
 
 ### Image Loading
 

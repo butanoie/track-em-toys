@@ -49,7 +49,7 @@ export default defineConfig({
       name: 'user',
       use: { ...devices['Desktop Chrome'] },
       testMatch:
-        /authenticated-session\.spec\.ts|catalog-browse\.spec\.ts|catalog-detail-pages\.spec\.ts|catalog-search\.spec\.ts|session-persistence\.spec\.ts|collection\.spec\.ts/,
+        /authenticated-session\.spec\.ts|catalog-browse\.spec\.ts|catalog-detail-pages\.spec\.ts|catalog-search\.spec\.ts|session-persistence\.spec\.ts|collection\.spec\.ts|collection-export-import\.spec\.ts/,
     },
     // Authenticated as admin — admin dashboard
     {
