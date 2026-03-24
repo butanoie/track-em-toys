@@ -131,7 +131,8 @@ export const CatalogItemSchema = z.object({
 
 export const CatalogItemListSchema = z.object({
   data: z.array(CatalogItemSchema),
-  next_cursor: z.string().nullable(),
+  page: z.number().int(),
+  limit: z.number().int(),
   total_count: z.number().int(),
 });
 
@@ -339,7 +340,8 @@ export const CharacterListItemSchema = z.object({
 
 export const CharacterListSchema = z.object({
   data: z.array(CharacterListItemSchema),
-  next_cursor: z.string().nullable(),
+  page: z.number().int(),
+  limit: z.number().int(),
   total_count: z.number().int(),
 });
 
@@ -468,7 +470,8 @@ export const CollectionItemSchema = z.object({
 
 export const CollectionItemListSchema = z.object({
   data: z.array(CollectionItemSchema),
-  next_cursor: z.string().nullable(),
+  page: z.number().int(),
+  limit: z.number().int(),
   total_count: z.number().int(),
 });
 

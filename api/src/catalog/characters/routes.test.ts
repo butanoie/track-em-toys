@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { mockQuery, setupCatalogTest } from '../shared/test-setup.js';
-import { encodeCursor } from '../shared/pagination.js';
 
 const { buildServer } = await setupCatalogTest();
 
@@ -51,49 +50,33 @@ describe('character routes (franchise-scoped)', () => {
         url: '/catalog/franchises/transformers/characters?limit=20',
       });
       expect(res.statusCode).toBe(200);
-      const body = res.json<{ data: unknown[]; next_cursor: string | null; total_count: number }>();
+      const body = res.json<{ data: unknown[]; page: number; limit: number; total_count: number }>();
       expect(body.data).toHaveLength(1);
-      expect(body.next_cursor).toBeNull();
+      expect(body.page).toBe(1);
+      expect(body.limit).toBe(20);
       expect(body.total_count).toBe(1);
     });
 
-    it('should return next_cursor when more results exist', async () => {
-      const rows = [
-        { ...charListRow, id: 'c-1', name: 'Alpha' },
-        { ...charListRow, id: 'c-2', name: 'Beta' },
-        { ...charListRow, id: 'c-3', name: 'Gamma' }, // limit+1 row
-      ];
-      mockQuery.mockResolvedValueOnce({ rows }).mockResolvedValueOnce({ rows: [{ total_count: 10 }] });
+    it('should return page and limit in response', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [charListRow] }).mockResolvedValueOnce({ rows: [{ total_count: 10 }] });
 
       const res = await server.inject({
         method: 'GET',
-        url: '/catalog/franchises/transformers/characters?limit=2',
+        url: '/catalog/franchises/transformers/characters?page=2&limit=50',
       });
       expect(res.statusCode).toBe(200);
-      const body = res.json<{ data: unknown[]; next_cursor: string; total_count: number }>();
-      expect(body.data).toHaveLength(2);
-      expect(body.next_cursor).toBeTruthy();
+      const body = res.json<{ data: unknown[]; page: number; limit: number; total_count: number }>();
+      expect(body.page).toBe(2);
+      expect(body.limit).toBe(50);
       expect(body.total_count).toBe(10);
     });
 
-    it('should accept cursor parameter', async () => {
-      const cursor = encodeCursor('Alpha', 'c-1');
-      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ total_count: 0 }] });
-
+    it('should return 400 for invalid limit', async () => {
       const res = await server.inject({
         method: 'GET',
-        url: `/catalog/franchises/transformers/characters?cursor=${cursor}`,
-      });
-      expect(res.statusCode).toBe(200);
-    });
-
-    it('should return 400 for invalid cursor', async () => {
-      const res = await server.inject({
-        method: 'GET',
-        url: '/catalog/franchises/transformers/characters?cursor=invalid!!!',
+        url: '/catalog/franchises/transformers/characters?limit=25',
       });
       expect(res.statusCode).toBe(400);
-      expect(res.json<{ error: string }>().error).toBe('Invalid cursor');
     });
 
     it('should return empty data for franchise with no characters', async () => {
@@ -143,13 +126,12 @@ describe('character routes (franchise-scoped)', () => {
       expect(res.statusCode).toBe(200);
     });
 
-    it('should accept all filters combined with cursor', async () => {
-      const cursor = encodeCursor('Alpha', 'c-1');
+    it('should accept all filters combined with page', async () => {
       mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ total_count: 0 }] });
 
       const res = await server.inject({
         method: 'GET',
-        url: `/catalog/franchises/transformers/characters?continuity_family=g1&faction=autobot&character_type=Transformer&sub_group=dinobots&cursor=${cursor}`,
+        url: '/catalog/franchises/transformers/characters?continuity_family=g1&faction=autobot&character_type=Transformer&sub_group=dinobots&page=2',
       });
       expect(res.statusCode).toBe(200);
     });

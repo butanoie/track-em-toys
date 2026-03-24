@@ -36,7 +36,8 @@ const mockCharacterList = {
       is_combined_form: false,
     },
   ],
-  next_cursor: 'abc123',
+  page: 1,
+  limit: 20,
   total_count: 42,
 };
 
@@ -55,7 +56,8 @@ describe('useCharacters', () => {
     expect(listCharacters).toHaveBeenCalledWith({
       franchise: 'transformers',
       filters: undefined,
-      cursor: undefined,
+      page: undefined,
+      limit: undefined,
     });
     expect(result.current.data).toEqual(mockCharacterList);
   });
@@ -65,7 +67,7 @@ describe('useCharacters', () => {
     const { wrapper } = createWrapper();
     const filters = { continuity_family: 'g1', faction: 'autobot' };
 
-    const { result } = renderHook(() => useCharacters('transformers', filters, 'cursor-xyz'), {
+    const { result } = renderHook(() => useCharacters('transformers', filters, 2), {
       wrapper,
     });
 
@@ -73,7 +75,8 @@ describe('useCharacters', () => {
     expect(listCharacters).toHaveBeenCalledWith({
       franchise: 'transformers',
       filters,
-      cursor: 'cursor-xyz',
+      page: 2,
+      limit: undefined,
     });
   });
 
@@ -82,16 +85,16 @@ describe('useCharacters', () => {
     const { wrapper, queryClient } = createWrapper();
     const filters = { faction: 'autobot' };
 
-    renderHook(() => useCharacters('transformers', filters, 'cur1'), { wrapper });
+    renderHook(() => useCharacters('transformers', filters, 2), { wrapper });
 
     await waitFor(() => {
       const cache = queryClient.getQueryCache().findAll();
       expect(cache).toHaveLength(1);
-      expect(cache[0].queryKey).toEqual(['catalog', 'characters', 'transformers', { faction: 'autobot' }, 'cur1']);
+      expect(cache[0].queryKey).toEqual(['catalog', 'characters', 'transformers', { faction: 'autobot' }, 2, 20]);
     });
   });
 
-  it('uses empty object for filters and null for cursor in queryKey when omitted', async () => {
+  it('uses empty object for filters and defaults for page/limit in queryKey when omitted', async () => {
     vi.mocked(listCharacters).mockResolvedValue(mockCharacterList);
     const { wrapper, queryClient } = createWrapper();
 
@@ -100,7 +103,7 @@ describe('useCharacters', () => {
     await waitFor(() => {
       const cache = queryClient.getQueryCache().findAll();
       expect(cache).toHaveLength(1);
-      expect(cache[0].queryKey).toEqual(['catalog', 'characters', 'transformers', {}, null]);
+      expect(cache[0].queryKey).toEqual(['catalog', 'characters', 'transformers', {}, 1, 20]);
     });
   });
 

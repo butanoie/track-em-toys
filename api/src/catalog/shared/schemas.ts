@@ -37,16 +37,6 @@ export const slugParam = {
   },
 } as const;
 
-/** Querystring schema for cursor-paginated list endpoints. */
-export const paginationQuery = {
-  type: 'object',
-  additionalProperties: false,
-  properties: {
-    limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
-    cursor: { type: 'string', maxLength: 512 },
-  },
-} as const;
-
 /** Shared { slug, name } reference shape used in joined responses. */
 export const slugNameRef = {
   type: 'object',
@@ -137,18 +127,19 @@ export const photoItem = {
 } as const;
 
 /**
- * Cursor-paginated list response wrapper.
+ * Page-based list response wrapper.
  *
  * @param itemSchema - JSON Schema for array items
  */
-export function cursorListResponse(itemSchema: object) {
+export function pageListResponse(itemSchema: object) {
   return {
     type: 'object',
-    required: ['data', 'next_cursor', 'total_count'],
+    required: ['data', 'page', 'limit', 'total_count'],
     additionalProperties: false,
     properties: {
       data: { type: 'array', items: itemSchema },
-      next_cursor: { type: ['string', 'null'] },
+      page: { type: 'integer' },
+      limit: { type: 'integer' },
       total_count: { type: 'integer' },
     },
   } as const;

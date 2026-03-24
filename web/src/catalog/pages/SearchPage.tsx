@@ -15,7 +15,9 @@ import { ItemList } from '@/catalog/components/ItemList';
 import { ItemDetailPanel } from '@/catalog/components/ItemDetailPanel';
 import { CharacterResultList } from '@/catalog/components/CharacterResultList';
 import { CharacterDetailPanel } from '@/catalog/components/CharacterDetailPanel';
-import { SearchPagination } from '@/catalog/components/SearchPagination';
+import { Pagination } from '@/catalog/components/Pagination';
+import { PageSizeSelector } from '@/components/PageSizeSelector';
+import { DEFAULT_PAGE_LIMIT, type PageLimitOption } from '@/lib/pagination-constants';
 import type { SearchCharacterResult, SearchItemResult } from '@/lib/zod-schemas';
 
 export function SearchPage() {
@@ -25,8 +27,9 @@ export function SearchPage() {
 
   const q = search.q ?? '';
   const page = search.page ?? 1;
+  const limit = search.limit ?? DEFAULT_PAGE_LIMIT;
 
-  const { data, isPending } = useSearch(q, page);
+  const { data, isPending } = useSearch(q, page, undefined, limit);
 
   const exportMutation = useMutation({
     mutationFn: () => exportForMl({ q }),
@@ -98,6 +101,28 @@ export function SearchPage() {
     [navigate]
   );
 
+  const handleLimitChange = useCallback(
+    (newLimit: PageLimitOption) => {
+      void navigate({
+        to: '/catalog/search',
+        search: (prev) => {
+          const next = {
+            ...prev,
+            limit: newLimit === DEFAULT_PAGE_LIMIT ? undefined : newLimit,
+            page: undefined,
+            selected: undefined,
+            selected_type: undefined,
+          };
+          for (const [k, v] of Object.entries(next)) {
+            if (v === undefined) delete (next as Record<string, unknown>)[k];
+          }
+          return next;
+        },
+      });
+    },
+    [navigate]
+  );
+
   // Empty state: no query
   if (!q) {
     return (
@@ -120,10 +145,13 @@ export function SearchPage() {
       <MainNav />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="mb-4">
+        <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
             {data ? `${data.total_count} ${data.total_count === 1 ? 'result' : 'results'} for "${q}"` : 'Searching...'}
           </p>
+          {data && data.total_count > 0 && (
+            <PageSizeSelector value={limit} onChange={handleLimitChange} />
+          )}
         </div>
 
         {isPending && !data && <LoadingSpinner className="py-16" />}
@@ -184,11 +212,12 @@ export function SearchPage() {
                 </section>
               )}
 
-              <SearchPagination
+              <Pagination
                 page={page}
                 totalCount={data.total_count}
                 limit={data.limit}
                 onPageChange={handlePageChange}
+                ariaLabel="Search results pagination"
               />
             </div>
 

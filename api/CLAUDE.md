@@ -210,7 +210,9 @@ Two distinct photo types:
 - Manufacturers stay globally unique slugs (franchise-agnostic)
 - FTS uses generated `search_vector tsvector STORED` columns — queries use `WHERE search_vector @@ ...`, never recompute the tsvector expression inline
 - Fastify's `fast-json-stringify` does NOT support `oneOf` for serialization — use a flat superset schema with nullable fields instead. Apply discriminated unions at the web Zod layer, not the Fastify schema layer
-- Cursor pagination encodes `{ v: 1, name, id }` as base64url — always include version field
+- All list endpoints use page-based pagination: `{ data, page, limit, total_count }` response shape via `pageListResponse()` helper
+- Limit validation: `enum: [20, 50, 100]` on catalog and collection endpoints; `minimum: 1, maximum: 100` on search
+- `catalog/shared/pagination.ts` was removed — all cursor pagination utilities (`encodeCursor`, `decodeCursor`, `buildCursorPage`, `clampLimit`) are gone. `paginationQuery` and `cursorListResponse` also removed from `catalog/shared/schemas.ts`
 - `buildItemsQuery` parameter indexing: each filter block uses `$${idx}` and increments `idx++` — except the LAST filter (ESLint `no-useless-assignment` flags it). When adding a new filter, add `idx++` to the previously-last filter block
 - Cursor UUID comparison uses `$N::uuid`, not text cast
 - Error responses use `reply.code(N).send({ error: '...' })` — no HttpError (no transactions)
@@ -232,7 +234,7 @@ Two distinct photo types:
 
 ### Catalog Shared Modules
 
-- `catalog/shared/schemas.ts` — shared schema fragments: `itemListItem`, `facetValueItem`, `slugNameRef`, `nullableSlugNameRef`, `cursorListResponse`. Import these instead of defining local copies.
+- `catalog/shared/schemas.ts` — shared schema fragments: `itemListItem`, `facetValueItem`, `slugNameRef`, `nullableSlugNameRef`, `pageListResponse`. Import these instead of defining local copies.
 - `catalog/shared/formatters.ts` — shared `formatListItem()` and `formatDetail()` for item responses. Used by both `items/routes.ts` and `manufacturers/routes.ts`.
 - Do NOT reuse `nullableSlugNameRef` from `catalog/shared/schemas.ts` in new modules — it uses `oneOf` which `fast-json-stringify` does not support. Define nullable object schemas inline with `type: ['object', 'null']` instead
 
@@ -261,7 +263,7 @@ Adding a column to item list API responses requires updating ALL of these (missi
 - PATCH/DELETE use `SELECT ... FOR UPDATE` to serialize concurrent mutations and prevent TOCTOU races with soft-delete
 - PATCH partial updates: use `Object.hasOwn(body, 'field')` to distinguish absent key from `null` value (Fastify strips absent keys from validated body)
 - Stats query uses a single CTE for snapshot consistency — do NOT use `Promise.all` with multiple queries on a single `PoolClient` (pg does not support concurrent queries on one connection)
-- `buildCursorPage` requires rows with `{ name: string; id: string }` — queries must alias columns to match (e.g., `i.name AS name, ci.id AS id`)
+- Collection list uses page/offset pagination (`LIMIT $4 OFFSET $5`) with `enum: [20, 50, 100]` limit validation — NOT cursor-based. Response shape: `{ data, page, limit, total_count }`
 - Export/import: `GET /collection/export` returns slug-based JSON (no UUIDs), `POST /collection/import` resolves slugs via `batchGetItemIdsBySlugs` (UNNEST query), uses SAVEPOINT per insert for partial success
 - Partial-success inserts require `SAVEPOINT` / `ROLLBACK TO SAVEPOINT` per insert — PostgreSQL aborts the entire transaction on any error without savepoints. Always log the error before rolling back.
 - Export includes `deleted_count` in stats for UI to prompt about soft-deleted items

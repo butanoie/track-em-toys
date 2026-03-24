@@ -5,6 +5,9 @@ import { Route } from '@/routes/_authenticated/collection';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { Button } from '@/components/ui/button';
+import { Pagination } from '@/catalog/components/Pagination';
+import { PageSizeSelector } from '@/components/PageSizeSelector';
+import { DEFAULT_PAGE_LIMIT, type PageLimitOption } from '@/lib/pagination-constants';
 import { useLocalStorage } from '@/lib/use-local-storage';
 import { useCollectionItems } from '@/collection/hooks/useCollectionItems';
 import { useCollectionStats } from '@/collection/hooks/useCollectionStats';
@@ -30,28 +33,29 @@ export function CollectionPage() {
   const [importOpen, setImportOpen] = useState(false);
   const [view, setView] = useLocalStorage<CollectionViewMode>('trackem:collection-view', 'grid');
 
-  const [cursorStack, setCursorStack] = useState<Array<string | undefined>>([]);
+  const page = search.page ?? 1;
+  const limit = search.limit ?? DEFAULT_PAGE_LIMIT;
 
   const filters: CollectionFiltersType = useMemo(
     () => ({
       franchise: search.franchise,
       condition: search.condition,
       search: search.search,
-      cursor: search.cursor,
+      page,
+      limit,
     }),
-    [search.franchise, search.condition, search.search, search.cursor]
+    [search.franchise, search.condition, search.search, page, limit]
   );
 
   const { data, isPending } = useCollectionItems(filters);
   const { data: stats } = useCollectionStats();
 
   const updateSearch = useCallback(
-    (updates: Record<string, string | undefined>) => {
-      setCursorStack([]);
+    (updates: Record<string, string | number | undefined>) => {
       void navigate({
         to: '/collection',
         search: (prev) => {
-          const next = { ...prev, ...updates, cursor: undefined };
+          const next = { ...prev, ...updates, page: undefined };
           for (const [k, v] of Object.entries(next)) {
             if (v === undefined || v === '') {
               delete (next as Record<string, unknown>)[k];
@@ -64,30 +68,31 @@ export function CollectionPage() {
     [navigate]
   );
 
-  const loadNextPage = useCallback(() => {
-    if (data?.next_cursor) {
-      setCursorStack((prev) => [...prev, search.cursor]);
+  const handlePageChange = useCallback(
+    (newPage: number) => {
       void navigate({
         to: '/collection',
-        search: (prev) => ({ ...prev, cursor: data.next_cursor ?? undefined }),
+        search: (prev) => ({ ...prev, page: newPage }),
       });
-    }
-  }, [navigate, data?.next_cursor, search.cursor]);
+    },
+    [navigate]
+  );
 
-  const loadPreviousPage = useCallback(() => {
-    if (cursorStack.length > 0) {
-      const previousCursor = cursorStack[cursorStack.length - 1];
-      setCursorStack((prev) => prev.slice(0, -1));
+  const handleLimitChange = useCallback(
+    (newLimit: PageLimitOption) => {
       void navigate({
         to: '/collection',
         search: (prev) => {
-          const next = { ...prev, cursor: previousCursor };
-          if (!previousCursor) delete (next as Record<string, unknown>).cursor;
+          const next = { ...prev, limit: newLimit === DEFAULT_PAGE_LIMIT ? undefined : newLimit, page: undefined };
+          for (const [k, v] of Object.entries(next)) {
+            if (v === undefined) delete (next as Record<string, unknown>)[k];
+          }
           return next;
         },
       });
-    }
-  }, [navigate, cursorStack]);
+    },
+    [navigate]
+  );
 
   const showEmptyState =
     !isPending && data && data.total_count === 0 && !search.franchise && !search.condition && !search.search;
@@ -170,17 +175,8 @@ export function CollectionPage() {
                   }}
                   onImportOpen={() => setImportOpen(true)}
                 />
+                <PageSizeSelector value={limit} onChange={handleLimitChange} />
                 <ViewToggle view={view} onViewChange={setView} />
-                {(cursorStack.length > 0 || data?.next_cursor) && (
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={loadPreviousPage} disabled={cursorStack.length === 0}>
-                      Previous
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={loadNextPage} disabled={!data?.next_cursor}>
-                      Next
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -189,6 +185,14 @@ export function CollectionPage() {
             ) : (
               <CollectionTable items={data?.data ?? []} isLoading={isPending} onEdit={setEditTarget} />
             )}
+
+            <Pagination
+              page={page}
+              totalCount={data?.total_count ?? 0}
+              limit={data?.limit ?? limit}
+              onPageChange={handlePageChange}
+              ariaLabel="Collection pagination"
+            />
           </>
         )}
       </main>

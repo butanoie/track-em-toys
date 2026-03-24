@@ -89,28 +89,24 @@ describe('item routes (franchise-scoped)', () => {
       expect(body.total_count).toBe(1);
     });
 
-    it('should return next_cursor when more results exist', async () => {
-      const rows = [
-        { ...itemListRow, id: 'i-1', name: 'Alpha' },
-        { ...itemListRow, id: 'i-2', name: 'Beta' },
-        { ...itemListRow, id: 'i-3', name: 'Gamma' },
-      ];
-      mockQuery.mockResolvedValueOnce({ rows }).mockResolvedValueOnce({ rows: [{ total_count: 50 }] });
+    it('should return page and limit in response', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [itemListRow] }).mockResolvedValueOnce({ rows: [{ total_count: 50 }] });
 
       const res = await server.inject({
         method: 'GET',
-        url: '/catalog/franchises/transformers/items?limit=2',
+        url: '/catalog/franchises/transformers/items?page=2&limit=50',
       });
       expect(res.statusCode).toBe(200);
-      const body = res.json<{ data: unknown[]; next_cursor: string }>();
-      expect(body.data).toHaveLength(2);
-      expect(body.next_cursor).toBeTruthy();
+      const body = res.json<{ data: unknown[]; page: number; limit: number; total_count: number }>();
+      expect(body.page).toBe(2);
+      expect(body.limit).toBe(50);
+      expect(body.total_count).toBe(50);
     });
 
-    it('should return 400 for invalid cursor', async () => {
+    it('should return 400 for invalid limit', async () => {
       const res = await server.inject({
         method: 'GET',
-        url: '/catalog/franchises/transformers/items?cursor=bad',
+        url: '/catalog/franchises/transformers/items?limit=25',
       });
       expect(res.statusCode).toBe(400);
     });

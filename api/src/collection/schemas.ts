@@ -1,4 +1,4 @@
-import { errorResponse, cursorListResponse, slugNameRef } from '../catalog/shared/schemas.js';
+import { errorResponse, pageListResponse, slugNameRef } from '../catalog/shared/schemas.js';
 
 const CONDITION_ENUM = [
   'mint_sealed',
@@ -70,7 +70,7 @@ const uuidParam = {
 
 /** GET /collection */
 export const listCollectionSchema = {
-  description: "List the authenticated user's collection with optional filters and cursor pagination.",
+  description: "List the authenticated user's collection with optional filters and page-based pagination.",
   tags: ['collection'],
   summary: 'List collection',
   security: [{ bearerAuth: [] }],
@@ -81,12 +81,12 @@ export const listCollectionSchema = {
       franchise: { type: 'string', maxLength: 120 },
       condition: { type: 'string', enum: CONDITION_ENUM },
       search: { type: 'string', maxLength: 200 },
-      limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
-      cursor: { type: 'string', maxLength: 512 },
+      page: { type: 'integer', minimum: 1, default: 1 },
+      limit: { type: 'integer', enum: [20, 50, 100], default: 20 },
     },
   },
   response: {
-    200: cursorListResponse(collectionItemSchema),
+    200: pageListResponse(collectionItemSchema),
     400: errorResponse,
     401: errorResponse,
     403: errorResponse,

@@ -49,7 +49,7 @@ export interface ItemFilters extends BaseItemFilters {
 export interface ListItemsParams {
   franchise: string;
   filters?: ItemFilters;
-  cursor?: string;
+  page?: number;
   limit?: number;
 }
 
@@ -72,7 +72,7 @@ export async function getFranchiseDetail(slug: string): Promise<FranchiseDetail>
 
 export async function listCatalogItems(params: ListItemsParams): Promise<CatalogItemList> {
   const searchParams = buildFilterParams(params.filters);
-  if (params.cursor) searchParams.set('cursor', params.cursor);
+  if (params.page) searchParams.set('page', String(params.page));
   if (params.limit) searchParams.set('limit', String(params.limit));
   const qs = searchParams.toString();
   const url = `/catalog/franchises/${encodeURIComponent(params.franchise)}/items${qs ? `?${qs}` : ''}`;
@@ -124,13 +124,13 @@ export interface CharacterFilters {
 export interface ListCharactersParams {
   franchise: string;
   filters?: CharacterFilters;
-  cursor?: string;
+  page?: number;
   limit?: number;
 }
 
 export async function listCharacters(params: ListCharactersParams): Promise<CharacterList> {
   const searchParams = buildFilterParams(params.filters);
-  if (params.cursor) searchParams.set('cursor', params.cursor);
+  if (params.page) searchParams.set('page', String(params.page));
   if (params.limit) searchParams.set('limit', String(params.limit));
   const qs = searchParams.toString();
   const url = `/catalog/franchises/${encodeURIComponent(params.franchise)}/characters${qs ? `?${qs}` : ''}`;
@@ -188,7 +188,7 @@ export interface ManufacturerItemFilters extends BaseItemFilters {
 export interface ListManufacturerItemsParams {
   manufacturer: string;
   filters?: ManufacturerItemFilters;
-  cursor?: string;
+  page?: number;
   limit?: number;
 }
 
@@ -202,7 +202,7 @@ export async function getManufacturerDetail(slug: string): Promise<ManufacturerD
 
 export async function listManufacturerItems(params: ListManufacturerItemsParams): Promise<CatalogItemList> {
   const searchParams = buildFilterParams(params.filters);
-  if (params.cursor) searchParams.set('cursor', params.cursor);
+  if (params.page) searchParams.set('page', String(params.page));
   if (params.limit) searchParams.set('limit', String(params.limit));
   const qs = searchParams.toString();
   const url = `/catalog/manufacturers/${encodeURIComponent(params.manufacturer)}/items${qs ? `?${qs}` : ''}`;

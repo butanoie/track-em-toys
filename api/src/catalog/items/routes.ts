@@ -2,7 +2,6 @@ import type { FastifyInstance } from 'fastify';
 import { listItems, getItemBySlug, getItemFacets } from './queries.js';
 import type { ItemFilters } from './queries.js';
 import { listItemsSchema, getItemSchema, getItemFacetsSchema } from './schemas.js';
-import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js';
 import { formatListItem, formatDetail } from '../shared/formatters.js';
 import { photoRoutes } from '../photos/routes.js';
 import { itemRelationshipRoutes } from '../relationships/routes.js';
@@ -15,8 +14,8 @@ interface FranchiseSlugParams {
   slug: string;
 }
 interface ItemsListQuery {
+  page?: number;
   limit?: number;
-  cursor?: string;
   manufacturer?: string;
   size_class?: string;
   toy_line?: string;
@@ -53,26 +52,20 @@ export async function itemRoutes(fastify: FastifyInstance, _opts: object): Promi
   fastify.get<{ Params: FranchiseParams; Querystring: ItemsListQuery }>(
     '/',
     { schema: listItemsSchema, config: rateLimitConfig },
-    async (request, reply) => {
-      const limit = clampLimit(request.query.limit);
-
-      let cursor: { name: string; id: string } | null = null;
-      if (request.query.cursor) {
-        cursor = decodeCursor(request.query.cursor);
-        if (!cursor) return reply.code(400).send({ error: 'Invalid cursor' });
-      }
-
+    async (request) => {
+      const page = request.query.page ?? 1;
+      const limit = request.query.limit ?? 20;
+      const offset = (page - 1) * limit;
       const filters = extractFilters(request.query);
 
       const { rows, totalCount } = await listItems({
         franchiseSlug: request.params.franchise,
         limit,
-        cursor,
+        offset,
         filters,
       });
 
-      const page = buildCursorPage(rows.map(formatListItem), limit);
-      return { ...page, total_count: totalCount };
+      return { data: rows.map(formatListItem), page, limit, total_count: totalCount };
     }
   );
 

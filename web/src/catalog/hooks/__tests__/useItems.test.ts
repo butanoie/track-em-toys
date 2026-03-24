@@ -41,7 +41,8 @@ const mockItemList = {
       data_quality: 'verified' as const,
     },
   ],
-  next_cursor: 'abc123',
+  page: 1,
+  limit: 20,
   total_count: 42,
 };
 
@@ -65,12 +66,12 @@ describe('useItems', () => {
     expect(result.current.data).toEqual(mockItemList);
   });
 
-  it('passes filters and cursor to the API function', async () => {
+  it('passes filters and page/limit to the API function', async () => {
     vi.mocked(listCatalogItems).mockResolvedValue(mockItemList);
     const { wrapper } = createWrapper();
     const filters = { manufacturer: 'hasbro', size_class: 'deluxe' };
 
-    const { result } = renderHook(() => useItems('transformers', filters, 'cursor-xyz'), {
+    const { result } = renderHook(() => useItems('transformers', filters, 2, 50), {
       wrapper,
     });
 
@@ -78,7 +79,8 @@ describe('useItems', () => {
     expect(listCatalogItems).toHaveBeenCalledWith({
       franchise: 'transformers',
       filters,
-      cursor: 'cursor-xyz',
+      page: 2,
+      limit: 50,
     });
   });
 
@@ -87,16 +89,16 @@ describe('useItems', () => {
     const { wrapper, queryClient } = createWrapper();
     const filters = { manufacturer: 'hasbro' };
 
-    renderHook(() => useItems('transformers', filters, 'cur1'), { wrapper });
+    renderHook(() => useItems('transformers', filters, 3), { wrapper });
 
     await waitFor(() => {
       const cache = queryClient.getQueryCache().findAll();
       expect(cache).toHaveLength(1);
-      expect(cache[0].queryKey).toEqual(['catalog', 'items', 'transformers', { manufacturer: 'hasbro' }, 'cur1']);
+      expect(cache[0].queryKey).toEqual(['catalog', 'items', 'transformers', { manufacturer: 'hasbro' }, 3, 20]);
     });
   });
 
-  it('uses empty object for filters and null for cursor in queryKey when omitted', async () => {
+  it('uses default page and limit in queryKey when omitted', async () => {
     vi.mocked(listCatalogItems).mockResolvedValue(mockItemList);
     const { wrapper, queryClient } = createWrapper();
 
@@ -105,7 +107,7 @@ describe('useItems', () => {
     await waitFor(() => {
       const cache = queryClient.getQueryCache().findAll();
       expect(cache).toHaveLength(1);
-      expect(cache[0].queryKey).toEqual(['catalog', 'items', 'transformers', {}, null]);
+      expect(cache[0].queryKey).toEqual(['catalog', 'items', 'transformers', {}, 1, 20]);
     });
   });
 
@@ -138,6 +140,6 @@ describe('useItems', () => {
     // by checking that the observer has the option. We test this indirectly:
     // when data exists from a previous key and we switch keys, isPlaceholderData should be available.
     // For now, ensure the query was created with the expected configuration.
-    expect(query.queryKey).toEqual(['catalog', 'items', 'transformers', {}, null]);
+    expect(query.queryKey).toEqual(['catalog', 'items', 'transformers', {}, 1, 20]);
   });
 });

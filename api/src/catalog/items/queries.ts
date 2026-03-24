@@ -81,7 +81,7 @@ export interface ItemFilters {
 export interface ListItemsParams {
   franchiseSlug: string;
   limit: number;
-  cursor: { name: string; id: string } | null;
+  offset: number;
   filters?: ItemFilters;
 }
 
@@ -148,16 +148,16 @@ export function buildItemsQuery(
 }
 
 /**
- * List items for a franchise with cursor pagination and optional filters.
+ * List items for a franchise with page-based pagination and optional filters.
  *
- * @param params - Cursor-paginated list parameters with filters
+ * @param params - Page-based list parameters with filters
  */
 export async function listItems(params: ListItemsParams): Promise<{ rows: ItemListRow[]; totalCount: number }> {
-  const { franchiseSlug, limit, cursor, filters } = params;
+  const { franchiseSlug, limit, offset, filters } = params;
   const { joins, whereClause, params: filterParams } = buildItemsQuery(franchiseSlug, filters);
 
-  const cursorIdx = filterParams.length + 1;
-  const limitIdx = filterParams.length + 3;
+  const limitIdx = filterParams.length + 1;
+  const offsetIdx = filterParams.length + 2;
 
   const dataQuery = `
     SELECT i.id, i.name, i.slug,
@@ -183,9 +183,8 @@ export async function listItems(params: ListItemsParams): Promise<{ rows: ItemLi
            ) AS characters
     ${joins}
      WHERE ${whereClause}
-       AND ($${cursorIdx}::text IS NULL OR (i.name, i.id) > ($${cursorIdx}, $${cursorIdx + 1}::uuid))
      ORDER BY i.name ASC, i.id ASC
-     LIMIT $${limitIdx}`;
+     LIMIT $${limitIdx} OFFSET $${offsetIdx}`;
 
   const countQuery = `
     SELECT COUNT(*)::int AS total_count
@@ -193,7 +192,7 @@ export async function listItems(params: ListItemsParams): Promise<{ rows: ItemLi
      WHERE ${whereClause}`;
 
   const [dataResult, countResult] = await Promise.all([
-    pool.query<ItemListRow>(dataQuery, [...filterParams, cursor?.name ?? null, cursor?.id ?? null, limit + 1]),
+    pool.query<ItemListRow>(dataQuery, [...filterParams, limit, offset]),
     pool.query<{ total_count: number }>(countQuery, filterParams),
   ]);
 

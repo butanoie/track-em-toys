@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { ChevronRight, SlidersHorizontal, X } from 'lucide-react';
 import { Route } from '@/routes/_authenticated/catalog/$franchise/characters/index';
@@ -6,6 +6,9 @@ import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Pagination } from '@/catalog/components/Pagination';
+import { PageSizeSelector } from '@/components/PageSizeSelector';
+import { DEFAULT_PAGE_LIMIT, type PageLimitOption } from '@/lib/pagination-constants';
 import { useCharacters } from '@/catalog/hooks/useCharacters';
 import { useCharacterFacets } from '@/catalog/hooks/useCharacterFacets';
 import { useFranchiseDetail } from '@/catalog/hooks/useFranchiseDetail';
@@ -21,10 +24,8 @@ export function CharactersPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
 
-  // Cursor stack enables "Previous page" with cursor-based pagination.
-  // Each "Next" pushes the current cursor; "Previous" pops the last one.
-  // Cleared when filters change (new result set invalidates old cursors).
-  const [cursorStack, setCursorStack] = useState<Array<string | undefined>>([]);
+  const page = search.page ?? 1;
+  const limit = search.limit ?? DEFAULT_PAGE_LIMIT;
 
   const { data: detail, error: detailError } = useFranchiseDetail(franchiseSlug);
 
@@ -39,7 +40,7 @@ export function CharactersPage() {
 
   const hasActiveFilters = Object.keys(filters).length > 0;
 
-  const { data: charactersData, isPending: charactersPending } = useCharacters(franchiseSlug, filters, search.cursor);
+  const { data: charactersData, isPending: charactersPending } = useCharacters(franchiseSlug, filters, page, limit);
   const { data: facetsData } = useCharacterFacets(franchiseSlug, filters);
 
   const facetGroups: FacetGroupConfig[] = useMemo(() => {
@@ -68,12 +69,11 @@ export function CharactersPage() {
 
   const setFilter = useCallback(
     (key: keyof CharacterFilters, value: string | boolean | undefined) => {
-      setCursorStack([]);
       void navigate({
         to: '/catalog/$franchise/characters',
         params: { franchise: franchiseSlug },
         search: (prev) => {
-          const next = { ...prev, [key]: value, cursor: undefined, selected: undefined };
+          const next = { ...prev, [key]: value, page: undefined, selected: undefined };
           for (const [k, v] of Object.entries(next)) {
             if (v === undefined || v === '') {
               delete (next as Record<string, unknown>)[k];
@@ -87,7 +87,6 @@ export function CharactersPage() {
   );
 
   const clearFilters = useCallback(() => {
-    setCursorStack([]);
     void navigate({
       to: '/catalog/$franchise/characters',
       params: { franchise: franchiseSlug },
@@ -110,32 +109,33 @@ export function CharactersPage() {
     [navigate, franchiseSlug]
   );
 
-  const loadNextPage = useCallback(() => {
-    if (charactersData?.next_cursor) {
-      setCursorStack((prev) => [...prev, search.cursor]);
+  const handlePageChange = useCallback(
+    (newPage: number) => {
       void navigate({
         to: '/catalog/$franchise/characters',
         params: { franchise: franchiseSlug },
-        search: (prev) => ({ ...prev, cursor: charactersData.next_cursor ?? undefined, selected: undefined }),
+        search: (prev) => ({ ...prev, page: newPage, selected: undefined }),
       });
-    }
-  }, [navigate, franchiseSlug, charactersData?.next_cursor, search.cursor]);
+    },
+    [navigate, franchiseSlug]
+  );
 
-  const loadPreviousPage = useCallback(() => {
-    if (cursorStack.length > 0) {
-      const previousCursor = cursorStack[cursorStack.length - 1];
-      setCursorStack((prev) => prev.slice(0, -1));
+  const handleLimitChange = useCallback(
+    (newLimit: PageLimitOption) => {
       void navigate({
         to: '/catalog/$franchise/characters',
         params: { franchise: franchiseSlug },
         search: (prev) => {
-          const next = { ...prev, selected: undefined, cursor: previousCursor };
-          if (!previousCursor) delete (next as Record<string, unknown>).cursor;
+          const next = { ...prev, limit: newLimit === DEFAULT_PAGE_LIMIT ? undefined : newLimit, page: undefined, selected: undefined };
+          for (const [k, v] of Object.entries(next)) {
+            if (v === undefined) delete (next as Record<string, unknown>)[k];
+          }
           return next;
         },
       });
-    }
-  }, [navigate, franchiseSlug, cursorStack]);
+    },
+    [navigate, franchiseSlug]
+  );
 
   if (detailError instanceof ApiError && detailError.status === 404) {
     return (
@@ -233,29 +233,24 @@ export function CharactersPage() {
             {charactersPending && !charactersData ? (
               <LoadingSpinner className="py-16" />
             ) : charactersData ? (
-              <CharacterList
-                characters={charactersData.data}
-                selectedSlug={search.selected}
-                onSelect={selectCharacter}
-                totalCount={charactersData.total_count}
-                paginationControls={
-                  cursorStack.length > 0 || charactersData.next_cursor ? (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={loadPreviousPage}
-                        disabled={cursorStack.length === 0}
-                      >
-                        Previous
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={loadNextPage} disabled={!charactersData.next_cursor}>
-                        Next
-                      </Button>
-                    </>
-                  ) : undefined
-                }
-              />
+              <>
+                <CharacterList
+                  characters={charactersData.data}
+                  selectedSlug={search.selected}
+                  onSelect={selectCharacter}
+                  totalCount={charactersData.total_count}
+                  paginationControls={
+                    <PageSizeSelector value={limit} onChange={handleLimitChange} />
+                  }
+                />
+                <Pagination
+                  page={page}
+                  totalCount={charactersData.total_count}
+                  limit={charactersData.limit}
+                  onPageChange={handlePageChange}
+                  ariaLabel="Characters pagination"
+                />
+              </>
             ) : null}
           </div>
 

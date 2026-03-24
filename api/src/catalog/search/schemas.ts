@@ -1,4 +1,4 @@
-import { errorResponse, slugNameRef, nullableSlugNameRef } from '../shared/schemas.js';
+import { errorResponse, slugNameRef, nullableSlugNameRef, pageListResponse } from '../shared/schemas.js';
 
 const searchResultItem = {
   type: 'object',
@@ -53,17 +53,7 @@ export const searchSchema = {
     },
   },
   response: {
-    200: {
-      type: 'object',
-      required: ['data', 'page', 'limit', 'total_count'],
-      additionalProperties: false,
-      properties: {
-        data: { type: 'array', items: searchResultItem },
-        page: { type: 'integer' },
-        limit: { type: 'integer' },
-        total_count: { type: 'integer' },
-      },
-    },
+    200: pageListResponse(searchResultItem),
     400: errorResponse,
     500: errorResponse,
   },

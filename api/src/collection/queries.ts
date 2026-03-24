@@ -5,13 +5,9 @@ import type { ItemCondition } from '../types/index.js';
 // Row types
 // ---------------------------------------------------------------------------
 
-/**
- * Row returned by the collection list query.
- * `name` and `id` are aliased for buildCursorPage<T extends { name: string; id: string }>.
- */
+/** Row returned by the collection list query. */
 export interface CollectionListRow {
-  id: string; // ci.id — collection entry UUID (cursor id)
-  name: string; // i.name — item name (cursor name)
+  id: string;
   item_id: string;
   item_name: string;
   item_slug: string;
@@ -65,7 +61,6 @@ export interface CheckRow {
 const COLLECTION_ITEM_SELECT = `
     SELECT
         ci.id,
-        i.name,
         i.id         AS item_id,
         i.name       AS item_name,
         i.slug       AS item_slug,
@@ -99,8 +94,8 @@ export interface ListCollectionParams {
   franchise: string | null;
   condition: string | null;
   search: string | null;
-  cursor: { name: string; id: string } | null;
   limit: number;
+  offset: number;
 }
 
 /**
@@ -108,13 +103,13 @@ export interface ListCollectionParams {
  * RLS enforces user isolation — only the current user's rows are visible.
  *
  * @param client - Transaction client with RLS context
- * @param params - Pagination, filter, and cursor parameters
+ * @param params - Pagination, filter, and offset parameters
  */
 export async function listCollectionItems(
   client: PoolClient,
   params: ListCollectionParams
 ): Promise<{ rows: CollectionListRow[]; totalCount: number }> {
-  const { franchise, condition, search, cursor, limit } = params;
+  const { franchise, condition, search, limit, offset } = params;
 
   const dataQuery = `
     ${COLLECTION_ITEM_SELECT}
@@ -122,9 +117,8 @@ export async function listCollectionItems(
       AND ($1::text IS NULL OR fr.slug = $1)
       AND ($2::text IS NULL OR ci.condition = $2::item_condition)
       AND ($3::text IS NULL OR i.search_vector @@ websearch_to_tsquery('simple', $3))
-      AND ($4::text IS NULL OR (i.name, ci.id) > ($4, $5::uuid))
     ORDER BY i.name ASC, ci.id ASC
-    LIMIT $6`;
+    LIMIT $4 OFFSET $5`;
 
   const countQuery = `
     SELECT COUNT(*)::int AS total_count
@@ -137,7 +131,7 @@ export async function listCollectionItems(
       AND ($3::text IS NULL OR i.search_vector @@ websearch_to_tsquery('simple', $3))`;
 
   const filterParams = [franchise, condition, search];
-  const dataParams = [...filterParams, cursor?.name ?? null, cursor?.id ?? null, limit + 1];
+  const dataParams = [...filterParams, limit, offset];
 
   const dataResult = await client.query<CollectionListRow>(dataQuery, dataParams);
   const countResult = await client.query<{ total_count: number }>(countQuery, filterParams);

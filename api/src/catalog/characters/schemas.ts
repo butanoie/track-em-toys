@@ -4,7 +4,7 @@ import {
   franchiseSlugParams,
   slugNameRef,
   nullableSlugNameRef,
-  cursorListResponse,
+  pageListResponse,
   facetValueItem,
 } from '../shared/schemas.js';
 
@@ -93,8 +93,8 @@ const characterListQuerystring = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
-    cursor: { type: 'string', maxLength: 512 },
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', enum: [20, 50, 100], default: 20 },
     continuity_family: { type: 'string', minLength: 1, maxLength: 120 },
     faction: { type: 'string', minLength: 1, maxLength: 120 },
     character_type: { type: 'string', minLength: 1, maxLength: 120 },
@@ -115,13 +115,13 @@ const characterFiltersQuerystring = {
 } as const;
 
 export const listCharactersSchema = {
-  description: 'List characters in a franchise with cursor-based pagination and optional filters.',
+  description: 'List characters in a franchise with page-based pagination and optional filters.',
   tags: ['catalog'],
   summary: 'List characters',
   params: franchiseParam,
   querystring: characterListQuerystring,
   response: {
-    200: cursorListResponse(characterListItem),
+    200: pageListResponse(characterListItem),
     400: errorResponse,
     404: errorResponse,
     500: errorResponse,

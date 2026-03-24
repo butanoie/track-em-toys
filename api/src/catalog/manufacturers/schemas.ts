@@ -1,4 +1,4 @@
-import { errorResponse, slugParam, itemListItem, facetValueItem, cursorListResponse } from '../shared/schemas.js';
+import { errorResponse, slugParam, itemListItem, facetValueItem, pageListResponse } from '../shared/schemas.js';
 
 const manufacturerItem = {
   type: 'object',
@@ -102,8 +102,8 @@ const manufacturerItemsListQuerystring = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
-    cursor: { type: 'string', maxLength: 512 },
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', enum: [20, 50, 100], default: 20 },
     franchise: { type: 'string', minLength: 1, maxLength: 120 },
     size_class: { type: 'string', minLength: 1, maxLength: 120 },
     toy_line: { type: 'string', minLength: 1, maxLength: 120 },
@@ -125,13 +125,13 @@ const manufacturerItemFiltersQuerystring = {
 } as const;
 
 export const listManufacturerItemsSchema = {
-  description: 'List items by manufacturer with cursor-based pagination and optional filters.',
+  description: 'List items by manufacturer with page-based pagination and optional filters.',
   tags: ['catalog'],
   summary: 'List manufacturer items',
   params: slugParam,
   querystring: manufacturerItemsListQuerystring,
   response: {
-    200: cursorListResponse(itemListItem),
+    200: pageListResponse(itemListItem),
     400: errorResponse,
     404: errorResponse,
     500: errorResponse,

@@ -121,23 +121,23 @@ function buildCharactersQuery(
 export interface ListCharactersParams {
   franchiseSlug: string;
   limit: number;
-  cursor: { name: string; id: string } | null;
+  offset: number;
   filters?: CharacterFilters;
 }
 
 /**
- * List characters for a franchise with cursor pagination and optional filters.
+ * List characters for a franchise with page-based pagination and optional filters.
  *
- * @param params - Cursor-paginated list parameters with filters
+ * @param params - Page-based list parameters with filters
  */
 export async function listCharacters(
   params: ListCharactersParams
 ): Promise<{ rows: CharacterListRow[]; totalCount: number }> {
-  const { franchiseSlug, limit, cursor, filters } = params;
+  const { franchiseSlug, limit, offset, filters } = params;
   const { joins, whereClause, params: filterParams } = buildCharactersQuery(franchiseSlug, filters);
 
-  const cursorIdx = filterParams.length + 1;
-  const limitIdx = filterParams.length + 3;
+  const limitIdx = filterParams.length + 1;
+  const offsetIdx = filterParams.length + 2;
 
   const dataQuery = `
     SELECT c.id, c.name, c.slug,
@@ -147,9 +147,8 @@ export async function listCharacters(
            cf.slug AS continuity_family_slug, cf.name AS continuity_family_name
     ${joins}
      WHERE ${whereClause}
-       AND ($${cursorIdx}::text IS NULL OR (c.name, c.id) > ($${cursorIdx}, $${cursorIdx + 1}::uuid))
      ORDER BY c.name ASC, c.id ASC
-     LIMIT $${limitIdx}`;
+     LIMIT $${limitIdx} OFFSET $${offsetIdx}`;
 
   const countQuery = `
     SELECT COUNT(*)::int AS total_count
@@ -157,7 +156,7 @@ export async function listCharacters(
      WHERE ${whereClause}`;
 
   const [dataResult, countResult] = await Promise.all([
-    pool.query<CharacterListRow>(dataQuery, [...filterParams, cursor?.name ?? null, cursor?.id ?? null, limit + 1]),
+    pool.query<CharacterListRow>(dataQuery, [...filterParams, limit, offset]),
     pool.query<{ total_count: number }>(countQuery, filterParams),
   ]);
 

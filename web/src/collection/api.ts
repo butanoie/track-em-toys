@@ -19,7 +19,8 @@ export interface CollectionFilters {
   franchise?: string;
   condition?: CollectionCondition;
   search?: string;
-  cursor?: string;
+  page?: number;
+  limit?: number;
 }
 
 export async function listCollectionItems(filters?: CollectionFilters): Promise<CollectionItemList> {
@@ -27,7 +28,8 @@ export async function listCollectionItems(filters?: CollectionFilters): Promise<
   if (filters?.franchise) params.set('franchise', filters.franchise);
   if (filters?.condition) params.set('condition', filters.condition);
   if (filters?.search) params.set('search', filters.search);
-  if (filters?.cursor) params.set('cursor', filters.cursor);
+  if (filters?.page) params.set('page', String(filters.page));
+  if (filters?.limit) params.set('limit', String(filters.limit));
 
   const qs = params.toString();
   return apiFetchJson(`/collection${qs ? `?${qs}` : ''}`, CollectionItemListSchema);

@@ -74,10 +74,18 @@ vi.mock('@/collection/components/AddToCollectionButton', () => ({
   AddToCollectionButton: () => null,
 }));
 
+vi.mock('@/catalog/components/Pagination', () => ({
+  Pagination: () => <nav data-testid="pagination" />,
+}));
+
+vi.mock('@/components/PageSizeSelector', () => ({
+  PageSizeSelector: () => <div data-testid="page-size-selector" />,
+}));
+
 function setupDefaults() {
   mockUseManufacturerDetail.mockReturnValue({ data: mockManufacturerDetail, error: null });
   mockUseManufacturerItems.mockReturnValue({
-    data: { data: [mockCatalogItem], next_cursor: null, total_count: 1 },
+    data: { data: [mockCatalogItem], page: 1, limit: 20, total_count: 1 },
     isPending: false,
   });
   mockUseManufacturerItemFacets.mockReturnValue({ data: mockManufacturerItemFacets });
@@ -127,16 +135,15 @@ describe('ManufacturerItemsPage', () => {
     expect(screen.getByRole('heading', { name: 'Manufacturer not found' })).toBeInTheDocument();
   });
 
-  it('renders Next button when next_cursor is present', () => {
+  it('renders pagination controls', () => {
     mockUseManufacturerDetail.mockReturnValue({ data: mockManufacturerDetail, error: null });
     mockUseManufacturerItems.mockReturnValue({
-      data: { data: [mockCatalogItem], next_cursor: 'abc', total_count: 50 },
+      data: { data: [mockCatalogItem], page: 1, limit: 20, total_count: 50 },
       isPending: false,
     });
     mockUseManufacturerItemFacets.mockReturnValue({ data: mockManufacturerItemFacets });
     mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
     render(<ManufacturerItemsPage />);
-    expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
+    expect(screen.getByTestId('page-size-selector')).toBeInTheDocument();
   });
 });

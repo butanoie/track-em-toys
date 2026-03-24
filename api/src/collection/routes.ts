@@ -1,7 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
 import { HttpError } from '../auth/errors.js';
-import { clampLimit, decodeCursor, buildCursorPage } from '../catalog/shared/pagination.js';
 import { withTransaction } from '../db/pool.js';
 import type { ItemCondition } from '../types/index.js';
 import type { CollectionListRow } from './queries.js';
@@ -86,8 +85,8 @@ interface ListQuery {
   franchise?: string;
   condition?: string;
   search?: string;
+  page?: number;
   limit?: number;
-  cursor?: string;
 }
 
 interface AddBody {
@@ -320,29 +319,22 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
   fastify.get<{ Querystring: ListQuery }>(
     '/',
     { schema: listCollectionSchema, preHandler: authPreHandler, config: readRateLimit },
-    async (request, reply) => {
-      const limit = clampLimit(request.query.limit);
-
-      let cursor: { name: string; id: string } | null = null;
-      if (request.query.cursor) {
-        cursor = decodeCursor(request.query.cursor);
-        if (!cursor) return reply.code(400).send({ error: 'Invalid cursor' });
-      }
+    async (request) => {
+      const page = request.query.page ?? 1;
+      const limit = request.query.limit ?? 20;
+      const offset = (page - 1) * limit;
 
       const { rows, totalCount } = await withTransaction(async (client) => {
         return queries.listCollectionItems(client, {
           franchise: request.query.franchise ?? null,
           condition: request.query.condition ?? null,
           search: request.query.search ?? null,
-          cursor,
           limit,
+          offset,
         });
       }, request.user.sub);
 
-      // buildCursorPage requires { name, id } — call it on raw rows first,
-      // then format the trimmed data slice.
-      const page = buildCursorPage(rows, limit);
-      return { data: page.data.map(formatCollectionItem), next_cursor: page.next_cursor, total_count: totalCount };
+      return { data: rows.map(formatCollectionItem), page, limit, total_count: totalCount };
     }
   );
 

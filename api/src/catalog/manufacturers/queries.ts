@@ -160,23 +160,23 @@ function buildManufacturerItemsQuery(
 export interface ListManufacturerItemsParams {
   manufacturerSlug: string;
   limit: number;
-  cursor: { name: string; id: string } | null;
+  offset: number;
   filters?: ManufacturerItemFilters;
 }
 
 /**
- * List items for a manufacturer with cursor pagination and optional filters.
+ * List items for a manufacturer with page-based pagination and optional filters.
  *
- * @param params - Cursor-paginated list parameters with filters
+ * @param params - Page-based list parameters with filters
  */
 export async function listManufacturerItems(
   params: ListManufacturerItemsParams
 ): Promise<{ rows: ItemListRow[]; totalCount: number }> {
-  const { manufacturerSlug, limit, cursor, filters } = params;
+  const { manufacturerSlug, limit, offset, filters } = params;
   const { joins, whereClause, params: filterParams } = buildManufacturerItemsQuery(manufacturerSlug, filters);
 
-  const cursorIdx = filterParams.length + 1;
-  const limitIdx = filterParams.length + 3;
+  const limitIdx = filterParams.length + 1;
+  const offsetIdx = filterParams.length + 2;
 
   const dataQuery = `
     SELECT i.id, i.name, i.slug,
@@ -202,9 +202,8 @@ export async function listManufacturerItems(
            ) AS characters
     ${joins}
      WHERE ${whereClause}
-       AND ($${cursorIdx}::text IS NULL OR (i.name, i.id) > ($${cursorIdx}, $${cursorIdx + 1}::uuid))
      ORDER BY i.name ASC, i.id ASC
-     LIMIT $${limitIdx}`;
+     LIMIT $${limitIdx} OFFSET $${offsetIdx}`;
 
   const countQuery = `
     SELECT COUNT(*)::int AS total_count
@@ -212,7 +211,7 @@ export async function listManufacturerItems(
      WHERE ${whereClause}`;
 
   const [dataResult, countResult] = await Promise.all([
-    pool.query<ItemListRow>(dataQuery, [...filterParams, cursor?.name ?? null, cursor?.id ?? null, limit + 1]),
+    pool.query<ItemListRow>(dataQuery, [...filterParams, limit, offset]),
     pool.query<{ total_count: number }>(countQuery, filterParams),
   ]);
 

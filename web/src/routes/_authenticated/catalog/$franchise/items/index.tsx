@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { ItemsPage } from '@/catalog/pages/ItemsPage';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { pageLimitSchema } from '@/lib/pagination-constants';
 
 const itemsSearchSchema = z.object({
   manufacturer: z.string().optional().catch(undefined),
@@ -14,7 +15,8 @@ const itemsSearchSchema = z.object({
     .optional()
     .catch(undefined),
   character: z.string().optional().catch(undefined),
-  cursor: z.string().optional().catch(undefined),
+  page: z.coerce.number().int().min(1).optional().catch(undefined),
+  limit: pageLimitSchema,
   selected: z.string().optional().catch(undefined),
 });
 
