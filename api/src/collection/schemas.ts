@@ -369,6 +369,7 @@ export const importCollectionSchema = {
     additionalProperties: false,
     properties: {
       version: { type: 'integer', minimum: 1, maximum: 1 },
+      mode: { type: 'string', enum: ['append', 'overwrite'], default: 'append' },
       items: {
         type: 'array',
         minItems: 1,
@@ -380,11 +381,12 @@ export const importCollectionSchema = {
   response: {
     200: {
       type: 'object',
-      required: ['imported', 'unresolved'],
+      required: ['imported', 'unresolved', 'overwritten_count'],
       additionalProperties: false,
       properties: {
         imported: { type: 'array', items: importedItemSchema },
         unresolved: { type: 'array', items: unresolvedItemSchema },
+        overwritten_count: { type: 'integer' },
       },
     },
     400: errorResponse,

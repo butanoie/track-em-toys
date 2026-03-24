@@ -375,6 +375,17 @@ export async function softDeleteCollectionItem(client: PoolClient, id: string): 
   return (result.rowCount ?? 0) > 0;
 }
 
+/**
+ * Soft-delete all active collection items for the current RLS user.
+ * Used by the overwrite import mode to clear the collection before re-importing.
+ *
+ * @param client - Transaction client with RLS context
+ */
+export async function softDeleteAllCollectionItems(client: PoolClient): Promise<number> {
+  const result = await client.query(`UPDATE collection_items SET deleted_at = now() WHERE deleted_at IS NULL`);
+  return result.rowCount ?? 0;
+}
+
 // ---------------------------------------------------------------------------
 // Restore
 // ---------------------------------------------------------------------------

@@ -113,8 +113,11 @@ interface ImportItem {
   added_at?: string;
 }
 
+type ImportMode = 'append' | 'overwrite';
+
 interface ImportBody {
   version: number;
+  mode?: ImportMode;
   items: ImportItem[];
 }
 
@@ -238,7 +241,8 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
     '/import',
     { schema: importCollectionSchema, preHandler: authPreHandler, config: importRateLimit },
     async (request, reply) => {
-      const { items } = request.body;
+      const { items, mode } = request.body;
+      const importMode: ImportMode = mode ?? 'append';
 
       // Defense-in-depth — schema enforces maxItems: 500
       if (items.length > MAX_IMPORT_ITEMS) {
@@ -246,6 +250,12 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
       }
 
       return withTransaction(async (client) => {
+        // In overwrite mode, soft-delete all existing items first
+        let overwrittenCount = 0;
+        if (importMode === 'overwrite') {
+          overwrittenCount = await queries.softDeleteAllCollectionItems(client);
+        }
+
         const resolved = await queries.batchGetItemIdsBySlugs(client, items);
 
         const imported: Array<{
@@ -300,7 +310,7 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
           }
         }
 
-        return { imported, unresolved };
+        return { imported, unresolved, overwritten_count: overwrittenCount };
       }, request.user.sub);
     }
   );

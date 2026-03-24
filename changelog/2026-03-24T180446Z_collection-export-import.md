@@ -137,6 +137,37 @@ Four review passes found and fixed 19 issues including:
 
 ---
 
+## Append/Overwrite Import Mode (follow-up enhancement)
+
+Added user choice between appending to or replacing the existing collection during import.
+
+### API Changes
+
+- Added `softDeleteAllCollectionItems` query — RLS-scoped bulk soft-delete for overwrite mode
+- Added `mode: 'append' | 'overwrite'` to import body schema (default: `'append'`)
+- Added `overwritten_count` to import response — reports how many items were soft-deleted
+- In overwrite mode, all existing active items are soft-deleted within the same transaction before inserting new ones (atomic — rollback restores the old collection on failure)
+- 3 new integration tests: append default, overwrite mode, invalid mode rejection
+
+### Web Changes
+
+- Dialog footer replaced single "Import" button with "Append" and "Replace" buttons (amber outline / red outline)
+- Three confirmation prompts via conditionally-rendered `AlertDialog`:
+  - **Append**: "Add N items to your existing M items?"
+  - **Overwrite**: "Replace your M items with N items from the file?"
+  - **Size warning** (overwrite when import < 50% of collection): "Your collection has M items but this import only has N — are you sure?"
+- `ImportCollectionDialog` receives `currentCollectionCount` prop from `CollectionPage` via stats
+- Results manifest shows "N previous items were archived" when `overwritten_count > 0`
+- `useCollectionImport` hook accepts `{ data, mode }` variables; `ImportVariables` interface exported
+
+### Code Simplification (from /simplify review)
+
+- AlertDialogs conditionally rendered via `{confirm.type === 'x' && ...}` instead of always-mounted with `open={condition}` — eliminates 2 unnecessary DOM trees, removes fallback `0` guards, enables TypeScript discriminated union narrowing
+- Fixed `{'\n\n'}` (invisible in JSX) replaced with proper `<p>` elements via `asChild` + `<div>` wrapper
+- Exported `ImportVariables` interface for type-safe usage in tests
+
+---
+
 ## Next Steps
 
 - Pre-export `AlertDialog` prompt when `stats.deleted_count > 0` (plumbing ready)

@@ -40,6 +40,11 @@ export function ImportResultsManifest({ result, originalItems, onDone }: ImportR
           <p className="text-sm text-muted-foreground mt-1">
             {imported.length === 1 ? 'item' : 'items'} added to your collection
           </p>
+          {result.overwritten_count > 0 && (
+            <p className="text-xs text-muted-foreground mt-2">
+              {result.overwritten_count} previous {result.overwritten_count === 1 ? 'item was' : 'items were'} archived
+            </p>
+          )}
         </div>
         <div className="flex items-center justify-end">
           <Button

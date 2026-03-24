@@ -202,7 +202,11 @@ export function CollectionPage() {
         mutations={mutations}
       />
 
-      <ImportCollectionDialog open={importOpen} onOpenChange={setImportOpen} />
+      <ImportCollectionDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        currentCollectionCount={stats?.total_copies ?? 0}
+      />
     </div>
   );
 }

@@ -80,6 +80,7 @@ vi.mock('./queries.js', () => ({
   getCollectionStats: vi.fn(),
   exportCollectionItems: vi.fn(),
   batchGetItemIdsBySlugs: vi.fn(),
+  softDeleteAllCollectionItems: vi.fn(),
   checkCollectionItems: vi.fn(),
   updateCollectionItem: vi.fn(),
   softDeleteCollectionItem: vi.fn(),
@@ -1165,6 +1166,68 @@ describe('collection routes', () => {
       });
 
       expect(res.statusCode).toBe(415);
+    });
+
+    it('should return overwritten_count=0 in append mode (default)', async () => {
+      mockTx();
+      const resolvedMap = new Map([
+        ['transformers::optimus-prime', { item_id: ITEM_UUID, item_name: 'Optimus Prime' }],
+      ]);
+      vi.mocked(queries.batchGetItemIdsBySlugs).mockResolvedValue(resolvedMap);
+      vi.mocked(queries.insertCollectionItem).mockResolvedValue(COLLECTION_UUID);
+
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: { version: 1, items: [{ franchise_slug: 'transformers', item_slug: 'optimus-prime' }] },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json().overwritten_count).toBe(0);
+      expect(queries.softDeleteAllCollectionItems).not.toHaveBeenCalled();
+    });
+
+    it('should soft-delete all items before import in overwrite mode', async () => {
+      mockTx();
+      vi.mocked(queries.softDeleteAllCollectionItems).mockResolvedValue(5);
+      const resolvedMap = new Map([
+        ['transformers::optimus-prime', { item_id: ITEM_UUID, item_name: 'Optimus Prime' }],
+      ]);
+      vi.mocked(queries.batchGetItemIdsBySlugs).mockResolvedValue(resolvedMap);
+      vi.mocked(queries.insertCollectionItem).mockResolvedValue(COLLECTION_UUID);
+
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: {
+          version: 1,
+          mode: 'overwrite',
+          items: [{ franchise_slug: 'transformers', item_slug: 'optimus-prime' }],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.overwritten_count).toBe(5);
+      expect(json.imported).toHaveLength(1);
+      expect(queries.softDeleteAllCollectionItems).toHaveBeenCalledOnce();
+    });
+
+    it('should reject invalid mode value', async () => {
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: {
+          version: 1,
+          mode: 'invalid',
+          items: [{ franchise_slug: 'tf', item_slug: 'op' }],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
     });
   });
 });

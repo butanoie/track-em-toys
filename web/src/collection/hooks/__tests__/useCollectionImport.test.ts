@@ -37,20 +37,36 @@ describe('useCollectionImport', () => {
     vi.clearAllMocks();
   });
 
-  it('calls importCollection with the payload', async () => {
-    vi.mocked(importCollection).mockResolvedValue({ imported: [], unresolved: [] });
+  it('calls importCollection with payload and mode', async () => {
+    vi.mocked(importCollection).mockResolvedValue({ imported: [], unresolved: [], overwritten_count: 0 });
 
     const { result } = renderHook(() => useCollectionImport(), { wrapper: createWrapper() });
 
     act(() => {
-      result.current.mutate(mockPayload);
+      result.current.mutate({ data: mockPayload, mode: 'append' });
     });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(vi.mocked(importCollection).mock.calls[0]?.[0]).toEqual(mockPayload);
+    expect(importCollection).toHaveBeenCalledWith(mockPayload, 'append');
+  });
+
+  it('passes overwrite mode to importCollection', async () => {
+    vi.mocked(importCollection).mockResolvedValue({ imported: [], unresolved: [], overwritten_count: 5 });
+
+    const { result } = renderHook(() => useCollectionImport(), { wrapper: createWrapper() });
+
+    act(() => {
+      result.current.mutate({ data: mockPayload, mode: 'overwrite' });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(importCollection).toHaveBeenCalledWith(mockPayload, 'overwrite');
   });
 
   it('surfaces error on API failure', async () => {
@@ -59,7 +75,7 @@ describe('useCollectionImport', () => {
     const { result } = renderHook(() => useCollectionImport(), { wrapper: createWrapper() });
 
     act(() => {
-      result.current.mutate(mockPayload);
+      result.current.mutate({ data: mockPayload, mode: 'append' });
     });
 
     await waitFor(() => {

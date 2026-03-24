@@ -15,6 +15,7 @@ const allSuccessResult: CollectionImportResponse = {
     { franchise_slug: 'gi-joe', item_slug: 'snake-eyes', item_name: 'Snake Eyes', condition: 'damaged' },
   ],
   unresolved: [],
+  overwritten_count: 0,
 };
 
 const mixedResult: CollectionImportResponse = {
@@ -27,6 +28,7 @@ const mixedResult: CollectionImportResponse = {
     },
   ],
   unresolved: [{ franchise_slug: 'gi-joe', item_slug: 'snow-serpent', reason: 'Item not found in catalog' }],
+  overwritten_count: 0,
 };
 
 describe('ImportResultsManifest', () => {

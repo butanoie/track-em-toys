@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus, RefreshCw } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -8,17 +8,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   CollectionExportPayloadSchema,
   type CollectionExportPayload,
   type CollectionImportResponse,
+  type ImportMode,
 } from '@/lib/zod-schemas';
 import { MAX_EXPORT_VERSION, type ImportPreviewData } from '@/collection/lib/import-types';
 import { useCollectionImport } from '@/collection/hooks/useCollectionImport';
 import { ImportDropZone } from '@/collection/components/ImportDropZone';
 import { ImportPreview } from '@/collection/components/ImportPreview';
 import { ImportResultsManifest } from '@/collection/components/ImportResultsManifest';
+
+/** Threshold: if import has fewer than this fraction of existing items, require double confirmation */
+const OVERWRITE_SIZE_WARNING_RATIO = 0.5;
 
 type ImportDialogState =
   | { phase: 'idle' }
@@ -27,9 +41,16 @@ type ImportDialogState =
   | { phase: 'complete'; result: CollectionImportResponse; originalItems: CollectionExportPayload['items'] }
   | { phase: 'error'; errorType: 'invalid-json' | 'bad-version' | 'empty-items' | 'api-error'; message: string };
 
+type ConfirmState =
+  | { type: 'none' }
+  | { type: 'append'; itemCount: number }
+  | { type: 'overwrite'; itemCount: number; currentCount: number }
+  | { type: 'overwrite-size-warning'; itemCount: number; currentCount: number };
+
 interface ImportCollectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  currentCollectionCount: number;
 }
 
 function computePreview(payload: CollectionExportPayload): ImportPreviewData {
@@ -63,7 +84,7 @@ function getDialogDescription(phase: ImportDialogState['phase']): string {
     case 'idle':
       return 'Restore items from a previously exported file';
     case 'file-selected':
-      return 'Review before importing';
+      return 'Choose how to import';
     case 'importing':
       return 'Resolving catalog slugs and adding items';
     case 'complete':
@@ -121,8 +142,9 @@ function ImportErrorAlert({ errorType, message, onRetry }: ImportErrorAlertProps
   );
 }
 
-export function ImportCollectionDialog({ open, onOpenChange }: ImportCollectionDialogProps) {
+export function ImportCollectionDialog({ open, onOpenChange, currentCollectionCount }: ImportCollectionDialogProps) {
   const [state, setState] = useState<ImportDialogState>({ phase: 'idle' });
+  const [confirm, setConfirm] = useState<ConfirmState>({ type: 'none' });
   const importMutation = useCollectionImport();
   const { reset: resetImportMutation } = importMutation;
 
@@ -130,6 +152,7 @@ export function ImportCollectionDialog({ open, onOpenChange }: ImportCollectionD
   useEffect(() => {
     if (!open) {
       setState({ phase: 'idle' });
+      setConfirm({ type: 'none' });
       resetImportMutation();
     }
   }, [open, resetImportMutation]);
@@ -190,19 +213,48 @@ export function ImportCollectionDialog({ open, onOpenChange }: ImportCollectionD
     }
   }
 
-  function handleConfirmImport(): void {
+  function handleRequestAppend(): void {
+    if (state.phase !== 'file-selected') return;
+    setConfirm({ type: 'append', itemCount: state.preview.itemCount });
+  }
+
+  function handleRequestOverwrite(): void {
+    if (state.phase !== 'file-selected') return;
+    const importCount = state.preview.itemCount;
+
+    // If the import is significantly smaller than the existing collection, require extra confirmation
+    if (currentCollectionCount > 0 && importCount < currentCollectionCount * OVERWRITE_SIZE_WARNING_RATIO) {
+      setConfirm({
+        type: 'overwrite-size-warning',
+        itemCount: importCount,
+        currentCount: currentCollectionCount,
+      });
+    } else {
+      setConfirm({
+        type: 'overwrite',
+        itemCount: importCount,
+        currentCount: currentCollectionCount,
+      });
+    }
+  }
+
+  function handleConfirmImport(mode: ImportMode): void {
     if (state.phase !== 'file-selected') return;
     const { payload } = state;
+    setConfirm({ type: 'none' });
     setState({ phase: 'importing' });
 
-    importMutation.mutate(payload, {
-      onSuccess: (result) => {
-        setState({ phase: 'complete', result, originalItems: payload.items });
-      },
-      onError: (err) => {
-        setState({ phase: 'error', errorType: 'api-error', message: err.message });
-      },
-    });
+    importMutation.mutate(
+      { data: payload, mode },
+      {
+        onSuccess: (result) => {
+          setState({ phase: 'complete', result, originalItems: payload.items });
+        },
+        onError: (err) => {
+          setState({ phase: 'error', errorType: 'api-error', message: err.message });
+        },
+      }
+    );
   }
 
   function handleDone(): void {
@@ -214,62 +266,153 @@ export function ImportCollectionDialog({ open, onOpenChange }: ImportCollectionD
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{getDialogTitle(state.phase)}</DialogTitle>
-          <DialogDescription>{getDialogDescription(state.phase)}</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{getDialogTitle(state.phase)}</DialogTitle>
+            <DialogDescription>{getDialogDescription(state.phase)}</DialogDescription>
+          </DialogHeader>
 
-        {/* Phase: idle */}
-        {state.phase === 'idle' && (
-          <ImportDropZone
-            onFileSelect={(file) => {
-              void handleFileSelect(file);
-            }}
-          />
-        )}
+          {/* Phase: idle */}
+          {state.phase === 'idle' && (
+            <ImportDropZone
+              onFileSelect={(file) => {
+                void handleFileSelect(file);
+              }}
+            />
+          )}
 
-        {/* Phase: file-selected */}
-        {state.phase === 'file-selected' && (
-          <ImportPreview file={state.file} preview={state.preview} onReplaceFile={handleResetToIdle} />
-        )}
+          {/* Phase: file-selected */}
+          {state.phase === 'file-selected' && (
+            <ImportPreview file={state.file} preview={state.preview} onReplaceFile={handleResetToIdle} />
+          )}
 
-        {/* Phase: importing */}
-        {state.phase === 'importing' && (
-          <div className="rounded-lg border border-border bg-muted/30 p-8 text-center">
-            <Loader2 className="h-10 w-10 mx-auto mb-4 text-amber-600 dark:text-amber-400 animate-spin" />
-            <p className="text-sm font-medium text-foreground">Processing items</p>
-            <p className="text-xs text-muted-foreground mt-1">Matching franchise and item slugs...</p>
-          </div>
-        )}
+          {/* Phase: importing */}
+          {state.phase === 'importing' && (
+            <div className="rounded-lg border border-border bg-muted/30 p-8 text-center">
+              <Loader2 className="h-10 w-10 mx-auto mb-4 text-amber-600 dark:text-amber-400 animate-spin" />
+              <p className="text-sm font-medium text-foreground">Processing items</p>
+              <p className="text-xs text-muted-foreground mt-1">Matching franchise and item slugs...</p>
+            </div>
+          )}
 
-        {/* Phase: complete */}
-        {state.phase === 'complete' && (
-          <ImportResultsManifest result={state.result} originalItems={state.originalItems} onDone={handleDone} />
-        )}
+          {/* Phase: complete */}
+          {state.phase === 'complete' && (
+            <ImportResultsManifest result={state.result} originalItems={state.originalItems} onDone={handleDone} />
+          )}
 
-        {/* Phase: error */}
-        {state.phase === 'error' && (
-          <ImportErrorAlert errorType={state.errorType} message={state.message} onRetry={handleResetToIdle} />
-        )}
+          {/* Phase: error */}
+          {state.phase === 'error' && (
+            <ImportErrorAlert errorType={state.errorType} message={state.message} onRetry={handleResetToIdle} />
+          )}
 
-        {/* Footer — only for idle and file-selected phases */}
-        {(state.phase === 'idle' || state.phase === 'file-selected') && (
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmImport}
-              disabled={state.phase !== 'file-selected'}
-              className="bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-500 dark:hover:bg-amber-600"
-            >
-              {state.phase === 'file-selected' ? `Import ${state.preview.itemCount} items` : 'Import'}
-            </Button>
-          </DialogFooter>
-        )}
-      </DialogContent>
-    </Dialog>
+          {/* Footer — idle and file-selected phases */}
+          {(state.phase === 'idle' || state.phase === 'file-selected') && (
+            <DialogFooter className="sm:justify-between">
+              <Button variant="ghost" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              {state.phase === 'file-selected' && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleRequestAppend}
+                    className="border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-950"
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1.5" />
+                    Append
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleRequestOverwrite}
+                    className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-950"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                    Replace
+                  </Button>
+                </div>
+              )}
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Append confirmation — conditionally rendered so TS narrows confirm type */}
+      {confirm.type === 'append' && (
+        <AlertDialog open onOpenChange={() => setConfirm({ type: 'none' })}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Append to collection?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will add {confirm.itemCount} items to your existing collection
+                {currentCollectionCount > 0 ? ` of ${currentCollectionCount} items` : ''}. Existing entries will not be
+                modified.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => handleConfirmImport('append')}>
+                Append {confirm.itemCount} items
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {/* Overwrite confirmation */}
+      {confirm.type === 'overwrite' && (
+        <AlertDialog open onOpenChange={() => setConfirm({ type: 'none' })}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Replace entire collection?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will remove all {confirm.currentCount} existing items and replace them with {confirm.itemCount}{' '}
+                items from the file. Removed items can be restored from the soft-delete archive.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => handleConfirmImport('overwrite')}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Replace collection
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {/* Overwrite size warning — second confirmation for significantly smaller imports */}
+      {confirm.type === 'overwrite-size-warning' && (
+        <AlertDialog open onOpenChange={() => setConfirm({ type: 'none' })}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Import is much smaller than your collection</AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div>
+                  <p>
+                    Your collection has <span className="font-semibold">{confirm.currentCount}</span> items, but this
+                    import only contains <span className="font-semibold">{confirm.itemCount}</span> items. Replacing
+                    your collection will soft-delete {confirm.currentCount - confirm.itemCount} more items than it adds.
+                  </p>
+                  <p className="mt-2">Are you sure you want to proceed?</p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => handleConfirmImport('overwrite')}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Yes, replace collection
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+    </>
   );
 }

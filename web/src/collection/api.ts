@@ -12,6 +12,7 @@ import {
   type CollectionCondition,
   type CollectionExportPayload,
   type CollectionImportResponse,
+  type ImportMode,
 } from '@/lib/zod-schemas';
 
 export interface CollectionFilters {
@@ -81,11 +82,15 @@ export async function exportCollection(includeDeleted = false): Promise<Response
   return response;
 }
 
-export async function importCollection(data: CollectionExportPayload): Promise<CollectionImportResponse> {
+export async function importCollection(
+  data: CollectionExportPayload,
+  mode: ImportMode = 'append'
+): Promise<CollectionImportResponse> {
   // Strip fields the import endpoint doesn't accept (exported_at, deleted_at on items)
   // to avoid Fastify's additionalProperties:false rejecting the request
   const payload = {
     version: data.version,
+    mode,
     items: data.items.map((item) => {
       const entry: Record<string, unknown> = {
         franchise_slug: item.franchise_slug,

@@ -30,7 +30,7 @@ vi.mock('../ImportDropZone', () => ({
 vi.mock('../ImportPreview', () => ({
   ImportPreview: ({ onReplaceFile }: { onReplaceFile: () => void }) => (
     <div data-testid="preview">
-      <button onClick={onReplaceFile}>Replace</button>
+      <button onClick={onReplaceFile}>Replace file</button>
     </div>
   ),
 }));
@@ -62,12 +62,12 @@ const validExportJson = JSON.stringify({
   ],
 });
 
-function renderDialog(open = true) {
+function renderDialog(open = true, currentCollectionCount = 10) {
   const onOpenChange = vi.fn();
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const result = render(
     <QueryClientProvider client={qc}>
-      <ImportCollectionDialog open={open} onOpenChange={onOpenChange} />
+      <ImportCollectionDialog open={open} onOpenChange={onOpenChange} currentCollectionCount={currentCollectionCount} />
     </QueryClientProvider>
   );
   return { ...result, onOpenChange };
@@ -77,7 +77,6 @@ async function triggerFileSelect(content: string, name = 'test.json') {
   const file = createFile(content, name);
   await act(async () => {
     capturedOnFileSelect?.(file);
-    // Allow file.text() promise and setState to resolve
     await new Promise((r) => setTimeout(r, 0));
   });
 }
@@ -100,6 +99,65 @@ describe('ImportCollectionDialog', () => {
     await waitFor(() => {
       expect(screen.getByTestId('preview')).toBeInTheDocument();
     });
+  });
+
+  it('shows Append and Replace buttons after file selection', async () => {
+    renderDialog();
+    await triggerFileSelect(validExportJson);
+    await waitFor(() => screen.getByTestId('preview'));
+    expect(screen.getByRole('button', { name: /^Append$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Replace$/i })).toBeInTheDocument();
+  });
+
+  it('shows append confirmation dialog when Append is clicked', async () => {
+    const user = userEvent.setup();
+    renderDialog();
+    await triggerFileSelect(validExportJson);
+    await waitFor(() => screen.getByTestId('preview'));
+    await user.click(screen.getByRole('button', { name: /^Append$/i }));
+    expect(screen.getByText('Append to collection?')).toBeInTheDocument();
+  });
+
+  it('calls import mutation with append mode after append confirmation', async () => {
+    const user = userEvent.setup();
+    renderDialog();
+    await triggerFileSelect(validExportJson);
+    await waitFor(() => screen.getByTestId('preview'));
+    await user.click(screen.getByRole('button', { name: /^Append$/i }));
+    await user.click(screen.getByRole('button', { name: /append 1 items/i }));
+    expect(mockMutate).toHaveBeenCalledOnce();
+    const call = mockMutate.mock.calls[0] as unknown[];
+    expect((call[0] as { mode: string }).mode).toBe('append');
+  });
+
+  it('shows overwrite confirmation when Replace is clicked', async () => {
+    const user = userEvent.setup();
+    // 1 item importing into collection of 1 → ratio = 1.0 ≥ 0.5 → regular overwrite prompt
+    renderDialog(true, 1);
+    await triggerFileSelect(validExportJson);
+    await waitFor(() => screen.getByTestId('preview'));
+    await user.click(screen.getByRole('button', { name: /^Replace$/i }));
+    expect(screen.getByText('Replace entire collection?')).toBeInTheDocument();
+  });
+
+  it('shows size warning when import is much smaller than collection', async () => {
+    const user = userEvent.setup();
+    // 1 item importing into a collection of 10 → ratio = 0.1 < 0.5 → size warning
+    renderDialog(true, 10);
+    await triggerFileSelect(validExportJson);
+    await waitFor(() => screen.getByTestId('preview'));
+    await user.click(screen.getByRole('button', { name: /^Replace$/i }));
+    expect(screen.getByText('Import is much smaller than your collection')).toBeInTheDocument();
+  });
+
+  it('does not show size warning when import is similar size', async () => {
+    const user = userEvent.setup();
+    // 1 item importing into a collection of 1 → ratio = 1.0 ≥ 0.5 → no warning
+    renderDialog(true, 1);
+    await triggerFileSelect(validExportJson);
+    await waitFor(() => screen.getByTestId('preview'));
+    await user.click(screen.getByRole('button', { name: /^Replace$/i }));
+    expect(screen.getByText('Replace entire collection?')).toBeInTheDocument();
   });
 
   it('shows error state on invalid JSON file', async () => {
@@ -146,21 +204,12 @@ describe('ImportCollectionDialog', () => {
     });
   });
 
-  it('calls import mutation on confirm', async () => {
+  it('returns to idle when Replace file is clicked in preview', async () => {
     const user = userEvent.setup();
     renderDialog();
     await triggerFileSelect(validExportJson);
     await waitFor(() => screen.getByTestId('preview'));
-    await user.click(screen.getByRole('button', { name: /import 1 items/i }));
-    expect(mockMutate).toHaveBeenCalledOnce();
-  });
-
-  it('returns to idle when Replace is clicked in preview', async () => {
-    const user = userEvent.setup();
-    renderDialog();
-    await triggerFileSelect(validExportJson);
-    await waitFor(() => screen.getByTestId('preview'));
-    await user.click(screen.getByText('Replace'));
+    await user.click(screen.getByText('Replace file'));
     expect(screen.getByTestId('drop-zone')).toBeInTheDocument();
   });
 

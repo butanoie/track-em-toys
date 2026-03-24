@@ -530,9 +530,12 @@ const UnresolvedItemSchema = z.object({
   reason: z.string(),
 });
 
+export const ImportModeSchema = z.enum(['append', 'overwrite']);
+
 export const CollectionImportResponseSchema = z.object({
   imported: z.array(ImportedItemSchema),
   unresolved: z.array(UnresolvedItemSchema),
+  overwritten_count: z.number().int(),
 });
 
 // Collection types
@@ -545,4 +548,5 @@ export type CollectionCheckResponse = z.infer<typeof CollectionCheckResponseSche
 export type CollectionExportPayload = z.infer<typeof CollectionExportPayloadSchema>;
 export type ImportedItem = z.infer<typeof ImportedItemSchema>;
 export type UnresolvedItem = z.infer<typeof UnresolvedItemSchema>;
+export type ImportMode = z.infer<typeof ImportModeSchema>;
 export type CollectionImportResponse = z.infer<typeof CollectionImportResponseSchema>;
