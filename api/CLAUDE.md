@@ -262,6 +262,9 @@ Adding a column to item list API responses requires updating ALL of these (missi
 - PATCH partial updates: use `Object.hasOwn(body, 'field')` to distinguish absent key from `null` value (Fastify strips absent keys from validated body)
 - Stats query uses a single CTE for snapshot consistency — do NOT use `Promise.all` with multiple queries on a single `PoolClient` (pg does not support concurrent queries on one connection)
 - `buildCursorPage` requires rows with `{ name: string; id: string }` — queries must alias columns to match (e.g., `i.name AS name, ci.id AS id`)
+- Export/import: `GET /collection/export` returns slug-based JSON (no UUIDs), `POST /collection/import` resolves slugs via `batchGetItemIdsBySlugs` (UNNEST query), uses SAVEPOINT per insert for partial success
+- Partial-success inserts require `SAVEPOINT` / `ROLLBACK TO SAVEPOINT` per insert — PostgreSQL aborts the entire transaction on any error without savepoints. Always log the error before rolling back.
+- Export includes `deleted_count` in stats for UI to prompt about soft-deleted items
 
 ## Before Writing New Code
 

@@ -486,6 +486,7 @@ const CollectionConditionStatSchema = z.object({
 export const CollectionStatsSchema = z.object({
   total_copies: z.number().int(),
   unique_items: z.number().int(),
+  deleted_count: z.number().int(),
   by_franchise: z.array(CollectionFranchiseStatSchema),
   by_condition: z.array(CollectionConditionStatSchema),
 });
@@ -499,6 +500,44 @@ export const CollectionCheckResponseSchema = z.object({
   items: z.record(CollectionCheckEntrySchema),
 });
 
+// Export/import schemas
+
+const ExportItemSchema = z.object({
+  franchise_slug: z.string(),
+  item_slug: z.string(),
+  condition: CollectionConditionSchema,
+  notes: z.string().nullable(),
+  added_at: z.string(),
+  deleted_at: z.string().nullable(),
+});
+
+export const CollectionExportPayloadSchema = z.object({
+  version: z.number().int().min(1),
+  exported_at: z.string(),
+  items: z.array(ExportItemSchema),
+});
+
+const ImportedItemSchema = z.object({
+  franchise_slug: z.string(),
+  item_slug: z.string(),
+  item_name: z.string(),
+  condition: CollectionConditionSchema,
+});
+
+const UnresolvedItemSchema = z.object({
+  franchise_slug: z.string(),
+  item_slug: z.string(),
+  reason: z.string(),
+});
+
+export const ImportModeSchema = z.enum(['append', 'overwrite']);
+
+export const CollectionImportResponseSchema = z.object({
+  imported: z.array(ImportedItemSchema),
+  unresolved: z.array(UnresolvedItemSchema),
+  overwritten_count: z.number().int(),
+});
+
 // Collection types
 export type CollectionCondition = z.infer<typeof CollectionConditionSchema>;
 export type CollectionItem = z.infer<typeof CollectionItemSchema>;
@@ -506,3 +545,8 @@ export type CollectionItemList = z.infer<typeof CollectionItemListSchema>;
 export type CollectionStats = z.infer<typeof CollectionStatsSchema>;
 export type CollectionCheckEntry = z.infer<typeof CollectionCheckEntrySchema>;
 export type CollectionCheckResponse = z.infer<typeof CollectionCheckResponseSchema>;
+export type CollectionExportPayload = z.infer<typeof CollectionExportPayloadSchema>;
+export type ImportedItem = z.infer<typeof ImportedItemSchema>;
+export type UnresolvedItem = z.infer<typeof UnresolvedItemSchema>;
+export type ImportMode = z.infer<typeof ImportModeSchema>;
+export type CollectionImportResponse = z.infer<typeof CollectionImportResponseSchema>;

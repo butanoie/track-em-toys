@@ -78,6 +78,9 @@ vi.mock('./queries.js', () => ({
   itemExists: vi.fn(),
   insertCollectionItem: vi.fn(),
   getCollectionStats: vi.fn(),
+  exportCollectionItems: vi.fn(),
+  batchGetItemIdsBySlugs: vi.fn(),
+  softDeleteAllCollectionItems: vi.fn(),
   checkCollectionItems: vi.fn(),
   updateCollectionItem: vi.fn(),
   softDeleteCollectionItem: vi.fn(),
@@ -124,9 +127,11 @@ function makeCollectionRow(overrides: Partial<CollectionListRow> = {}): Collecti
 
 // ─── withTransaction passthrough ─────────────────────────────────────────────
 
-const fakeClient = {} satisfies Pick<PoolClient, never>;
+const fakeQuery = vi.fn();
+const fakeClient = { query: fakeQuery } as pool.QueryOnlyClient;
 
 function mockTx() {
+  // QueryOnlyClient → PoolClient: safe because handlers only use query()
   vi.mocked(pool.withTransaction).mockImplementation(async (fn, _userId) => fn(fakeClient as PoolClient));
 }
 
@@ -389,6 +394,7 @@ describe('collection routes', () => {
       vi.mocked(queries.getCollectionStats).mockResolvedValue({
         total_copies: 5,
         unique_items: 3,
+        deleted_count: 0,
         by_franchise: [{ slug: 'transformers', name: 'Transformers', count: 5 }],
         by_condition: [
           { condition: 'mint_sealed', count: 3 },
@@ -415,6 +421,7 @@ describe('collection routes', () => {
       vi.mocked(queries.getCollectionStats).mockResolvedValue({
         total_copies: 0,
         unique_items: 0,
+        deleted_count: 0,
         by_franchise: [],
         by_condition: [],
       });
@@ -863,6 +870,364 @@ describe('collection routes', () => {
       });
 
       expect(res.statusCode).toBe(415);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // GET /collection/export
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  describe('GET /collection/export', () => {
+    it('should return 200 with versioned export envelope', async () => {
+      mockTx();
+      vi.mocked(queries.exportCollectionItems).mockResolvedValue([
+        {
+          franchise_slug: 'transformers',
+          item_slug: 'optimus-prime',
+          condition: 'mint_sealed',
+          notes: 'Excellent condition',
+          added_at: '2026-03-20T08:30:00Z',
+          deleted_at: null,
+        },
+        {
+          franchise_slug: 'gi-joe',
+          item_slug: 'snake-eyes-v1',
+          condition: 'damaged',
+          notes: null,
+          added_at: '2026-03-21T10:00:00Z',
+          deleted_at: null,
+        },
+      ]);
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/collection/export',
+        headers: authHeaders(),
+      });
+
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.version).toBe(1);
+      expect(json.exported_at).toBeDefined();
+      expect(json.items).toHaveLength(2);
+      expect(json.items[0].franchise_slug).toBe('transformers');
+      expect(json.items[0].item_slug).toBe('optimus-prime');
+      expect(json.items[0].condition).toBe('mint_sealed');
+      expect(json.items[0].notes).toBe('Excellent condition');
+      expect(json.items[0].added_at).toBeDefined();
+      expect(json.items[0].deleted_at).toBeNull();
+    });
+
+    it('should return 200 with empty items for empty collection', async () => {
+      mockTx();
+      vi.mocked(queries.exportCollectionItems).mockResolvedValue([]);
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/collection/export',
+        headers: authHeaders(),
+      });
+
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.version).toBe(1);
+      expect(json.items).toEqual([]);
+    });
+
+    it('should pass include_deleted=true to query', async () => {
+      mockTx();
+      vi.mocked(queries.exportCollectionItems).mockResolvedValue([]);
+
+      await server.inject({
+        method: 'GET',
+        url: '/collection/export?include_deleted=true',
+        headers: authHeaders(),
+      });
+
+      expect(queries.exportCollectionItems).toHaveBeenCalledWith(expect.anything(), true);
+    });
+
+    it('should default include_deleted to false', async () => {
+      mockTx();
+      vi.mocked(queries.exportCollectionItems).mockResolvedValue([]);
+
+      await server.inject({
+        method: 'GET',
+        url: '/collection/export',
+        headers: authHeaders(),
+      });
+
+      expect(queries.exportCollectionItems).toHaveBeenCalledWith(expect.anything(), false);
+    });
+
+    it('should return 401 without auth', async () => {
+      const res = await server.inject({
+        method: 'GET',
+        url: '/collection/export',
+      });
+
+      expect(res.statusCode).toBe(401);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // POST /collection/import
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  describe('POST /collection/import', () => {
+    const validPayload = {
+      version: 1,
+      items: [
+        { franchise_slug: 'transformers', item_slug: 'optimus-prime', condition: 'mint_sealed' },
+        { franchise_slug: 'gi-joe', item_slug: 'snake-eyes-v1', condition: 'damaged', notes: 'Missing arm' },
+      ],
+    };
+
+    it('should return 200 with partial success — some resolved, some unresolved', async () => {
+      mockTx();
+      const resolvedMap = new Map([
+        ['transformers::optimus-prime', { item_id: ITEM_UUID, item_name: 'Optimus Prime' }],
+      ]);
+      vi.mocked(queries.batchGetItemIdsBySlugs).mockResolvedValue(resolvedMap);
+      vi.mocked(queries.insertCollectionItem).mockResolvedValue(COLLECTION_UUID);
+
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: validPayload,
+      });
+
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.imported).toHaveLength(1);
+      expect(json.imported[0].franchise_slug).toBe('transformers');
+      expect(json.imported[0].item_slug).toBe('optimus-prime');
+      expect(json.imported[0].item_name).toBe('Optimus Prime');
+      expect(json.imported[0].condition).toBe('mint_sealed');
+      expect(json.unresolved).toHaveLength(1);
+      expect(json.unresolved[0].franchise_slug).toBe('gi-joe');
+      expect(json.unresolved[0].reason).toBe('Item not found in catalog');
+    });
+
+    it('should return 200 with all items resolved', async () => {
+      mockTx();
+      const resolvedMap = new Map([
+        ['transformers::optimus-prime', { item_id: ITEM_UUID, item_name: 'Optimus Prime' }],
+        ['gi-joe::snake-eyes-v1', { item_id: COLLECTION_UUID_2, item_name: 'Snake Eyes' }],
+      ]);
+      vi.mocked(queries.batchGetItemIdsBySlugs).mockResolvedValue(resolvedMap);
+      vi.mocked(queries.insertCollectionItem).mockResolvedValue(COLLECTION_UUID);
+
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: validPayload,
+      });
+
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.imported).toHaveLength(2);
+      expect(json.unresolved).toHaveLength(0);
+    });
+
+    it('should return 200 with all items unresolved when none match catalog', async () => {
+      mockTx();
+      vi.mocked(queries.batchGetItemIdsBySlugs).mockResolvedValue(new Map());
+
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: validPayload,
+      });
+
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.imported).toHaveLength(0);
+      expect(json.unresolved).toHaveLength(2);
+    });
+
+    it('should return 400 when version is unsupported', async () => {
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: { version: 2, items: [{ franchise_slug: 'tf', item_slug: 'op' }] },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it('should return 400 when items array is empty', async () => {
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: { version: 1, items: [] },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it('should return 400 when items array exceeds 500 entries', async () => {
+      const items = Array.from({ length: 501 }, (_, i) => ({
+        franchise_slug: 'tf',
+        item_slug: `item-${i}`,
+      }));
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: { version: 1, items },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it('should return 400 when version field is missing', async () => {
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: { items: [{ franchise_slug: 'tf', item_slug: 'op' }] },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it('should add item to unresolved when insert throws (savepoint rollback)', async () => {
+      mockTx();
+      const resolvedMap = new Map([
+        ['transformers::optimus-prime', { item_id: ITEM_UUID, item_name: 'Optimus Prime' }],
+      ]);
+      vi.mocked(queries.batchGetItemIdsBySlugs).mockResolvedValue(resolvedMap);
+      vi.mocked(queries.insertCollectionItem).mockRejectedValue(new Error('DB constraint error'));
+      fakeQuery.mockResolvedValue({ rows: [], rowCount: 0 });
+
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: { version: 1, items: [{ franchise_slug: 'transformers', item_slug: 'optimus-prime' }] },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.imported).toHaveLength(0);
+      expect(json.unresolved).toHaveLength(1);
+      expect(json.unresolved[0].reason).toBe('Insert failed');
+    });
+
+    it('should sanitize notes during import', async () => {
+      mockTx();
+      const resolvedMap = new Map([
+        ['transformers::optimus-prime', { item_id: ITEM_UUID, item_name: 'Optimus Prime' }],
+      ]);
+      vi.mocked(queries.batchGetItemIdsBySlugs).mockResolvedValue(resolvedMap);
+      vi.mocked(queries.insertCollectionItem).mockResolvedValue(COLLECTION_UUID);
+
+      await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: {
+          version: 1,
+          items: [{ franchise_slug: 'transformers', item_slug: 'optimus-prime', notes: '  hello\x00world  ' }],
+        },
+      });
+
+      expect(queries.insertCollectionItem).toHaveBeenCalledWith(
+        expect.anything(),
+        USER_A_UUID,
+        ITEM_UUID,
+        'unknown',
+        'helloworld'
+      );
+    });
+
+    it('should return 401 without auth', async () => {
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        payload: validPayload,
+      });
+
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('should return 415 for wrong content-type', async () => {
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: { ...authHeaders(), 'content-type': 'text/plain' },
+        payload: 'invalid',
+      });
+
+      expect(res.statusCode).toBe(415);
+    });
+
+    it('should return overwritten_count=0 in append mode (default)', async () => {
+      mockTx();
+      const resolvedMap = new Map([
+        ['transformers::optimus-prime', { item_id: ITEM_UUID, item_name: 'Optimus Prime' }],
+      ]);
+      vi.mocked(queries.batchGetItemIdsBySlugs).mockResolvedValue(resolvedMap);
+      vi.mocked(queries.insertCollectionItem).mockResolvedValue(COLLECTION_UUID);
+
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: { version: 1, items: [{ franchise_slug: 'transformers', item_slug: 'optimus-prime' }] },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json().overwritten_count).toBe(0);
+      expect(queries.softDeleteAllCollectionItems).not.toHaveBeenCalled();
+    });
+
+    it('should soft-delete all items before import in overwrite mode', async () => {
+      mockTx();
+      vi.mocked(queries.softDeleteAllCollectionItems).mockResolvedValue(5);
+      const resolvedMap = new Map([
+        ['transformers::optimus-prime', { item_id: ITEM_UUID, item_name: 'Optimus Prime' }],
+      ]);
+      vi.mocked(queries.batchGetItemIdsBySlugs).mockResolvedValue(resolvedMap);
+      vi.mocked(queries.insertCollectionItem).mockResolvedValue(COLLECTION_UUID);
+
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: {
+          version: 1,
+          mode: 'overwrite',
+          items: [{ franchise_slug: 'transformers', item_slug: 'optimus-prime' }],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.overwritten_count).toBe(5);
+      expect(json.imported).toHaveLength(1);
+      expect(queries.softDeleteAllCollectionItems).toHaveBeenCalledOnce();
+    });
+
+    it('should reject invalid mode value', async () => {
+      const res = await server.inject({
+        method: 'POST',
+        url: '/collection/import',
+        headers: authHeaders(),
+        payload: {
+          version: 1,
+          mode: 'invalid',
+          items: [{ franchise_slug: 'tf', item_slug: 'op' }],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
     });
   });
 });

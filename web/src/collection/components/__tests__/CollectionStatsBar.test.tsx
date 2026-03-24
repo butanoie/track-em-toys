@@ -7,6 +7,7 @@ import type { CollectionStats } from '@/lib/zod-schemas';
 const mockStats: CollectionStats = {
   total_copies: 47,
   unique_items: 38,
+  deleted_count: 0,
   by_franchise: [
     { slug: 'transformers', name: 'Transformers', count: 32 },
     { slug: 'gi-joe', name: 'G.I. Joe', count: 15 },

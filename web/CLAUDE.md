@@ -166,6 +166,9 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Soft-delete uses undo toast (Sonner action button, 8s duration), NOT confirmation dialog
 - `buildPhotoUrl` lives in `lib/photo-url.ts` but the documented import path is `@/catalog/photos/api` (re-export) — use the re-export for convention consistency
 - Adding `useCollectionCheck` or `useCollectionMutations` to a component requires adding mocks to every test file that renders that component — search for `vi.mock.*useCollectionCheck` to find existing mock patterns
+- Export/import: `useCollectionExport` (useState-based, blob download + toast), `useCollectionImport` (useMutation with `['collection']` invalidation), `ImportCollectionDialog` (5-phase state machine: idle → file-selected → importing → complete → error)
+- Export/import round-trip safety: client `importCollection` must strip fields the import endpoint doesn't accept (`exported_at`, item `deleted_at`) — Fastify's `additionalProperties: false` rejects unknown properties with 400
+- `downloadJsonBlob` in `collection/lib/download.ts` — shared blob download utility used by export hook and retry-file download
 - Route tree regeneration: `npx tsr generate` does not work standalone — use `npm run build` or `npm run dev` to trigger the TanStack Router Vite plugin
 - `CatalogItemDetailSchema` extends `CatalogItemSchema` — any field added to the base schema MUST also be added to the API's `itemDetail` Fastify schema in `api/src/catalog/items/schemas.ts` (which is hand-written, not derived from `itemListItem`)
 - `ItemListItem` interface in `ItemList.tsx` uses optional `thumbnail_url?` — search results may not include it, so the field must be optional to avoid breaking the SearchPage
@@ -210,6 +213,8 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Adding `useAuth()` to a component requires adding `vi.mock('@/auth/useAuth', () => ({ useAuth: () => ({ user: { id: 'u-1', role: 'user' }, isAuthenticated: true, isLoading: false }) }))` to every test file that renders that component (including parent pages like `ItemsPage` that render `ItemDetailPanel`)
 - `vi.advanceTimersByTime()` must be wrapped in `act()` when it triggers React state updates (e.g., `ShareLinkButton` timeout reset)
 - jsdom does not implement `navigator.clipboard` — mock with `Object.assign(navigator, { clipboard: { writeText: vi.fn() } })`
+- jsdom does not implement `File.prototype.text()` or `Blob.prototype.text()` — use `FileReader` wrapped in a `Promise` instead of the modern `file.text()` API
+- TanStack Query `mutationFn: myFunction` direct reference: TanStack calls `myFunction(variables, mutationContext)` with two args — use `vi.mocked(fn).mock.calls[0]?.[0]` to assert only the first arg, not `toHaveBeenCalledWith(payload)`
 - Integration components that own their own fetch (e.g., `CharacterRelationships`, `ItemRelationships`) require `vi.mock` in parent component tests — otherwise the hook fires without a QueryClient and crashes. Mock pattern: `vi.mock('@/catalog/components/CharacterRelationships', () => ({ CharacterRelationships: () => null }))`
 
 ## Before Writing New Code

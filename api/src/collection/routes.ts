@@ -11,7 +11,9 @@ import {
   checkCollectionSchema,
   collectionStatsSchema,
   deleteCollectionItemSchema,
+  exportCollectionSchema,
   getCollectionItemSchema,
+  importCollectionSchema,
   listCollectionSchema,
   patchCollectionItemSchema,
   restoreCollectionItemSchema,
@@ -26,6 +28,7 @@ const MAX_NOTES_LENGTH = 2000;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_CHECK_ITEM_IDS = 50;
+const MAX_IMPORT_ITEMS = 500;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -98,6 +101,26 @@ interface PatchBody {
   notes?: string | null;
 }
 
+interface ExportQuery {
+  include_deleted?: boolean;
+}
+
+interface ImportItem {
+  franchise_slug: string;
+  item_slug: string;
+  condition?: ItemCondition;
+  notes?: string | null;
+  added_at?: string;
+}
+
+type ImportMode = 'append' | 'overwrite';
+
+interface ImportBody {
+  version: number;
+  mode?: ImportMode;
+  items: ImportItem[];
+}
+
 interface CheckQuery {
   itemIds: string;
 }
@@ -109,6 +132,8 @@ interface CheckQuery {
 const readRateLimit = { rateLimit: { max: 100, timeWindow: '1 minute' } } as const;
 const writeRateLimit = { rateLimit: { max: 30, timeWindow: '1 minute' } } as const;
 const deleteRateLimit = { rateLimit: { max: 20, timeWindow: '1 minute' } } as const;
+const exportRateLimit = { rateLimit: { max: 20, timeWindow: '1 minute' } } as const;
+const importRateLimit = { rateLimit: { max: 20, timeWindow: '1 minute' } } as const;
 
 // ---------------------------------------------------------------------------
 // Plugin
@@ -188,6 +213,105 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
       }
 
       return { items };
+    }
+  );
+
+  // ─── GET /collection/export (must precede /:id) ─────────────────────
+
+  fastify.get<{ Querystring: ExportQuery }>(
+    '/export',
+    { schema: exportCollectionSchema, preHandler: authPreHandler, config: exportRateLimit },
+    async (request) => {
+      const includeDeleted = request.query.include_deleted ?? false;
+      const items = await withTransaction(async (client) => {
+        return queries.exportCollectionItems(client, includeDeleted);
+      }, request.user.sub);
+
+      return {
+        version: 1,
+        exported_at: new Date().toISOString(),
+        items,
+      };
+    }
+  );
+
+  // ─── POST /collection/import (must precede /:id) ───────────────────
+
+  fastify.post<{ Body: ImportBody }>(
+    '/import',
+    { schema: importCollectionSchema, preHandler: authPreHandler, config: importRateLimit },
+    async (request, reply) => {
+      const { items, mode } = request.body;
+      const importMode: ImportMode = mode ?? 'append';
+
+      // Defense-in-depth — schema enforces maxItems: 500
+      if (items.length > MAX_IMPORT_ITEMS) {
+        return reply.code(400).send({ error: `Import limited to ${MAX_IMPORT_ITEMS} items` });
+      }
+
+      return withTransaction(async (client) => {
+        // In overwrite mode, soft-delete all existing items first
+        let overwrittenCount = 0;
+        if (importMode === 'overwrite') {
+          overwrittenCount = await queries.softDeleteAllCollectionItems(client);
+        }
+
+        const resolved = await queries.batchGetItemIdsBySlugs(client, items);
+
+        const imported: Array<{
+          franchise_slug: string;
+          item_slug: string;
+          item_name: string;
+          condition: ItemCondition;
+        }> = [];
+        const unresolved: Array<{
+          franchise_slug: string;
+          item_slug: string;
+          reason: string;
+        }> = [];
+
+        for (const item of items) {
+          const key = `${item.franchise_slug}::${item.item_slug}`;
+          const match = resolved.get(key);
+
+          if (!match) {
+            unresolved.push({
+              franchise_slug: item.franchise_slug,
+              item_slug: item.item_slug,
+              reason: 'Item not found in catalog',
+            });
+            continue;
+          }
+
+          const condition: ItemCondition = item.condition ?? 'unknown';
+          const sanitizedNotes = typeof item.notes === 'string' ? sanitizeNotes(item.notes) : null;
+
+          await client.query('SAVEPOINT import_item');
+          try {
+            await queries.insertCollectionItem(client, request.user.sub, match.item_id, condition, sanitizedNotes);
+            await client.query('RELEASE SAVEPOINT import_item');
+            imported.push({
+              franchise_slug: item.franchise_slug,
+              item_slug: item.item_slug,
+              item_name: match.item_name,
+              condition,
+            });
+          } catch (err) {
+            request.log.warn(
+              { err, franchise_slug: item.franchise_slug, item_slug: item.item_slug },
+              'import: insert failed, rolling back savepoint'
+            );
+            await client.query('ROLLBACK TO SAVEPOINT import_item');
+            unresolved.push({
+              franchise_slug: item.franchise_slug,
+              item_slug: item.item_slug,
+              reason: 'Insert failed',
+            });
+          }
+        }
+
+        return { imported, unresolved, overwritten_count: overwrittenCount };
+      }, request.user.sub);
     }
   );
 

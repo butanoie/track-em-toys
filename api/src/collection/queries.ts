@@ -43,6 +43,7 @@ export interface ConditionStat {
 export interface CollectionStats {
   total_copies: number;
   unique_items: number;
+  deleted_count: number;
   by_franchise: FranchiseStat[];
   by_condition: ConditionStat[];
 }
@@ -234,6 +235,7 @@ export async function insertCollectionItem(
 interface StatsRaw {
   total_copies: number;
   unique_items: number;
+  deleted_count: number;
   by_franchise: FranchiseStat[] | null;
   by_condition: ConditionStat[] | null;
 }
@@ -255,6 +257,7 @@ export async function getCollectionStats(client: PoolClient): Promise<Collection
     SELECT
       (SELECT COUNT(*)::int FROM active) AS total_copies,
       (SELECT COUNT(DISTINCT item_id)::int FROM active) AS unique_items,
+      (SELECT COUNT(*)::int FROM collection_items WHERE deleted_at IS NOT NULL) AS deleted_count,
       COALESCE(
         (SELECT json_agg(row_to_json(f))
          FROM (
@@ -282,6 +285,7 @@ export async function getCollectionStats(client: PoolClient): Promise<Collection
   return {
     total_copies: raw?.total_copies ?? 0,
     unique_items: raw?.unique_items ?? 0,
+    deleted_count: raw?.deleted_count ?? 0,
     by_franchise: raw?.by_franchise ?? [],
     by_condition: raw?.by_condition ?? [],
   };
@@ -371,6 +375,17 @@ export async function softDeleteCollectionItem(client: PoolClient, id: string): 
   return (result.rowCount ?? 0) > 0;
 }
 
+/**
+ * Soft-delete all active collection items for the current RLS user.
+ * Used by the overwrite import mode to clear the collection before re-importing.
+ *
+ * @param client - Transaction client with RLS context
+ */
+export async function softDeleteAllCollectionItems(client: PoolClient): Promise<number> {
+  const result = await client.query(`UPDATE collection_items SET deleted_at = now() WHERE deleted_at IS NULL`);
+  return result.rowCount ?? 0;
+}
+
 // ---------------------------------------------------------------------------
 // Restore
 // ---------------------------------------------------------------------------
@@ -385,4 +400,96 @@ export async function softDeleteCollectionItem(client: PoolClient, id: string): 
 export async function restoreCollectionItem(client: PoolClient, id: string): Promise<boolean> {
   const result = await client.query(`UPDATE collection_items SET deleted_at = NULL WHERE id = $1`, [id]);
   return (result.rowCount ?? 0) > 0;
+}
+
+// ---------------------------------------------------------------------------
+// Export
+// ---------------------------------------------------------------------------
+
+export interface ExportRow {
+  franchise_slug: string;
+  item_slug: string;
+  condition: ItemCondition;
+  notes: string | null;
+  added_at: string;
+  deleted_at: string | null;
+}
+
+/**
+ * Fetch all collection items for the current RLS user in slug-based export format.
+ * No UUIDs in the output — only slugs and enum values for cross-purge portability.
+ *
+ * @param client - Transaction client with RLS context
+ * @param includeDeleted - When true, includes soft-deleted items
+ */
+export async function exportCollectionItems(client: PoolClient, includeDeleted: boolean): Promise<ExportRow[]> {
+  const whereClause = includeDeleted ? '' : 'WHERE ci.deleted_at IS NULL';
+  const { rows } = await client.query<ExportRow>(
+    `SELECT
+        fr.slug      AS franchise_slug,
+        i.slug       AS item_slug,
+        ci.condition,
+        ci.notes,
+        ci.created_at AS added_at,
+        ci.deleted_at
+     FROM collection_items ci
+     JOIN items i        ON i.id  = ci.item_id
+     JOIN franchises fr  ON fr.id = i.franchise_id
+     ${whereClause}
+     ORDER BY fr.slug ASC, i.name ASC, ci.created_at ASC`
+  );
+  return rows;
+}
+
+// ---------------------------------------------------------------------------
+// Import
+// ---------------------------------------------------------------------------
+
+export interface ResolvedSlug {
+  item_id: string;
+  item_name: string;
+}
+
+/**
+ * Batch-resolve (franchise_slug, item_slug) pairs to item UUIDs and names.
+ * Items have no RLS — this query is safe inside an RLS-set transaction.
+ * Returns a Map keyed by "franchise_slug::item_slug".
+ *
+ * @param client - Transaction client with RLS context
+ * @param slugPairs - Array of slug pairs to resolve
+ */
+export async function batchGetItemIdsBySlugs(
+  client: PoolClient,
+  slugPairs: Array<{ franchise_slug: string; item_slug: string }>
+): Promise<Map<string, ResolvedSlug>> {
+  if (slugPairs.length === 0) return new Map();
+
+  const franchiseSlugs = slugPairs.map((p) => p.franchise_slug);
+  const itemSlugs = slugPairs.map((p) => p.item_slug);
+
+  const { rows } = await client.query<{
+    franchise_slug: string;
+    item_slug: string;
+    item_id: string;
+    item_name: string;
+  }>(
+    `SELECT
+        fr.slug AS franchise_slug,
+        i.slug  AS item_slug,
+        i.id    AS item_id,
+        i.name  AS item_name
+     FROM UNNEST($1::text[], $2::text[]) AS input(franchise_slug, item_slug)
+     JOIN franchises fr ON fr.slug = input.franchise_slug
+     JOIN items i       ON i.franchise_id = fr.id AND i.slug = input.item_slug`,
+    [franchiseSlugs, itemSlugs]
+  );
+
+  const result = new Map<string, ResolvedSlug>();
+  for (const row of rows) {
+    result.set(`${row.franchise_slug}::${row.item_slug}`, {
+      item_id: row.item_id,
+      item_name: row.item_name,
+    });
+  }
+  return result;
 }
