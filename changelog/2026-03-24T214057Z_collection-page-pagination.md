@@ -80,14 +80,14 @@ Playwright glob `**/collection` does not match URLs with query strings (`/collec
 - **UX**: Users can now jump to any page on all browse pages, page state survives browser refresh, consistent pagination with per-page size selector across all paginated views
 - **Performance**: Negligible — OFFSET on datasets of thousands of rows with index-backed ORDER BY is fast
 - **Breaking**: All list endpoint response shapes changed (`next_cursor` removed, `page`/`limit` added). `cursor` query param replaced by `page`/`limit`. `limit` now restricted to `enum: [20, 50, 100]` on catalog and collection (was `1-100`). No external API consumers exist yet.
-- **Dead code**: `cursorListResponse`, `buildCursorPage`, `encodeCursor`, `decodeCursor` in `catalog/shared/pagination.ts` are now unused — can be removed in a cleanup pass
+- **Removed**: `catalog/shared/pagination.ts` (and its 19-test companion) deleted entirely — `encodeCursor`, `decodeCursor`, `buildCursorPage`, `clampLimit`, `CursorPayload`, `DEFAULT_PAGE_LIMIT`, `MAX_PAGE_LIMIT` all gone. `cursorListResponse()` and `paginationQuery` removed from `catalog/shared/schemas.ts`.
 
 ## Summary Statistics
 
-- 55 files changed
-- ~650 lines added, ~450 lines removed
+- 57 files changed
+- ~727 lines added, ~657 lines removed
 - 4 new E2E tests, ~10 new/updated unit tests
-- API: 755/755 passed | Web: 684/684 passed | E2E: 80/80 passed
+- API: 736/736 passed | Web: 684/684 passed | E2E: 80/80 passed
 
 ## Status
 

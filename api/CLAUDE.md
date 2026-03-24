@@ -214,17 +214,17 @@ Two distinct photo types:
 - Limit validation: `enum: [20, 50, 100]` on catalog and collection endpoints; `minimum: 1, maximum: 100` on search
 - `catalog/shared/pagination.ts` was removed — all cursor pagination utilities (`encodeCursor`, `decodeCursor`, `buildCursorPage`, `clampLimit`) are gone. `paginationQuery` and `cursorListResponse` also removed from `catalog/shared/schemas.ts`
 - `buildItemsQuery` parameter indexing: each filter block uses `$${idx}` and increments `idx++` — except the LAST filter (ESLint `no-useless-assignment` flags it). When adding a new filter, add `idx++` to the previously-last filter block
-- Cursor UUID comparison uses `$N::uuid`, not text cast
+- Offset/limit params use `$N` dynamic indexing appended after filter params (same pattern as the removed cursor params)
 - Error responses use `reply.code(N).send({ error: '...' })` — no HttpError (no transactions)
 - CRITICAL: Every property in a response schema's `properties` MUST appear in `required` — Fastify's fast-json-stringify silently DROPS unrequired null fields from the response body, so clients never see them
-- Count queries must have identical JOINs as data queries (minus cursor/LIMIT) to avoid inflated total_count
+- Count queries must have identical JOINs as data queries (minus LIMIT/OFFSET) to avoid inflated total_count
 - Migrations that depend on columns added by other migrations must be ordered accordingly — do not create indexes on columns that don't exist yet
 - See `docs/decisions/ADR_Catalog_API_Architecture.md` for full architecture
 
 ### Catalog Filters & Facets (Phase 1.7+)
 
-- `paginationQuery` (shared schema) has `additionalProperties: false` — CANNOT be extended. Routes with additional query params must create their own querystring schema copying pagination fields
-- Filtered list queries use `buildItemsQuery()` in `items/queries.ts` — returns shared `{ joins, whereClause, params }` for both data and count queries. Cursor params are appended AFTER filter params with dynamic `$N` indexing
+- Each list endpoint defines its own querystring schema with `page`, `limit`, and domain-specific filter fields — there is no shared `paginationQuery` fragment (it was removed with the cursor utilities)
+- Filtered list queries use `buildItemsQuery()` in `items/queries.ts` — returns shared `{ joins, whereClause, params }` for both data and count queries. Limit/offset params are appended AFTER filter params with dynamic `$N` indexing
 - Facet cross-filtering: each dimension runs its own GROUP BY query excluding its own filter via `filtersExcluding(key)`. All 5 queries run in parallel via `Promise.all`
 - Facets use unified `{ value: string, label: string, count: number }` shape — slug-based facets use `value=slug, label=name`; free-text facets use `value=label=raw_value`; boolean facets use `value="true"/"false", label="Third Party"/"Official"`
 - NULL values excluded from facets: manufacturer facet uses `AND mfr.id IS NOT NULL`, size_class uses `AND i.size_class IS NOT NULL`

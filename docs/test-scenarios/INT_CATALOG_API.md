@@ -45,23 +45,21 @@ Scenario: Franchise slug does not exist
 #### Happy Path: List Characters with Pagination
 
 ```gherkin
-Scenario: List characters in a franchise with cursor pagination
-  When the client sends GET /catalog/franchises/transformers/characters?limit=5
+Scenario: List characters in a franchise with page-based pagination
+  When the client sends GET /catalog/franchises/transformers/characters?page=1&limit=20
   Then a 200 response is returned
-  And data contains at most 5 characters
+  And data contains at most 20 characters
   And each character has id, name, slug, franchise, faction, continuity_family, character_type, alt_mode, is_combined_form
-  And next_cursor is a non-null string if more results exist
-  And total_count reflects the total characters in this franchise
+  And response includes page: 1, limit: 20, total_count
 ```
 
-#### Happy Path: Paginate with Cursor
+#### Happy Path: Paginate to Next Page
 
 ```gherkin
-Scenario: Fetch next page using cursor
-  Given the client has fetched page 1 and received a next_cursor
-  When the client sends GET /catalog/franchises/transformers/characters?cursor=<next_cursor>
-  Then a 200 response is returned
-  And data contains the next page of characters
+Scenario: Fetch page 2 of characters
+  When the client sends GET /catalog/franchises/transformers/characters?page=2&limit=20
+  Then a 200 response is returned with page: 2
+  And data contains the second page of characters
   And no characters from page 1 appear in page 2
 ```
 
@@ -107,13 +105,12 @@ Scenario: Franchise slug does not exist
   And the error message is "Franchise not found"
 ```
 
-#### Error: Invalid Cursor
+#### Error: Invalid Limit
 
 ```gherkin
-Scenario: Malformed cursor string
-  When the client sends GET /catalog/franchises/transformers/characters?cursor=not-valid-base64
-  Then a 400 response is returned
-  And the error message is "Invalid cursor"
+Scenario: Invalid limit value
+  When the client sends GET /catalog/franchises/transformers/characters?limit=25
+  Then a 400 response is returned (limit must be 20, 50, or 100)
 ```
 
 #### Edge: Empty Result Set
@@ -124,7 +121,7 @@ Scenario: Franchise has no characters
   When the client sends GET /catalog/franchises/<empty-franchise>/characters
   Then a 200 response is returned
   And data is an empty array
-  And next_cursor is null
+  And page is 1, limit is 20
   And total_count is 0
 ```
 
@@ -135,13 +132,12 @@ Scenario: Franchise has no characters
 #### Happy Path: List Items with Pagination
 
 ```gherkin
-Scenario: List items in a franchise with cursor pagination
-  When the client sends GET /catalog/franchises/transformers/items?limit=10
+Scenario: List items in a franchise with page-based pagination
+  When the client sends GET /catalog/franchises/transformers/items?page=1&limit=20
   Then a 200 response is returned
   And each item has id, name, slug, franchise, characters, manufacturer, toy_line, size_class, year_released, is_third_party, data_quality
   And characters is an array where each entry has slug, name, appearance_slug, is_primary
-  And next_cursor is present if more results exist
-  And total_count reflects total items in this franchise
+  And response includes page: 1, limit: 20, total_count
 ```
 
 #### Happy Path: Item Detail

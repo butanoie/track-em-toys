@@ -16,7 +16,7 @@ And all collection queries use RLS (user can only see their own rows)
 Scenario: List collection with no items
   When the client sends GET /collection with a valid auth token
   Then a 200 response is returned
-  And the response has data: [], next_cursor: null, total_count: 0
+  And the response has data: [], page: 1, limit: 20, total_count: 0
 ```
 
 #### Happy Path: List with Items
@@ -55,15 +55,28 @@ Scenario: Search collection items
   Then items matching the search term via full-text search are returned
 ```
 
-#### Happy Path: Cursor Pagination
+#### Happy Path: Page-Based Pagination
 
 ```gherkin
 Scenario: Paginate through collection
   Given the user has more items than the page limit
-  When the client sends GET /collection?limit=5
-  Then a 200 response is returned with next_cursor populated
-  When the client sends GET /collection?limit=5&cursor={next_cursor}
-  Then the next page of results is returned
+  When the client sends GET /collection?page=1&limit=20
+  Then a 200 response is returned with page: 1, limit: 20, total_count
+  When the client sends GET /collection?page=2&limit=20
+  Then the second page of results is returned
+
+Scenario: Custom page size
+  When the client sends GET /collection?limit=50
+  Then a 200 response with limit: 50 is returned
+
+Scenario: Invalid limit rejected
+  When the client sends GET /collection?limit=25
+  Then a 400 response is returned (limit must be 20, 50, or 100)
+
+Scenario: Out-of-bounds page returns empty data
+  Given the user has 5 items
+  When the client sends GET /collection?page=99
+  Then a 200 response is returned with data: [], total_count: 5
 ```
 
 #### Happy Path: Null Manufacturer
