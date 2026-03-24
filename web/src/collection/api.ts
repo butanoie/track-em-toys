@@ -4,11 +4,14 @@ import {
   CollectionItemSchema,
   CollectionStatsSchema,
   CollectionCheckResponseSchema,
+  CollectionImportResponseSchema,
   type CollectionItemList,
   type CollectionItem,
   type CollectionStats,
   type CollectionCheckResponse,
   type CollectionCondition,
+  type CollectionExportPayload,
+  type CollectionImportResponse,
 } from '@/lib/zod-schemas';
 
 export interface CollectionFilters {
@@ -68,5 +71,34 @@ export async function deleteCollectionItem(id: string): Promise<void> {
 export async function restoreCollectionItem(id: string): Promise<CollectionItem> {
   return apiFetchJson(`/collection/${encodeURIComponent(id)}/restore`, CollectionItemSchema, {
     method: 'POST',
+  });
+}
+
+export async function exportCollection(includeDeleted = false): Promise<Response> {
+  const qs = includeDeleted ? '?include_deleted=true' : '';
+  const response = await apiFetch(`/collection/export${qs}`);
+  if (!response.ok) await throwApiError(response);
+  return response;
+}
+
+export async function importCollection(data: CollectionExportPayload): Promise<CollectionImportResponse> {
+  // Strip fields the import endpoint doesn't accept (exported_at, deleted_at on items)
+  // to avoid Fastify's additionalProperties:false rejecting the request
+  const payload = {
+    version: data.version,
+    items: data.items.map((item) => {
+      const entry: Record<string, unknown> = {
+        franchise_slug: item.franchise_slug,
+        item_slug: item.item_slug,
+        condition: item.condition,
+      };
+      if (item.notes != null) entry.notes = item.notes;
+      if (item.added_at) entry.added_at = item.added_at;
+      return entry;
+    }),
+  };
+  return apiFetchJson('/collection/import', CollectionImportResponseSchema, {
+    method: 'POST',
+    body: JSON.stringify(payload),
   });
 }

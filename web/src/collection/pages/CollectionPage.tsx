@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Upload } from 'lucide-react';
 import { Route } from '@/routes/_authenticated/collection';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
@@ -9,12 +9,15 @@ import { useLocalStorage } from '@/lib/use-local-storage';
 import { useCollectionItems } from '@/collection/hooks/useCollectionItems';
 import { useCollectionStats } from '@/collection/hooks/useCollectionStats';
 import { useCollectionMutations } from '@/collection/hooks/useCollectionMutations';
+import { useCollectionExport } from '@/collection/hooks/useCollectionExport';
 import { CollectionStatsBar } from '@/collection/components/CollectionStatsBar';
 import { CollectionFilters } from '@/collection/components/CollectionFilters';
 import { CollectionGrid } from '@/collection/components/CollectionGrid';
 import { CollectionTable } from '@/collection/components/CollectionTable';
 import { ViewToggle, type CollectionViewMode } from '@/collection/components/ViewToggle';
+import { ExportImportToolbar } from '@/collection/components/ExportImportToolbar';
 import { EditCollectionItemDialog } from '@/collection/components/EditCollectionItemDialog';
+import { ImportCollectionDialog } from '@/collection/components/ImportCollectionDialog';
 import type { CollectionFilters as CollectionFiltersType } from '@/collection/api';
 import type { CollectionItem } from '@/lib/zod-schemas';
 
@@ -22,7 +25,9 @@ export function CollectionPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const mutations = useCollectionMutations();
+  const { runExport, isExporting } = useCollectionExport();
   const [editTarget, setEditTarget] = useState<CollectionItem | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
   const [view, setView] = useLocalStorage<CollectionViewMode>('trackem:collection-view', 'grid');
 
   const [cursorStack, setCursorStack] = useState<Array<string | undefined>>([]);
@@ -123,6 +128,16 @@ export function CollectionPage() {
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </Link>
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => setImportOpen(true)}
+                className="inline-flex items-center gap-1.5 text-sm text-amber-700 dark:text-amber-300 hover:underline"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                or Import from file
+              </button>
+            </div>
           </div>
         ) : (
           <>
@@ -147,6 +162,14 @@ export function CollectionPage() {
                 {data?.total_count ?? '—'} {data?.total_count === 1 ? 'item' : 'items'}
               </p>
               <div className="flex items-center gap-3">
+                <ExportImportToolbar
+                  hasItems={(stats?.total_copies ?? 0) > 0}
+                  isExporting={isExporting}
+                  onExport={() => {
+                    void runExport();
+                  }}
+                  onImportOpen={() => setImportOpen(true)}
+                />
                 <ViewToggle view={view} onViewChange={setView} />
                 {(cursorStack.length > 0 || data?.next_cursor) && (
                   <div className="flex items-center gap-2">
@@ -178,6 +201,8 @@ export function CollectionPage() {
         item={editTarget}
         mutations={mutations}
       />
+
+      <ImportCollectionDialog open={importOpen} onOpenChange={setImportOpen} />
     </div>
   );
 }

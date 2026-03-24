@@ -28,6 +28,7 @@ vi.mock('@/routes/_authenticated/collection', () => ({
 const mockStats: CollectionStats = {
   total_copies: 5,
   unique_items: 4,
+  deleted_count: 0,
   by_franchise: [{ slug: 'transformers', name: 'Transformers', count: 5 }],
   by_condition: [{ condition: 'mint_sealed', count: 2 }],
 };
@@ -69,8 +70,24 @@ vi.mock('@/collection/components/CollectionGrid', () => ({
   CollectionGrid: () => <div data-testid="grid" />,
 }));
 
+vi.mock('@/collection/components/CollectionTable', () => ({
+  CollectionTable: () => <div data-testid="table" />,
+}));
+
+vi.mock('@/collection/hooks/useCollectionExport', () => ({
+  useCollectionExport: () => ({ runExport: vi.fn(), isExporting: false }),
+}));
+
+vi.mock('@/collection/components/ExportImportToolbar', () => ({
+  ExportImportToolbar: () => <div data-testid="export-import-toolbar" />,
+}));
+
 vi.mock('@/collection/components/EditCollectionItemDialog', () => ({
   EditCollectionItemDialog: () => null,
+}));
+
+vi.mock('@/collection/components/ImportCollectionDialog', () => ({
+  ImportCollectionDialog: () => null,
 }));
 
 describe('CollectionPage', () => {
@@ -91,6 +108,23 @@ describe('CollectionPage', () => {
     render(<CollectionPage />);
     expect(screen.getByText('Your collection is empty')).toBeInTheDocument();
     expect(screen.getByText('Browse Catalog')).toBeInTheDocument();
+  });
+
+  it('renders import from file link in empty state', () => {
+    mockUseCollectionItems.mockReturnValue({ data: mockItemList, isPending: false });
+    mockUseCollectionStats.mockReturnValue({ data: { ...mockStats, total_copies: 0 } });
+    render(<CollectionPage />);
+    expect(screen.getByText('or Import from file')).toBeInTheDocument();
+  });
+
+  it('renders export/import toolbar when collection has items', () => {
+    mockUseCollectionItems.mockReturnValue({
+      data: { ...mockItemList, total_count: 5 },
+      isPending: false,
+    });
+    mockUseCollectionStats.mockReturnValue({ data: mockStats });
+    render(<CollectionPage />);
+    expect(screen.getByTestId('export-import-toolbar')).toBeInTheDocument();
   });
 
   it('renders stats bar, filters, and grid when collection has items', () => {

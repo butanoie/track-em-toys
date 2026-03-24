@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-24
 **Issue:** [#116 — Collection data export/import with cross-purge portability](https://github.com/butanoie/track-em-toys/issues/116)
-**Status:** Design complete, pending implementation via /feature-dev
+**Status:** Architecture reviewed, implementation in progress
 **Prototype:** `web/design-prototypes/collection-export-import.html`
 
 ---
@@ -336,3 +336,37 @@ and adding items you own.
 ### Rationale
 
 > Option A is preferred because after a DB purge, a user's first action is to import their backup — they shouldn't have to add a dummy item just to see the Import button. The "or Import from file" secondary CTA makes the restore path discoverable from the very first screen.
+
+---
+
+## 9. Architecture Decisions (from review audit)
+
+### API Architecture
+
+| Decision | Choice |
+|----------|--------|
+| Slug resolution | `batchGetItemIdsBySlugs` — single UNNEST query resolving up to 500 pairs in one round-trip |
+| Partial success | SAVEPOINT per insert inside one transaction (PostgreSQL aborts entire tx on error without savepoints) |
+| Export query | Single query, no pagination — collections are small enough |
+| Version guard | `minimum: 1, maximum: 1` in Fastify schema — schema-level rejection |
+| Rate limits | Export: 20/min, Import: 10/min |
+| `added_at` on import | Accepted in schema but ignored — new rows get `created_at = now()` |
+| Stats `deleted_count` | Added to `GET /collection/stats` to support pre-export deleted-items prompt |
+
+### Web Architecture
+
+| Decision | Choice |
+|----------|--------|
+| State machine | `useState` with discriminated union tag (matches existing collection patterns) |
+| Export hook | `useState`-based, not `useMutation` (produces blob download, not cache mutation) |
+| Import hook | `useMutation` with `['collection']` prefix invalidation |
+| Retry file | Client constructs from unresolved items (no server-side retry file generation) |
+| Pre-export deleted check | `AlertDialog` when `stats.deleted_count > 0` |
+
+### Audit Findings (resolved)
+
+1. Web `ExportItemSchema` must include `added_at` and `deleted_at` fields
+2. Web `ImportedItemSchema` must NOT include `collection_item_id` (not in API response)
+3. Stats API/schema needs `deleted_count` addition (3-layer change)
+4. `batchGetItemIdsBySlugs` handles empty input with early return
+5. Duplicate slugs in import payload both succeed (multiple copies allowed — no UNIQUE constraint)

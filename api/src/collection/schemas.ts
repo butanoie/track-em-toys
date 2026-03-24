@@ -127,11 +127,12 @@ export const collectionStatsSchema = {
   response: {
     200: {
       type: 'object',
-      required: ['total_copies', 'unique_items', 'by_franchise', 'by_condition'],
+      required: ['total_copies', 'unique_items', 'deleted_count', 'by_franchise', 'by_condition'],
       additionalProperties: false,
       properties: {
         total_copies: { type: 'integer' },
         unique_items: { type: 'integer' },
+        deleted_count: { type: 'integer' },
         by_franchise: {
           type: 'array',
           items: {
@@ -270,5 +271,125 @@ export const restoreCollectionItemSchema = {
     401: errorResponse,
     403: errorResponse,
     404: errorResponse,
+  },
+} as const;
+
+/** Export item shape — slug-based, no UUIDs */
+const exportItemSchema = {
+  type: 'object',
+  required: ['franchise_slug', 'item_slug', 'condition', 'notes', 'added_at', 'deleted_at'],
+  additionalProperties: false,
+  properties: {
+    franchise_slug: { type: 'string' },
+    item_slug: { type: 'string' },
+    condition: { type: 'string', enum: CONDITION_ENUM },
+    notes: { type: ['string', 'null'] },
+    added_at: { type: 'string' },
+    deleted_at: { type: ['string', 'null'] },
+  },
+} as const;
+
+/** GET /collection/export */
+export const exportCollectionSchema = {
+  description: "Export the authenticated user's collection as a portable, slug-based JSON file.",
+  tags: ['collection'],
+  summary: 'Export collection',
+  security: [{ bearerAuth: [] }],
+  querystring: {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      include_deleted: { type: 'boolean', default: false },
+    },
+  },
+  response: {
+    200: {
+      type: 'object',
+      required: ['version', 'exported_at', 'items'],
+      additionalProperties: false,
+      properties: {
+        version: { type: 'integer' },
+        exported_at: { type: 'string' },
+        items: { type: 'array', items: exportItemSchema },
+      },
+    },
+    401: errorResponse,
+    403: errorResponse,
+  },
+} as const;
+
+/** Import item shape — matches the export item shape that clients send back */
+const importItemSchema = {
+  type: 'object',
+  required: ['franchise_slug', 'item_slug'],
+  additionalProperties: false,
+  properties: {
+    franchise_slug: { type: 'string', minLength: 1, maxLength: 120 },
+    item_slug: { type: 'string', minLength: 1, maxLength: 120 },
+    condition: { type: 'string', enum: CONDITION_ENUM },
+    notes: { type: ['string', 'null'], maxLength: 2000 },
+    added_at: { type: 'string', maxLength: 100 },
+  },
+} as const;
+
+/** Imported item in the response — includes resolved item name */
+const importedItemSchema = {
+  type: 'object',
+  required: ['franchise_slug', 'item_slug', 'item_name', 'condition'],
+  additionalProperties: false,
+  properties: {
+    franchise_slug: { type: 'string' },
+    item_slug: { type: 'string' },
+    item_name: { type: 'string' },
+    condition: { type: 'string', enum: CONDITION_ENUM },
+  },
+} as const;
+
+/** Unresolved item in the response — slug pair that could not be matched */
+const unresolvedItemSchema = {
+  type: 'object',
+  required: ['franchise_slug', 'item_slug', 'reason'],
+  additionalProperties: false,
+  properties: {
+    franchise_slug: { type: 'string' },
+    item_slug: { type: 'string' },
+    reason: { type: 'string' },
+  },
+} as const;
+
+/** POST /collection/import */
+export const importCollectionSchema = {
+  description: 'Import a previously exported collection file. Resolves slugs and creates new entries.',
+  tags: ['collection'],
+  summary: 'Import collection',
+  security: [{ bearerAuth: [] }],
+  body: {
+    type: 'object',
+    required: ['version', 'items'],
+    additionalProperties: false,
+    properties: {
+      version: { type: 'integer', minimum: 1, maximum: 1 },
+      items: {
+        type: 'array',
+        minItems: 1,
+        maxItems: 500,
+        items: importItemSchema,
+      },
+    },
+  },
+  response: {
+    200: {
+      type: 'object',
+      required: ['imported', 'unresolved'],
+      additionalProperties: false,
+      properties: {
+        imported: { type: 'array', items: importedItemSchema },
+        unresolved: { type: 'array', items: unresolvedItemSchema },
+      },
+    },
+    400: errorResponse,
+    401: errorResponse,
+    403: errorResponse,
+    500: errorResponse,
   },
 } as const;

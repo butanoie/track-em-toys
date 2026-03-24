@@ -72,7 +72,9 @@ export async function mockEmptyCollection(page: Page): Promise<void> {
   });
   await page.route('**/collection/stats', (route) => {
     if (isDocRequest(route)) return route.continue();
-    return route.fulfill(jsonResponse({ total_copies: 0, unique_items: 0, by_franchise: [], by_condition: [] }));
+    return route.fulfill(
+      jsonResponse({ total_copies: 0, unique_items: 0, deleted_count: 0, by_franchise: [], by_condition: [] })
+    );
   });
 }
 
@@ -118,6 +120,7 @@ export class MockCollectionState {
     return {
       total_copies: live.length,
       unique_items: uniqueItemIds.size,
+      deleted_count: this._deleted.size,
       by_franchise: Array.from(franchiseMap.values()),
       by_condition: Array.from(conditionMap.entries()).map(([condition, count]) => ({ condition, count })),
     };
