@@ -32,9 +32,7 @@ export interface Manifest {
   warnings: ManifestWarning[];
 }
 
-export type CliSource =
-  | { mode: 'manifest'; manifestPath: string }
-  | { mode: 'source-dir'; sourceDir: string };
+export type CliSource = { mode: 'manifest'; manifestPath: string } | { mode: 'source-dir'; sourceDir: string };
 
 export interface CliOptions {
   source: CliSource;

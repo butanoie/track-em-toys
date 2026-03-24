@@ -31,6 +31,7 @@ This ADR documents the UI design decisions for rendering these relationships on 
 **Why:** Character entities can have relationships across multiple types (e.g., Devastator has combiner-component AND rival relationships). A flat list loses the semantic grouping. A table adds unnecessary chrome for what is essentially a labeled list. A graph/network visualization is overkill for a detail page with typically < 20 relationships.
 
 **Format:**
+
 ```
 Combiner Components
   Scrapper ·· right leg
@@ -58,6 +59,7 @@ Rival
 ### 4. Section Placement
 
 **Decision:**
+
 - **Character detail:** After Sub-Groups, before Appearances. Relationships describe who the character is connected to — more fundamental than media appearances.
 - **Item detail:** After the description/badges, as the last section. Item relationships (mold-origin, variants, gift-sets) are supplementary catalog data.
 
@@ -72,6 +74,7 @@ Rival
 ### 6. Three-Layer Architecture
 
 **Decision:** The implementation uses three layers:
+
 1. **Pure utility module** (`relationship-utils.ts`) — data transformation (grouping, formatting, symmetric detection). No React imports.
 2. **Generic display component** (`RelationshipSection`) — renders pre-grouped data with headings, badges, roles, and link slots via `renderLink` callback. Router-agnostic.
 3. **Integration components** (`CharacterRelationships`, `ItemRelationships`) — own their own data fetch via hooks, transform data using utilities, and pass grouped results to `RelationshipSection`. These embed directly in content components.
@@ -97,12 +100,15 @@ Rival
 ## Alternatives Considered
 
 ### Network Graph Visualization
+
 Rejected — too complex for a detail page, requires a visualization library, and the relationship count per entity is small (typically < 20). Could be revisited for a dedicated "relationship explorer" page in the future.
 
 ### Table Layout
+
 Rejected — tables imply structured columnar data. Relationships are more naturally a grouped list with variable metadata (some have roles, some have subtypes, some have neither).
 
 ### Relationship Data Embedded in Detail Response
+
 Rejected — would couple the detail and relationship queries, making the detail response slower. The current architecture keeps them independent.
 
 ---
@@ -119,30 +125,30 @@ Rejected — would couple the detail and relationship queries, making the detail
 
 ## Component Summary
 
-| Component | Type | Purpose |
-|---|---|---|
-| `relationship-utils.ts` | New | Pure utility module: grouping, formatting, symmetric detection |
-| `RelationshipSection` | New | Generic grouped-list renderer (router-agnostic) |
-| `CharacterRelationships` | New | Integration: fetches + transforms + renders character relationships |
-| `ItemRelationships` | New | Integration: fetches + transforms + renders item relationships |
-| `useCharacterRelationships` | New | TanStack Query hook |
-| `useItemRelationships` | New | TanStack Query hook |
-| `api.ts` | Edit | Add `getCharacterRelationships`, `getItemRelationships` |
-| `CharacterDetailContent` | Edit | Embed `<CharacterRelationships />` |
-| `ItemDetailContent` | Edit | Embed `<ItemRelationships />` |
+| Component                   | Type | Purpose                                                             |
+| --------------------------- | ---- | ------------------------------------------------------------------- |
+| `relationship-utils.ts`     | New  | Pure utility module: grouping, formatting, symmetric detection      |
+| `RelationshipSection`       | New  | Generic grouped-list renderer (router-agnostic)                     |
+| `CharacterRelationships`    | New  | Integration: fetches + transforms + renders character relationships |
+| `ItemRelationships`         | New  | Integration: fetches + transforms + renders item relationships      |
+| `useCharacterRelationships` | New  | TanStack Query hook                                                 |
+| `useItemRelationships`      | New  | TanStack Query hook                                                 |
+| `api.ts`                    | Edit | Add `getCharacterRelationships`, `getItemRelationships`             |
+| `CharacterDetailContent`    | Edit | Embed `<CharacterRelationships />`                                  |
+| `ItemDetailContent`         | Edit | Embed `<ItemRelationships />`                                       |
 
 ### Test Impact
 
-| Test File | Change |
-|---|---|
-| `CharacterDetailContent.test.tsx` | Add `vi.mock` for `CharacterRelationships` |
-| `ItemDetailContent.test.tsx` | Add `vi.mock` for `ItemRelationships` |
-| `CharacterDetailPanel.test.tsx` | Add `vi.mock` for `CharacterRelationships` |
-| `ItemDetailPanel.test.tsx` | Add `vi.mock` for `ItemRelationships` |
-| `relationship-utils.test.ts` | New — pure unit tests |
-| `RelationshipSection.test.tsx` | New — component rendering tests |
-| `CharacterRelationships.test.tsx` | New — integration component tests |
-| `ItemRelationships.test.tsx` | New — integration component tests |
-| `useCharacterRelationships.test.ts` | New — hook tests |
-| `useItemRelationships.test.ts` | New — hook tests |
-| `catalog-test-helpers.tsx` | Add relationship mock fixtures |
+| Test File                           | Change                                     |
+| ----------------------------------- | ------------------------------------------ |
+| `CharacterDetailContent.test.tsx`   | Add `vi.mock` for `CharacterRelationships` |
+| `ItemDetailContent.test.tsx`        | Add `vi.mock` for `ItemRelationships`      |
+| `CharacterDetailPanel.test.tsx`     | Add `vi.mock` for `CharacterRelationships` |
+| `ItemDetailPanel.test.tsx`          | Add `vi.mock` for `ItemRelationships`      |
+| `relationship-utils.test.ts`        | New — pure unit tests                      |
+| `RelationshipSection.test.tsx`      | New — component rendering tests            |
+| `CharacterRelationships.test.tsx`   | New — integration component tests          |
+| `ItemRelationships.test.tsx`        | New — integration component tests          |
+| `useCharacterRelationships.test.ts` | New — hook tests                           |
+| `useItemRelationships.test.ts`      | New — hook tests                           |
+| `catalog-test-helpers.tsx`          | Add relationship mock fixtures             |

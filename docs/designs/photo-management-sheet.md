@@ -56,6 +56,7 @@ actions={
 ## 2. Sheet Layout
 
 **Shadcn Sheet, right side, responsive width:**
+
 - Desktop: `sm:max-w-lg` (512px)
 - Mobile: full width (Radix default)
 - `side="right"`
@@ -120,6 +121,7 @@ The sheet body has two vertically stacked sections separated by visual hierarchy
 ```
 
 **Visual treatment:**
+
 - Dashed border: `border-2 border-dashed border-muted-foreground/25 rounded-lg`
 - Background: `bg-muted/30`
 - Padding: `p-8` for comfortable target area
@@ -142,6 +144,7 @@ The sheet body has two vertically stacked sections separated by visual hierarchy
 ```
 
 **Visual treatment on drag-over:**
+
 - Border transitions to: `border-primary border-solid` (solid replaces dashed)
 - Background: `bg-primary/5`
 - Icon color: `text-primary`
@@ -179,14 +182,15 @@ Renders between the drop zone and the photo grid, only when uploads are in progr
 
 **States per file:**
 
-| State | Icon (right) | Progress bar | Text |
-|-------|-------------|-------------|------|
-| `queued` | `Circle` (muted, hollow) | None | — |
-| `uploading` | `Loader2` (spinning, `animate-spin`) | `<progress>` bar, `bg-primary` fill | `{percent}%` |
-| `done` | `CheckCircle2` (green-600) | Full bar briefly, then fades | — |
-| `error` | `XCircle` (destructive) | None | Error message in `text-destructive text-xs` |
+| State       | Icon (right)                         | Progress bar                        | Text                                        |
+| ----------- | ------------------------------------ | ----------------------------------- | ------------------------------------------- |
+| `queued`    | `Circle` (muted, hollow)             | None                                | —                                           |
+| `uploading` | `Loader2` (spinning, `animate-spin`) | `<progress>` bar, `bg-primary` fill | `{percent}%`                                |
+| `done`      | `CheckCircle2` (green-600)           | Full bar briefly, then fades        | —                                           |
+| `error`     | `XCircle` (destructive)              | None                                | Error message in `text-destructive text-xs` |
 
 **Visual treatment:**
+
 - Each row: `flex items-center gap-2 py-1.5`
 - Filename: `text-sm text-foreground truncate flex-1` with `Paperclip` icon (`text-muted-foreground h-3.5 w-3.5`)
 - Progress bar: HTML `<progress>` element styled via Tailwind
@@ -198,6 +202,7 @@ Renders between the drop zone and the photo grid, only when uploads are in progr
 - Completed items auto-clear after 3 seconds (with fade-out transition)
 
 **Accessibility:**
+
 - `<progress>` element with `aria-label="Uploading {filename}"`, `aria-valuenow`, `aria-valuemin="0"`, `aria-valuemax="100"`
 - Error messages: `role="alert"`
 - Container: `aria-label="Upload progress"` region
@@ -224,6 +229,7 @@ Renders between the drop zone and the photo grid, only when uploads are in progr
 ```
 
 **Visual treatment:**
+
 - Card: `relative group bg-muted rounded-md overflow-hidden aspect-square`
 - Thumbnail: `<img>` with `object-cover w-full h-full`
 - Hover overlay: `absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors` (subtle dim)
@@ -242,6 +248,7 @@ Position: Top-left corner of the card.
 ```
 
 **Visual treatment:**
+
 - `absolute top-1 left-1 z-10`
 - Container: `flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-semibold`
 - Colors: `bg-amber-500 text-white` (light mode) / `bg-amber-400 text-amber-950` (dark mode)
@@ -316,7 +323,9 @@ Reuses `ConfirmDialog` from `@/admin/components/ConfirmDialog`:
 ```tsx
 <ConfirmDialog
   open={deleteTarget !== null}
-  onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+  onOpenChange={(open) => {
+    if (!open) setDeleteTarget(null);
+  }}
   title="Delete photo?"
   description="This photo will be permanently removed from the catalog item. This action cannot be undone."
   confirmLabel="Delete Photo"
@@ -378,16 +387,16 @@ No `confirmText` prop — photo deletion has friction (the dialog itself) but do
 
 ## 8. Keyboard Accessibility
 
-| Key | Context | Action |
-|-----|---------|--------|
-| `Tab` | Sheet | Navigate between drop zone, upload queue items, photo grid items |
-| `Enter`/`Space` | On photo tile | Pick up / drop item (dnd-kit keyboard sensor) |
-| `ArrowUp`/`ArrowDown` | While dragging (keyboard) | Move item in the grid |
-| `Escape` | While dragging | Cancel drag operation |
-| `Escape` | Sheet open (no drag) | Close Sheet |
-| `Enter`/`Space` | On star button | Set as primary photo |
-| `Enter`/`Space` | On delete button | Open confirm dialog |
-| `Enter`/`Space` | On "select files" | Open file picker |
+| Key                   | Context                   | Action                                                           |
+| --------------------- | ------------------------- | ---------------------------------------------------------------- |
+| `Tab`                 | Sheet                     | Navigate between drop zone, upload queue items, photo grid items |
+| `Enter`/`Space`       | On photo tile             | Pick up / drop item (dnd-kit keyboard sensor)                    |
+| `ArrowUp`/`ArrowDown` | While dragging (keyboard) | Move item in the grid                                            |
+| `Escape`              | While dragging            | Cancel drag operation                                            |
+| `Escape`              | Sheet open (no drag)      | Close Sheet                                                      |
+| `Enter`/`Space`       | On star button            | Set as primary photo                                             |
+| `Enter`/`Space`       | On delete button          | Open confirm dialog                                              |
+| `Enter`/`Space`       | On "select files"         | Open file picker                                                 |
 
 ### dnd-kit Screen Reader Announcements
 
@@ -410,10 +419,10 @@ accessibility={{
 
 ## 9. Responsive Behavior
 
-| Breakpoint | Sheet width | Grid columns | Action bar |
-|-----------|------------|-------------|------------|
-| `< sm` (640px) | Full width | 2 columns (`grid-cols-2`) | Always visible (no hover on touch) |
-| `sm+` | 512px (`sm:max-w-lg`) | 3 columns (`grid-cols-3`) | Visible on hover |
+| Breakpoint     | Sheet width           | Grid columns              | Action bar                         |
+| -------------- | --------------------- | ------------------------- | ---------------------------------- |
+| `< sm` (640px) | Full width            | 2 columns (`grid-cols-2`) | Always visible (no hover on touch) |
+| `sm+`          | 512px (`sm:max-w-lg`) | 3 columns (`grid-cols-3`) | Visible on hover                   |
 
 On mobile/touch devices, the action bar (delete button) should always be visible since there's no hover state. Drag works via touch-and-hold on the entire tile. Use `@media (hover: none)` or always-show on `< sm`:
 
@@ -432,17 +441,17 @@ Note: `@media (hover: hover)` is more precise than breakpoint-based, but Tailwin
 
 All colors use existing design tokens except the primary badge amber:
 
-| Element | Light Mode | Dark Mode | WCAG AA |
-|---------|-----------|-----------|---------|
-| Drop zone border | `border-muted-foreground/25` | Same token | N/A (decorative) |
-| Drop zone active border | `border-primary` | Same token | N/A (decorative) |
-| Progress bar fill | `bg-primary` | Same token | N/A (non-text) |
-| Primary badge bg | `bg-amber-600` | `bg-amber-500` | 4.6:1 / 4.7:1 |
-| Primary badge text | `text-white` | `text-amber-950` | Pass AA |
-| Done icon | `text-green-600` | `text-green-400` | 4.8:1 / 4.6:1 |
-| Error text | `text-destructive` (token) | Same token | Pass (themed) |
-| Action bar gradient | `from-black/40` | Same | N/A (overlay) |
-| Action icons | `text-white/80` | Same | 4.5:1 on dark overlay |
+| Element                 | Light Mode                   | Dark Mode        | WCAG AA               |
+| ----------------------- | ---------------------------- | ---------------- | --------------------- |
+| Drop zone border        | `border-muted-foreground/25` | Same token       | N/A (decorative)      |
+| Drop zone active border | `border-primary`             | Same token       | N/A (decorative)      |
+| Progress bar fill       | `bg-primary`                 | Same token       | N/A (non-text)        |
+| Primary badge bg        | `bg-amber-600`               | `bg-amber-500`   | 4.6:1 / 4.7:1         |
+| Primary badge text      | `text-white`                 | `text-amber-950` | Pass AA               |
+| Done icon               | `text-green-600`             | `text-green-400` | 4.8:1 / 4.6:1         |
+| Error text              | `text-destructive` (token)   | Same token       | Pass (themed)         |
+| Action bar gradient     | `from-black/40`              | Same             | N/A (overlay)         |
+| Action icons            | `text-white/80`              | Same             | 4.5:1 on dark overlay |
 
 ---
 
@@ -490,7 +499,11 @@ function DropZoneMockup({ isDragOver }: { isDragOver: boolean }) {
 
 ```tsx
 // DESIGN MOCKUP — not production code
-function UploadQueueItemMockup({ status, progress, filename }: {
+function UploadQueueItemMockup({
+  status,
+  progress,
+  filename,
+}: {
   status: 'queued' | 'uploading' | 'done' | 'error';
   progress: number;
   filename: string;
@@ -550,11 +563,7 @@ function PhotoGridItemMockup({ isPrimary, url }: { isPrimary: boolean; url: stri
 
       {/* Action bar — bottom gradient overlay */}
       <div className="absolute bottom-0 inset-x-0 flex items-end justify-end p-1.5 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-        <button
-          type="button"
-          className="text-white/80 hover:text-white"
-          aria-label="Delete photo"
-        >
+        <button type="button" className="text-white/80 hover:text-white" aria-label="Delete photo">
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
@@ -604,9 +613,7 @@ function PhotoManagementSheetMockup() {
               <PhotoGridItemMockup isPrimary={false} url="/photo4.jpg" />
             </div>
 
-            <p className="text-xs text-muted-foreground text-center">
-              Drag to reorder · Star marks primary
-            </p>
+            <p className="text-xs text-muted-foreground text-center">Drag to reorder · Star marks primary</p>
           </div>
         </div>
       </SheetContent>
@@ -621,14 +628,14 @@ function PhotoManagementSheetMockup() {
 
 All animations use CSS transitions (no animation library):
 
-| Element | Property | Duration | Easing |
-|---------|----------|----------|--------|
-| Drop zone border/bg | `all` | `150ms` | default ease |
-| Upload progress bar | `width` | `300ms` | default ease |
-| Done item fade-out | `opacity` | `500ms` | default ease |
-| Photo hover overlay | `opacity` | default | default ease |
-| Action bar reveal | `opacity` | default | default ease |
-| Drag item lift | `transform, box-shadow` | `200ms` | default ease |
+| Element             | Property                | Duration | Easing       |
+| ------------------- | ----------------------- | -------- | ------------ |
+| Drop zone border/bg | `all`                   | `150ms`  | default ease |
+| Upload progress bar | `width`                 | `300ms`  | default ease |
+| Done item fade-out  | `opacity`               | `500ms`  | default ease |
+| Photo hover overlay | `opacity`               | default  | default ease |
+| Action bar reveal   | `opacity`               | default  | default ease |
+| Drag item lift      | `transform, box-shadow` | `200ms`  | default ease |
 
 ---
 

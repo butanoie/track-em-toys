@@ -84,10 +84,10 @@ Used `aria-current="true"` (not `"page"`) because the current item indicator is 
 
 ## Validation & Testing
 
-| Module | Tests | Lint | Typecheck | Format | Build |
-|--------|-------|------|-----------|--------|-------|
-| API    | ✅ 630 passed | ✅ | ✅ | ✅ | ✅ |
-| Web    | ✅ 538 passed | ✅ | ✅ | ✅ | ✅ |
+| Module | Tests         | Lint | Typecheck | Format | Build |
+| ------ | ------------- | ---- | --------- | ------ | ----- |
+| API    | ✅ 630 passed | ✅   | ✅        | ✅     | ✅    |
+| Web    | ✅ 538 passed | ✅   | ✅        | ✅     | ✅    |
 
 ---
 

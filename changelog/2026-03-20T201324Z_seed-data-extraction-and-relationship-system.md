@@ -21,6 +21,7 @@ Replaced domain-specific combiner fields (`combined_form_slug`, `combiner_role`,
 **Relationship types:** `combiner-component`, `binary-bond`, `vehicle-crew`, `rival`, `sibling`, `mentor-student`, `evolution`
 
 **Record shape:**
+
 ```json
 {
   "type": "combiner-component",
@@ -32,6 +33,7 @@ Replaced domain-specific combiner fields (`combined_form_slug`, `combiner_role`,
 ```
 
 **Validation additions to `seed-validation.test.ts`:**
+
 - `RelationshipRecord`, `RelationshipEntity`, `RelationshipFile` interfaces
 - `RELATIONSHIP_TYPE_REGISTRY` Map with per-type role/subtype allowlists
 - Auto-discovery of `relationships/*.json` files
@@ -42,6 +44,7 @@ Replaced domain-specific combiner fields (`combined_form_slug`, `combiner_role`,
 Moved all proprietary catalog data to a separate repository. Replaced with minimal FK-consistent sample fixtures.
 
 **Sample data (`api/db/seed/sample/`):**
+
 - Reference: 2 franchises, 2 continuity families, 3 factions, 2 sub-groups, 2 manufacturers, 2 toy lines
 - Characters: 4 records (Optimus Prime, Bumblebee, Devastator, Scrapper)
 - Appearances: 4 records (one per character)
@@ -49,6 +52,7 @@ Moved all proprietary catalog data to a separate repository. Replaced with minim
 - Items: 3 records (official Hasbro + third-party FansToys)
 
 **Deleted from monorepo (moved to private repo):**
+
 - 13 character files, 15 appearance files, 8 relationship files, 7 item files, 6 reference files
 - `scripts/migrate-to-relationships.py`
 - `.claude/skills/research-catalog/` (data generation skill + evals + entity schemas)
@@ -60,7 +64,7 @@ Moved all proprietary catalog data to a separate repository. Replaced with minim
 ```typescript
 const SEED_DIR = process.env['SEED_DATA_PATH']
   ? path.resolve(process.env['SEED_DATA_PATH'])
-  : path.join(SCRIPT_DIR, 'sample')
+  : path.join(SCRIPT_DIR, 'sample');
 ```
 
 ### 4. Auto-Discovery Refactor
@@ -68,9 +72,9 @@ const SEED_DIR = process.env['SEED_DATA_PATH']
 Replaced hardcoded `CHARACTER_FILES` (13 entries) and `ITEM_FILES` (7 entries) arrays in `seed-validation.test.ts` with directory auto-discovery. Consolidated 5 nearly-identical loader functions into generic helpers:
 
 ```typescript
-function loadSeedFile<T>(relPath: string): T
-function discoverJsonFiles(subdir: string, options?: { recursive: boolean }): string[]
-function discoverAndLoad<T>(subdir: string, options?: { recursive: boolean }): Array<{ file: string } & T>
+function loadSeedFile<T>(relPath: string): T;
+function discoverJsonFiles(subdir: string, options?: { recursive: boolean }): string[];
+function discoverAndLoad<T>(subdir: string, options?: { recursive: boolean }): Array<{ file: string } & T>;
 ```
 
 All four data types (characters, items, appearances, relationships) now use the same discovery pattern.
@@ -78,6 +82,7 @@ All four data types (characters, items, appearances, relationships) now use the 
 ### 5. Integration Test Updates
 
 Updated `seed-integration.test.ts` for sample data compatibility:
+
 - Row counts updated to sample sizes (e.g., characters: 4, items: 3)
 - Exact-count assertions guarded with `describe.skipIf(!!process.env['SEED_DATA_PATH'])`
 - Removed data-specific tests (Devastator 6-component enumeration, Apeface sub-groups, exact manufacturer counts)
@@ -122,9 +127,11 @@ Updated `seed-integration.test.ts` for sample data compatibility:
 ## Related Files
 
 **Created:**
+
 - `api/db/seed/sample/` (10 files — reference, characters, appearances, relationships, items)
 
 **Modified:**
+
 - `api/src/db/seed-validation.test.ts` — relationship interfaces/types/registry, auto-discovery, generic loaders, SEED_DATA_PATH
 - `api/src/db/seed-integration.test.ts` — sample counts, skipIf guard, removed data-specific tests
 - `api/db/seed/ingest.ts` — SEED_DATA_PATH support, log message
@@ -134,6 +141,7 @@ Updated `seed-integration.test.ts` for sample data compatibility:
 - `api/CLAUDE.md` — seed data conventions update
 
 **Deleted:**
+
 - `api/db/seed/characters/` (13 files), `api/db/seed/appearances/` (15 files), `api/db/seed/relationships/` (8 files), `api/db/seed/items/` (7 files), `api/db/seed/reference/` (6 files), `api/db/seed/scripts/` (1 file)
 - `.claude/skills/research-catalog/` (4 files)
 

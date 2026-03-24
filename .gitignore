@@ -20,6 +20,10 @@ node_modules/
 
 # Build output
 dist/
+api/db/seed/*.js
+api/db/seed/*.js.map
+api/db/seed/*.d.ts
+api/db/seed/*.d.ts.map
 
 # Test coverage
 coverage/

@@ -8,157 +8,43 @@
  */
 
 import 'dotenv/config'
-import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import pg from 'pg'
 import pino from 'pino'
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+import type {
+  AppearanceFile,
+  CharacterFile,
+  CharacterRecord,
+  ContinuityFamilyRecord,
+  FactionRecord,
+  FranchiseRecord,
+  ItemFile,
+  ItemRecord,
+  ItemRelationshipFile,
+  ManufacturerRecord,
+  ReferenceFile,
+  RelationshipFile,
+  SubGroupRecord,
+  ToyLineRecord,
+} from './seed-types.js'
 
-interface ReferenceRecord {
-  slug: string
-  name: string
-  [key: string]: unknown
-}
-
-interface SubGroupRecord extends ReferenceRecord {
-  faction_slug: string | null
-  franchise_slug: string
-}
-
-interface ToyLineRecord extends ReferenceRecord {
-  manufacturer_slug: string
-  franchise_slug: string
-}
-
-interface ManufacturerRecord extends ReferenceRecord {
-  is_official_licensee: boolean
-  country: string | null
-  website_url: string | null
-  aliases: string[]
-  notes: string | null
-}
-
-interface FranchiseRecord extends ReferenceRecord {
-  sort_order: number | null
-  notes: string | null
-}
-
-interface ContinuityFamilyRecord extends ReferenceRecord {
-  franchise_slug: string
-  sort_order: number | null
-  notes: string | null
-}
-
-interface FactionRecord extends ReferenceRecord {
-  franchise_slug: string
-  notes: string | null
-}
-
-interface CharacterRecord {
-  name: string
-  slug: string
-  franchise_slug: string
-  faction_slug: string | null
-  character_type: string | null
-  alt_mode: string | null
-  is_combined_form: boolean
-  continuity_family_slug: string
-  sub_group_slugs: string[]
-  notes: string | null
-  series_year?: string | null
-  year_released?: number | null
-  [key: string]: unknown
-}
-
-interface AppearanceRecord {
-  slug: string
-  name: string
-  character_slug: string
-  description: string | null
-  source_media: string | null
-  source_name: string | null
-  year_start: number | null
-  year_end: number | null
-  metadata: Record<string, unknown>
-}
-
-interface ItemRecord {
-  name: string
-  slug: string
-  product_code: string | null
-  character_slug: string
-  character_appearance_slug: string | null
-  manufacturer_slug: string
-  toy_line_slug: string
-  is_third_party: boolean
-  year_released: number | null
-  size_class: string | null
-  metadata: Record<string, unknown>
-}
-
-interface ReferenceFile<T = ReferenceRecord> {
-  _metadata: { total: number; [key: string]: unknown }
-  data: T[]
-}
-
-interface CharacterFile {
-  _metadata: { total_characters: number; [key: string]: unknown }
-  characters: CharacterRecord[]
-}
-
-interface AppearanceFile {
-  _metadata: { total: number; [key: string]: unknown }
-  data: AppearanceRecord[]
-}
-
-interface ItemFile {
-  _metadata: { total_items: number; [key: string]: unknown }
-  items: ItemRecord[]
-}
-
-interface RelationshipEntity {
-  slug: string
-  role: string | null
-}
-
-interface RelationshipRecord {
-  type: string
-  subtype: string | null
-  entity1: RelationshipEntity
-  entity2: RelationshipEntity
-  metadata: Record<string, unknown>
-}
-
-interface RelationshipFile {
-  _metadata: { total: number; [key: string]: unknown }
-  relationships: RelationshipRecord[]
-}
-
-interface ItemRelationshipRecord {
-  type: string
-  subtype: string | null
-  item1_slug: string
-  item1_role: string | null
-  item2_slug: string
-  item2_role: string | null
-  metadata: Record<string, unknown>
-}
-
-interface ItemRelationshipFile {
-  _metadata: { total: number; [key: string]: unknown }
-  item_relationships: ItemRelationshipRecord[]
-}
+import {
+  assembleCharacterMetadata,
+  buildSlugMap,
+  discoverJsonFiles,
+  discoverJsonFilesRecursive,
+  loadJson,
+  resolveOptionalSlug,
+  resolveSlug,
+  resolveSeedDir,
+} from './seed-io.js'
 
 // ─── Setup ──────────────────────────────────────────────────────────────────
 
 const log = pino({ level: process.env['LOG_LEVEL'] ?? 'info' })
 
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url))
-const SEED_DIR = process.env['SEED_DATA_PATH']
-  ? path.resolve(process.env['SEED_DATA_PATH'])
-  : path.join(SCRIPT_DIR, 'sample')
+const SEED_DIR = resolveSeedDir()
 
 const dbUrl = process.env['DATABASE_URL']
 if (!dbUrl) {
@@ -172,80 +58,6 @@ const ssl =
     : undefined
 
 const pool = new pg.Pool({ connectionString: dbUrl, max: 1, ssl })
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-function loadJson<T>(filePath: string): T {
-  // Files validated by seed-validation.test.ts before ingest runs
-  const raw: unknown = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-  if (raw === null || typeof raw !== 'object') {
-    throw new Error(`loadJson: expected object in ${filePath}`)
-  }
-  return raw as T
-}
-
-function discoverJsonFiles(dir: string): string[] {
-  if (!fs.existsSync(dir)) return []
-  return fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith('.json'))
-    .sort()
-    .map((f) => path.join(dir, f))
-}
-
-function discoverJsonFilesRecursive(dir: string): string[] {
-  if (!fs.existsSync(dir)) return []
-  return fs
-    .readdirSync(dir, { recursive: true })
-    .filter((f): f is string => typeof f === 'string' && f.endsWith('.json'))
-    .sort()
-    .map((f) => path.join(dir, f))
-}
-
-function resolveSlug(
-  map: Map<string, string>,
-  slug: string,
-  context: string,
-): string {
-  const id = map.get(slug)
-  if (id === undefined) {
-    throw new Error(`Unresolved slug "${slug}" in ${context}`)
-  }
-  return id
-}
-
-function resolveOptionalSlug(
-  map: Map<string, string>,
-  slug: string | null,
-  context: string,
-): string | null {
-  if (slug == null) return null
-  return resolveSlug(map, slug, context)
-}
-
-const SLUG_TABLES = new Set([
-  'franchises', 'continuity_families', 'factions', 'sub_groups',
-  'manufacturers', 'toy_lines', 'characters',
-  'character_appearances',
-])
-
-async function buildSlugMap(
-  client: pg.PoolClient,
-  table: string,
-): Promise<Map<string, string>> {
-  if (!SLUG_TABLES.has(table)) {
-    throw new Error(`buildSlugMap: unexpected table "${table}"`)
-  }
-  const { rows } = await client.query<{ slug: string; id: string }>(
-    `SELECT slug, id FROM ${pg.escapeIdentifier(table)}`,
-  )
-  const map = new Map<string, string>()
-  for (const row of rows) {
-    map.set(row.slug, row.id)
-  }
-  log.debug({ map: table, size: map.size }, 'slug map built')
-  return map
-}
 
 // ─── Reference table upserts ────────────────────────────────────────────────
 
@@ -436,14 +248,6 @@ async function upsertToyLines(
 }
 
 // ─── Character upserts ──────────────────────────────────────────────────────
-
-function assembleCharacterMetadata(char: CharacterRecord): Record<string, unknown> {
-  const metadata: Record<string, unknown> = {}
-  if (char.notes != null) metadata['notes'] = char.notes
-  if (char.series_year != null) metadata['series_year'] = char.series_year
-  if (char.year_released != null) metadata['year_released'] = char.year_released
-  return metadata
-}
 
 async function upsertCharactersPass1(
   client: pg.PoolClient,
@@ -798,7 +602,7 @@ async function runPurge(client: pg.PoolClient): Promise<void> {
 
 // ─── Main ───────────────────────────────────────────────────────────────────
 
-async function runSeed(client: pg.PoolClient): Promise<void> {
+export async function runSeed(client: pg.PoolClient): Promise<void> {
   // -1: Franchises (must be first — all other reference tables depend on it)
   const franchiseMap = await upsertFranchises(client)
 

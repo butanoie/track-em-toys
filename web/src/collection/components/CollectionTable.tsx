@@ -89,7 +89,12 @@ export function CollectionTable({ items, isLoading, onEdit }: CollectionTablePro
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded bg-muted flex-shrink-0 overflow-hidden">
                     {item.thumbnail_url ? (
-                      <img src={buildPhotoUrl(item.thumbnail_url)} alt="" className="w-full h-full object-contain" loading="lazy" />
+                      <img
+                        src={buildPhotoUrl(item.thumbnail_url)}
+                        alt=""
+                        className="w-full h-full object-contain"
+                        loading="lazy"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Package className="h-4 w-4 text-muted-foreground/40" />

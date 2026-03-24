@@ -23,6 +23,7 @@ Added `maxAge: 86400` (24 hours) to `@fastify/cors` config. Browsers now cache O
 ### 2. TanStack Query Client Defaults
 
 Added global defaults to reduce unnecessary API traffic:
+
 - `refetchOnWindowFocus: false` — prevents refetching all queries on tab focus
 - `refetchOnReconnect: false` — prevents refetch storms after network recovery
 - `gcTime: 15 * 60 * 1000` — keeps inactive query cache for 15 minutes (up from 5 min default)
@@ -36,6 +37,7 @@ Per-hook overrides (e.g., `staleTime: 30_000` on collection hooks) continue to t
 Added `loading="lazy"` to all thumbnail `<img>` elements across catalog and collection UIs. Hero/displayed photos and lightbox images intentionally left eager-loaded to avoid above-the-fold pop-in.
 
 **Modified:**
+
 - `web/src/collection/components/CollectionTable.tsx`
 - `web/src/collection/components/CollectionItemCard.tsx`
 - `web/src/catalog/components/ItemList.tsx`
@@ -53,10 +55,12 @@ Changed `auth_events.user_id` from `ON DELETE SET NULL` to `ON DELETE RESTRICT`,
 Extracted identical `formatRelativeDate` function from `CollectionTable` and `CollectionItemCard` into a shared utility with unit tests.
 
 **Created:**
+
 - `web/src/collection/lib/format-date.ts`
 - `web/src/collection/lib/format-date.test.ts`
 
 **Modified:**
+
 - `web/src/collection/components/CollectionTable.tsx` — import shared util
 - `web/src/collection/components/CollectionItemCard.tsx` — import shared util
 
@@ -95,18 +99,18 @@ Typecheck: clean (both modules)
 
 ## Related Files
 
-| File | Action |
-|------|--------|
-| `api/src/server.ts` | Modified |
-| `api/db/migrations/030_auth_events_fk_restrict.sql` | Created |
-| `web/src/routes/__root.tsx` | Modified |
-| `web/src/collection/lib/format-date.ts` | Created |
-| `web/src/collection/lib/format-date.test.ts` | Created |
-| `web/src/collection/components/CollectionTable.tsx` | Modified |
+| File                                                   | Action   |
+| ------------------------------------------------------ | -------- |
+| `api/src/server.ts`                                    | Modified |
+| `api/db/migrations/030_auth_events_fk_restrict.sql`    | Created  |
+| `web/src/routes/__root.tsx`                            | Modified |
+| `web/src/collection/lib/format-date.ts`                | Created  |
+| `web/src/collection/lib/format-date.test.ts`           | Created  |
+| `web/src/collection/components/CollectionTable.tsx`    | Modified |
 | `web/src/collection/components/CollectionItemCard.tsx` | Modified |
-| `web/src/catalog/components/ItemList.tsx` | Modified |
-| `web/src/catalog/components/PhotoGallery.tsx` | Modified |
-| `web/src/catalog/photos/PhotoGrid.tsx` | Modified |
+| `web/src/catalog/components/ItemList.tsx`              | Modified |
+| `web/src/catalog/components/PhotoGallery.tsx`          | Modified |
+| `web/src/catalog/photos/PhotoGrid.tsx`                 | Modified |
 | `docs/decisions/ADR_Performance_Scaling_Assessment.md` | Modified |
 
 ---

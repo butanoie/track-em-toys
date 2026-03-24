@@ -15,7 +15,9 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['src/db/seed-io.test.ts'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },

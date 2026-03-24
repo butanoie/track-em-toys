@@ -92,6 +92,7 @@ Phase 1.9 Slice 2 adds curator/admin-facing photo management UI to the catalog i
 ### 11. Integration Points
 
 **Decision:** "Manage Photos" button placement:
+
 - **ItemDetailPage:** In the header row, next to `ShareLinkButton`
 - **ItemDetailPanel:** In `DetailPanelShell`'s `actions` slot
 
@@ -136,12 +137,12 @@ catalog/photos/
 
 ## API Endpoints (Slice 1, Already Built)
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` | `/catalog/franchises/:franchise/items/:slug/photos` | Upload 1-10 photos (multipart) |
-| `DELETE` | `.../photos/:photoId` | Delete a photo (204) |
-| `PATCH` | `.../photos/:photoId/primary` | Set primary photo |
-| `PATCH` | `.../photos/reorder` | Bulk reorder photos |
+| Method   | Path                                                | Purpose                        |
+| -------- | --------------------------------------------------- | ------------------------------ |
+| `POST`   | `/catalog/franchises/:franchise/items/:slug/photos` | Upload 1-10 photos (multipart) |
+| `DELETE` | `.../photos/:photoId`                               | Delete a photo (204)           |
+| `PATCH`  | `.../photos/:photoId/primary`                       | Set primary photo              |
+| `PATCH`  | `.../photos/reorder`                                | Bulk reorder photos            |
 
 ---
 

@@ -17,6 +17,7 @@ Implemented an ML training data export feature that generates manifest files map
 ### 1. API — ML Export Endpoint
 
 New `POST /catalog/ml-export` endpoint (admin-only) that:
+
 - Accepts `q` (search query) and optional `franchise` filter — same params as catalog search
 - Finds matching items via full-text search (replicating the items half of the search UNION)
 - LEFT JOINs `item_photos` to include approved photos
@@ -24,12 +25,14 @@ New `POST /catalog/ml-export` endpoint (admin-only) that:
 - Writes to `ML_EXPORT_PATH` with ISO8601 timestamped filename (e.g., `20260321T154530Z.json`)
 
 **Created:**
+
 - `api/src/catalog/ml-export/queries.ts` — FTS query with photo JOIN
 - `api/src/catalog/ml-export/routes.ts` — POST handler, manifest assembly, file I/O
 - `api/src/catalog/ml-export/schemas.ts` — Fastify route schema (200/400/401/403/500)
 - `api/src/catalog/ml-export/routes.test.ts` — 11 integration tests
 
 **Modified:**
+
 - `api/src/config.ts` — Added `ml.exportPath` (optional via `optionalOrUndefined`)
 - `api/src/catalog/routes.ts` — Registered `mlExportRoutes` at `/ml-export`
 - `api/.env.example` — Added `ML_EXPORT_PATH` documentation
@@ -41,6 +44,7 @@ New `POST /catalog/ml-export` endpoint (admin-only) that:
 Admin-only "Export for ML" button on the search results page, using `useMutation` + Sonner toast for feedback.
 
 **Modified:**
+
 - `web/src/lib/zod-schemas.ts` — Added `MlExportResponseSchema` and related sub-schemas
 - `web/src/catalog/api.ts` — Added `exportForMl()` API function
 - `web/src/catalog/pages/SearchPage.tsx` — Added Export button (admin-gated, items-only guard)
@@ -48,9 +52,11 @@ Admin-only "Export for ML" button on the search results page, using `useMutation
 ### 3. Documentation
 
 **Created:**
+
 - `docs/test-scenarios/INT_ML_EXPORT.md` — 11 Gherkin scenarios
 
 **Modified:**
+
 - `docs/test-scenarios/README.md` — Updated mapping table
 
 ### 4. Pre-existing Fix
@@ -118,10 +124,10 @@ Admin-only "Export for ML" button on the search results page, using `useMutation
 
 ### Verification Results
 
-| Module | Tests | Lint | Typecheck | Format | Build |
-|--------|-------|------|-----------|--------|-------|
-| API    | ✅ 641 passed | ✅ | ✅ | ✅ | ✅ |
-| Web    | ✅ 592 passed | ✅ | ✅ | ✅ | ✅ |
+| Module | Tests         | Lint | Typecheck | Format | Build |
+| ------ | ------------- | ---- | --------- | ------ | ----- |
+| API    | ✅ 641 passed | ✅   | ✅        | ✅     | ✅    |
+| Web    | ✅ 592 passed | ✅   | ✅        | ✅     | ✅    |
 
 ---
 

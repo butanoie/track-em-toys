@@ -185,6 +185,7 @@ CREATE TABLE public.character_relationships (
     entity2_role text,
     metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT character_relationships_no_self CHECK ((entity1_id <> entity2_id))
 );
 
@@ -298,7 +299,8 @@ CREATE TABLE public.continuity_families (
     sort_order integer,
     notes text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    franchise_id uuid NOT NULL
+    franchise_id uuid NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -333,7 +335,8 @@ CREATE TABLE public.factions (
     slug text NOT NULL,
     notes text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    franchise_id uuid NOT NULL
+    franchise_id uuid NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -361,7 +364,8 @@ CREATE TABLE public.franchises (
     name text NOT NULL,
     sort_order integer,
     notes text,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -440,6 +444,7 @@ CREATE TABLE public.item_relationships (
     item2_role text,
     metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT item_relationships_no_self CHECK ((item1_id <> item2_id)),
     CONSTRAINT item_relationships_type_check CHECK ((type = ANY (ARRAY['mold-origin'::text, 'gift-set-contents'::text, 'variant'::text])))
 );
@@ -597,7 +602,8 @@ CREATE TABLE public.sub_groups (
     faction_id uuid,
     notes text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    franchise_id uuid NOT NULL
+    franchise_id uuid NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -1319,6 +1325,13 @@ CREATE TRIGGER character_appearances_updated_at BEFORE UPDATE ON public.characte
 
 
 --
+-- Name: character_relationships character_relationships_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER character_relationships_updated_at BEFORE UPDATE ON public.character_relationships FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
 -- Name: characters characters_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -1333,10 +1346,38 @@ CREATE TRIGGER collection_items_updated_at BEFORE UPDATE ON public.collection_it
 
 
 --
+-- Name: continuity_families continuity_families_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER continuity_families_updated_at BEFORE UPDATE ON public.continuity_families FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: factions factions_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER factions_updated_at BEFORE UPDATE ON public.factions FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: franchises franchises_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER franchises_updated_at BEFORE UPDATE ON public.franchises FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
 -- Name: item_photos item_photos_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER item_photos_updated_at BEFORE UPDATE ON public.item_photos FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: item_relationships item_relationships_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER item_relationships_updated_at BEFORE UPDATE ON public.item_relationships FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
 
 --
@@ -1358,6 +1399,13 @@ CREATE TRIGGER items_updated_at BEFORE UPDATE ON public.items FOR EACH ROW EXECU
 --
 
 CREATE TRIGGER manufacturers_updated_at BEFORE UPDATE ON public.manufacturers FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: sub_groups sub_groups_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER sub_groups_updated_at BEFORE UPDATE ON public.sub_groups FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
 
 --
@@ -1705,4 +1753,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('027'),
     ('028'),
     ('029'),
-    ('030');
+    ('030'),
+    ('031');

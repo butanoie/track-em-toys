@@ -34,6 +34,7 @@ Four sequential migrations implementing the additive-first strategy:
 ### 3. API Response Shape Changes
 
 **Items**: `character: { slug, name }` (single object) → `characters: [{ slug, name, appearance_slug, is_primary }]` (array)
+
 - List queries use `json_agg` correlated subquery instead of JOIN (avoids row multiplication)
 - Character and continuity_family filters use `EXISTS` subqueries through the depictions junction
 - Detail queries fetch depictions in parallel with photos

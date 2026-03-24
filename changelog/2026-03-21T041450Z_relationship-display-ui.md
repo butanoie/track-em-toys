@@ -114,13 +114,13 @@ Tests  523 passed (523)
 
 ### Quality Checks
 
-| Check | Result |
-|-------|--------|
-| Unit tests | ✅ 523 passing |
-| ESLint | ✅ 0 errors |
-| TypeScript | ✅ 0 errors |
-| Prettier | ✅ All formatted |
-| Build | ✅ Clean |
+| Check      | Result           |
+| ---------- | ---------------- |
+| Unit tests | ✅ 523 passing   |
+| ESLint     | ✅ 0 errors      |
+| TypeScript | ✅ 0 errors      |
+| Prettier   | ✅ All formatted |
+| Build      | ✅ Clean         |
 
 ---
 

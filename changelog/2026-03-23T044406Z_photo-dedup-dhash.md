@@ -85,10 +85,10 @@ toBuffer() → computeDHash(rawBuffer) → check DB + batch hashes
 
 ### Test Results
 
-| Module | Tests | Status |
-|--------|-------|--------|
-| API | 716 passed, 42 skipped | ✅ |
-| Web | 593 passed | ✅ |
+| Module | Tests                  | Status |
+| ------ | ---------------------- | ------ |
+| API    | 716 passed, 42 skipped | ✅     |
+| Web    | 593 passed             | ✅     |
 
 ### New Tests Added
 

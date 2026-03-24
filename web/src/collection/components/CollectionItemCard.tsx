@@ -17,7 +17,12 @@ export function CollectionItemCard({ item, onEdit }: CollectionItemCardProps) {
       <div className="flex gap-4 p-4">
         <div className="w-20 h-20 rounded-md bg-muted flex-shrink-0 overflow-hidden">
           {item.thumbnail_url ? (
-            <img src={buildPhotoUrl(item.thumbnail_url)} alt="" className="w-full h-full object-contain" loading="lazy" />
+            <img
+              src={buildPhotoUrl(item.thumbnail_url)}
+              alt=""
+              className="w-full h-full object-contain"
+              loading="lazy"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Package className="h-8 w-8 text-muted-foreground/40" />

@@ -12,6 +12,6 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": ["db/seed/ingest.ts"],
+  "include": ["db/seed/**/*.ts", "src/db/seed-io.test.ts"],
   "exclude": ["node_modules"]
 }
