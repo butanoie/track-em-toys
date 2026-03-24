@@ -564,8 +564,8 @@ export async function authRoutes(fastify: FastifyInstance, _opts: object): Promi
       // Rate-limit by IP only. keyGenerator runs at onRequest time (before body
       // parsing), so request.body is always null there; a custom token-hash key
       // would silently always fall through to IP anyway.
-      // max: 60 allows E2E tests (each test calls refresh; 47+ tests share one IP).
-      config: { rateLimit: { max: 60, timeWindow: '1 minute' } },
+      // max: 120 allows E2E tests (each test calls refresh; 70+ tests share one IP).
+      config: { rateLimit: { max: 120, timeWindow: '1 minute' } },
     },
     async (request, reply) => {
       const extracted = extractRefreshToken(request);
