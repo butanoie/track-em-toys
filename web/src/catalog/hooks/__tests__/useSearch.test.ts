@@ -44,6 +44,8 @@ const mockSearchResponse = {
   page: 1,
   limit: 20,
   total_count: 1,
+  character_count: 0,
+  item_count: 1,
 };
 
 describe('useSearch', () => {
@@ -58,7 +60,7 @@ describe('useSearch', () => {
     const { result } = renderHook(() => useSearch('optimus', 1), { wrapper });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(searchCatalog).toHaveBeenCalledWith({ q: 'optimus', page: 1, franchise: undefined, limit: undefined });
+    expect(searchCatalog).toHaveBeenCalledWith({ q: 'optimus', page: 1, franchise: undefined, limit: undefined, type: undefined });
     expect(result.current.data).toEqual(mockSearchResponse);
   });
 
@@ -74,6 +76,7 @@ describe('useSearch', () => {
       page: 1,
       franchise: 'transformers',
       limit: undefined,
+      type: undefined,
     });
   });
 
@@ -105,7 +108,7 @@ describe('useSearch', () => {
     await waitFor(() => {
       const cache = queryClient.getQueryCache().findAll();
       expect(cache).toHaveLength(1);
-      expect(cache[0].queryKey).toEqual(['catalog', 'search', 'optimus', 2, 20, 'transformers']);
+      expect(cache[0].queryKey).toEqual(['catalog', 'search', 'optimus', 2, 20, 'transformers', null]);
     });
   });
 

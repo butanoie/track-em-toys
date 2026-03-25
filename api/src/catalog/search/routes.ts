@@ -5,6 +5,7 @@ import { searchSchema } from './schemas.js';
 interface SearchQuery {
   q: string;
   franchise?: string;
+  type?: 'character' | 'item';
   page?: number;
   limit?: number;
 }
@@ -54,9 +55,10 @@ export async function searchRoutes(fastify: FastifyInstance, _opts: object): Pro
       const limit = request.query.limit ?? 20;
       const offset = (page - 1) * limit;
 
-      const { rows, totalCount } = await searchCatalog({
+      const { rows, totalCount, characterCount, itemCount } = await searchCatalog({
         query: request.query.q,
         franchiseSlug: request.query.franchise ?? null,
+        entityType: request.query.type ?? null,
         limit,
         offset,
       });
@@ -66,6 +68,8 @@ export async function searchRoutes(fastify: FastifyInstance, _opts: object): Pro
         page,
         limit,
         total_count: totalCount,
+        character_count: characterCount,
+        item_count: itemCount,
       };
     }
   );

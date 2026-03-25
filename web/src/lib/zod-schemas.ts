@@ -294,6 +294,8 @@ export const CatalogSearchResponseSchema = z.object({
   page: z.number().int(),
   limit: z.number().int(),
   total_count: z.number().int(),
+  character_count: z.number().int(),
+  item_count: z.number().int(),
 });
 
 // Character detail (GET /catalog/franchises/:franchise/characters/:slug)

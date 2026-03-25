@@ -47,6 +47,8 @@ const mockSearchResults = {
   page: 1,
   limit: 20,
   total_count: 2,
+  character_count: 1,
+  item_count: 1,
 };
 
 const mockEmptyResults = {
@@ -54,6 +56,8 @@ const mockEmptyResults = {
   page: 1,
   limit: 20,
   total_count: 0,
+  character_count: 0,
+  item_count: 0,
 };
 
 const mockItemDetail = {
@@ -178,15 +182,21 @@ test.describe('Catalog Search', () => {
     await expect(page.getByText('Search for characters and items across the catalog.')).toBeVisible();
   });
 
-  test('Given search page with q=optimus, When results load, Then grouped results are displayed', async ({ page }) => {
+  test('Given search page with q=optimus, When results load, Then unified results with type filter are displayed', async ({
+    page,
+  }) => {
     await setupSearchMocks(page);
     await page.goto('/catalog/search?q=optimus');
 
     await expect(page.getByText('2 results for "optimus"')).toBeVisible();
-    await expect(page.getByRole('heading', { name: /Characters/ })).toBeVisible();
-    await expect(page.getByRole('heading', { name: /Items/ })).toBeVisible();
-    await expect(page.getByText('Optimus Prime', { exact: true })).toBeVisible();
-    await expect(page.getByText('MP-44 Optimus Prime', { exact: true })).toBeVisible();
+    // Type filter chips show per-type counts
+    await expect(page.getByRole('button', { name: /All · 2/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Characters · 1/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Items · 1/ })).toBeVisible();
+    // Results are in a single unified list
+    const resultsList = page.getByRole('listbox', { name: 'Search results' });
+    await expect(resultsList.getByText('Optimus Prime', { exact: true })).toBeVisible();
+    await expect(resultsList.getByText('MP-44 Optimus Prime', { exact: true })).toBeVisible();
   });
 
   test('Given search results, When clicking an item, Then item detail panel opens', async ({ page }) => {
@@ -204,9 +214,9 @@ test.describe('Catalog Search', () => {
     await setupSearchMocks(page);
     await page.goto('/catalog/search?q=optimus');
 
-    // Click the character result (first "Optimus Prime" in the characters section)
-    const charList = page.getByRole('listbox', { name: 'Character results' });
-    await charList.getByRole('option', { name: /Optimus Prime/ }).click();
+    // Click the character result — in the unified list, "Optimus Prime" (exact) is the character
+    const resultsList = page.getByRole('listbox', { name: 'Search results' });
+    await resultsList.getByText('Optimus Prime', { exact: true }).click();
 
     // Character detail panel should show real data
     const panel = page.getByRole('complementary', { name: /Character detail/ });

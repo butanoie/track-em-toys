@@ -165,6 +165,7 @@ export async function listContinuityFamilies(franchise: string): Promise<Continu
 export interface SearchParams {
   q: string;
   franchise?: string;
+  type?: 'character' | 'item';
   page?: number;
   limit?: number;
 }
@@ -174,6 +175,7 @@ export async function searchCatalog(params: SearchParams): Promise<CatalogSearch
   if (params.page) sp.set('page', String(params.page));
   if (params.limit) sp.set('limit', String(params.limit));
   if (params.franchise) sp.set('franchise', params.franchise);
+  if (params.type) sp.set('type', params.type);
   return apiFetchJson(`/catalog/search?${sp.toString()}`, CatalogSearchResponseSchema);
 }
 
