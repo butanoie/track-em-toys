@@ -5,6 +5,7 @@ import { Route } from '@/routes/_authenticated/catalog/$franchise/characters/$sl
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCharacterDetail } from '@/catalog/hooks/useCharacterDetail';
 import { useFranchiseDetail } from '@/catalog/hooks/useFranchiseDetail';
@@ -101,9 +102,22 @@ export function CharacterDetailPage() {
 
         {data && (
           <div className="max-w-2xl">
-            <div className="flex items-start justify-between gap-2 mb-4">
+            <div className="flex items-start justify-between gap-2">
               <h1 className="text-2xl font-semibold text-foreground">{data.name}</h1>
               <ShareLinkButton />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5 mt-1 mb-4">
+              <Badge variant="secondary">{data.franchise.name}</Badge>
+              <Badge variant="secondary">{data.continuity_family.name}</Badge>
+              {data.is_combined_form && (
+                <Badge
+                  variant="outline"
+                  className="border-orange-300 text-orange-700 dark:border-orange-700 dark:text-orange-300"
+                >
+                  Combined Form
+                </Badge>
+              )}
             </div>
 
             <Separator className="mb-6" />
@@ -112,6 +126,7 @@ export function CharacterDetailPage() {
               data={data}
               relatedItems={itemsData?.data}
               relatedItemsCount={itemsData?.total_count}
+              hideTags
             />
           </div>
         )}

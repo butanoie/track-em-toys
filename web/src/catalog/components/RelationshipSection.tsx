@@ -37,7 +37,7 @@ export function RelationshipSection({ groups }: RelationshipSectionProps) {
               </Badge>
             )}
           </h3>
-          <ul className="space-y-1.5">
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-1.5">
             {group.items.map((item) => (
               <li key={item.key}>
                 {item.isCurrent ? (

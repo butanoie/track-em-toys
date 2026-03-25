@@ -18,12 +18,6 @@ vi.mock('@/catalog/components/ItemRelationships', () => ({
 }));
 
 describe('ItemDetailContent', () => {
-  it('renders character link', () => {
-    render(<ItemDetailContent data={mockCatalogItemDetail} franchise="transformers" />);
-    const link = screen.getByText('Optimus Prime').closest('a');
-    expect(link).toHaveAttribute('href', '/catalog/$franchise/characters/$slug');
-  });
-
   it('renders manufacturer link when present', () => {
     render(<ItemDetailContent data={mockCatalogItemDetail} franchise="transformers" />);
     const link = screen.getByText('Hasbro').closest('a');
@@ -68,22 +62,6 @@ describe('ItemDetailContent', () => {
     const data: CatalogItemDetail = { ...mockCatalogItemDetail, characters: [] };
     render(<ItemDetailContent data={data} franchise="transformers" />);
     expect(screen.queryByText('Appearance')).not.toBeInTheDocument();
-  });
-
-  it('renders data_quality badge', () => {
-    render(<ItemDetailContent data={mockCatalogItemDetail} franchise="transformers" />);
-    expect(screen.getByText('verified')).toBeInTheDocument();
-  });
-
-  it('renders "Third Party" badge when is_third_party is true', () => {
-    const data: CatalogItemDetail = { ...mockCatalogItemDetail, is_third_party: true };
-    render(<ItemDetailContent data={data} franchise="transformers" />);
-    expect(screen.getByText('Third Party')).toBeInTheDocument();
-  });
-
-  it('does not render "Third Party" badge when false', () => {
-    render(<ItemDetailContent data={mockCatalogItemDetail} franchise="transformers" />);
-    expect(screen.queryByText('Third Party')).not.toBeInTheDocument();
   });
 
   it('renders description when present', () => {

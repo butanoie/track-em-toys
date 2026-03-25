@@ -1,16 +1,12 @@
-import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { FranchiseTable } from '../FranchiseTable';
 import { mockFranchise } from '@/catalog/__tests__/catalog-test-helpers';
 import type { FranchiseStatsItem } from '@/lib/zod-schemas';
 
+const mockNavigate = vi.fn();
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, ...props }: { children: React.ReactNode; to: string }) => (
-    <a href={to} {...props}>
-      {children}
-    </a>
-  ),
+  useNavigate: () => mockNavigate,
 }));
 
 const mockFranchises: FranchiseStatsItem[] = [
@@ -36,10 +32,11 @@ describe('FranchiseTable', () => {
     expect(screen.getByText('Notes')).toBeInTheDocument();
   });
 
-  it('renders franchise name as a link', () => {
+  it('renders franchise name and navigates on row click', () => {
     render(<FranchiseTable franchises={mockFranchises} />);
-    const link = screen.getByText('Transformers').closest('a');
-    expect(link).toHaveAttribute('href', '/catalog/$franchise');
+    expect(screen.getByText('Transformers')).toBeInTheDocument();
+    screen.getByText('Transformers').closest('tr')!.click();
+    expect(mockNavigate).toHaveBeenCalledWith({ to: '/catalog/$franchise', params: { franchise: 'transformers' } });
   });
 
   it('renders count columns', () => {

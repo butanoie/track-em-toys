@@ -11,6 +11,8 @@ const collectionSearchSchema = z.object({
   search: z.string().optional().catch(undefined),
   page: z.coerce.number().int().min(1).optional().catch(undefined),
   limit: pageLimitSchema,
+  selected: z.string().optional().catch(undefined),
+  selected_franchise: z.string().optional().catch(undefined),
 });
 
 export const Route = createFileRoute('/_authenticated/collection')({

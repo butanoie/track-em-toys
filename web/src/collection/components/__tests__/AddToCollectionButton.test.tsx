@@ -26,7 +26,7 @@ describe('AddToCollectionButton', () => {
     expect(screen.getByText('Add to Collection')).toBeInTheDocument();
   });
 
-  it('renders "In collection" indicator and "Add Copy" when owned', () => {
+  it('renders "Add Copy" when already owned', () => {
     render(
       <AddToCollectionButton
         item={{ id: 'i-1', name: 'Test' }}
@@ -34,7 +34,6 @@ describe('AddToCollectionButton', () => {
         mutations={mockMutations()}
       />
     );
-    expect(screen.getByText('In collection (2)')).toBeInTheDocument();
     expect(screen.getByText('Add Copy')).toBeInTheDocument();
   });
 

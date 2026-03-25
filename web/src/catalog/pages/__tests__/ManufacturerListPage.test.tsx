@@ -19,6 +19,7 @@ vi.mock('@tanstack/react-router', () => ({
       {children}
     </a>
   ),
+  useNavigate: () => vi.fn(),
 }));
 
 const mockUseManufacturers = vi.fn();
