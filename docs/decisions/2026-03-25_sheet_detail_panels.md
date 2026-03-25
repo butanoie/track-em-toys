@@ -54,9 +54,18 @@ Replace the inline right-column detail panels with Shadcn Sheet overlays that sl
 **Delete:** `DetailPanelShell.tsx`, `ItemDetailPanel.tsx`, `CharacterDetailPanel.tsx` + test files
 **Update:** E2E specs (`catalog-browse.spec.ts`, `catalog-search.spec.ts`) — `role="complementary"` → `role="dialog"`
 
+### Collection Page Integration
+
+The collection page's catalog links were also converted to open the `ItemDetailSheet` as an overlay, rather than navigating to the standalone item detail page. The collection page owns the sheet state via `useState` (not URL params) since the sheet is transient context, not a bookmarkable view.
+
+- `CollectionItemCard` and `CollectionTable` replaced `<Link>` with an Eye icon `<Button>` + `onViewCatalog` callback
+- `CollectionStatsBar` gained an `actions` slot for the `ExportImportToolbar` (moved from the toolbar row)
+- `Archive` icon removed from copies count in the stats bar
+
 ## Consequences
 
 - Browse list gets more horizontal space (~380px recovered)
 - Mobile users can now see item/character details (sheets are full-width on mobile; old panels were `hidden lg:block`)
 - Standalone detail pages (`ItemDetailPage`, `CharacterDetailPage`) remain for direct URL access
 - The "panel preview → full page" two-step is eliminated for in-app browsing
+- Collection page users can view full catalog details without leaving the collection context
