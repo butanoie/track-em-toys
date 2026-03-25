@@ -29,26 +29,25 @@ Scenario: Search results are grouped by entity type
   And item results show manufacturer, toy line, and size class
 ```
 
-### Happy Path: Item detail panel opens
+### Happy Path: Item detail sheet opens
 
 ```gherkin
 Scenario: User selects an item search result
   Given the user is on the search results page with item results
   When they click an item result
-  Then the item detail panel opens on the right
-  And the detail panel shows full item information
+  Then the item detail sheet slides in from the right (role="dialog")
+  And the sheet shows full item information
   And the URL updates with selected and selected_type params
 ```
 
-### Happy Path: Character detail panel opens
+### Happy Path: Character detail sheet opens
 
 ```gherkin
 Scenario: User selects a character search result
   Given the user is on the search results page with character results
   When they click a character result
-  Then the character detail panel opens showing full character information
-  And the panel shows faction, continuity family, and character type
-  And a "View full profile" link is available
+  Then the character detail sheet slides in showing full character information
+  And the sheet shows faction, continuity family, and character type
 ```
 
 ### Happy Path: Page-number pagination
@@ -98,7 +97,7 @@ Scenario: User navigates search results with keyboard
   When they press ArrowDown
   Then the next item in the list is selected
   When they press Escape
-  Then the detail panel closes
+  Then the detail sheet closes
 ```
 
 ### Navigation: Browser back preserves search

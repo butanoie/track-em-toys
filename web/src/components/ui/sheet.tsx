@@ -103,4 +103,5 @@ export {
   SheetFooter,
   SheetTitle,
   SheetDescription,
+  sheetVariants,
 };

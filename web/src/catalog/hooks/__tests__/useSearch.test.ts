@@ -60,7 +60,13 @@ describe('useSearch', () => {
     const { result } = renderHook(() => useSearch('optimus', 1), { wrapper });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(searchCatalog).toHaveBeenCalledWith({ q: 'optimus', page: 1, franchise: undefined, limit: undefined, type: undefined });
+    expect(searchCatalog).toHaveBeenCalledWith({
+      q: 'optimus',
+      page: 1,
+      franchise: undefined,
+      limit: undefined,
+      type: undefined,
+    });
     expect(result.current.data).toEqual(mockSearchResponse);
   });
 

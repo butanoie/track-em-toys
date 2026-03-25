@@ -191,7 +191,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - TanStack Router: a flat route file (e.g., `items.tsx`) becomes a layout parent if a child directory (`items/`) is added alongside it. To add child routes without a layout, move the flat file to `items/index.tsx` first — both become flat siblings under `AuthenticatedRoute`. The `createFileRoute` path gains a trailing slash for index files (e.g., `'/_authenticated/catalog/$franchise/items/'`)
 - Item detail route uses directory structure: `$franchise/items/index.tsx` (browse) + `$franchise/items/$slug.tsx` (detail) — NOT a layout route
 - Character browse route: `$franchise/characters/index.tsx` (browse with faceted filters) + `$franchise/characters/$slug.tsx` (detail) — same directory structure as items
-- Character browse page uses three-column layout (FacetSidebar | CharacterList | CharacterDetailPanel) matching the items browse pattern
+- Browse pages (Items, Characters, Manufacturer Items) use two-column layout (FacetSidebar | List) with a non-modal Sheet overlay for details; Search uses single column + Sheet
 - Character facets: faction, character_type, sub_group — continuity_family is a fixed scope filter (set from hub navigation), not a facet dimension
 - Franchise hub page has Items/Characters toggle via `?view=characters` search param; characters view mounts `CharactersHubView` sub-component (avoids conditional hook calls)
 - Photo gallery uses a two-level interaction: thumbnails change the displayed photo in-page (`selectedIndex`), clicking the displayed photo opens the lightbox (`lightboxIndex`). Lightbox navigation wraps around (last→first, first→last)
@@ -200,8 +200,8 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Photo lightbox uses Shadcn `Dialog` for focus trap, scroll lock, and ARIA modal compliance — must include `onKeyDown` for ArrowLeft/ArrowRight navigation
 - Displayed photo has a `ZoomIn` magnifying glass icon overlay (bottom-right, opacity transitions on hover via `group`/`group-hover`)
 - Gallery main image is constrained to `max-h-[32rem]` (512px); photo manager tiles are constrained to `max-h-48`
-- `DetailPanelShell` component handles all panel chrome (aside wrapper, focus management, Escape key, loading/error/empty states, close button) — new panels should compose it rather than duplicating the chrome
-- Panel Escape key handlers must check `e.defaultPrevented` before calling `onClose()` — Radix `Dialog` (lightbox) calls `preventDefault` on Escape, and without the check both the dialog and panel close simultaneously
+- `DetailSheet` component handles all detail overlay chrome (non-modal Sheet, loading/error states, header with title + actions + close button) — `ItemDetailSheet` and `CharacterDetailSheet` compose it. Uses `SheetPortal` + `SheetPrimitive.Content` directly (bypasses `SheetContent` to omit `SheetOverlay` for non-modal behavior). Width: `sm:max-w-3xl` (768px).
+- Detail sheets use `modal={false}` on Radix Dialog — no focus trap, no backdrop overlay, list behind is interactive. Escape key is handled by Radix built-in (fires `onOpenChange(false)`). The `aria-label` on `SheetPrimitive.Content` provides the accessible name for E2E selectors (`getByRole('dialog', { name: /Item detail/ })`).
 - Catalog page headings use `<h1>` for the primary page title, `<h2>` for sub-sections — no page should lack an `<h1>`
 - NEVER use `z.coerce.boolean()` for URL search params — `Boolean("false")` returns `true`. Use `z.enum(['true', 'false']).transform(v => v === 'true')` instead
 - `FacetSidebar` accepts generic `groups: FacetGroupConfig[]` + `onFilterChange: (key: string, value) => void` — callers construct the groups array and cast the key to their filter type. Do NOT add domain-specific filter types to FacetSidebar.
@@ -217,7 +217,8 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Page tests must mock `AppHeader` and `MainNav` — `AppHeader` calls `useAuth()` which throws without `AuthContext`. Use: `vi.mock('@/components/AppHeader', () => ({ AppHeader: () => <header data-testid="app-header" /> }))`
 - `FranchiseListPage`, `ManufacturerListPage`, `ManufacturerHubPage` do NOT import route files — no `Route.useSearch()` mock needed for these
 - `CharacterDetailPage` uses inline `useQuery` (not a custom hook) for related items — mock `listCatalogItems` from `@/catalog/api` and wrap in `createCatalogTestWrapper()`
-- Adding `useAuth()` to a component requires adding `vi.mock('@/auth/useAuth', () => ({ useAuth: () => ({ user: { id: 'u-1', role: 'user' }, isAuthenticated: true, isLoading: false }) }))` to every test file that renders that component (including parent pages like `ItemsPage` that render `ItemDetailPanel`)
+- Adding `useAuth()` to a component requires adding `vi.mock('@/auth/useAuth', () => ({ useAuth: () => ({ user: { id: 'u-1', role: 'user' }, isAuthenticated: true, isLoading: false }) }))` to every test file that renders that component
+- Page tests that render `ItemDetailSheet` or `CharacterDetailSheet` mock the entire sheet component to `null` — this avoids needing QueryClient, collection, and auth mocks in page-level tests. The sheet's own test file handles those mocks.
 - `vi.advanceTimersByTime()` must be wrapped in `act()` when it triggers React state updates (e.g., `ShareLinkButton` timeout reset)
 - jsdom does not implement `navigator.clipboard` — mock with `Object.assign(navigator, { clipboard: { writeText: vi.fn() } })`
 - jsdom does not implement `File.prototype.text()` or `Blob.prototype.text()` — use `FileReader` wrapped in a `Promise` instead of the modern `file.text()` API

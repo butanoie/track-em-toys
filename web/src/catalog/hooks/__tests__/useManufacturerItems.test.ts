@@ -59,7 +59,12 @@ describe('useManufacturerItems', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(mockItemList);
-    expect(listManufacturerItems).toHaveBeenCalledWith({ manufacturer: 'hasbro', filters: {}, page: undefined, limit: undefined });
+    expect(listManufacturerItems).toHaveBeenCalledWith({
+      manufacturer: 'hasbro',
+      filters: {},
+      page: undefined,
+      limit: undefined,
+    });
   });
 
   it('includes filters and cursor in query key', async () => {

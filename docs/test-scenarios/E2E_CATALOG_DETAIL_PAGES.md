@@ -184,28 +184,27 @@ Scenario: 404 when item slug is invalid
   And a "Back to Catalog" link is available
 ```
 
-## Search Panel Integration
+## Search Sheet Integration
 
-### Happy Path: Character detail panel in search
+### Happy Path: Character detail sheet in search
 
 ```gherkin
 Scenario: User selects a character search result and sees full detail
   Given the user is on the search results page with character results
   When they click a character result
-  Then the character detail panel opens showing full character information
-  And the panel shows faction, continuity family, character type
-  And a "View full profile" link navigates to the character detail page
+  Then the character detail sheet slides in (role="dialog")
+  And the sheet shows faction, continuity family, character type
 ```
 
-## Item Detail Panel — Share Link
+## Item Detail Sheet — Share Link
 
-### Happy Path: Copy share link from panel
+### Happy Path: Copy share link from sheet
 
 ```gherkin
-Scenario: User copies share link from item detail panel
-  Given the user is on the items browse page with an item selected in the panel
-  When they click the "Copy link" button in the panel
-  Then the standalone item page URL is copied to the clipboard
+Scenario: User copies share link from item detail sheet
+  Given the user is on the items browse page with an item selected in the sheet
+  When they click the "Copy link" button in the sheet header
+  Then the current page URL (with ?selected= param) is copied to the clipboard
 ```
 
 ## API: Character filter on items

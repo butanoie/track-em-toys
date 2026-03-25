@@ -52,26 +52,8 @@ vi.mock('@/catalog/hooks/useManufacturerItemFacets', () => ({
   useManufacturerItemFacets: (...args: unknown[]) => mockUseManufacturerItemFacets(...args),
 }));
 
-const mockUseItemDetail = vi.fn();
-vi.mock('@/catalog/hooks/useItemDetail', () => ({
-  useItemDetail: (...args: unknown[]) => mockUseItemDetail(...args),
-}));
-
-vi.mock('@/collection/hooks/useCollectionCheck', () => ({
-  useCollectionCheck: () => ({ data: undefined }),
-}));
-
-vi.mock('@/collection/hooks/useCollectionMutations', () => ({
-  useCollectionMutations: () => ({
-    add: { mutate: vi.fn(), isPending: false },
-    patch: { mutate: vi.fn(), isPending: false },
-    remove: { mutate: vi.fn(), isPending: false },
-    restore: { mutate: vi.fn(), isPending: false },
-  }),
-}));
-
-vi.mock('@/collection/components/AddToCollectionButton', () => ({
-  AddToCollectionButton: () => null,
+vi.mock('@/catalog/components/ItemDetailSheet', () => ({
+  ItemDetailSheet: () => null,
 }));
 
 vi.mock('@/catalog/components/Pagination', () => ({
@@ -89,7 +71,6 @@ function setupDefaults() {
     isPending: false,
   });
   mockUseManufacturerItemFacets.mockReturnValue({ data: mockManufacturerItemFacets });
-  mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
 }
 
 describe('ManufacturerItemsPage', () => {
@@ -112,7 +93,7 @@ describe('ManufacturerItemsPage', () => {
     mockUseManufacturerDetail.mockReturnValue({ data: mockManufacturerDetail, error: null });
     mockUseManufacturerItems.mockReturnValue({ data: undefined, isPending: true });
     mockUseManufacturerItemFacets.mockReturnValue({ data: undefined });
-    mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
+
     render(<ManufacturerItemsPage />);
     expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
   });
@@ -130,7 +111,7 @@ describe('ManufacturerItemsPage', () => {
     });
     mockUseManufacturerItems.mockReturnValue({ data: undefined, isPending: false });
     mockUseManufacturerItemFacets.mockReturnValue({ data: undefined });
-    mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
+
     render(<ManufacturerItemsPage />);
     expect(screen.getByRole('heading', { name: 'Manufacturer not found' })).toBeInTheDocument();
   });
@@ -142,7 +123,7 @@ describe('ManufacturerItemsPage', () => {
       isPending: false,
     });
     mockUseManufacturerItemFacets.mockReturnValue({ data: mockManufacturerItemFacets });
-    mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
+
     render(<ManufacturerItemsPage />);
     expect(screen.getByTestId('page-size-selector')).toBeInTheDocument();
   });

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useMutation } from '@tanstack/react-query';
 import { Search, Download } from 'lucide-react';
@@ -13,12 +13,11 @@ import { useSearch, type SearchEntityType } from '@/catalog/hooks/useSearch';
 import { exportForMl } from '@/catalog/api';
 import { SearchResultCard } from '@/catalog/components/SearchResultCard';
 import { SearchResultTypeFilter } from '@/catalog/components/SearchResultTypeFilter';
-import { ItemDetailPanel } from '@/catalog/components/ItemDetailPanel';
-import { CharacterDetailPanel } from '@/catalog/components/CharacterDetailPanel';
+import { ItemDetailSheet } from '@/catalog/components/ItemDetailSheet';
+import { CharacterDetailSheet } from '@/catalog/components/CharacterDetailSheet';
 import { Pagination } from '@/catalog/components/Pagination';
 import { PageSizeSelector } from '@/components/PageSizeSelector';
 import { DEFAULT_PAGE_LIMIT, type PageLimitOption } from '@/lib/pagination-constants';
-import type { SearchResult } from '@/lib/zod-schemas';
 
 export function SearchPage() {
   const search = Route.useSearch();
@@ -32,7 +31,6 @@ export function SearchPage() {
 
   const { data, isPending } = useSearch(q, page, undefined, limit, activeType);
 
-  const listRef = useRef<HTMLUListElement>(null);
   const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
   const selectedSlug = search.selected;
@@ -67,13 +65,6 @@ export function SearchPage() {
       });
     },
     [navigate]
-  );
-
-  const handleResultClick = useCallback(
-    (result: SearchResult) => {
-      selectResult(result.slug, result.entity_type);
-    },
-    [selectResult]
   );
 
   const handleKeyDown = useCallback(
@@ -212,9 +203,7 @@ export function SearchPage() {
                 {exportMutation.isPending ? 'Exporting...' : 'Export for ML'}
               </Button>
             )}
-            {data && data.total_count > 0 && (
-              <PageSizeSelector value={limit} onChange={handleLimitChange} />
-            )}
+            {data && data.total_count > 0 && <PageSizeSelector value={limit} onChange={handleLimitChange} />}
           </div>
         </div>
 
@@ -230,60 +219,50 @@ export function SearchPage() {
         )}
 
         {data && data.total_count > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
-            {/* Unified results list */}
-            <div className="min-w-0">
-              <ul
-                ref={listRef}
-                role="listbox"
-                className="space-y-1"
-                onKeyDown={handleKeyDown}
-                aria-label="Search results"
-              >
-                {data.data.map((result, index) => {
-                  const isSelected = result.slug === selectedSlug && result.entity_type === selectedType;
-                  return (
-                    <li
-                      key={`${result.entity_type}-${result.id}`}
-                      ref={(el) => setItemRef(`${result.entity_type}-${result.slug}`, el)}
-                      tabIndex={isSelected || (!selectedSlug && index === 0) ? 0 : -1}
-                      role="option"
-                      aria-selected={isSelected}
-                      onClick={() => handleResultClick(result)}
-                    >
-                      <SearchResultCard result={result} isSelected={isSelected} />
-                    </li>
-                  );
-                })}
-              </ul>
+          <div className="min-w-0">
+            <ul
+              role="listbox"
+              className="space-y-1"
+              onKeyDown={handleKeyDown}
+              aria-label="Search results"
+            >
+              {data.data.map((result, index) => {
+                const isSelected = result.slug === selectedSlug && result.entity_type === selectedType;
+                return (
+                  <li
+                    key={`${result.entity_type}-${result.id}`}
+                    ref={(el) => setItemRef(`${result.entity_type}-${result.slug}`, el)}
+                    tabIndex={isSelected || (!selectedSlug && index === 0) ? 0 : -1}
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => selectResult(result.slug, result.entity_type)}
+                  >
+                    <SearchResultCard result={result} isSelected={isSelected} />
+                  </li>
+                );
+              })}
+            </ul>
 
-              <Pagination
-                page={page}
-                totalCount={data.total_count}
-                limit={data.limit}
-                onPageChange={handlePageChange}
-                ariaLabel="Search results pagination"
-              />
-            </div>
-
-            {/* Detail panel */}
-            <div className="hidden lg:block border-l border-border min-h-[400px]">
-              {selectedType === 'character' ? (
-                <CharacterDetailPanel
-                  franchise={selectedResult?.franchise.slug ?? ''}
-                  characterSlug={selectedType === 'character' ? selectedSlug : undefined}
-                  onClose={() => selectResult(undefined, undefined)}
-                />
-              ) : (
-                <ItemDetailPanel
-                  franchise={selectedResult?.franchise.slug ?? ''}
-                  itemSlug={selectedType === 'item' ? selectedSlug : undefined}
-                  onClose={() => selectResult(undefined, undefined)}
-                />
-              )}
-            </div>
+            <Pagination
+              page={page}
+              totalCount={data.total_count}
+              limit={data.limit}
+              onPageChange={handlePageChange}
+              ariaLabel="Search results pagination"
+            />
           </div>
         )}
+
+        <ItemDetailSheet
+          franchise={selectedResult?.franchise.slug ?? ''}
+          itemSlug={selectedType === 'item' ? selectedSlug : undefined}
+          onClose={() => selectResult(undefined, undefined)}
+        />
+        <CharacterDetailSheet
+          franchise={selectedResult?.franchise.slug ?? ''}
+          characterSlug={selectedType === 'character' ? selectedSlug : undefined}
+          onClose={() => selectResult(undefined, undefined)}
+        />
       </main>
     </div>
   );

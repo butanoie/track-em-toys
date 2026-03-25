@@ -72,9 +72,8 @@ vi.mock('@/catalog/hooks/useItemFacets', () => ({
   useItemFacets: (...args: unknown[]) => mockUseItemFacets(...args),
 }));
 
-const mockUseItemDetail = vi.fn();
-vi.mock('@/catalog/hooks/useItemDetail', () => ({
-  useItemDetail: (...args: unknown[]) => mockUseItemDetail(...args),
+vi.mock('@/catalog/components/ItemDetailSheet', () => ({
+  ItemDetailSheet: () => null,
 }));
 
 function setupDefaults() {
@@ -84,7 +83,6 @@ function setupDefaults() {
     isPending: false,
   });
   mockUseItemFacets.mockReturnValue({ data: mockItemFacets });
-  mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
 }
 
 describe('ItemsPage', () => {
@@ -107,7 +105,6 @@ describe('ItemsPage', () => {
     mockUseFranchiseDetail.mockReturnValue({ data: mockFranchiseDetail, error: null });
     mockUseItems.mockReturnValue({ data: undefined, isPending: true });
     mockUseItemFacets.mockReturnValue({ data: undefined });
-    mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
     render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
   });
@@ -126,7 +123,6 @@ describe('ItemsPage', () => {
     });
     mockUseItems.mockReturnValue({ data: undefined, isPending: false });
     mockUseItemFacets.mockReturnValue({ data: undefined });
-    mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
     render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     expect(screen.getByRole('heading', { name: 'Franchise not found' })).toBeInTheDocument();
   });
@@ -162,7 +158,6 @@ describe('ItemsPage', () => {
       isPending: false,
     });
     mockUseItemFacets.mockReturnValue({ data: mockItemFacets });
-    mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
     render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
     expect(screen.getByTestId('page-size-selector')).toBeInTheDocument();
   });

@@ -34,9 +34,7 @@ vi.mock('@/catalog/components/Pagination', () => ({
 }));
 
 vi.mock('@/components/PageSizeSelector', () => ({
-  PageSizeSelector: (props: { value: number }) => (
-    <div data-testid="page-size-selector">{props.value} / page</div>
-  ),
+  PageSizeSelector: (props: { value: number }) => <div data-testid="page-size-selector">{props.value} / page</div>,
 }));
 
 const mockStats: CollectionStats = {

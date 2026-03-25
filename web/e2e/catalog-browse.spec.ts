@@ -141,7 +141,7 @@ async function setupCatalogMocks(page: import('@playwright/test').Page) {
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockFranchiseDetail) });
   });
 
-  // Mock relationships endpoints (item detail panel fetches these)
+  // Mock relationships endpoints (item detail sheet fetches these)
   await page.route('**/relationships', (route) => {
     if (route.request().resourceType() === 'document') return route.continue();
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ relationships: [] }) });
@@ -224,7 +224,7 @@ test.describe('Catalog Browsing', () => {
     await expect(page).toHaveURL(/\/catalog\/transformers\/items/);
   });
 
-  test('Given items list, When clicking an item, Then detail panel shows item data', async ({ page }) => {
+  test('Given items list, When clicking an item, Then detail sheet shows item data', async ({ page }) => {
     await setupCatalogMocks(page);
     await page.goto('/catalog/transformers/items');
 

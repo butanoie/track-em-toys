@@ -49,9 +49,8 @@ vi.mock('@/catalog/hooks/useCharacterFacets', () => ({
   useCharacterFacets: (...args: unknown[]) => mockUseCharacterFacets(...args),
 }));
 
-const mockUseCharacterDetail = vi.fn();
-vi.mock('@/catalog/hooks/useCharacterDetail', () => ({
-  useCharacterDetail: (...args: unknown[]) => mockUseCharacterDetail(...args),
+vi.mock('@/catalog/components/CharacterDetailSheet', () => ({
+  CharacterDetailSheet: () => null,
 }));
 
 vi.mock('@/catalog/components/Pagination', () => ({
@@ -69,7 +68,6 @@ function setupDefaults() {
     isPending: false,
   });
   mockUseCharacterFacets.mockReturnValue({ data: mockCharacterFacets });
-  mockUseCharacterDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
 }
 
 describe('CharactersPage', () => {
@@ -91,7 +89,7 @@ describe('CharactersPage', () => {
     mockUseFranchiseDetail.mockReturnValue({ data: mockFranchiseDetail, error: null });
     mockUseCharacters.mockReturnValue({ data: undefined, isPending: true });
     mockUseCharacterFacets.mockReturnValue({ data: undefined });
-    mockUseCharacterDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
+
     render(<CharactersPage />);
     expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
   });
@@ -110,7 +108,7 @@ describe('CharactersPage', () => {
     });
     mockUseCharacters.mockReturnValue({ data: undefined, isPending: false });
     mockUseCharacterFacets.mockReturnValue({ data: undefined });
-    mockUseCharacterDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
+
     render(<CharactersPage />);
     expect(screen.getByRole('heading', { name: 'Franchise not found' })).toBeInTheDocument();
   });
@@ -137,7 +135,7 @@ describe('CharactersPage', () => {
       isPending: false,
     });
     mockUseCharacterFacets.mockReturnValue({ data: mockCharacterFacets });
-    mockUseCharacterDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
+
     render(<CharactersPage />);
     expect(screen.getByTestId('page-size-selector')).toBeInTheDocument();
   });

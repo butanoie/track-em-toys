@@ -293,9 +293,7 @@ test.describe('Collection pagination', () => {
     );
   }
 
-  test('Given >20 items, When on page 1, Then pagination controls are visible with page 1 active', async ({
-    page,
-  }) => {
+  test('Given >20 items, When on page 1, Then pagination controls are visible with page 1 active', async ({ page }) => {
     const state = new MockCollectionState(makeItems(25));
     await state.register(page);
     await page.goto('/collection');

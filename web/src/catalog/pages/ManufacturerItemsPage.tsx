@@ -14,7 +14,7 @@ import { useManufacturerItemFacets } from '@/catalog/hooks/useManufacturerItemFa
 import { useManufacturerDetail } from '@/catalog/hooks/useManufacturerDetail';
 import { FacetSidebar, type FacetGroupConfig } from '@/catalog/components/FacetSidebar';
 import { ItemList } from '@/catalog/components/ItemList';
-import { ItemDetailPanel } from '@/catalog/components/ItemDetailPanel';
+import { ItemDetailSheet } from '@/catalog/components/ItemDetailSheet';
 import { ApiError } from '@/lib/api-client';
 import type { ManufacturerItemFilters } from '@/catalog/api';
 
@@ -134,7 +134,12 @@ export function ManufacturerItemsPage() {
         to: '/catalog/manufacturers/$slug/items',
         params: { slug: manufacturerSlug },
         search: (prev) => {
-          const next = { ...prev, limit: newLimit === DEFAULT_PAGE_LIMIT ? undefined : newLimit, page: undefined, selected: undefined };
+          const next = {
+            ...prev,
+            limit: newLimit === DEFAULT_PAGE_LIMIT ? undefined : newLimit,
+            page: undefined,
+            selected: undefined,
+          };
           for (const [k, v] of Object.entries(next)) {
             if (v === undefined) delete (next as Record<string, unknown>)[k];
           }
@@ -227,8 +232,8 @@ export function ManufacturerItemsPage() {
           </div>
         )}
 
-        {/* Three-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr_380px] gap-6">
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
           {/* Facets sidebar */}
           <div className="hidden lg:block">
             {facetsData ? (
@@ -253,9 +258,7 @@ export function ManufacturerItemsPage() {
                   selectedSlug={search.selected}
                   onSelect={selectItem}
                   totalCount={itemsData.total_count}
-                  paginationControls={
-                    <PageSizeSelector value={limit} onChange={handleLimitChange} />
-                  }
+                  paginationControls={<PageSizeSelector value={limit} onChange={handleLimitChange} />}
                 />
                 <Pagination
                   page={page}
@@ -267,16 +270,13 @@ export function ManufacturerItemsPage() {
               </>
             ) : null}
           </div>
-
-          {/* Right: detail panel */}
-          <div className="hidden lg:block border-l border-border min-h-[400px]">
-            <ItemDetailPanel
-              franchise={selectedItem?.franchise.slug ?? ''}
-              itemSlug={search.selected}
-              onClose={() => selectItem(undefined)}
-            />
-          </div>
         </div>
+
+        <ItemDetailSheet
+          franchise={selectedItem?.franchise.slug ?? ''}
+          itemSlug={search.selected}
+          onClose={() => selectItem(undefined)}
+        />
       </main>
     </div>
   );

@@ -1,5 +1,5 @@
 /**
- * E2E: Catalog Search — search input, grouped results, detail panels
+ * E2E: Catalog Search — search input, grouped results, detail sheets
  *
  * Tests use mocked API responses (page.route()) — no real API server required.
  */
@@ -140,7 +140,7 @@ async function setupSearchMocks(page: import('@playwright/test').Page) {
     })
   );
 
-  // Mock relationships endpoints (detail panels fetch these)
+  // Mock relationships endpoints (detail sheets fetch these)
   await page.route('**/relationships', (route) => {
     if (route.request().resourceType() === 'document') return route.continue();
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ relationships: [] }) });
@@ -199,18 +199,18 @@ test.describe('Catalog Search', () => {
     await expect(resultsList.getByText('MP-44 Optimus Prime', { exact: true })).toBeVisible();
   });
 
-  test('Given search results, When clicking an item, Then item detail panel opens', async ({ page }) => {
+  test('Given search results, When clicking an item, Then item detail sheet opens', async ({ page }) => {
     await setupSearchMocks(page);
     await page.goto('/catalog/search?q=optimus');
 
     await page.getByText('MP-44 Optimus Prime').click();
 
-    // Detail panel should show item information
-    const panel = page.getByRole('complementary', { name: /Item detail/ });
-    await expect(panel.getByText('Masterpiece', { exact: true })).toBeVisible();
+    // Detail sheet should show item information
+    const sheet = page.getByRole('dialog', { name: /MP-44 Optimus Prime/ });
+    await expect(sheet.getByText('Masterpiece', { exact: true })).toBeVisible();
   });
 
-  test('Given search results, When clicking a character, Then character detail panel opens', async ({ page }) => {
+  test('Given search results, When clicking a character, Then character detail sheet opens', async ({ page }) => {
     await setupSearchMocks(page);
     await page.goto('/catalog/search?q=optimus');
 
@@ -218,11 +218,10 @@ test.describe('Catalog Search', () => {
     const resultsList = page.getByRole('listbox', { name: 'Search results' });
     await resultsList.getByText('Optimus Prime', { exact: true }).click();
 
-    // Character detail panel should show real data
-    const panel = page.getByRole('complementary', { name: /Character detail/ });
-    await expect(panel.getByText('Autobots')).toBeVisible();
-    await expect(panel.getByText('Generation 1')).toBeVisible();
-    await expect(page.getByRole('link', { name: /View full profile/ })).toBeVisible();
+    // Character detail sheet should show real data
+    const sheet = page.getByRole('dialog', { name: /Optimus Prime/ });
+    await expect(sheet.getByText('Autobots')).toBeVisible();
+    await expect(sheet.getByText('Generation 1')).toBeVisible();
   });
 
   test('Given search for nonexistent term, Then no results message is displayed', async ({ page }) => {
