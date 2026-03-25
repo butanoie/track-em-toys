@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { ChevronRight, Upload } from 'lucide-react';
+import { ItemDetailSheet } from '@/catalog/components/ItemDetailSheet';
 import { Route } from '@/routes/_authenticated/collection';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
@@ -31,6 +32,7 @@ export function CollectionPage() {
   const { runExport, isExporting } = useCollectionExport();
   const [editTarget, setEditTarget] = useState<CollectionItem | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [catalogItem, setCatalogItem] = useState<{ franchise: string; slug: string } | null>(null);
   const [view, setView] = useLocalStorage<CollectionViewMode>('trackem:collection-view', 'grid');
 
   const page = search.page ?? 1;
@@ -94,6 +96,10 @@ export function CollectionPage() {
     [navigate]
   );
 
+  const handleViewCatalog = useCallback((franchise: string, slug: string) => {
+    setCatalogItem({ franchise, slug });
+  }, []);
+
   const showEmptyState =
     !isPending && data && data.total_count === 0 && !search.franchise && !search.condition && !search.search;
 
@@ -150,6 +156,16 @@ export function CollectionPage() {
               stats={stats}
               activeFranchise={search.franchise}
               onFranchiseClick={(slug) => updateSearch({ franchise: slug })}
+              actions={
+                <ExportImportToolbar
+                  hasItems={(stats?.total_copies ?? 0) > 0}
+                  isExporting={isExporting}
+                  onExport={() => {
+                    void runExport();
+                  }}
+                  onImportOpen={() => setImportOpen(true)}
+                />
+              }
             />
 
             <CollectionFilters
@@ -167,23 +183,15 @@ export function CollectionPage() {
                 {data?.total_count ?? '—'} {data?.total_count === 1 ? 'item' : 'items'}
               </p>
               <div className="flex items-center gap-3">
-                <ExportImportToolbar
-                  hasItems={(stats?.total_copies ?? 0) > 0}
-                  isExporting={isExporting}
-                  onExport={() => {
-                    void runExport();
-                  }}
-                  onImportOpen={() => setImportOpen(true)}
-                />
                 <PageSizeSelector value={limit} onChange={handleLimitChange} />
                 <ViewToggle view={view} onViewChange={setView} />
               </div>
             </div>
 
             {view === 'grid' ? (
-              <CollectionGrid items={data?.data ?? []} isLoading={isPending} onEdit={setEditTarget} />
+              <CollectionGrid items={data?.data ?? []} isLoading={isPending} onEdit={setEditTarget} onViewCatalog={handleViewCatalog} />
             ) : (
-              <CollectionTable items={data?.data ?? []} isLoading={isPending} onEdit={setEditTarget} />
+              <CollectionTable items={data?.data ?? []} isLoading={isPending} onEdit={setEditTarget} onViewCatalog={handleViewCatalog} />
             )}
 
             <Pagination
@@ -210,6 +218,12 @@ export function CollectionPage() {
         open={importOpen}
         onOpenChange={setImportOpen}
         currentCollectionCount={stats?.total_copies ?? 0}
+      />
+
+      <ItemDetailSheet
+        franchise={catalogItem?.franchise ?? ''}
+        itemSlug={catalogItem?.slug}
+        onClose={() => setCatalogItem(null)}
       />
     </div>
   );

@@ -6,6 +6,7 @@ interface CollectionGridProps {
   items: CollectionItem[];
   isLoading: boolean;
   onEdit: (item: CollectionItem) => void;
+  onViewCatalog: (franchise: string, slug: string) => void;
 }
 
 function SkeletonCard() {
@@ -23,7 +24,7 @@ function SkeletonCard() {
   );
 }
 
-export function CollectionGrid({ items, isLoading, onEdit }: CollectionGridProps) {
+export function CollectionGrid({ items, isLoading, onEdit, onViewCatalog }: CollectionGridProps) {
   if (isLoading && items.length === 0) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -47,7 +48,7 @@ export function CollectionGrid({ items, isLoading, onEdit }: CollectionGridProps
     <ul role="list" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {items.map((item) => (
         <li key={item.id}>
-          <CollectionItemCard item={item} onEdit={onEdit} />
+          <CollectionItemCard item={item} onEdit={onEdit} onViewCatalog={onViewCatalog} />
         </li>
       ))}
     </ul>

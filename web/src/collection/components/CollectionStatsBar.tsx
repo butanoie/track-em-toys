@@ -1,4 +1,4 @@
-import { Archive } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import type { CollectionStats } from '@/lib/zod-schemas';
@@ -7,9 +7,10 @@ interface CollectionStatsBarProps {
   stats: CollectionStats | undefined;
   activeFranchise: string | undefined;
   onFranchiseClick: (slug: string | undefined) => void;
+  actions?: ReactNode;
 }
 
-export function CollectionStatsBar({ stats, activeFranchise, onFranchiseClick }: CollectionStatsBarProps) {
+export function CollectionStatsBar({ stats, activeFranchise, onFranchiseClick, actions }: CollectionStatsBarProps) {
   if (!stats) {
     return (
       <div className="rounded-lg border bg-card p-5 mb-6 animate-pulse">
@@ -29,12 +30,9 @@ export function CollectionStatsBar({ stats, activeFranchise, onFranchiseClick }:
     <div className="rounded-lg border bg-card p-5 mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Archive className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            <div>
-              <p className="text-2xl font-bold tabular-nums text-foreground">{stats.total_copies}</p>
-              <p className="text-xs text-muted-foreground">copies</p>
-            </div>
+          <div>
+            <p className="text-2xl font-bold tabular-nums text-foreground">{stats.total_copies}</p>
+            <p className="text-xs text-muted-foreground">copies</p>
           </div>
           <Separator orientation="vertical" className="h-8 hidden sm:block" />
           <div>
@@ -80,6 +78,8 @@ export function CollectionStatsBar({ stats, activeFranchise, onFranchiseClick }:
             </div>
           </>
         )}
+
+        {actions && <div className="sm:ml-auto flex-shrink-0">{actions}</div>}
       </div>
     </div>
   );

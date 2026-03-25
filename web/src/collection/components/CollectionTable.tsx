@@ -1,5 +1,4 @@
-import { Link } from '@tanstack/react-router';
-import { Pencil, Package } from 'lucide-react';
+import { Eye, Pencil, Package } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { buildPhotoUrl } from '@/catalog/photos/api';
@@ -11,9 +10,10 @@ interface CollectionTableProps {
   items: CollectionItem[];
   isLoading: boolean;
   onEdit: (item: CollectionItem) => void;
+  onViewCatalog: (franchise: string, slug: string) => void;
 }
 
-export function CollectionTable({ items, isLoading, onEdit }: CollectionTableProps) {
+export function CollectionTable({ items, isLoading, onEdit, onViewCatalog }: CollectionTableProps) {
   if (isLoading && items.length === 0) {
     return (
       <div className="rounded-md border">
@@ -123,18 +123,20 @@ export function CollectionTable({ items, isLoading, onEdit }: CollectionTablePro
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7"
+                    onClick={() => onViewCatalog(item.franchise.slug, item.item_slug)}
+                    aria-label={`View catalog details for ${item.item_name}`}
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
                     onClick={() => onEdit(item)}
                     aria-label={`Edit ${item.item_name}`}
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Link
-                    to="/catalog/$franchise/items/$slug"
-                    params={{ franchise: item.franchise.slug, slug: item.item_slug }}
-                    className="text-xs text-primary hover:underline whitespace-nowrap"
-                  >
-                    Catalog
-                  </Link>
                 </div>
               </TableCell>
             </TableRow>
