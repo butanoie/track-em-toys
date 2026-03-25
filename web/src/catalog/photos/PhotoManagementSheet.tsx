@@ -88,7 +88,7 @@ export function PhotoManagementSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="sm:max-w-lg w-full flex flex-col">
+        <SheetContent side="right" className="sm:max-w-3xl w-full flex flex-col">
           <SheetHeader>
             <SheetTitle>Manage Photos</SheetTitle>
             <SheetDescription>

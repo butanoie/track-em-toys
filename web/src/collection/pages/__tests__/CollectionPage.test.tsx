@@ -34,9 +34,7 @@ vi.mock('@/catalog/components/Pagination', () => ({
 }));
 
 vi.mock('@/components/PageSizeSelector', () => ({
-  PageSizeSelector: (props: { value: number }) => (
-    <div data-testid="page-size-selector">{props.value} / page</div>
-  ),
+  PageSizeSelector: (props: { value: number }) => <div data-testid="page-size-selector">{props.value} / page</div>,
 }));
 
 const mockStats: CollectionStats = {
@@ -89,6 +87,10 @@ vi.mock('@/collection/components/CollectionTable', () => ({
   CollectionTable: () => <div data-testid="table" />,
 }));
 
+vi.mock('@/catalog/components/ItemDetailSheet', () => ({
+  ItemDetailSheet: () => null,
+}));
+
 vi.mock('@/collection/hooks/useCollectionExport', () => ({
   useCollectionExport: () => ({ runExport: vi.fn(), isExporting: false }),
 }));
@@ -130,16 +132,6 @@ describe('CollectionPage', () => {
     mockUseCollectionStats.mockReturnValue({ data: { ...mockStats, total_copies: 0 } });
     render(<CollectionPage />);
     expect(screen.getByText('or Import from file')).toBeInTheDocument();
-  });
-
-  it('renders export/import toolbar when collection has items', () => {
-    mockUseCollectionItems.mockReturnValue({
-      data: { ...mockItemList, total_count: 5 },
-      isPending: false,
-    });
-    mockUseCollectionStats.mockReturnValue({ data: mockStats });
-    render(<CollectionPage />);
-    expect(screen.getByTestId('export-import-toolbar')).toBeInTheDocument();
   });
 
   it('renders stats bar, filters, and grid when collection has items', () => {

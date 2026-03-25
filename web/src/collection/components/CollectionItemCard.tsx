@@ -1,5 +1,4 @@
-import { Link } from '@tanstack/react-router';
-import { Pencil, Package } from 'lucide-react';
+import { Eye, Pencil, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { buildPhotoUrl } from '@/catalog/photos/api';
 import { ConditionBadge } from '@/collection/components/ConditionBadge';
@@ -9,9 +8,10 @@ import type { CollectionItem } from '@/lib/zod-schemas';
 interface CollectionItemCardProps {
   item: CollectionItem;
   onEdit: (item: CollectionItem) => void;
+  onViewCatalog: (franchise: string, slug: string) => void;
 }
 
-export function CollectionItemCard({ item, onEdit }: CollectionItemCardProps) {
+export function CollectionItemCard({ item, onEdit, onViewCatalog }: CollectionItemCardProps) {
   return (
     <article className="group rounded-lg border bg-card hover:shadow-md hover:border-border/80 transition-all duration-200 overflow-hidden">
       <div className="flex gap-4 p-4">
@@ -44,6 +44,15 @@ export function CollectionItemCard({ item, onEdit }: CollectionItemCardProps) {
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
+                onClick={() => onViewCatalog(item.franchise.slug, item.item_slug)}
+                aria-label={`View catalog details for ${item.item_name}`}
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
                 onClick={() => onEdit(item)}
                 aria-label={`Edit ${item.item_name}`}
               >
@@ -58,15 +67,8 @@ export function CollectionItemCard({ item, onEdit }: CollectionItemCardProps) {
         </div>
       </div>
 
-      <div className="px-4 pb-3 flex items-center justify-between">
+      <div className="px-4 pb-3">
         <p className="text-xs text-muted-foreground/60 tabular-nums">Added {formatRelativeDate(item.created_at)}</p>
-        <Link
-          to="/catalog/$franchise/items/$slug"
-          params={{ franchise: item.franchise.slug, slug: item.item_slug }}
-          className="text-xs text-primary hover:underline opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
-        >
-          View in catalog
-        </Link>
       </div>
     </article>
   );

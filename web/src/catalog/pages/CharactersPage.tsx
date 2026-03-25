@@ -14,7 +14,7 @@ import { useCharacterFacets } from '@/catalog/hooks/useCharacterFacets';
 import { useFranchiseDetail } from '@/catalog/hooks/useFranchiseDetail';
 import { FacetSidebar, type FacetGroupConfig } from '@/catalog/components/FacetSidebar';
 import { CharacterList } from '@/catalog/components/CharacterList';
-import { CharacterDetailPanel } from '@/catalog/components/CharacterDetailPanel';
+import { CharacterDetailSheet } from '@/catalog/components/CharacterDetailSheet';
 import { ApiError } from '@/lib/api-client';
 import type { CharacterFilters } from '@/catalog/api';
 
@@ -126,7 +126,12 @@ export function CharactersPage() {
         to: '/catalog/$franchise/characters',
         params: { franchise: franchiseSlug },
         search: (prev) => {
-          const next = { ...prev, limit: newLimit === DEFAULT_PAGE_LIMIT ? undefined : newLimit, page: undefined, selected: undefined };
+          const next = {
+            ...prev,
+            limit: newLimit === DEFAULT_PAGE_LIMIT ? undefined : newLimit,
+            page: undefined,
+            selected: undefined,
+          };
           for (const [k, v] of Object.entries(next)) {
             if (v === undefined) delete (next as Record<string, unknown>)[k];
           }
@@ -210,8 +215,8 @@ export function CharactersPage() {
           </div>
         )}
 
-        {/* Three-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr_380px] gap-6">
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
           {/* Facets sidebar — hidden on mobile, visible on lg+ */}
           <div className="hidden lg:block">
             {facetsData ? (
@@ -239,9 +244,7 @@ export function CharactersPage() {
                   selectedSlug={search.selected}
                   onSelect={selectCharacter}
                   totalCount={charactersData.total_count}
-                  paginationControls={
-                    <PageSizeSelector value={limit} onChange={handleLimitChange} />
-                  }
+                  paginationControls={<PageSizeSelector value={limit} onChange={handleLimitChange} />}
                 />
                 <Pagination
                   page={page}
@@ -253,16 +256,13 @@ export function CharactersPage() {
               </>
             ) : null}
           </div>
-
-          {/* Right: detail panel */}
-          <div className="hidden lg:block border-l border-border min-h-[400px]">
-            <CharacterDetailPanel
-              franchise={franchiseSlug}
-              characterSlug={search.selected}
-              onClose={() => selectCharacter(undefined)}
-            />
-          </div>
         </div>
+
+        <CharacterDetailSheet
+          franchise={franchiseSlug}
+          characterSlug={search.selected}
+          onClose={() => selectCharacter(undefined)}
+        />
       </main>
     </div>
   );

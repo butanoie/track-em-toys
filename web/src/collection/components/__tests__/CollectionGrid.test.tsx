@@ -24,17 +24,17 @@ const mockItem: CollectionItem = {
 
 describe('CollectionGrid', () => {
   it('renders skeleton cards when loading with no items', () => {
-    const { container } = render(<CollectionGrid items={[]} isLoading={true} onEdit={vi.fn()} />);
+    const { container } = render(<CollectionGrid items={[]} isLoading={true} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
     expect(container.querySelectorAll('.animate-pulse')).toHaveLength(6);
   });
 
   it('renders empty state when no items and not loading', () => {
-    render(<CollectionGrid items={[]} isLoading={false} onEdit={vi.fn()} />);
+    render(<CollectionGrid items={[]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
     expect(screen.getByText('No items match your filters.')).toBeInTheDocument();
   });
 
   it('renders item cards', () => {
-    render(<CollectionGrid items={[mockItem]} isLoading={false} onEdit={vi.fn()} />);
+    render(<CollectionGrid items={[mockItem]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
     expect(screen.getByText('Optimus Prime')).toBeInTheDocument();
   });
 });

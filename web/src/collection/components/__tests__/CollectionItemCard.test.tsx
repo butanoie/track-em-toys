@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -7,14 +6,6 @@ import type { CollectionItem } from '@/lib/zod-schemas';
 
 vi.mock('@/catalog/photos/api', () => ({
   buildPhotoUrl: (url: string) => `http://photos/${url}`,
-}));
-
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, ...props }: { children: React.ReactNode; to: string }) => (
-    <a href={to} {...props}>
-      {children}
-    </a>
-  ),
 }));
 
 const mockItem: CollectionItem = {
@@ -34,44 +25,44 @@ const mockItem: CollectionItem = {
 
 describe('CollectionItemCard', () => {
   it('renders item name and franchise info', () => {
-    render(<CollectionItemCard item={mockItem} onEdit={vi.fn()} />);
+    render(<CollectionItemCard item={mockItem} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
     expect(screen.getByText('Optimus Prime')).toBeInTheDocument();
     expect(screen.getByText(/Transformers/)).toBeInTheDocument();
     expect(screen.getByText(/Generation 1/)).toBeInTheDocument();
   });
 
   it('renders condition badge', () => {
-    render(<CollectionItemCard item={mockItem} onEdit={vi.fn()} />);
+    render(<CollectionItemCard item={mockItem} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
     expect(screen.getByTitle('Mint Sealed')).toBeInTheDocument();
   });
 
   it('renders thumbnail image', () => {
-    render(<CollectionItemCard item={mockItem} onEdit={vi.fn()} />);
+    render(<CollectionItemCard item={mockItem} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
     const img = document.querySelector('img');
     expect(img).not.toBeNull();
     expect(img).toHaveAttribute('src', 'http://photos/abc/thumb.webp');
   });
 
   it('renders notes preview', () => {
-    render(<CollectionItemCard item={mockItem} onEdit={vi.fn()} />);
+    render(<CollectionItemCard item={mockItem} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
     expect(screen.getByText(/Found at a garage sale/)).toBeInTheDocument();
   });
 
-  it('renders "View in catalog" link', () => {
-    render(<CollectionItemCard item={mockItem} onEdit={vi.fn()} />);
-    expect(screen.getByText('View in catalog')).toBeInTheDocument();
+  it('renders catalog detail button', () => {
+    render(<CollectionItemCard item={mockItem} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /View catalog details for Optimus Prime/ })).toBeInTheDocument();
   });
 
   it('calls onEdit when edit button is clicked', async () => {
     const onEdit = vi.fn();
-    render(<CollectionItemCard item={mockItem} onEdit={onEdit} />);
+    render(<CollectionItemCard item={mockItem} onEdit={onEdit} onViewCatalog={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: /Edit Optimus Prime/ }));
     expect(onEdit).toHaveBeenCalledWith(mockItem);
   });
 
   it('renders placeholder when no thumbnail', () => {
     const itemNoThumb = { ...mockItem, thumbnail_url: null };
-    render(<CollectionItemCard item={itemNoThumb} onEdit={vi.fn()} />);
+    render(<CollectionItemCard item={itemNoThumb} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 });

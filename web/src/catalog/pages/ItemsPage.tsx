@@ -18,7 +18,7 @@ import { useFranchiseDetail } from '@/catalog/hooks/useFranchiseDetail';
 import { exportForMl } from '@/catalog/api';
 import { FacetSidebar, type FacetGroupConfig } from '@/catalog/components/FacetSidebar';
 import { ItemList } from '@/catalog/components/ItemList';
-import { ItemDetailPanel } from '@/catalog/components/ItemDetailPanel';
+import { ItemDetailSheet } from '@/catalog/components/ItemDetailSheet';
 import { ApiError } from '@/lib/api-client';
 import type { ItemFilters } from '@/catalog/api';
 
@@ -159,7 +159,12 @@ export function ItemsPage() {
         to: '/catalog/$franchise/items',
         params: { franchise: franchiseSlug },
         search: (prev) => {
-          const next = { ...prev, limit: newLimit === DEFAULT_PAGE_LIMIT ? undefined : newLimit, page: undefined, selected: undefined };
+          const next = {
+            ...prev,
+            limit: newLimit === DEFAULT_PAGE_LIMIT ? undefined : newLimit,
+            page: undefined,
+            selected: undefined,
+          };
           for (const [k, v] of Object.entries(next)) {
             if (v === undefined) delete (next as Record<string, unknown>)[k];
           }
@@ -244,8 +249,8 @@ export function ItemsPage() {
           </div>
         )}
 
-        {/* Three-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr_380px] gap-6">
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
           {/* Facets sidebar — hidden on mobile, visible on lg+ */}
           <div className="hidden lg:block">
             {facetsData ? (
@@ -288,9 +293,7 @@ export function ItemsPage() {
                   selectedSlug={search.selected}
                   onSelect={selectItem}
                   totalCount={itemsData.total_count}
-                  paginationControls={
-                    <PageSizeSelector value={limit} onChange={handleLimitChange} />
-                  }
+                  paginationControls={<PageSizeSelector value={limit} onChange={handleLimitChange} />}
                 />
                 <Pagination
                   page={page}
@@ -302,16 +305,9 @@ export function ItemsPage() {
               </>
             ) : null}
           </div>
-
-          {/* Right: detail panel */}
-          <div className="hidden lg:block border-l border-border min-h-[400px]">
-            <ItemDetailPanel
-              franchise={franchiseSlug}
-              itemSlug={search.selected}
-              onClose={() => selectItem(undefined)}
-            />
-          </div>
         </div>
+
+        <ItemDetailSheet franchise={franchiseSlug} itemSlug={search.selected} onClose={() => selectItem(undefined)} />
       </main>
     </div>
   );
