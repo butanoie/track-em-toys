@@ -25,6 +25,14 @@ vi.mock('@/catalog/api', async (importOriginal) => {
   };
 });
 
+vi.mock('@/catalog/components/Pagination', () => ({
+  Pagination: () => <nav data-testid="pagination" />,
+}));
+
+vi.mock('@/components/PageSizeSelector', () => ({
+  PageSizeSelector: () => <div data-testid="page-size-selector" />,
+}));
+
 vi.mock('@/components/AppHeader', () => ({
   AppHeader: () => <header data-testid="app-header" />,
 }));
@@ -72,7 +80,7 @@ vi.mock('@/catalog/hooks/useItemDetail', () => ({
 function setupDefaults() {
   mockUseFranchiseDetail.mockReturnValue({ data: mockFranchiseDetail, error: null });
   mockUseItems.mockReturnValue({
-    data: { data: [mockCatalogItem], next_cursor: null, total_count: 1 },
+    data: { data: [mockCatalogItem], page: 1, limit: 20, total_count: 1 },
     isPending: false,
   });
   mockUseItemFacets.mockReturnValue({ data: mockItemFacets });
@@ -147,22 +155,15 @@ describe('ItemsPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith(expect.objectContaining({ search: {} }));
   });
 
-  it('does not render pagination when no next_cursor and no history', () => {
-    setupDefaults();
-    render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
-    expect(screen.queryByRole('button', { name: 'Next' })).not.toBeInTheDocument();
-  });
-
-  it('renders Next button when next_cursor is present', () => {
+  it('renders pagination controls', () => {
     mockUseFranchiseDetail.mockReturnValue({ data: mockFranchiseDetail, error: null });
     mockUseItems.mockReturnValue({
-      data: { data: [mockCatalogItem], next_cursor: 'abc', total_count: 50 },
+      data: { data: [mockCatalogItem], page: 1, limit: 20, total_count: 50 },
       isPending: false,
     });
     mockUseItemFacets.mockReturnValue({ data: mockItemFacets });
     mockUseItemDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
     render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
-    expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
+    expect(screen.getByTestId('page-size-selector')).toBeInTheDocument();
   });
 });

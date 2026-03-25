@@ -54,10 +54,18 @@ vi.mock('@/catalog/hooks/useCharacterDetail', () => ({
   useCharacterDetail: (...args: unknown[]) => mockUseCharacterDetail(...args),
 }));
 
+vi.mock('@/catalog/components/Pagination', () => ({
+  Pagination: () => <nav data-testid="pagination" />,
+}));
+
+vi.mock('@/components/PageSizeSelector', () => ({
+  PageSizeSelector: () => <div data-testid="page-size-selector" />,
+}));
+
 function setupDefaults() {
   mockUseFranchiseDetail.mockReturnValue({ data: mockFranchiseDetail, error: null });
   mockUseCharacters.mockReturnValue({
-    data: { data: [mockCharacterListItem], next_cursor: null, total_count: 1 },
+    data: { data: [mockCharacterListItem], page: 1, limit: 20, total_count: 1 },
     isPending: false,
   });
   mockUseCharacterFacets.mockReturnValue({ data: mockCharacterFacets });
@@ -122,16 +130,15 @@ describe('CharactersPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith(expect.objectContaining({ search: {} }));
   });
 
-  it('renders Next button when next_cursor is present', () => {
+  it('renders pagination controls', () => {
     mockUseFranchiseDetail.mockReturnValue({ data: mockFranchiseDetail, error: null });
     mockUseCharacters.mockReturnValue({
-      data: { data: [mockCharacterListItem], next_cursor: 'abc', total_count: 50 },
+      data: { data: [mockCharacterListItem], page: 1, limit: 20, total_count: 50 },
       isPending: false,
     });
     mockUseCharacterFacets.mockReturnValue({ data: mockCharacterFacets });
     mockUseCharacterDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
     render(<CharactersPage />);
-    expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
+    expect(screen.getByTestId('page-size-selector')).toBeInTheDocument();
   });
 });

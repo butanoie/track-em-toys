@@ -48,6 +48,7 @@ export const searchSchema = {
     properties: {
       q: { type: 'string', minLength: 1, maxLength: 200 },
       franchise: { type: 'string', minLength: 1, maxLength: 120 },
+      type: { type: 'string', enum: ['character', 'item'] },
       page: { type: 'integer', minimum: 1, default: 1 },
       limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
     },
@@ -55,13 +56,15 @@ export const searchSchema = {
   response: {
     200: {
       type: 'object',
-      required: ['data', 'page', 'limit', 'total_count'],
+      required: ['data', 'page', 'limit', 'total_count', 'character_count', 'item_count'],
       additionalProperties: false,
       properties: {
         data: { type: 'array', items: searchResultItem },
         page: { type: 'integer' },
         limit: { type: 'integer' },
         total_count: { type: 'integer' },
+        character_count: { type: 'integer' },
+        item_count: { type: 'integer' },
       },
     },
     400: errorResponse,

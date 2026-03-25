@@ -26,8 +26,16 @@ export interface SearchResultRow {
 export interface SearchParams {
   query: string;
   franchiseSlug: string | null;
+  entityType: 'character' | 'item' | null;
   limit: number;
   offset: number;
+}
+
+export interface SearchResult {
+  rows: SearchResultRow[];
+  totalCount: number;
+  characterCount: number;
+  itemCount: number;
 }
 
 /**
@@ -65,12 +73,12 @@ export function buildSearchTsquery(input: string): string | null {
  *
  * @param params - Search query parameters
  */
-export async function searchCatalog(params: SearchParams): Promise<{ rows: SearchResultRow[]; totalCount: number }> {
-  const { query, franchiseSlug, limit, offset } = params;
+export async function searchCatalog(params: SearchParams): Promise<SearchResult> {
+  const { query, franchiseSlug, entityType, limit, offset } = params;
 
   const tsqueryStr = buildSearchTsquery(query);
   if (!tsqueryStr) {
-    return { rows: [], totalCount: 0 };
+    return { rows: [], totalCount: 0, characterCount: 0, itemCount: 0 };
   }
 
   const dataQuery = `
@@ -127,17 +135,17 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
               OR ch.search_vector @@ to_tsquery('simple', $1))
          AND ($2::text IS NULL OR fr.slug = $2)
     ) results
+    WHERE ($3::text IS NULL OR entity_type = $3)
     ORDER BY rank DESC, name ASC, entity_type ASC, id ASC
-    LIMIT $3 OFFSET $4`;
+    LIMIT $4 OFFSET $5`;
 
   const countQuery = `
-    SELECT (
+    SELECT
       (SELECT COUNT(*)::int
          FROM characters c
          JOIN franchises fr ON fr.id = c.franchise_id
         WHERE c.search_vector @@ to_tsquery('simple', $1)
-          AND ($2::text IS NULL OR fr.slug = $2))
-      +
+          AND ($2::text IS NULL OR fr.slug = $2)) AS character_count,
       (SELECT COUNT(*)::int
          FROM items i
          JOIN franchises fr ON fr.id = i.franchise_id
@@ -146,16 +154,21 @@ export async function searchCatalog(params: SearchParams): Promise<{ rows: Searc
          LEFT JOIN characters ch ON ch.id = ca.character_id
         WHERE (i.search_vector @@ to_tsquery('simple', $1)
                OR ch.search_vector @@ to_tsquery('simple', $1))
-          AND ($2::text IS NULL OR fr.slug = $2))
-    ) AS total_count`;
+          AND ($2::text IS NULL OR fr.slug = $2)) AS item_count`;
 
   const [dataResult, countResult] = await Promise.all([
-    pool.query<SearchResultRow>(dataQuery, [tsqueryStr, franchiseSlug, limit, offset]),
-    pool.query<{ total_count: number }>(countQuery, [tsqueryStr, franchiseSlug]),
+    pool.query<SearchResultRow>(dataQuery, [tsqueryStr, franchiseSlug, entityType, limit, offset]),
+    pool.query<{ character_count: number; item_count: number }>(countQuery, [tsqueryStr, franchiseSlug]),
   ]);
 
-  return {
-    rows: dataResult.rows,
-    totalCount: countResult.rows[0]?.total_count ?? 0,
-  };
+  const characterCount = countResult.rows[0]?.character_count ?? 0;
+  const itemCount = countResult.rows[0]?.item_count ?? 0;
+
+  // total_count reflects the filtered set (for pagination)
+  let totalCount: number;
+  if (entityType === 'character') totalCount = characterCount;
+  else if (entityType === 'item') totalCount = itemCount;
+  else totalCount = characterCount + itemCount;
+
+  return { rows: dataResult.rows, totalCount, characterCount, itemCount };
 }

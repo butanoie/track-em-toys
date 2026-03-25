@@ -56,7 +56,7 @@ function renderWithQuery(ui: React.ReactElement) {
 describe('CharacterDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockListCatalogItems.mockResolvedValue({ data: [], next_cursor: null, total_count: 0 });
+    mockListCatalogItems.mockResolvedValue({ data: [], page: 1, limit: 20, total_count: 0 });
   });
 
   it('renders loading spinner while pending', () => {

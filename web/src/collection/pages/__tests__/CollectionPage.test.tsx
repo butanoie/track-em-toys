@@ -25,6 +25,20 @@ vi.mock('@/routes/_authenticated/collection', () => ({
   Route: { useSearch: () => ({}) },
 }));
 
+vi.mock('@/catalog/components/Pagination', () => ({
+  Pagination: (props: { page: number; totalCount: number; limit: number; ariaLabel?: string }) => (
+    <nav data-testid="pagination" aria-label={props.ariaLabel ?? 'Pagination'}>
+      Page {props.page} of {Math.ceil(props.totalCount / props.limit) || 1}
+    </nav>
+  ),
+}));
+
+vi.mock('@/components/PageSizeSelector', () => ({
+  PageSizeSelector: (props: { value: number }) => (
+    <div data-testid="page-size-selector">{props.value} / page</div>
+  ),
+}));
+
 const mockStats: CollectionStats = {
   total_copies: 5,
   unique_items: 4,
@@ -35,7 +49,8 @@ const mockStats: CollectionStats = {
 
 const mockItemList: CollectionItemList = {
   data: [],
-  next_cursor: null,
+  page: 1,
+  limit: 20,
   total_count: 0,
 };
 
@@ -137,5 +152,25 @@ describe('CollectionPage', () => {
     expect(screen.getByTestId('stats-bar')).toBeInTheDocument();
     expect(screen.getByTestId('filters')).toBeInTheDocument();
     expect(screen.getByTestId('grid')).toBeInTheDocument();
+  });
+
+  it('renders page size selector when collection has items', () => {
+    mockUseCollectionItems.mockReturnValue({
+      data: { ...mockItemList, total_count: 5 },
+      isPending: false,
+    });
+    mockUseCollectionStats.mockReturnValue({ data: mockStats });
+    render(<CollectionPage />);
+    expect(screen.getByTestId('page-size-selector')).toBeInTheDocument();
+  });
+
+  it('renders pagination when multiple pages exist', () => {
+    mockUseCollectionItems.mockReturnValue({
+      data: { ...mockItemList, total_count: 45 },
+      isPending: false,
+    });
+    mockUseCollectionStats.mockReturnValue({ data: mockStats });
+    render(<CollectionPage />);
+    expect(screen.getByTestId('pagination')).toBeInTheDocument();
   });
 });

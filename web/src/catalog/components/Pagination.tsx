@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 
-interface SearchPaginationProps {
+interface PaginationProps {
   page: number;
   totalCount: number;
   limit: number;
   onPageChange: (page: number) => void;
+  ariaLabel?: string;
 }
 
 function getVisiblePages(current: number, total: number): Array<number | 'ellipsis'> {
@@ -35,14 +36,14 @@ function getVisiblePages(current: number, total: number): Array<number | 'ellips
   return pages;
 }
 
-export function SearchPagination({ page, totalCount, limit, onPageChange }: SearchPaginationProps) {
+export function Pagination({ page, totalCount, limit, onPageChange, ariaLabel = 'Pagination' }: PaginationProps) {
   const totalPages = Math.ceil(totalCount / limit);
   const visiblePages = useMemo(() => getVisiblePages(page, totalPages), [page, totalPages]);
 
   if (totalPages <= 1) return null;
 
   return (
-    <nav aria-label="Search results pagination" className="flex items-center justify-center gap-1 mt-4">
+    <nav aria-label={ariaLabel} className="flex items-center justify-center gap-1 mt-4">
       <Button variant="outline" size="sm" onClick={() => onPageChange(page - 1)} disabled={page <= 1}>
         Previous
       </Button>

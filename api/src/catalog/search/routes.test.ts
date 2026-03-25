@@ -60,7 +60,7 @@ describe('search routes', () => {
 
   describe('GET /catalog/search', () => {
     it('should return 200 with search results', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [searchResult] }).mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+      mockQuery.mockResolvedValueOnce({ rows: [searchResult] }).mockResolvedValueOnce({ rows: [{ character_count: 1, item_count: 0 }] });
 
       const res = await server.inject({
         method: 'GET',
@@ -82,7 +82,7 @@ describe('search routes', () => {
     });
 
     it('should support franchise filter', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ total_count: 0 }] });
+      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ character_count: 0, item_count: 0 }] });
 
       const res = await server.inject({
         method: 'GET',
@@ -97,7 +97,7 @@ describe('search routes', () => {
     });
 
     it('should support pagination params', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ total_count: 0 }] });
+      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ character_count: 0, item_count: 0 }] });
 
       const res = await server.inject({
         method: 'GET',
@@ -118,7 +118,7 @@ describe('search routes', () => {
     });
 
     it('should return empty results for no matches', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ total_count: 0 }] });
+      mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ character_count: 0, item_count: 0 }] });
 
       const res = await server.inject({
         method: 'GET',
@@ -133,7 +133,7 @@ describe('search routes', () => {
     it('should return enriched fields for item results', async () => {
       mockQuery
         .mockResolvedValueOnce({ rows: [itemSearchResult] })
-        .mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+        .mockResolvedValueOnce({ rows: [{ character_count: 0, item_count: 1 }] });
 
       const res = await server.inject({
         method: 'GET',
@@ -166,7 +166,7 @@ describe('search routes', () => {
     });
 
     it('should return null enrichment fields for character results', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [searchResult] }).mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+      mockQuery.mockResolvedValueOnce({ rows: [searchResult] }).mockResolvedValueOnce({ rows: [{ character_count: 1, item_count: 0 }] });
 
       const res = await server.inject({
         method: 'GET',
@@ -208,7 +208,7 @@ describe('search routes', () => {
         is_third_party: true,
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [thirdPartyItem] }).mockResolvedValueOnce({ rows: [{ total_count: 1 }] });
+      mockQuery.mockResolvedValueOnce({ rows: [thirdPartyItem] }).mockResolvedValueOnce({ rows: [{ character_count: 0, item_count: 1 }] });
 
       const res = await server.inject({
         method: 'GET',
@@ -235,6 +235,64 @@ describe('search routes', () => {
       expect(dataQueryCall).toBeDefined();
       const sql = dataQueryCall![0] as string;
       expect(sql).toContain('ch.search_vector');
+    });
+
+    it('should return character_count and item_count in response', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [searchResult] })
+        .mockResolvedValueOnce({ rows: [{ character_count: 3, item_count: 7 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/search?q=optimus',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ character_count: number; item_count: number; total_count: number }>();
+      expect(body.character_count).toBe(3);
+      expect(body.item_count).toBe(7);
+      expect(body.total_count).toBe(10);
+    });
+
+    it('should filter by type=character', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [searchResult] })
+        .mockResolvedValueOnce({ rows: [{ character_count: 3, item_count: 7 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/search?q=optimus&type=character',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ total_count: number; character_count: number; item_count: number }>();
+      // total_count reflects the filtered set for pagination
+      expect(body.total_count).toBe(3);
+      // per-type counts are always unfiltered
+      expect(body.character_count).toBe(3);
+      expect(body.item_count).toBe(7);
+
+      // Verify entityType was passed to the data query
+      const dataCallArgs = mockQuery.mock.calls[0];
+      expect(dataCallArgs).toBeDefined();
+      expect(dataCallArgs![1]).toContain('character');
+    });
+
+    it('should filter by type=item', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [itemSearchResult] })
+        .mockResolvedValueOnce({ rows: [{ character_count: 3, item_count: 7 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/search?q=optimus&type=item',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ total_count: number }>();
+      expect(body.total_count).toBe(7);
+
+      // Verify entityType was passed to the data query
+      const dataCallArgs = mockQuery.mock.calls[0];
+      expect(dataCallArgs).toBeDefined();
+      expect(dataCallArgs![1]).toContain('item');
     });
 
     it('should return empty results for punctuation-only query', async () => {

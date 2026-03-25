@@ -110,7 +110,8 @@ const mockRelatedItems = {
       data_quality: 'verified',
     },
   ],
-  next_cursor: null,
+  page: 1,
+  limit: 20,
   total_count: 1,
 };
 
@@ -167,7 +168,7 @@ async function setupDetailMocks(page: import('@playwright/test').Page) {
     return route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ data: [], next_cursor: null, total_count: 0 }),
+      body: JSON.stringify({ data: [], page: 1, limit: 20, total_count: 0 }),
     });
   });
 

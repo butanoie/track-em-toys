@@ -90,7 +90,8 @@ const mockItems = {
       data_quality: 'verified',
     },
   ],
-  next_cursor: null,
+  page: 1,
+  limit: 20,
   total_count: 2,
 };
 

@@ -111,10 +111,11 @@ describe('manufacturer routes', () => {
         url: '/catalog/manufacturers/fanstoys/items',
       });
       expect(res.statusCode).toBe(200);
-      const body = res.json<{ data: unknown[]; total_count: number; next_cursor: string | null }>();
+      const body = res.json<{ data: unknown[]; page: number; limit: number; total_count: number }>();
       expect(body.data).toHaveLength(1);
       expect(body.total_count).toBe(1);
-      expect(body.next_cursor).toBeNull();
+      expect(body.page).toBe(1);
+      expect(body.limit).toBe(20);
     });
 
     it('should return 404 when manufacturer not found', async () => {

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { useMutation } from '@tanstack/react-query';
 import { ChevronRight, Download, SlidersHorizontal, X } from 'lucide-react';
@@ -8,6 +8,9 @@ import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Pagination } from '@/catalog/components/Pagination';
+import { PageSizeSelector } from '@/components/PageSizeSelector';
+import { DEFAULT_PAGE_LIMIT, type PageLimitOption } from '@/lib/pagination-constants';
 import { useAuth } from '@/auth/useAuth';
 import { useItems } from '@/catalog/hooks/useItems';
 import { useItemFacets } from '@/catalog/hooks/useItemFacets';
@@ -26,10 +29,8 @@ export function ItemsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Cursor stack enables "Previous page" with cursor-based pagination.
-  // Each "Next" pushes the current cursor; "Previous" pops the last one.
-  // Cleared when filters change (new result set invalidates old cursors).
-  const [cursorStack, setCursorStack] = useState<Array<string | undefined>>([]);
+  const page = search.page ?? 1;
+  const limit = search.limit ?? DEFAULT_PAGE_LIMIT;
 
   const { data: detail, error: detailError } = useFranchiseDetail(franchiseSlug);
 
@@ -65,7 +66,7 @@ export function ItemsPage() {
     },
   });
 
-  const { data: itemsData, isPending: itemsPending } = useItems(franchiseSlug, filters, search.cursor);
+  const { data: itemsData, isPending: itemsPending } = useItems(franchiseSlug, filters, page, limit);
   const { data: facetsData } = useItemFacets(franchiseSlug, filters);
 
   const facetGroups: FacetGroupConfig[] = useMemo(() => {
@@ -101,12 +102,11 @@ export function ItemsPage() {
 
   const setFilter = useCallback(
     (key: keyof ItemFilters, value: string | boolean | undefined) => {
-      setCursorStack([]);
       void navigate({
         to: '/catalog/$franchise/items',
         params: { franchise: franchiseSlug },
         search: (prev) => {
-          const next = { ...prev, [key]: value, cursor: undefined, selected: undefined };
+          const next = { ...prev, [key]: value, page: undefined, selected: undefined };
           for (const [k, v] of Object.entries(next)) {
             if (v === undefined || v === '') {
               delete (next as Record<string, unknown>)[k];
@@ -120,7 +120,6 @@ export function ItemsPage() {
   );
 
   const clearFilters = useCallback(() => {
-    setCursorStack([]);
     void navigate({
       to: '/catalog/$franchise/items',
       params: { franchise: franchiseSlug },
@@ -143,32 +142,33 @@ export function ItemsPage() {
     [navigate, franchiseSlug]
   );
 
-  const loadNextPage = useCallback(() => {
-    if (itemsData?.next_cursor) {
-      setCursorStack((prev) => [...prev, search.cursor]);
+  const handlePageChange = useCallback(
+    (newPage: number) => {
       void navigate({
         to: '/catalog/$franchise/items',
         params: { franchise: franchiseSlug },
-        search: (prev) => ({ ...prev, cursor: itemsData.next_cursor ?? undefined, selected: undefined }),
+        search: (prev) => ({ ...prev, page: newPage, selected: undefined }),
       });
-    }
-  }, [navigate, franchiseSlug, itemsData?.next_cursor, search.cursor]);
+    },
+    [navigate, franchiseSlug]
+  );
 
-  const loadPreviousPage = useCallback(() => {
-    if (cursorStack.length > 0) {
-      const previousCursor = cursorStack[cursorStack.length - 1];
-      setCursorStack((prev) => prev.slice(0, -1));
+  const handleLimitChange = useCallback(
+    (newLimit: PageLimitOption) => {
       void navigate({
         to: '/catalog/$franchise/items',
         params: { franchise: franchiseSlug },
         search: (prev) => {
-          const next = { ...prev, selected: undefined, cursor: previousCursor };
-          if (!previousCursor) delete (next as Record<string, unknown>).cursor;
+          const next = { ...prev, limit: newLimit === DEFAULT_PAGE_LIMIT ? undefined : newLimit, page: undefined, selected: undefined };
+          for (const [k, v] of Object.entries(next)) {
+            if (v === undefined) delete (next as Record<string, unknown>)[k];
+          }
           return next;
         },
       });
-    }
-  }, [navigate, franchiseSlug, cursorStack]);
+    },
+    [navigate, franchiseSlug]
+  );
 
   // Franchise not found
   if (detailError instanceof ApiError && detailError.status === 404) {
@@ -282,29 +282,24 @@ export function ItemsPage() {
             {itemsPending && !itemsData ? (
               <LoadingSpinner className="py-16" />
             ) : itemsData ? (
-              <ItemList
-                items={itemsData.data}
-                selectedSlug={search.selected}
-                onSelect={selectItem}
-                totalCount={itemsData.total_count}
-                paginationControls={
-                  cursorStack.length > 0 || itemsData.next_cursor ? (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={loadPreviousPage}
-                        disabled={cursorStack.length === 0}
-                      >
-                        Previous
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={loadNextPage} disabled={!itemsData.next_cursor}>
-                        Next
-                      </Button>
-                    </>
-                  ) : undefined
-                }
-              />
+              <>
+                <ItemList
+                  items={itemsData.data}
+                  selectedSlug={search.selected}
+                  onSelect={selectItem}
+                  totalCount={itemsData.total_count}
+                  paginationControls={
+                    <PageSizeSelector value={limit} onChange={handleLimitChange} />
+                  }
+                />
+                <Pagination
+                  page={page}
+                  totalCount={itemsData.total_count}
+                  limit={itemsData.limit}
+                  onPageChange={handlePageChange}
+                  ariaLabel="Items pagination"
+                />
+              </>
             ) : null}
           </div>
 

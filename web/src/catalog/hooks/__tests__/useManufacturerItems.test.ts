@@ -41,7 +41,8 @@ const mockItemList = {
       data_quality: 'verified' as const,
     },
   ],
-  next_cursor: null,
+  page: 1,
+  limit: 20,
   total_count: 1,
 };
 
@@ -58,7 +59,7 @@ describe('useManufacturerItems', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(mockItemList);
-    expect(listManufacturerItems).toHaveBeenCalledWith({ manufacturer: 'hasbro', filters: {}, cursor: undefined });
+    expect(listManufacturerItems).toHaveBeenCalledWith({ manufacturer: 'hasbro', filters: {}, page: undefined, limit: undefined });
   });
 
   it('includes filters and cursor in query key', async () => {
@@ -66,7 +67,7 @@ describe('useManufacturerItems', () => {
     const { wrapper, queryClient } = createWrapper();
     const filters = { franchise: 'transformers' };
 
-    renderHook(() => useManufacturerItems('hasbro', filters, 'abc123'), { wrapper });
+    renderHook(() => useManufacturerItems('hasbro', filters, 2), { wrapper });
 
     await waitFor(() => {
       const cache = queryClient.getQueryCache().findAll();
@@ -76,7 +77,8 @@ describe('useManufacturerItems', () => {
         'manufacturer-items',
         'hasbro',
         { franchise: 'transformers' },
-        'abc123',
+        2,
+        20,
       ]);
     });
   });

@@ -105,7 +105,6 @@ const COLLECTION_UUID_2 = 'e5e5e5e5-e5e5-e5e5-e5e5-e5e5e5e5e5e5';
 function makeCollectionRow(overrides: Partial<CollectionListRow> = {}): CollectionListRow {
   return {
     id: COLLECTION_UUID,
-    name: 'Optimus Prime',
     item_id: ITEM_UUID,
     item_name: 'Optimus Prime',
     item_slug: 'optimus-prime',
@@ -178,7 +177,8 @@ describe('collection routes', () => {
       expect(res.statusCode).toBe(200);
       const json = res.json();
       expect(json.data).toEqual([]);
-      expect(json.next_cursor).toBeNull();
+      expect(json.page).toBe(1);
+      expect(json.limit).toBe(20);
       expect(json.total_count).toBe(0);
     });
 
@@ -247,6 +247,54 @@ describe('collection routes', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.json().data[0].manufacturer).toBeNull();
+    });
+
+    it('should pass page and offset to query', async () => {
+      mockTx();
+      vi.mocked(queries.listCollectionItems).mockResolvedValue({ rows: [], totalCount: 0 });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/collection?page=3&limit=50',
+        headers: authHeaders(),
+      });
+
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.page).toBe(3);
+      expect(json.limit).toBe(50);
+
+      expect(vi.mocked(queries.listCollectionItems)).toHaveBeenCalledWith(
+        fakeClient,
+        expect.objectContaining({ limit: 50, offset: 100 })
+      );
+    });
+
+    it('should return 400 for invalid limit', async () => {
+      const res = await server.inject({
+        method: 'GET',
+        url: '/collection?limit=25',
+        headers: authHeaders(),
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it('should return empty data for out-of-bounds page', async () => {
+      mockTx();
+      vi.mocked(queries.listCollectionItems).mockResolvedValue({ rows: [], totalCount: 5 });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/collection?page=99',
+        headers: authHeaders(),
+      });
+
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.data).toEqual([]);
+      expect(json.page).toBe(99);
+      expect(json.total_count).toBe(5);
     });
 
     it('should return 401 without auth', async () => {

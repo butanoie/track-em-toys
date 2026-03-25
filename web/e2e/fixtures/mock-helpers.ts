@@ -66,9 +66,9 @@ export async function mockEmptyCollection(page: Page): Promise<void> {
     if (isDocRequest(route)) return route.continue();
     return route.fulfill(jsonResponse({ items: {} }));
   });
-  await page.route('**/collection', (route) => {
+  await page.route(/\/collection(\?.*)?$/, (route) => {
     if (isDocRequest(route)) return route.continue();
-    return route.fulfill(jsonResponse({ data: [], next_cursor: null, total_count: 0 }));
+    return route.fulfill(jsonResponse({ data: [], page: 1, limit: 20, total_count: 0 }));
   });
   await page.route('**/collection/stats', (route) => {
     if (isDocRequest(route)) return route.continue();
@@ -173,19 +173,25 @@ export class MockCollectionState {
     // 1. Catch-all for /collection/** — lowest priority fallback
     await page.route('**/collection/**', (route) => {
       if (isDocRequest(route)) return route.continue();
-      return route.fulfill(jsonResponse({ data: [], next_cursor: null, total_count: 0 }));
+      return route.fulfill(jsonResponse({ data: [], page: 1, limit: 20, total_count: 0 }));
     });
 
     // 2. GET /collection (list) + POST /collection (add)
-    await page.route('**/collection', (route) => {
+    await page.route(/\/collection(\?.*)?$/, (route) => {
       if (isDocRequest(route)) return route.continue();
       const method = route.request().method();
 
       if (method === 'GET') {
+        const url = new URL(route.request().url());
+        const reqPage = Number(url.searchParams.get('page') ?? '1');
+        const reqLimit = Number(url.searchParams.get('limit') ?? '20');
+        const offset = (reqPage - 1) * reqLimit;
+        const pageData = this.liveItems.slice(offset, offset + reqLimit);
         return route.fulfill(
           jsonResponse({
-            data: this.liveItems,
-            next_cursor: null,
+            data: pageData,
+            page: reqPage,
+            limit: reqLimit,
             total_count: this.liveItems.length,
           })
         );

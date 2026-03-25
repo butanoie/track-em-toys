@@ -14,7 +14,6 @@ import {
   listManufacturerItemsSchema,
   getManufacturerItemFacetsSchema,
 } from './schemas.js';
-import { decodeCursor, buildCursorPage, clampLimit } from '../shared/pagination.js';
 import { formatListItem } from '../shared/formatters.js';
 
 interface SlugParams {
@@ -22,8 +21,8 @@ interface SlugParams {
 }
 
 interface ManufacturerItemsListQuery {
+  page?: number;
   limit?: number;
-  cursor?: string;
   franchise?: string;
   size_class?: string;
   toy_line?: string;
@@ -98,25 +97,19 @@ export async function manufacturerRoutes(fastify: FastifyInstance, _opts: object
         return reply.code(404).send({ error: 'Manufacturer not found' });
       }
 
-      const limit = clampLimit(request.query.limit);
-
-      let cursor: { name: string; id: string } | null = null;
-      if (request.query.cursor) {
-        cursor = decodeCursor(request.query.cursor);
-        if (!cursor) return reply.code(400).send({ error: 'Invalid cursor' });
-      }
-
+      const page = request.query.page ?? 1;
+      const limit = request.query.limit ?? 20;
+      const offset = (page - 1) * limit;
       const filters = extractManufacturerFilters(request.query);
 
       const { rows, totalCount } = await listManufacturerItems({
         manufacturerSlug: request.params.slug,
         limit,
-        cursor,
+        offset,
         filters,
       });
 
-      const page = buildCursorPage(rows.map(formatListItem), limit);
-      return { ...page, total_count: totalCount };
+      return { data: rows.map(formatListItem), page, limit, total_count: totalCount };
     }
   );
 

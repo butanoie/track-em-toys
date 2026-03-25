@@ -279,3 +279,66 @@ test.describe('Collection navigation', () => {
     await expect(collectionLink).toHaveAttribute('aria-current', 'page');
   });
 });
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+test.describe('Collection pagination', () => {
+  function makeItems(count: number) {
+    return Array.from({ length: count }, (_, i) =>
+      makeCollectionItem({
+        item_id: `a0000000-0000-4000-a000-${String(i + 1).padStart(12, '0')}`,
+        item_name: `Item ${String(i + 1).padStart(3, '0')}`,
+        item_slug: `item-${String(i + 1).padStart(3, '0')}`,
+      })
+    );
+  }
+
+  test('Given >20 items, When on page 1, Then pagination controls are visible with page 1 active', async ({
+    page,
+  }) => {
+    const state = new MockCollectionState(makeItems(25));
+    await state.register(page);
+    await page.goto('/collection');
+
+    const pagination = page.getByRole('navigation', { name: 'Collection pagination' });
+    await expect(pagination).toBeVisible();
+    await expect(pagination.getByRole('button', { name: '1' })).toHaveAttribute('aria-current', 'page');
+    await expect(pagination.getByRole('button', { name: '2' })).toBeVisible();
+  });
+
+  test('Given >20 items, When clicking page 2, Then URL updates and second page items are shown', async ({ page }) => {
+    const state = new MockCollectionState(makeItems(25));
+    await state.register(page);
+    await page.goto('/collection');
+
+    const pagination = page.getByRole('navigation', { name: 'Collection pagination' });
+    await pagination.getByRole('button', { name: '2' }).click();
+
+    await expect(page).toHaveURL(/page=2/);
+    await expect(page.getByText('25 items')).toBeVisible();
+  });
+
+  test('Given page 2 active, When changing franchise filter, Then URL resets to page 1', async ({ page }) => {
+    const state = new MockCollectionState(makeItems(25));
+    await state.register(page);
+    await page.goto('/collection?page=2');
+
+    // Apply a filter — this should reset page
+    const franchiseFilter = page.getByRole('combobox', { name: /Filter by franchise/ });
+    await franchiseFilter.click();
+    await page.getByRole('option', { name: /Transformers/ }).click();
+
+    // URL should NOT contain page=2
+    await expect(page).toHaveURL(/franchise=transformers/);
+    expect(page.url()).not.toContain('page=2');
+  });
+
+  test('Given <=20 items, Then pagination is not rendered', async ({ page }) => {
+    const state = new MockCollectionState(makeItems(5));
+    await state.register(page);
+    await page.goto('/collection');
+
+    await expect(page.getByText('5 items')).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Collection pagination' })).not.toBeVisible();
+  });
+});

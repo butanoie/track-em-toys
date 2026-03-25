@@ -6,7 +6,7 @@ import {
   nullableSlugNameRef,
   itemListItem,
   facetValueItem,
-  cursorListResponse,
+  pageListResponse,
   photoItem,
 } from '../shared/schemas.js';
 
@@ -86,8 +86,8 @@ const itemsListQuerystring = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
-    cursor: { type: 'string', maxLength: 512 },
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', enum: [20, 50, 100], default: 20 },
     manufacturer: { type: 'string', minLength: 1, maxLength: 120 },
     size_class: { type: 'string', minLength: 1, maxLength: 120 },
     toy_line: { type: 'string', minLength: 1, maxLength: 120 },
@@ -111,13 +111,13 @@ const itemFiltersQuerystring = {
 } as const;
 
 export const listItemsSchema = {
-  description: 'List items in a franchise with cursor-based pagination and optional filters.',
+  description: 'List items in a franchise with page-based pagination and optional filters.',
   tags: ['catalog'],
   summary: 'List items',
   params: franchiseParam,
   querystring: itemsListQuerystring,
   response: {
-    200: cursorListResponse(itemListItem),
+    200: pageListResponse(itemListItem),
     400: errorResponse,
     404: errorResponse,
     500: errorResponse,
