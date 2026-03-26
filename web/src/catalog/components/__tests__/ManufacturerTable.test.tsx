@@ -1,15 +1,11 @@
-import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ManufacturerTable } from '../ManufacturerTable';
 import { mockManufacturer } from '@/catalog/__tests__/catalog-test-helpers';
 
+const mockNavigate = vi.fn();
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, ...props }: { children: React.ReactNode; to: string }) => (
-    <a href={to} {...props}>
-      {children}
-    </a>
-  ),
+  useNavigate: () => mockNavigate,
 }));
 
 const mockManufacturers = [mockManufacturer];
@@ -28,10 +24,11 @@ describe('ManufacturerTable', () => {
     expect(screen.getByText('Franchises')).toBeInTheDocument();
   });
 
-  it('renders manufacturer name as a link', () => {
+  it('renders manufacturer name and navigates on row click', () => {
     render(<ManufacturerTable manufacturers={mockManufacturers} />);
-    const link = screen.getByText('Hasbro').closest('a');
-    expect(link).toHaveAttribute('href', '/catalog/manufacturers/$slug');
+    expect(screen.getByText('Hasbro')).toBeInTheDocument();
+    screen.getByText('Hasbro').closest('tr')!.click();
+    expect(mockNavigate).toHaveBeenCalledWith({ to: '/catalog/manufacturers/$slug', params: { slug: 'hasbro' } });
   });
 
   it('renders count columns', () => {

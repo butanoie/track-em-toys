@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { ManufacturerStatsItem } from '@/lib/zod-schemas';
 
@@ -7,6 +7,8 @@ interface ManufacturerTableProps {
 }
 
 export function ManufacturerTable({ manufacturers }: ManufacturerTableProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="rounded-md border">
       <Table aria-label="Manufacturers list">
@@ -20,16 +22,14 @@ export function ManufacturerTable({ manufacturers }: ManufacturerTableProps) {
         </TableHeader>
         <TableBody>
           {manufacturers.map((m) => (
-            <TableRow key={m.slug}>
-              <TableCell>
-                <Link
-                  to="/catalog/manufacturers/$slug"
-                  params={{ slug: m.slug }}
-                  className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-                >
-                  {m.name}
-                </Link>
-              </TableCell>
+            <TableRow
+              key={m.slug}
+              className="cursor-pointer"
+              onClick={() => {
+                void navigate({ to: '/catalog/manufacturers/$slug', params: { slug: m.slug } });
+              }}
+            >
+              <TableCell className="text-sm font-medium text-foreground">{m.name}</TableCell>
               <TableCell className="text-right tabular-nums text-sm">{m.item_count}</TableCell>
               <TableCell className="text-right tabular-nums text-sm">{m.toy_line_count}</TableCell>
               <TableCell className="text-right tabular-nums text-sm">{m.franchise_count}</TableCell>

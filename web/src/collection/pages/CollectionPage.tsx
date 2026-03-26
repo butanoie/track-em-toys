@@ -32,7 +32,6 @@ export function CollectionPage() {
   const { runExport, isExporting } = useCollectionExport();
   const [editTarget, setEditTarget] = useState<CollectionItem | null>(null);
   const [importOpen, setImportOpen] = useState(false);
-  const [catalogItem, setCatalogItem] = useState<{ franchise: string; slug: string } | null>(null);
   const [view, setView] = useLocalStorage<CollectionViewMode>('trackem:collection-view', 'grid');
 
   const page = search.page ?? 1;
@@ -96,9 +95,27 @@ export function CollectionPage() {
     [navigate]
   );
 
-  const handleViewCatalog = useCallback((franchise: string, slug: string) => {
-    setCatalogItem({ franchise, slug });
-  }, []);
+  const handleViewCatalog = useCallback(
+    (franchise: string, slug: string) => {
+      void navigate({
+        to: '/collection',
+        search: (prev) => ({ ...prev, selected: slug, selected_franchise: franchise }),
+      });
+    },
+    [navigate]
+  );
+
+  const closeCatalogItem = useCallback(() => {
+    void navigate({
+      to: '/collection',
+      search: (prev) => {
+        const next = { ...prev };
+        delete (next as Record<string, unknown>).selected;
+        delete (next as Record<string, unknown>).selected_franchise;
+        return next;
+      },
+    });
+  }, [navigate]);
 
   const showEmptyState =
     !isPending && data && data.total_count === 0 && !search.franchise && !search.condition && !search.search;
@@ -221,9 +238,9 @@ export function CollectionPage() {
       />
 
       <ItemDetailSheet
-        franchise={catalogItem?.franchise ?? ''}
-        itemSlug={catalogItem?.slug}
-        onClose={() => setCatalogItem(null)}
+        franchise={search.selected_franchise ?? ''}
+        itemSlug={search.selected}
+        onClose={closeCatalogItem}
       />
     </div>
   );

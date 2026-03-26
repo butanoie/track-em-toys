@@ -57,3 +57,4 @@ web/e2e/.auth/*.json
 
 # Skill evaluation workspaces (generated test outputs, not part of the skill)
 .claude/skills/*-workspace/
+.playwright-mcp/console-2026-03-25T20-26-24-959Z.log

@@ -20,8 +20,9 @@ vi.mock('@/catalog/components/CharacterRelationships', () => ({
   CharacterRelationships: () => null,
 }));
 
+const mockCollectionCheckData = vi.fn();
 vi.mock('@/collection/hooks/useCollectionCheck', () => ({
-  useCollectionCheck: () => ({ data: undefined }),
+  useCollectionCheck: () => ({ data: mockCollectionCheckData() }),
 }));
 
 vi.mock('@/collection/hooks/useCollectionMutations', () => ({
@@ -62,6 +63,7 @@ describe('ItemDetailSheet', () => {
     Object.assign(navigator, { clipboard: { writeText: vi.fn().mockResolvedValue(undefined) } });
     mockUseAuth.mockReturnValue({ user: { id: 'u-1', role: 'user' }, isAuthenticated: true, isLoading: false });
     mockUseCharacterDetail.mockReturnValue({ data: undefined, isPending: false, isError: false });
+    mockCollectionCheckData.mockReturnValue(undefined);
   });
 
   it('renders no dialog when itemSlug is undefined', () => {
@@ -82,12 +84,11 @@ describe('ItemDetailSheet', () => {
     expect(screen.getByText('Failed to load Item details.')).toBeInTheDocument();
   });
 
-  it('renders item name in sheet title when data loads', () => {
+  it('renders item name as title and character name as subtitle when data loads', () => {
     mockUseItemDetail.mockReturnValue({ data: mockCatalogItemDetail, isPending: false, isError: false });
     render(<ItemDetailSheet franchise="transformers" itemSlug="optimus-prime" onClose={vi.fn()} />);
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveAttribute('aria-label', 'Item detail');
-    // Item name renders in the sheet (may appear multiple times if character shares the name)
     expect(screen.getAllByText('Optimus Prime').length).toBeGreaterThanOrEqual(1);
   });
 
@@ -125,5 +126,39 @@ describe('ItemDetailSheet', () => {
     mockUseItemDetail.mockReturnValue({ data: mockCatalogItemDetail, isPending: false, isError: false });
     render(<ItemDetailSheet franchise="transformers" itemSlug="optimus-prime" onClose={vi.fn()} />);
     expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
+  });
+
+  it('renders data_quality badge in header tags', () => {
+    mockUseItemDetail.mockReturnValue({ data: mockCatalogItemDetail, isPending: false, isError: false });
+    render(<ItemDetailSheet franchise="transformers" itemSlug="optimus-prime" onClose={vi.fn()} />);
+    expect(screen.getByText('Verified')).toBeInTheDocument();
+  });
+
+  it('renders "Third Party" badge when is_third_party is true', () => {
+    const data = { ...mockCatalogItemDetail, is_third_party: true };
+    mockUseItemDetail.mockReturnValue({ data, isPending: false, isError: false });
+    render(<ItemDetailSheet franchise="transformers" itemSlug="optimus-prime" onClose={vi.fn()} />);
+    expect(screen.getByText('Third Party')).toBeInTheDocument();
+  });
+
+  it('does not render "Third Party" badge when false', () => {
+    mockUseItemDetail.mockReturnValue({ data: mockCatalogItemDetail, isPending: false, isError: false });
+    render(<ItemDetailSheet franchise="transformers" itemSlug="optimus-prime" onClose={vi.fn()} />);
+    expect(screen.queryByText('Third Party')).not.toBeInTheDocument();
+  });
+
+  it('renders "In Collection" badge when item is in collection', () => {
+    mockUseItemDetail.mockReturnValue({ data: mockCatalogItemDetail, isPending: false, isError: false });
+    mockCollectionCheckData.mockReturnValue({
+      items: { [mockCatalogItemDetail.id]: { count: 3, collection_ids: ['c-1', 'c-2', 'c-3'] } },
+    });
+    render(<ItemDetailSheet franchise="transformers" itemSlug="optimus-prime" onClose={vi.fn()} />);
+    expect(screen.getByText('In Collection (3)')).toBeInTheDocument();
+  });
+
+  it('does not render "In Collection" badge when not in collection', () => {
+    mockUseItemDetail.mockReturnValue({ data: mockCatalogItemDetail, isPending: false, isError: false });
+    render(<ItemDetailSheet franchise="transformers" itemSlug="optimus-prime" onClose={vi.fn()} />);
+    expect(screen.queryByText(/In Collection/)).not.toBeInTheDocument();
   });
 });

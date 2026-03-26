@@ -9,44 +9,39 @@ interface CharacterDetailContentProps {
   data: CharacterDetail;
   relatedItems?: CatalogItem[];
   relatedItemsCount?: number;
+  hideTags?: boolean;
 }
 
-export function CharacterDetailContent({ data, relatedItems, relatedItemsCount }: CharacterDetailContentProps) {
+export function CharacterDetailContent({ data, relatedItems, relatedItemsCount, hideTags }: CharacterDetailContentProps) {
   const franchise = data.franchise.slug;
 
   return (
     <>
-      <dl className="space-y-3">
-        <DetailField label="Franchise" value={data.franchise.name} />
-        {data.faction && <DetailField label="Faction" value={data.faction.name} />}
-        <DetailField label="Continuity" value={data.continuity_family.name} />
-        <DetailField label="Character Type" value={data.character_type} />
-        <DetailField label="Alt Mode" value={data.alt_mode} />
-
-        {data.is_combined_form && (
-          <div>
+      {!hideTags && (
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          <Badge variant="secondary">{data.franchise.name}</Badge>
+          <Badge variant="secondary">{data.continuity_family.name}</Badge>
+          {data.is_combined_form && (
             <Badge
               variant="outline"
               className="border-orange-300 text-orange-700 dark:border-orange-700 dark:text-orange-300"
             >
               Combined Form
             </Badge>
-          </div>
-        )}
-      </dl>
-
-      {data.sub_groups.length > 0 && (
-        <section className="mt-6">
-          <h3 className="text-sm font-semibold text-foreground mb-2">Sub-Groups</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {data.sub_groups.map((sg) => (
-              <Badge key={sg.slug} variant="secondary">
-                {sg.name}
-              </Badge>
-            ))}
-          </div>
-        </section>
+          )}
+        </div>
       )}
+
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
+        <DetailField label="Faction" value={data.faction?.name} />
+        <DetailField label="Character Type" value={data.character_type} />
+
+        <DetailField
+          label="Sub-Groups"
+          value={data.sub_groups.length > 0 ? data.sub_groups.map((sg) => sg.name).join(', ') : undefined}
+        />
+        <DetailField label="Alt Mode" value={data.alt_mode} />
+      </dl>
 
       <CharacterRelationships franchise={franchise} characterSlug={data.slug} />
 
@@ -58,7 +53,7 @@ export function CharacterDetailContent({ data, relatedItems, relatedItemsCount }
       {relatedItems && relatedItems.length > 0 && (
         <section className="mt-6">
           <h3 className="text-sm font-semibold text-foreground mb-2">Related Items</h3>
-          <ul className="space-y-1.5">
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-1.5">
             {relatedItems.map((item) => (
               <li key={item.id}>
                 <Link

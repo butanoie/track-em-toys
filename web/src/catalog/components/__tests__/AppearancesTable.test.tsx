@@ -27,14 +27,19 @@ describe('AppearancesTable', () => {
     expect(screen.getByText('1984–1985')).toBeInTheDocument();
   });
 
-  it('formats open-ended start year as "1984–"', () => {
+  it('formats start-only year without hyphen', () => {
     render(<AppearancesTable appearances={[{ ...mockAppearance, year_end: null }]} />);
-    expect(screen.getByText('1984–')).toBeInTheDocument();
+    expect(screen.getByText('1984')).toBeInTheDocument();
   });
 
-  it('formats open-ended end year as "–1985"', () => {
+  it('formats end-only year without hyphen', () => {
     render(<AppearancesTable appearances={[{ ...mockAppearance, year_start: null }]} />);
-    expect(screen.getByText('–1985')).toBeInTheDocument();
+    expect(screen.getByText('1985')).toBeInTheDocument();
+  });
+
+  it('formats same start and end year as single year', () => {
+    render(<AppearancesTable appearances={[{ ...mockAppearance, year_start: 1986, year_end: 1986 }]} />);
+    expect(screen.getByText('1986')).toBeInTheDocument();
   });
 
   it('formats null/null years as "—"', () => {
