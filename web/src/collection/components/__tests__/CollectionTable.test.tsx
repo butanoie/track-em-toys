@@ -19,6 +19,7 @@ const mockItem: CollectionItem = {
   thumbnail_url: 'abc/thumb.webp',
   package_condition: 'mint_sealed',
   item_condition: 5,
+  product_code: null,
   notes: 'Great condition box',
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
@@ -48,7 +49,7 @@ describe('CollectionTable', () => {
   it('renders item data in table row', () => {
     render(<CollectionTable items={[mockItem]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
     expect(screen.getByText('Optimus Prime')).toBeInTheDocument();
-    expect(screen.getByText('Transformers')).toBeInTheDocument();
+    expect(screen.getByText(/Transformers/)).toBeInTheDocument();
     expect(screen.getByTitle('Mint Sealed')).toBeInTheDocument();
     expect(screen.getByText('Great condition box')).toBeInTheDocument();
   });

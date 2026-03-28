@@ -29,6 +29,7 @@ export interface MockCollectionItem {
   manufacturer: { slug: string; name: string } | null;
   toy_line: { slug: string; name: string };
   thumbnail_url: string | null;
+  product_code: string | null;
   package_condition: string;
   item_condition: number;
   notes: string | null;
@@ -46,6 +47,7 @@ export function makeCollectionItem(overrides?: Partial<MockCollectionItem>): Moc
     manufacturer: { slug: 'hasbro', name: 'Hasbro' },
     toy_line: { slug: 'legacy', name: 'Legacy' },
     thumbnail_url: null,
+    product_code: null,
     package_condition: 'loose_complete',
     item_condition: 5,
     notes: null,
@@ -80,6 +82,7 @@ export async function mockEmptyCollection(page: Page): Promise<void> {
         unique_items: 0,
         deleted_count: 0,
         by_franchise: [],
+        by_toy_line: [],
         by_package_condition: [],
         by_item_condition: [],
       })
@@ -114,6 +117,7 @@ export class MockCollectionState {
     const packageConditionMap = new Map<string, number>();
     const itemConditionMap = new Map<number, number>();
 
+    const toyLineMap = new Map<string, { slug: string; name: string; count: number }>();
     for (const item of live) {
       const fKey = item.franchise.slug;
       const existing = franchiseMap.get(fKey);
@@ -121,6 +125,13 @@ export class MockCollectionState {
         existing.count++;
       } else {
         franchiseMap.set(fKey, { slug: fKey, name: item.franchise.name, count: 1 });
+      }
+      const tlKey = item.toy_line.slug;
+      const existingTl = toyLineMap.get(tlKey);
+      if (existingTl) {
+        existingTl.count++;
+      } else {
+        toyLineMap.set(tlKey, { slug: tlKey, name: item.toy_line.name, count: 1 });
       }
       packageConditionMap.set(item.package_condition, (packageConditionMap.get(item.package_condition) ?? 0) + 1);
       itemConditionMap.set(item.item_condition, (itemConditionMap.get(item.item_condition) ?? 0) + 1);
@@ -133,6 +144,7 @@ export class MockCollectionState {
       unique_items: uniqueItemIds.size,
       deleted_count: this._deleted.size,
       by_franchise: Array.from(franchiseMap.values()),
+      by_toy_line: Array.from(toyLineMap.values()),
       by_package_condition: Array.from(packageConditionMap.entries()).map(([package_condition, count]) => ({
         package_condition,
         count,

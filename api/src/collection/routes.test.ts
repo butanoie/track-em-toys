@@ -108,6 +108,7 @@ function makeCollectionRow(overrides: Partial<CollectionListRow> = {}): Collecti
     item_id: ITEM_UUID,
     item_name: 'Optimus Prime',
     item_slug: 'optimus-prime',
+    product_code: null,
     franchise_slug: 'transformers',
     franchise_name: 'Transformers',
     manufacturer_slug: 'hasbro',
@@ -469,6 +470,7 @@ describe('collection routes', () => {
         unique_items: 3,
         deleted_count: 0,
         by_franchise: [{ slug: 'transformers', name: 'Transformers', count: 5 }],
+        by_toy_line: [{ slug: 'generations', name: 'Generations', count: 5 }],
         by_package_condition: [
           { package_condition: 'mint_sealed', count: 3 },
           { package_condition: 'unknown', count: 2 },
@@ -501,6 +503,7 @@ describe('collection routes', () => {
         unique_items: 0,
         deleted_count: 0,
         by_franchise: [],
+        by_toy_line: [],
         by_package_condition: [],
         by_item_condition: [],
       });

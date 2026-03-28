@@ -17,6 +17,7 @@ import {
 
 export interface CollectionFilters {
   franchise?: string;
+  toy_line?: string;
   package_condition?: PackageCondition;
   item_condition_min?: number;
   search?: string;
@@ -27,6 +28,7 @@ export interface CollectionFilters {
 export async function listCollectionItems(filters?: CollectionFilters): Promise<CollectionItemList> {
   const params = new URLSearchParams();
   if (filters?.franchise) params.set('franchise', filters.franchise);
+  if (filters?.toy_line) params.set('toy_line', filters.toy_line);
   if (filters?.package_condition) params.set('package_condition', filters.package_condition);
   if (filters?.item_condition_min !== undefined) params.set('item_condition_min', String(filters.item_condition_min));
   if (filters?.search) params.set('search', filters.search);

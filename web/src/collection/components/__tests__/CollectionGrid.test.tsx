@@ -18,6 +18,7 @@ const mockItem: CollectionItem = {
   thumbnail_url: null,
   package_condition: 'mint_sealed',
   item_condition: 5,
+  product_code: null,
   notes: null,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),

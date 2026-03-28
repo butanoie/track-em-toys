@@ -11,6 +11,7 @@ export interface CollectionListRow {
   item_id: string;
   item_name: string;
   item_slug: string;
+  product_code: string | null;
   franchise_slug: string;
   franchise_name: string;
   manufacturer_slug: string | null;
@@ -42,11 +43,18 @@ export interface ItemConditionStat {
   count: number;
 }
 
+export interface ToyLineStat {
+  slug: string;
+  name: string;
+  count: number;
+}
+
 export interface CollectionStats {
   total_copies: number;
   unique_items: number;
   deleted_count: number;
   by_franchise: FranchiseStat[];
+  by_toy_line: ToyLineStat[];
   by_package_condition: PackageConditionStat[];
   by_item_condition: ItemConditionStat[];
 }
@@ -71,6 +79,7 @@ const COLLECTION_ITEM_SELECT = `
         i.id         AS item_id,
         i.name       AS item_name,
         i.slug       AS item_slug,
+        i.product_code,
         fr.slug      AS franchise_slug,
         fr.name      AS franchise_name,
         mfr.slug     AS manufacturer_slug,
@@ -100,6 +109,7 @@ const COLLECTION_ITEM_SELECT = `
 
 export interface ListCollectionParams {
   franchise: string | null;
+  toy_line: string | null;
   package_condition: string | null;
   item_condition_min: number | null;
   search: string | null;
@@ -118,30 +128,33 @@ export async function listCollectionItems(
   client: PoolClient,
   params: ListCollectionParams
 ): Promise<{ rows: CollectionListRow[]; totalCount: number }> {
-  const { franchise, package_condition, item_condition_min, search, limit, offset } = params;
+  const { franchise, toy_line, package_condition, item_condition_min, search, limit, offset } = params;
 
   const dataQuery = `
     ${COLLECTION_ITEM_SELECT}
     WHERE ci.deleted_at IS NULL
       AND ($1::text IS NULL OR fr.slug = $1)
-      AND ($2::text IS NULL OR ci.package_condition = $2::package_condition)
-      AND ($3::int IS NULL OR ci.item_condition >= $3)
-      AND ($4::text IS NULL OR i.search_vector @@ websearch_to_tsquery('simple', $4))
+      AND ($2::text IS NULL OR tl.slug = $2)
+      AND ($3::text IS NULL OR ci.package_condition = $3::package_condition)
+      AND ($4::int IS NULL OR ci.item_condition >= $4)
+      AND ($5::text IS NULL OR i.search_vector @@ websearch_to_tsquery('simple', $5))
     ORDER BY i.name ASC, ci.id ASC
-    LIMIT $5 OFFSET $6`;
+    LIMIT $6 OFFSET $7`;
 
   const countQuery = `
     SELECT COUNT(*)::int AS total_count
     FROM collection_items ci
     JOIN items i ON i.id = ci.item_id
     JOIN franchises fr ON fr.id = i.franchise_id
+    JOIN toy_lines tl ON tl.id = i.toy_line_id
     WHERE ci.deleted_at IS NULL
       AND ($1::text IS NULL OR fr.slug = $1)
-      AND ($2::text IS NULL OR ci.package_condition = $2::package_condition)
-      AND ($3::int IS NULL OR ci.item_condition >= $3)
-      AND ($4::text IS NULL OR i.search_vector @@ websearch_to_tsquery('simple', $4))`;
+      AND ($2::text IS NULL OR tl.slug = $2)
+      AND ($3::text IS NULL OR ci.package_condition = $3::package_condition)
+      AND ($4::int IS NULL OR ci.item_condition >= $4)
+      AND ($5::text IS NULL OR i.search_vector @@ websearch_to_tsquery('simple', $5))`;
 
-  const filterParams = [franchise, package_condition, item_condition_min, search];
+  const filterParams = [franchise, toy_line, package_condition, item_condition_min, search];
   const dataParams = [...filterParams, limit, offset];
 
   const dataResult = await client.query<CollectionListRow>(dataQuery, dataParams);
@@ -244,6 +257,7 @@ interface StatsRaw {
   unique_items: number;
   deleted_count: number;
   by_franchise: FranchiseStat[] | null;
+  by_toy_line: ToyLineStat[] | null;
   by_package_condition: PackageConditionStat[] | null;
   by_item_condition: ItemConditionStat[] | null;
 }
@@ -257,7 +271,7 @@ interface StatsRaw {
 export async function getCollectionStats(client: PoolClient): Promise<CollectionStats> {
   const { rows } = await client.query<StatsRaw>(`
     WITH active AS (
-      SELECT ci.item_id, ci.package_condition, ci.item_condition, i.franchise_id
+      SELECT ci.item_id, ci.package_condition, ci.item_condition, i.franchise_id, i.toy_line_id
       FROM collection_items ci
       JOIN items i ON i.id = ci.item_id
       WHERE ci.deleted_at IS NULL
@@ -277,6 +291,17 @@ export async function getCollectionStats(client: PoolClient): Promise<Collection
          ) f),
         '[]'::json
       ) AS by_franchise,
+      COALESCE(
+        (SELECT json_agg(row_to_json(tl))
+         FROM (
+           SELECT t.slug, t.name, COUNT(*)::int AS count
+           FROM active a
+           JOIN toy_lines t ON t.id = a.toy_line_id
+           GROUP BY t.slug, t.name
+           ORDER BY count DESC, t.name ASC
+         ) tl),
+        '[]'::json
+      ) AS by_toy_line,
       COALESCE(
         (SELECT json_agg(row_to_json(c))
          FROM (
@@ -305,6 +330,7 @@ export async function getCollectionStats(client: PoolClient): Promise<Collection
     unique_items: raw?.unique_items ?? 0,
     deleted_count: raw?.deleted_count ?? 0,
     by_franchise: raw?.by_franchise ?? [],
+    by_toy_line: raw?.by_toy_line ?? [],
     by_package_condition: raw?.by_package_condition ?? [],
     by_item_condition: raw?.by_item_condition ?? [],
   };

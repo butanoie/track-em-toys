@@ -460,6 +460,7 @@ export const CollectionItemSchema = z.object({
   item_id: z.string().uuid(),
   item_name: z.string(),
   item_slug: z.string(),
+  product_code: z.string().nullable(),
   franchise: SlugNameRefSchema,
   manufacturer: SlugNameRefSchema.nullable(),
   toy_line: SlugNameRefSchema,
@@ -484,6 +485,12 @@ const CollectionFranchiseStatSchema = z.object({
   count: z.number().int(),
 });
 
+const CollectionToyLineStatSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  count: z.number().int(),
+});
+
 const PackageConditionStatSchema = z.object({
   package_condition: PackageConditionSchema,
   count: z.number().int(),
@@ -499,6 +506,7 @@ export const CollectionStatsSchema = z.object({
   unique_items: z.number().int(),
   deleted_count: z.number().int(),
   by_franchise: z.array(CollectionFranchiseStatSchema),
+  by_toy_line: z.array(CollectionToyLineStatSchema),
   by_package_condition: z.array(PackageConditionStatSchema),
   by_item_condition: z.array(ItemConditionStatSchema),
 });

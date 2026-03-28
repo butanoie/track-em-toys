@@ -32,6 +32,7 @@ export const collectionItemSchema = {
     'item_id',
     'item_name',
     'item_slug',
+    'product_code',
     'franchise',
     'manufacturer',
     'toy_line',
@@ -48,6 +49,7 @@ export const collectionItemSchema = {
     item_id: { type: 'string' },
     item_name: { type: 'string' },
     item_slug: { type: 'string' },
+    product_code: { type: ['string', 'null'] },
     franchise: slugNameRef,
     manufacturer: nullableSlugName,
     toy_line: slugNameRef,
@@ -80,6 +82,7 @@ export const listCollectionSchema = {
     additionalProperties: false,
     properties: {
       franchise: { type: 'string', maxLength: 120 },
+      toy_line: { type: 'string', maxLength: 120 },
       package_condition: { type: 'string', enum: PACKAGE_CONDITION_ENUM },
       item_condition_min: { type: 'integer', minimum: 1, maximum: 10 },
       search: { type: 'string', maxLength: 200 },
@@ -135,6 +138,7 @@ export const collectionStatsSchema = {
         'unique_items',
         'deleted_count',
         'by_franchise',
+        'by_toy_line',
         'by_package_condition',
         'by_item_condition',
       ],
@@ -144,6 +148,19 @@ export const collectionStatsSchema = {
         unique_items: { type: 'integer' },
         deleted_count: { type: 'integer' },
         by_franchise: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['slug', 'name', 'count'],
+            additionalProperties: false,
+            properties: {
+              slug: { type: 'string' },
+              name: { type: 'string' },
+              count: { type: 'integer' },
+            },
+          },
+        },
+        by_toy_line: {
           type: 'array',
           items: {
             type: 'object',

@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 const collectionSearchSchema = z.object({
   franchise: z.string().optional().catch(undefined),
+  toy_line: z.string().optional().catch(undefined),
   package_condition: z.enum(PackageConditionSchema.options).optional().catch(undefined),
   item_condition_min: z.coerce.number().int().min(1).max(10).optional().catch(undefined),
   search: z.string().optional().catch(undefined),

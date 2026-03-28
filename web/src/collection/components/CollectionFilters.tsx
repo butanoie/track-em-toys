@@ -8,11 +8,13 @@ import type { PackageCondition, CollectionStats } from '@/lib/zod-schemas';
 
 interface CollectionFiltersProps {
   franchise: string | undefined;
+  toyLine: string | undefined;
   packageCondition: PackageCondition | undefined;
   itemConditionMin: number | undefined;
   search: string | undefined;
   stats: CollectionStats | undefined;
   onFranchiseChange: (value: string | undefined) => void;
+  onToyLineChange: (value: string | undefined) => void;
   onPackageConditionChange: (value: PackageCondition | undefined) => void;
   onItemConditionMinChange: (value: number | undefined) => void;
   onSearchChange: (value: string | undefined) => void;
@@ -29,11 +31,13 @@ const GRADE_PRESETS: Array<{ label: string; value: string }> = [
 
 export function CollectionFilters({
   franchise,
+  toyLine,
   packageCondition,
   itemConditionMin,
   search,
   stats,
   onFranchiseChange,
+  onToyLineChange,
   onPackageConditionChange,
   onItemConditionMinChange,
   onSearchChange,
@@ -58,12 +62,24 @@ export function CollectionFilters({
 
   const hasActiveFilters =
     franchise !== undefined ||
+    toyLine !== undefined ||
     packageCondition !== undefined ||
     itemConditionMin !== undefined ||
     (search !== undefined && search !== '');
 
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
+      <div className="relative flex-1 min-w-[200px] max-w-lg">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search your collection..."
+          className="pl-9"
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
+          aria-label="Search collection"
+        />
+      </div>
+
       <Select value={franchise ?? '__all__'} onValueChange={(v) => onFranchiseChange(v === '__all__' ? undefined : v)}>
         <SelectTrigger className="w-[180px]" aria-label="Filter by franchise">
           <SelectValue placeholder="All Franchises" />
@@ -73,6 +89,20 @@ export function CollectionFilters({
           {stats?.by_franchise.map((f) => (
             <SelectItem key={f.slug} value={f.slug}>
               {f.name} ({f.count})
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select value={toyLine ?? '__all__'} onValueChange={(v) => onToyLineChange(v === '__all__' ? undefined : v)}>
+        <SelectTrigger className="w-[180px]" aria-label="Filter by toy line">
+          <SelectValue placeholder="All Toy Lines" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__all__">All Toy Lines</SelectItem>
+          {stats?.by_toy_line.map((tl) => (
+            <SelectItem key={tl.slug} value={tl.slug}>
+              {tl.name} ({tl.count})
             </SelectItem>
           ))}
         </SelectContent>
@@ -111,23 +141,13 @@ export function CollectionFilters({
         </SelectContent>
       </Select>
 
-      <div className="relative flex-1 min-w-[200px] max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search your collection..."
-          className="pl-9"
-          value={localSearch}
-          onChange={(e) => setLocalSearch(e.target.value)}
-          aria-label="Search collection"
-        />
-      </div>
-
       {hasActiveFilters && (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => {
             onFranchiseChange(undefined);
+            onToyLineChange(undefined);
             onPackageConditionChange(undefined);
             onItemConditionMinChange(undefined);
             onSearchChange(undefined);

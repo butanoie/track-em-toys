@@ -65,6 +65,7 @@ function formatCollectionItem(row: CollectionListRow): Record<string, unknown> {
     item_id: row.item_id,
     item_name: row.item_name,
     item_slug: row.item_slug,
+    product_code: row.product_code,
     franchise: { slug: row.franchise_slug, name: row.franchise_name },
     manufacturer: row.manufacturer_slug ? { slug: row.manufacturer_slug, name: row.manufacturer_name! } : null,
     toy_line: { slug: row.toy_line_slug, name: row.toy_line_name },
@@ -87,6 +88,7 @@ interface IdParams {
 
 interface ListQuery {
   franchise?: string;
+  toy_line?: string;
   package_condition?: string;
   item_condition_min?: number;
   search?: string;
@@ -345,6 +347,7 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
       const { rows, totalCount } = await withTransaction(async (client) => {
         return queries.listCollectionItems(client, {
           franchise: request.query.franchise ?? null,
+          toy_line: request.query.toy_line ?? null,
           package_condition: request.query.package_condition ?? null,
           item_condition_min: request.query.item_condition_min ?? null,
           search: request.query.search ?? null,

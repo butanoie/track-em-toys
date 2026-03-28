@@ -1,14 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Trash2 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ConditionSelector } from '@/collection/components/ConditionSelector';
 import { ItemConditionSelector } from '@/collection/components/ItemConditionSelector';
@@ -104,8 +97,9 @@ export function EditCollectionItemDialog({ open, onOpenChange, item, mutations }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Collection Entry</DialogTitle>
-          <DialogDescription>{item?.item_name}</DialogDescription>
+          <DialogTitle>
+            Edit Collection - {item?.product_code ? `${item.item_name} [${item.product_code}]` : item?.item_name}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

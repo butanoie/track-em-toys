@@ -42,6 +42,7 @@ const mockStats: CollectionStats = {
   unique_items: 4,
   deleted_count: 0,
   by_franchise: [{ slug: 'transformers', name: 'Transformers', count: 5 }],
+  by_toy_line: [],
   by_package_condition: [{ package_condition: 'mint_sealed', count: 2 }],
   by_item_condition: [],
 };

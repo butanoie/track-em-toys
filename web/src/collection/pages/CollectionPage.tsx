@@ -40,13 +40,14 @@ export function CollectionPage() {
   const filters: CollectionFiltersType = useMemo(
     () => ({
       franchise: search.franchise,
+      toy_line: search.toy_line,
       package_condition: search.package_condition,
       item_condition_min: search.item_condition_min,
       search: search.search,
       page,
       limit,
     }),
-    [search.franchise, search.package_condition, search.item_condition_min, search.search, page, limit]
+    [search.franchise, search.toy_line, search.package_condition, search.item_condition_min, search.search, page, limit]
   );
 
   const { data, isPending } = useCollectionItems(filters);
@@ -123,6 +124,7 @@ export function CollectionPage() {
     data &&
     data.total_count === 0 &&
     !search.franchise &&
+    !search.toy_line &&
     !search.package_condition &&
     !search.item_condition_min &&
     !search.search;
@@ -194,11 +196,13 @@ export function CollectionPage() {
 
             <CollectionFilters
               franchise={search.franchise}
+              toyLine={search.toy_line}
               packageCondition={search.package_condition}
               itemConditionMin={search.item_condition_min}
               search={search.search}
               stats={stats}
               onFranchiseChange={(v) => updateSearch({ franchise: v })}
+              onToyLineChange={(v) => updateSearch({ toy_line: v })}
               onPackageConditionChange={(v) => updateSearch({ package_condition: v })}
               onItemConditionMinChange={(v) => updateSearch({ item_condition_min: v })}
               onSearchChange={(v) => updateSearch({ search: v })}

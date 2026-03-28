@@ -19,6 +19,7 @@ const mockItem: CollectionItem = {
   thumbnail_url: 'abc/thumb.webp',
   package_condition: 'mint_sealed',
   item_condition: 5,
+  product_code: null,
   notes: 'Found at a garage sale',
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
