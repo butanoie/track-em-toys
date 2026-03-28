@@ -82,6 +82,7 @@ export const itemListItem = {
     'year_released',
     'is_third_party',
     'data_quality',
+    'product_code',
   ],
   additionalProperties: false,
   properties: {
@@ -97,6 +98,7 @@ export const itemListItem = {
     year_released: { type: ['integer', 'null'] },
     is_third_party: { type: 'boolean' },
     data_quality: { type: 'string', enum: ['needs_review', 'verified', 'community_verified'] },
+    product_code: { type: ['string', 'null'] },
   },
 } as const;
 

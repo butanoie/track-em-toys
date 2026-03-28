@@ -94,6 +94,7 @@ describe('manufacturer routes', () => {
       thumbnail_url: null,
       size_class: 'Leader',
       year_released: 2019,
+      product_code: 'MP-44',
       is_third_party: false,
       data_quality: 'verified',
     };

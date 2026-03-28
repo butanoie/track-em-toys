@@ -9,6 +9,7 @@ interface ItemListItem {
   name: string;
   manufacturer: { name: string } | null;
   toy_line: { name: string } | null;
+  product_code?: string | null;
   thumbnail_url?: string | null;
   size_class: string | null;
   year_released: number | null;
@@ -110,7 +111,9 @@ export function ItemList({ items, selectedSlug, onSelect, totalCount, pagination
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {item.product_code ? `${item.name} [${item.product_code}]` : item.name}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {item.manufacturer?.name ?? 'Unknown'} · {item.toy_line?.name ?? ''}
                     </p>

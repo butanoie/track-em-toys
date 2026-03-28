@@ -24,6 +24,7 @@ const mockSearchResults = {
       thumbnail_url: null,
       size_class: null,
       year_released: null,
+      product_code: null,
       is_third_party: null,
       data_quality: null,
     },
@@ -40,6 +41,7 @@ const mockSearchResults = {
       thumbnail_url: null,
       size_class: 'Leader',
       year_released: 2019,
+      product_code: 'MP-44',
       is_third_party: false,
       data_quality: 'verified',
     },
@@ -196,7 +198,7 @@ test.describe('Catalog Search', () => {
     // Results are in a single unified list
     const resultsList = page.getByRole('listbox', { name: 'Search results' });
     await expect(resultsList.getByText('Optimus Prime', { exact: true })).toBeVisible();
-    await expect(resultsList.getByText('MP-44 Optimus Prime', { exact: true })).toBeVisible();
+    await expect(resultsList.getByText('MP-44 Optimus Prime [MP-44]', { exact: true })).toBeVisible();
   });
 
   test('Given search results, When clicking an item, Then item detail sheet opens', async ({ page }) => {

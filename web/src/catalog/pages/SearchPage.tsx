@@ -147,7 +147,7 @@ export function SearchPage() {
     }
   }, []);
 
-  // Derive selected result for the detail panel
+  // Derive selected result for the detail sheet
   const selectedResult = data?.data.find((r) => r.slug === selectedSlug);
 
   // Empty state: no query

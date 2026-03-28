@@ -32,6 +32,7 @@ describe('item routes (franchise-scoped)', () => {
     thumbnail_url: null,
     size_class: 'Leader',
     year_released: 2023,
+    product_code: 'FT-44',
     is_third_party: true,
     data_quality: 'verified',
   };

@@ -17,6 +17,7 @@ const searchResultItem = {
     'year_released',
     'is_third_party',
     'data_quality',
+    'product_code',
   ],
   additionalProperties: false,
   properties: {
@@ -34,6 +35,7 @@ const searchResultItem = {
     year_released: { type: ['integer', 'null'] },
     is_third_party: { oneOf: [{ type: 'boolean' }, { type: 'null' }] },
     data_quality: { type: ['string', 'null'] },
+    product_code: { type: ['string', 'null'] },
   },
 } as const;
 

@@ -106,6 +106,7 @@ const mockRelatedItems = {
       thumbnail_url: null,
       size_class: 'Leader',
       year_released: 2019,
+      product_code: null,
       is_third_party: false,
       data_quality: 'verified',
     },
@@ -279,9 +280,9 @@ test.describe('Item Detail Page', () => {
     await page.goto('/catalog/transformers/items/legacy-bulkhead');
 
     const main = page.getByRole('main');
-    await expect(page.getByRole('heading', { name: 'Legacy Bulkhead' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Legacy Bulkhead [F3055]' })).toBeVisible();
     await expect(main.getByText('Voyager')).toBeVisible();
-    await expect(main.getByText('F3055')).toBeVisible();
+    await expect(main.getByRole('definition').filter({ hasText: 'F3055' })).toBeVisible();
   });
 
   test('Given item with photos, When on item page, Then photo gallery is displayed', async ({ page }) => {

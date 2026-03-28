@@ -33,7 +33,7 @@ export function ItemDetailSheet({ franchise, itemSlug, onClose }: ItemDetailShee
   const primaryCharacter = data?.characters.find((c) => c.is_primary) ?? data?.characters[0];
   const { data: characterData } = useCharacterDetail(franchise, primaryCharacter?.slug);
 
-  const sheetTitle = data?.name;
+  const sheetTitle = data ? (data.product_code ? `${data.name} [${data.product_code}]` : data.name) : undefined;
   const sheetSubtitle = primaryCharacter?.name;
 
   const itemIds = useMemo(() => (data?.id ? [data.id] : []), [data?.id]);

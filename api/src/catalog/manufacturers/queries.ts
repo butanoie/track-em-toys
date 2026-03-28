@@ -181,6 +181,7 @@ export async function listManufacturerItems(
   const dataQuery = `
     SELECT i.id, i.name, i.slug,
            i.size_class, i.year_released, i.is_third_party, i.data_quality,
+           i.product_code,
            fr.slug AS franchise_slug, fr.name AS franchise_name,
            mfr.slug AS manufacturer_slug, mfr.name AS manufacturer_name,
            tl.slug AS toy_line_slug, tl.name AS toy_line_name,

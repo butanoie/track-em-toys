@@ -35,6 +35,7 @@ describe('search routes', () => {
     year_released: null,
     is_third_party: null,
     data_quality: null,
+    product_code: null,
   };
 
   const itemSearchResult = {
@@ -56,6 +57,7 @@ describe('search routes', () => {
     year_released: 2019,
     is_third_party: false,
     data_quality: 'verified',
+    product_code: 'MP-44',
   };
 
   describe('GET /catalog/search', () => {

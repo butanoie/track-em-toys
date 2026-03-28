@@ -5,6 +5,7 @@ import { Route } from '@/routes/_authenticated/catalog/$franchise/items/$slug';
 import { AppHeader } from '@/components/AppHeader';
 import { MainNav } from '@/components/MainNav';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useItemDetail } from '@/catalog/hooks/useItemDetail';
@@ -36,6 +37,7 @@ export function ItemDetailPage() {
   const itemIds = useMemo(() => (data?.id ? [data.id] : []), [data?.id]);
   const { data: checkData } = useCollectionCheck(itemIds);
   const checkEntry = data?.id ? checkData?.items[data.id] : undefined;
+  const collectionCount = checkEntry?.count ?? 0;
   const collectionMutations = useCollectionMutations();
 
   if (error instanceof ApiError && error.status === 404) {
@@ -116,7 +118,7 @@ export function ItemDetailPage() {
               <ChevronRight className="h-3.5 w-3.5" />
             </li>
             <li className="text-foreground font-medium" aria-current="page">
-              {data?.name ?? itemSlug}
+              {data ? (data.product_code ? `${data.name} [${data.product_code}]` : data.name) : itemSlug}
             </li>
           </ol>
         </nav>
@@ -126,7 +128,9 @@ export function ItemDetailPage() {
         {data && (
           <>
             <div className="flex items-start justify-between gap-2 mb-4">
-              <h1 className="text-2xl font-semibold text-foreground">{data.name}</h1>
+              <h1 className="text-2xl font-semibold text-foreground">
+                {data.product_code ? `${data.name} [${data.product_code}]` : data.name}
+              </h1>
               <div className="flex items-center gap-1 flex-shrink-0">
                 {isCurator && (
                   <Button
@@ -142,13 +146,22 @@ export function ItemDetailPage() {
               </div>
             </div>
 
-            <div className="mb-6">
+            <div className="flex items-center gap-3 mb-6">
+              {collectionCount > 0 && (
+                <Badge
+                  variant="outline"
+                  className="border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400"
+                >
+                  In Collection ({collectionCount})
+                </Badge>
+              )}
               <AddToCollectionButton
                 item={{ id: data.id, name: data.name }}
                 checkResult={checkEntry}
                 mutations={collectionMutations}
               />
             </div>
+
 
             <Separator className="mb-6" />
 
