@@ -41,6 +41,7 @@ export interface CliOptions {
   format: 'webp' | 'jpeg';
   classes: string[] | null;
   noClean: boolean;
+  testSet: boolean;
 }
 
 export interface ClassBalance {

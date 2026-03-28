@@ -23,6 +23,8 @@
 - Both tiers are merged per item during training data preparation
 - `_unmatched/` directories are skipped at any level
 - User collection photos (private, RLS-protected) are NOT used for training
+- Three tiers in seed-images: `catalog/` (API-importable), `training-only/` (ML training only), `training-test/` (held-out evaluation set — excluded from training, never augmented)
+- `prepare-data` scans `catalog/` + `training-only/`; `prepare-test-data` (or `--test-set` flag) scans only `training-test/`
 
 ## Phase 4.0 Pipeline (planned)
 
@@ -158,6 +160,7 @@ Each subdirectory name becomes a class label in the trained model.
 cd ml && npm install           # Install dependencies (sharp, tsx, typescript)
 cd ml && npm run prepare-data -- --manifest <path>     # Prepare from API manifest
 cd ml && npm run prepare-data -- --source-dir <path>   # Prepare from seed-images directory
+cd ml && npm run prepare-test-data -- --source-dir <path> --output <path>  # Prepare held-out test set (no augmentation)
 cd ml && npm test              # Run tests + lint
 cd ml && npm run typecheck     # TypeScript check only
 cd ml && npm run lint          # ESLint only

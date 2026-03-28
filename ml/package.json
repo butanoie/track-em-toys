@@ -8,6 +8,7 @@
   },
   "scripts": {
     "prepare-data": "tsx src/prepare-training-data.ts",
+    "prepare-test-data": "tsx src/prepare-training-data.ts --test-set",
     "test": "vitest run && eslint src/ --max-warnings 0",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",

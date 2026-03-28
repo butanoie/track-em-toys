@@ -3,7 +3,8 @@ import { join, extname } from 'node:path';
 import type { Manifest, ManifestEntry } from './types.js';
 
 const IMAGE_EXTENSIONS = new Set(['.webp', '.jpg', '.jpeg', '.png', '.heic']);
-const TIERS = ['catalog', 'training-only'] as const;
+const TRAINING_TIERS = ['catalog', 'training-only'] as const;
+const TEST_TIERS = ['training-test'] as const;
 const SKIP_DIRS = new Set(['_unmatched', '.DS_Store']);
 
 /**
@@ -13,19 +14,22 @@ const SKIP_DIRS = new Set(['_unmatched', '.DS_Store']);
  * Expected structure:
  *   {sourceDir}/{tier}/{franchise}/{manufacturer}/{item}/{image-files}
  *
- * Tiers "catalog" and "training-only" are merged — images from both tiers for the
- * same franchise/item produce entries in the same label group.
+ * By default, scans "catalog" and "training-only" tiers and merges them.
+ * When `testSet` is true, scans only the "training-test" tier (held-out evaluation data).
  *
  * Directories named "_unmatched" are skipped at any level.
  *
  * @param sourceDir - Root directory (e.g., /Volumes/WD 6TB/track-em-toys/test-images)
+ * @param testSet - If true, scan only the "training-test" tier
  */
-export async function scanSourceDir(sourceDir: string): Promise<Manifest> {
+export async function scanSourceDir(sourceDir: string, testSet = false): Promise<Manifest> {
   const entries: ManifestEntry[] = [];
   const franchises = new Set<string>();
   const items = new Set<string>();
 
-  for (const tier of TIERS) {
+  const tiers = testSet ? TEST_TIERS : TRAINING_TIERS;
+
+  for (const tier of tiers) {
     const tierPath = join(sourceDir, tier);
 
     let franchiseDirs: string[];

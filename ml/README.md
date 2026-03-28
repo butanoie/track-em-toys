@@ -27,7 +27,7 @@ ml/
 
 ## Training Data Preparation
 
-Two mutually exclusive input modes:
+Two mutually exclusive input modes, plus a test set mode:
 
 ```bash
 # From API manifest (exported by POST /catalog/ml-export)
@@ -35,6 +35,9 @@ npm run prepare-data -- --manifest <path>
 
 # From seed-images directory (catalog/ + training-only/ tiers)
 npm run prepare-data -- --source-dir <path>
+
+# Prepare held-out test set (training-test/ tier only, no augmentation)
+npm run prepare-test-data -- --source-dir <path> --output <path>
 ```
 
 ### Seed Images Directory Structure
@@ -51,10 +54,17 @@ npm run prepare-data -- --source-dir <path>
       {manufacturer}/
         {item-slug}/
           image-2.jpeg
+  training-test/                    # Held-out evaluation set (never used for training)
+    {franchise}/
+      {manufacturer}/
+        {item-slug}/
+          image-3.jpeg
   _unmatched/                       # Ignored by tooling
 ```
 
-Both tiers are merged per item during preparation. The output is a flat folder-per-class structure for Create ML:
+`catalog/` and `training-only/` are merged per item during training data preparation. `training-test/` is prepared separately via `--test-set` for unbiased model evaluation with Create ML's `evaluation(on:)` API.
+
+The output is a flat folder-per-class structure for Create ML:
 
 ```
 ML_TRAINING_DATA_PATH/
@@ -72,6 +82,7 @@ ML_TRAINING_DATA_PATH/
 --format webp|jpeg      # Output image format (default: webp)
 --classes <a,b,c>       # Only process specific labels (comma-separated)
 --no-clean              # Skip cleaning class directories before writing
+--test-set              # Scan training-test/ tier only, copy without augmentation
 ```
 
 ## Constraints

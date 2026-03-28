@@ -21,6 +21,11 @@ const testRoot = join(tmpdir(), `ml-scan-test-${randomUUID()}`);
  *       transformers/
  *         mmc/
  *           r-03-bovis/     (2 images — merges with catalog tier)
+ *     training-test/
+ *       transformers/
+ *         mmc/
+ *           r-03-bovis/     (1 image — held-out test set)
+ *           r-04-leo-dux/   (1 image)
  *     _unmatched/
  *       stray-file.jpg
  */
@@ -30,6 +35,8 @@ async function buildTree(): Promise<void> {
     'catalog/transformers/mmc/r-04-leo-dux',
     'catalog/transformers/fanstoys/ft-04-scoria',
     'training-only/transformers/mmc/r-03-bovis',
+    'training-test/transformers/mmc/r-03-bovis',
+    'training-test/transformers/mmc/r-04-leo-dux',
     '_unmatched',
   ];
 
@@ -46,6 +53,8 @@ async function buildTree(): Promise<void> {
     ['catalog/transformers/fanstoys/ft-04-scoria/ft-04-scoria-1.webp', 'img6'],
     ['training-only/transformers/mmc/r-03-bovis/r-03-bovis-4.jpeg', 'img7'],
     ['training-only/transformers/mmc/r-03-bovis/r-03-bovis-5.jpeg', 'img8'],
+    ['training-test/transformers/mmc/r-03-bovis/r-03-bovis-test-1.jpeg', 'img9'],
+    ['training-test/transformers/mmc/r-04-leo-dux/r-04-leo-dux-test-1.png', 'img10'],
     ['_unmatched/stray-file.jpg', 'stray'],
   ];
 
@@ -134,6 +143,35 @@ describe('scanSourceDir', () => {
     await expect(scanSourceDir(emptyDir)).rejects.toThrow('No images found');
 
     await rm(emptyDir, { recursive: true, force: true });
+  });
+
+  it('default mode excludes training-test tier', async () => {
+    const manifest = await scanSourceDir(testRoot);
+
+    const testEntries = manifest.entries.filter((e) => e.photo_path.includes('training-test'));
+    expect(testEntries).toHaveLength(0);
+    expect(manifest.stats.total_photos).toBe(8); // only catalog + training-only
+  });
+
+  it('testSet mode scans only training-test tier', async () => {
+    const manifest = await scanSourceDir(testRoot, true);
+
+    expect(manifest.stats.total_photos).toBe(2);
+    expect(manifest.stats.items).toBe(2);
+    expect(manifest.stats.franchises).toBe(1);
+
+    const labels = new Set(manifest.entries.map((e) => e.label));
+    expect(labels).toEqual(new Set(['transformers/r-03-bovis', 'transformers/r-04-leo-dux']));
+  });
+
+  it('testSet mode does not include catalog or training-only images', async () => {
+    const manifest = await scanSourceDir(testRoot, true);
+
+    for (const entry of manifest.entries) {
+      expect(entry.photo_path).toContain('training-test');
+      expect(entry.photo_path).not.toContain('catalog/');
+      expect(entry.photo_path).not.toContain('training-only/');
+    }
   });
 
   it('handles missing tiers gracefully', async () => {
