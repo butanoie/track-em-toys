@@ -125,7 +125,7 @@ export function ImportResultsManifest({ result, originalItems, onDone }: ImportR
                     {item.franchise_slug} / {item.item_slug}
                   </p>
                 </div>
-                <ConditionBadge condition={item.condition} />
+                <ConditionBadge condition={item.package_condition} />
               </div>
             ))}
           </>

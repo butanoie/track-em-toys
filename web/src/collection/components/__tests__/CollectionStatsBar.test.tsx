@@ -12,7 +12,8 @@ const mockStats: CollectionStats = {
     { slug: 'transformers', name: 'Transformers', count: 32 },
     { slug: 'gi-joe', name: 'G.I. Joe', count: 15 },
   ],
-  by_condition: [{ condition: 'mint_sealed', count: 10 }],
+  by_package_condition: [{ package_condition: 'mint_sealed', count: 10 }],
+  by_item_condition: [],
 };
 
 describe('CollectionStatsBar', () => {

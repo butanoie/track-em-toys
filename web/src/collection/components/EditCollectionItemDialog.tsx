@@ -11,8 +11,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ConditionSelector } from '@/collection/components/ConditionSelector';
+import { ItemConditionSelector } from '@/collection/components/ItemConditionSelector';
 import { NotesField } from '@/collection/components/NotesField';
-import type { CollectionCondition, CollectionItem } from '@/lib/zod-schemas';
+import { DEFAULT_ITEM_CONDITION } from '@/collection/lib/item-condition-config';
+import type { PackageCondition, CollectionItem } from '@/lib/zod-schemas';
 import type { CollectionMutations } from '@/collection/hooks/useCollectionMutations';
 
 interface EditCollectionItemDialogProps {
@@ -23,28 +25,28 @@ interface EditCollectionItemDialogProps {
 }
 
 export function EditCollectionItemDialog({ open, onOpenChange, item, mutations }: EditCollectionItemDialogProps) {
-  const [condition, setCondition] = useState<CollectionCondition>('unknown');
+  const [packageCondition, setPackageCondition] = useState<PackageCondition>('unknown');
+  const [itemCondition, setItemCondition] = useState(DEFAULT_ITEM_CONDITION);
   const [notes, setNotes] = useState('');
-  const [initialCondition, setInitialCondition] = useState<CollectionCondition>('unknown');
-  const [initialNotes, setInitialNotes] = useState('');
 
   // Reset form when the item changes (different item selected) or dialog opens
   useEffect(() => {
     if (item) {
-      setCondition(item.condition);
+      setPackageCondition(item.package_condition);
+      setItemCondition(item.item_condition);
       setNotes(item.notes ?? '');
-      setInitialCondition(item.condition);
-      setInitialNotes(item.notes ?? '');
     }
   }, [item]);
 
   const handleSave = () => {
     if (!item) return;
 
-    const body: { condition?: CollectionCondition; notes?: string | null } = {};
-    if (condition !== initialCondition) body.condition = condition;
+    const body: { package_condition?: PackageCondition; item_condition?: number; notes?: string | null } = {};
+    if (packageCondition !== item.package_condition) body.package_condition = packageCondition;
+    if (itemCondition !== item.item_condition) body.item_condition = itemCondition;
     const trimmedNotes = notes.trim() || null;
-    if (trimmedNotes !== (initialNotes.trim() || null)) body.notes = trimmedNotes;
+    const initialNotes = item.notes?.trim() || null;
+    if (trimmedNotes !== initialNotes) body.notes = trimmedNotes;
 
     if (Object.keys(body).length === 0) {
       onOpenChange(false);
@@ -107,7 +109,8 @@ export function EditCollectionItemDialog({ open, onOpenChange, item, mutations }
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <ConditionSelector value={condition} onChange={setCondition} disabled={isPending} />
+          <ConditionSelector value={packageCondition} onChange={setPackageCondition} disabled={isPending} />
+          <ItemConditionSelector value={itemCondition} onChange={setItemCondition} disabled={isPending} />
           <NotesField id="edit-collection-notes" value={notes} onChange={setNotes} disabled={isPending} />
         </div>
 

@@ -40,12 +40,13 @@ export function CollectionPage() {
   const filters: CollectionFiltersType = useMemo(
     () => ({
       franchise: search.franchise,
-      condition: search.condition,
+      package_condition: search.package_condition,
+      item_condition_min: search.item_condition_min,
       search: search.search,
       page,
       limit,
     }),
-    [search.franchise, search.condition, search.search, page, limit]
+    [search.franchise, search.package_condition, search.item_condition_min, search.search, page, limit]
   );
 
   const { data, isPending } = useCollectionItems(filters);
@@ -118,7 +119,13 @@ export function CollectionPage() {
   }, [navigate]);
 
   const showEmptyState =
-    !isPending && data && data.total_count === 0 && !search.franchise && !search.condition && !search.search;
+    !isPending &&
+    data &&
+    data.total_count === 0 &&
+    !search.franchise &&
+    !search.package_condition &&
+    !search.item_condition_min &&
+    !search.search;
 
   return (
     <div className="min-h-screen bg-background">
@@ -187,11 +194,13 @@ export function CollectionPage() {
 
             <CollectionFilters
               franchise={search.franchise}
-              condition={search.condition}
+              packageCondition={search.package_condition}
+              itemConditionMin={search.item_condition_min}
               search={search.search}
               stats={stats}
               onFranchiseChange={(v) => updateSearch({ franchise: v })}
-              onConditionChange={(v) => updateSearch({ condition: v })}
+              onPackageConditionChange={(v) => updateSearch({ package_condition: v })}
+              onItemConditionMinChange={(v) => updateSearch({ item_condition_min: v })}
               onSearchChange={(v) => updateSearch({ search: v })}
             />
 
@@ -206,9 +215,19 @@ export function CollectionPage() {
             </div>
 
             {view === 'grid' ? (
-              <CollectionGrid items={data?.data ?? []} isLoading={isPending} onEdit={setEditTarget} onViewCatalog={handleViewCatalog} />
+              <CollectionGrid
+                items={data?.data ?? []}
+                isLoading={isPending}
+                onEdit={setEditTarget}
+                onViewCatalog={handleViewCatalog}
+              />
             ) : (
-              <CollectionTable items={data?.data ?? []} isLoading={isPending} onEdit={setEditTarget} onViewCatalog={handleViewCatalog} />
+              <CollectionTable
+                items={data?.data ?? []}
+                isLoading={isPending}
+                onEdit={setEditTarget}
+                onViewCatalog={handleViewCatalog}
+              />
             )}
 
             <Pagination

@@ -31,7 +31,8 @@ const ITEM_BULKHEAD = makeCollectionItem({
   item_name: 'Legacy Bulkhead',
   item_slug: 'legacy-bulkhead',
   franchise: { slug: 'transformers', name: 'Transformers' },
-  condition: 'loose_complete',
+  package_condition: 'loose_complete',
+  item_condition: 5,
 });
 
 const ITEM_SNAKE_EYES = makeCollectionItem({
@@ -39,7 +40,8 @@ const ITEM_SNAKE_EYES = makeCollectionItem({
   item_name: 'Classified Snake Eyes',
   item_slug: 'classified-snake-eyes',
   franchise: { slug: 'gi-joe', name: 'G.I. Joe' },
-  condition: 'mint_sealed',
+  package_condition: 'mint_sealed',
+  item_condition: 5,
 });
 
 // ─── Export ─────────────────────────────────────────────────────────────────
@@ -159,7 +161,7 @@ test.describe('Import confirmation dialogs', () => {
         item_id: `a0000000-0000-4000-a000-0000000000${String(i + 1).padStart(2, '0')}`,
         item_name: `Item ${i + 1}`,
         item_slug: `item-${i + 1}`,
-        condition: 'loose_complete',
+        package_condition: 'loose_complete',
       })
     );
     const state = new MockCollectionState(items);
@@ -188,7 +190,7 @@ test.describe('Import confirmation dialogs', () => {
         item_id: `a0000000-0000-4000-a000-0000000000${String(i + 1).padStart(2, '0')}`,
         item_name: `Item ${i + 1}`,
         item_slug: `item-${i + 1}`,
-        condition: 'loose_complete',
+        package_condition: 'loose_complete',
       })
     );
     const importItems = collectionItems.slice(0, 4);
@@ -244,7 +246,7 @@ test.describe('Import happy paths', () => {
         item_id: 'a0000000-0000-4000-a000-000000000003',
         item_name: 'MP-44 Optimus Prime',
         item_slug: 'mp-44-optimus-prime',
-        condition: 'mint_sealed',
+        package_condition: 'mint_sealed',
       }),
     ];
     const state = new MockCollectionState(collectionItems);
@@ -327,7 +329,8 @@ test.describe('Import error states', () => {
         {
           franchise_slug: 'transformers',
           item_slug: 'optimus-prime',
-          condition: 'unknown',
+          package_condition: 'unknown',
+          item_condition: 5,
           notes: null,
           added_at: '2026-01-01T00:00:00Z',
           deleted_at: null,
@@ -391,7 +394,8 @@ test.describe('Import partial success and retry', () => {
     payload.items.push({
       franchise_slug: 'transformers',
       item_slug: 'nonexistent-item',
-      condition: 'unknown',
+      package_condition: 'unknown',
+      item_condition: 5,
       notes: null,
       added_at: '2026-01-01T00:00:00Z',
       deleted_at: null,

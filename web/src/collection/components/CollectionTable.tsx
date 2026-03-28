@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { buildPhotoUrl } from '@/catalog/photos/api';
 import { ConditionBadge } from '@/collection/components/ConditionBadge';
+import { ItemConditionBadge } from '@/collection/components/ItemConditionBadge';
 import { formatRelativeDate } from '@/collection/lib/format-date';
 import type { CollectionItem } from '@/lib/zod-schemas';
 
@@ -109,7 +110,10 @@ export function CollectionTable({ items, isLoading, onEdit, onViewCatalog }: Col
               </TableCell>
               <TableCell className="hidden md:table-cell text-sm text-muted-foreground">{item.toy_line.name}</TableCell>
               <TableCell>
-                <ConditionBadge condition={item.condition} />
+                <div className="flex items-center gap-1">
+                  <ConditionBadge condition={item.package_condition} />
+                  <ItemConditionBadge grade={item.item_condition} />
+                </div>
               </TableCell>
               <TableCell className="hidden md:table-cell text-xs text-muted-foreground max-w-48 truncate">
                 {item.notes ?? '—'}

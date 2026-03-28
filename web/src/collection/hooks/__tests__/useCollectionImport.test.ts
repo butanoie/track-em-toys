@@ -18,7 +18,8 @@ const mockPayload: CollectionExportPayload = {
     {
       franchise_slug: 'transformers',
       item_slug: 'optimus-prime',
-      condition: 'mint_sealed',
+      package_condition: 'mint_sealed',
+      item_condition: 5,
       notes: null,
       added_at: '2026-03-20T00:00:00Z',
       deleted_at: null,

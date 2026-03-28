@@ -26,7 +26,7 @@ Scenario: List collection with items
   Given the user has items in their collection
   When the client sends GET /collection with a valid auth token
   Then a 200 response is returned
-  And each item has id, item_id, item_name, item_slug, franchise, manufacturer, toy_line, thumbnail_url, condition, notes, created_at, updated_at
+  And each item has id, item_id, item_name, item_slug, franchise, manufacturer, toy_line, thumbnail_url, package_condition, item_condition, notes, created_at, updated_at
   And franchise is a { slug, name } object
   And manufacturer is { slug, name } or null
 ```
@@ -42,9 +42,13 @@ Scenario: Filter collection by franchise
 #### Happy Path: Filter by Condition
 
 ```gherkin
-Scenario: Filter collection by condition
-  When the client sends GET /collection?condition=mint_sealed
-  Then only items with condition "mint_sealed" are returned
+Scenario: Filter collection by package condition
+  When the client sends GET /collection?package_condition=mint_sealed
+  Then only items with package_condition "mint_sealed" are returned
+
+Scenario: Filter collection by item condition minimum grade
+  When the client sends GET /collection?item_condition_min=7
+  Then only items with item_condition >= 7 are returned
 ```
 
 #### Happy Path: Search via FTS
@@ -106,15 +110,16 @@ Scenario: List collection without auth
 Scenario: Add item with only item_id
   When the client sends POST /collection with { item_id: "<valid-uuid>" }
   Then a 201 response is returned
-  And the item's condition defaults to "unknown"
+  And the item's package_condition defaults to "unknown"
+  And the item's item_condition defaults to 5
   And the item's notes is null
 ```
 
 #### Happy Path: Add with Condition and Notes
 
 ```gherkin
-Scenario: Add item with condition and notes
-  When the client sends POST /collection with { item_id, condition: "opened_complete", notes: "Great condition" }
+Scenario: Add item with package_condition, item_condition, and notes
+  When the client sends POST /collection with { item_id, package_condition: "opened_complete", item_condition: 8, notes: "Great condition" }
   Then a 201 response is returned
   And the response includes the full joined item data
 ```
@@ -148,8 +153,8 @@ Scenario: Add without item_id
 #### Error: Invalid Condition
 
 ```gherkin
-Scenario: Add with invalid condition value
-  When the client sends POST /collection with { item_id, condition: "invalid" }
+Scenario: Add with invalid package_condition value
+  When the client sends POST /collection with { item_id, package_condition: "invalid" }
   Then a 400 response is returned
 ```
 
@@ -180,8 +185,8 @@ Scenario: Get collection statistics
   Given the user has items in their collection
   When the client sends GET /collection/stats
   Then a 200 response is returned
-  And the response has total_copies, unique_items, by_franchise[], by_condition[]
-  And total_copies equals the sum of all by_condition[].count
+  And the response has total_copies, unique_items, by_franchise[], by_package_condition[], by_item_condition[]
+  And total_copies equals the sum of all by_package_condition[].count
 ```
 
 #### Happy Path: Empty Collection Stats
@@ -192,7 +197,7 @@ Scenario: Get stats for empty collection
   When the client sends GET /collection/stats
   Then a 200 response is returned
   And total_copies is 0, unique_items is 0
-  And by_franchise and by_condition are empty arrays (not null)
+  And by_franchise, by_package_condition, and by_item_condition are empty arrays (not null)
 ```
 
 #### Error: Unauthenticated
@@ -301,12 +306,20 @@ Scenario: User B tries to access User A's collection item
 
 ### Update Collection Item (PATCH /collection/:id)
 
-#### Happy Path: Update Condition
+#### Happy Path: Update Package Condition
 
 ```gherkin
-Scenario: Update only condition
-  When the client sends PATCH /collection/{id} with { condition: "damaged" }
-  Then a 200 response is returned with the updated condition
+Scenario: Update only package_condition
+  When the client sends PATCH /collection/{id} with { package_condition: "loose_complete" }
+  Then a 200 response is returned with the updated package_condition
+```
+
+#### Happy Path: Update Item Condition
+
+```gherkin
+Scenario: Update only item_condition
+  When the client sends PATCH /collection/{id} with { item_condition: 9 }
+  Then a 200 response is returned with the updated item_condition
 ```
 
 #### Happy Path: Update Notes
@@ -330,7 +343,7 @@ Scenario: Clear notes by setting null
 ```gherkin
 Scenario: PATCH with empty body
   When the client sends PATCH /collection/{id} with {}
-  Then a 400 response is returned with "At least one field (condition, notes) is required"
+  Then a 400 response is returned with "At least one field (package_condition, item_condition, notes) is required"
 ```
 
 #### Error: Soft-Deleted Item
@@ -338,7 +351,7 @@ Scenario: PATCH with empty body
 ```gherkin
 Scenario: PATCH soft-deleted item
   Given the collection item has been soft-deleted
-  When the client sends PATCH /collection/{id} with { condition: "damaged" }
+  When the client sends PATCH /collection/{id} with { package_condition: "loose_complete" }
   Then a 404 response is returned
 ```
 

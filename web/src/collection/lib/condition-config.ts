@@ -1,12 +1,12 @@
-import type { CollectionCondition } from '@/lib/zod-schemas';
+import type { PackageCondition } from '@/lib/zod-schemas';
 
-export interface ConditionConfig {
+export interface PackageConditionConfig {
   label: string;
   shortCode: string;
   className: string;
 }
 
-export const CONDITION_CONFIG: Record<CollectionCondition, ConditionConfig> = {
+export const PACKAGE_CONDITION_CONFIG: Record<PackageCondition, PackageConditionConfig> = {
   mint_sealed: {
     label: 'Mint Sealed',
     shortCode: 'MISB',
@@ -35,11 +35,6 @@ export const CONDITION_CONFIG: Record<CollectionCondition, ConditionConfig> = {
     className:
       'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700',
   },
-  damaged: {
-    label: 'Damaged',
-    shortCode: 'DMG',
-    className: 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900 dark:text-red-300 dark:border-red-700',
-  },
   unknown: {
     label: 'Unknown',
     shortCode: '?',
@@ -47,4 +42,6 @@ export const CONDITION_CONFIG: Record<CollectionCondition, ConditionConfig> = {
   },
 };
 
-export const CONDITION_OPTIONS = Object.entries(CONDITION_CONFIG) as Array<[CollectionCondition, ConditionConfig]>;
+export const PACKAGE_CONDITION_OPTIONS = Object.entries(PACKAGE_CONDITION_CONFIG) as Array<
+  [PackageCondition, PackageConditionConfig]
+>;

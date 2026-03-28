@@ -24,7 +24,8 @@ export function buildExportPayload(
     items: items.map((i) => ({
       franchise_slug: i.franchise.slug,
       item_slug: i.item_slug,
-      condition: i.condition,
+      package_condition: i.package_condition,
+      item_condition: i.item_condition,
       notes: i.notes,
       added_at: i.created_at,
       deleted_at: null,

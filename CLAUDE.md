@@ -61,6 +61,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - RLS uses (SELECT current_app_user_id()) subselect wrapper for initPlan caching
 - All catalog tables now have `updated_at` columns (migration 031 added them to reference and relationship tables for bidirectional sync)
 - `collection_items` is the first RLS-protected table — uses `FORCE ROW LEVEL SECURITY` + partial indexes on `WHERE deleted_at IS NULL`
+- `collection_items` has dual condition fields: `package_condition` (enum: packaging state) and `item_condition` (SMALLINT 1-10: C-grade physical condition). The old `condition` column and `item_condition` enum type were renamed/replaced in migration 033.
 - User-private tables must use `FORCE ROW LEVEL SECURITY` (without it, the DB owner bypasses all policies)
 - JWT: ES256 asymmetric signing, JWKS discovery, SHA-256 refresh token hashing
 - RLS policies: always use the (SELECT ...) wrapper, never bare function calls

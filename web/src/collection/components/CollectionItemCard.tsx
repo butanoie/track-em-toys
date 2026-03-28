@@ -2,6 +2,7 @@ import { Eye, Pencil, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { buildPhotoUrl } from '@/catalog/photos/api';
 import { ConditionBadge } from '@/collection/components/ConditionBadge';
+import { ItemConditionBadge } from '@/collection/components/ItemConditionBadge';
 import { formatRelativeDate } from '@/collection/lib/format-date';
 import type { CollectionItem } from '@/lib/zod-schemas';
 
@@ -39,7 +40,8 @@ export function CollectionItemCard({ item, onEdit, onViewCatalog }: CollectionIt
               </p>
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
-              <ConditionBadge condition={item.condition} />
+              <ConditionBadge condition={item.package_condition} />
+              <ItemConditionBadge grade={item.item_condition} />
               <Button
                 variant="ghost"
                 size="icon"

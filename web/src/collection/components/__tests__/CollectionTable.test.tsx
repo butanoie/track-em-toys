@@ -17,7 +17,8 @@ const mockItem: CollectionItem = {
   manufacturer: { slug: 'hasbro', name: 'Hasbro' },
   toy_line: { slug: 'g1', name: 'Generation 1' },
   thumbnail_url: 'abc/thumb.webp',
-  condition: 'mint_sealed',
+  package_condition: 'mint_sealed',
+  item_condition: 5,
   notes: 'Great condition box',
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
@@ -25,7 +26,9 @@ const mockItem: CollectionItem = {
 
 describe('CollectionTable', () => {
   it('renders skeleton rows when loading with no items', () => {
-    const { container } = render(<CollectionTable items={[]} isLoading={true} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
+    const { container } = render(
+      <CollectionTable items={[]} isLoading={true} onEdit={vi.fn()} onViewCatalog={vi.fn()} />
+    );
     expect(container.querySelectorAll('.animate-pulse')).toHaveLength(6);
   });
 

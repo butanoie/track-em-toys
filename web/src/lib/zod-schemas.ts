@@ -446,13 +446,12 @@ export type MlExportResponse = z.infer<typeof MlExportResponseSchema>;
 // Collection schemas
 // ---------------------------------------------------------------------------
 
-export const CollectionConditionSchema = z.enum([
+export const PackageConditionSchema = z.enum([
   'mint_sealed',
   'opened_complete',
   'opened_incomplete',
   'loose_complete',
   'loose_incomplete',
-  'damaged',
   'unknown',
 ]);
 
@@ -465,7 +464,8 @@ export const CollectionItemSchema = z.object({
   manufacturer: SlugNameRefSchema.nullable(),
   toy_line: SlugNameRefSchema,
   thumbnail_url: z.string().nullable(),
-  condition: CollectionConditionSchema,
+  package_condition: PackageConditionSchema,
+  item_condition: z.number().int().min(1).max(10),
   notes: z.string().nullable(),
   created_at: z.string(),
   updated_at: z.string(),
@@ -484,8 +484,13 @@ const CollectionFranchiseStatSchema = z.object({
   count: z.number().int(),
 });
 
-const CollectionConditionStatSchema = z.object({
-  condition: CollectionConditionSchema,
+const PackageConditionStatSchema = z.object({
+  package_condition: PackageConditionSchema,
+  count: z.number().int(),
+});
+
+const ItemConditionStatSchema = z.object({
+  item_condition: z.number().int().min(1).max(10),
   count: z.number().int(),
 });
 
@@ -494,7 +499,8 @@ export const CollectionStatsSchema = z.object({
   unique_items: z.number().int(),
   deleted_count: z.number().int(),
   by_franchise: z.array(CollectionFranchiseStatSchema),
-  by_condition: z.array(CollectionConditionStatSchema),
+  by_package_condition: z.array(PackageConditionStatSchema),
+  by_item_condition: z.array(ItemConditionStatSchema),
 });
 
 const CollectionCheckEntrySchema = z.object({
@@ -511,7 +517,8 @@ export const CollectionCheckResponseSchema = z.object({
 const ExportItemSchema = z.object({
   franchise_slug: z.string(),
   item_slug: z.string(),
-  condition: CollectionConditionSchema,
+  package_condition: PackageConditionSchema,
+  item_condition: z.number().int().min(1).max(10),
   notes: z.string().nullable(),
   added_at: z.string(),
   deleted_at: z.string().nullable(),
@@ -527,7 +534,8 @@ const ImportedItemSchema = z.object({
   franchise_slug: z.string(),
   item_slug: z.string(),
   item_name: z.string(),
-  condition: CollectionConditionSchema,
+  package_condition: PackageConditionSchema,
+  item_condition: z.number().int().min(1).max(10),
 });
 
 const UnresolvedItemSchema = z.object({
@@ -545,7 +553,7 @@ export const CollectionImportResponseSchema = z.object({
 });
 
 // Collection types
-export type CollectionCondition = z.infer<typeof CollectionConditionSchema>;
+export type PackageCondition = z.infer<typeof PackageConditionSchema>;
 export type CollectionItem = z.infer<typeof CollectionItemSchema>;
 export type CollectionItemList = z.infer<typeof CollectionItemListSchema>;
 export type CollectionStats = z.infer<typeof CollectionStatsSchema>;

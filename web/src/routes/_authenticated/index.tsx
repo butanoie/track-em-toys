@@ -48,7 +48,7 @@ function Dashboard() {
               </Card>
               <Card className="p-4 text-center">
                 <p className="text-3xl font-bold tabular-nums">
-                  {stats.by_condition.find((c) => c.condition === 'mint_sealed')?.count ?? 0}
+                  {stats.by_package_condition.find((c) => c.package_condition === 'mint_sealed')?.count ?? 0}
                 </p>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Mint Sealed</p>
               </Card>

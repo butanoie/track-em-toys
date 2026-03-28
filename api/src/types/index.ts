@@ -292,20 +292,20 @@ export interface CatalogEdit {
 // Collection
 // ---------------------------------------------------------------------------
 
-export type ItemCondition =
+export type PackageCondition =
   | 'mint_sealed'
   | 'opened_complete'
   | 'opened_incomplete'
   | 'loose_complete'
   | 'loose_incomplete'
-  | 'damaged'
   | 'unknown';
 
 export interface CollectionItem {
   id: string;
   user_id: string;
   item_id: string;
-  condition: ItemCondition;
+  package_condition: PackageCondition;
+  item_condition: number;
   notes: string | null;
   deleted_at: string | null;
   created_at: string;

@@ -1,19 +1,19 @@
 import { cn } from '@/lib/utils';
-import { CONDITION_OPTIONS } from '@/collection/lib/condition-config';
-import type { CollectionCondition } from '@/lib/zod-schemas';
+import { PACKAGE_CONDITION_OPTIONS } from '@/collection/lib/condition-config';
+import type { PackageCondition } from '@/lib/zod-schemas';
 
 interface ConditionSelectorProps {
-  value: CollectionCondition;
-  onChange: (value: CollectionCondition) => void;
+  value: PackageCondition;
+  onChange: (value: PackageCondition) => void;
   disabled?: boolean;
 }
 
 export function ConditionSelector({ value, onChange, disabled = false }: ConditionSelectorProps) {
   return (
     <fieldset disabled={disabled}>
-      <legend className="text-sm font-medium mb-2">Condition</legend>
+      <legend className="text-sm font-medium mb-2">Package Condition</legend>
       <div className="space-y-1">
-        {CONDITION_OPTIONS.map(([conditionValue, config]) => (
+        {PACKAGE_CONDITION_OPTIONS.map(([conditionValue, config]) => (
           <button
             key={conditionValue}
             type="button"

@@ -29,7 +29,8 @@ export interface MockCollectionItem {
   manufacturer: { slug: string; name: string } | null;
   toy_line: { slug: string; name: string };
   thumbnail_url: string | null;
-  condition: string;
+  package_condition: string;
+  item_condition: number;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -45,7 +46,8 @@ export function makeCollectionItem(overrides?: Partial<MockCollectionItem>): Moc
     manufacturer: { slug: 'hasbro', name: 'Hasbro' },
     toy_line: { slug: 'legacy', name: 'Legacy' },
     thumbnail_url: null,
-    condition: 'loose_complete',
+    package_condition: 'loose_complete',
+    item_condition: 5,
     notes: null,
     created_at: '2026-01-15T10:00:00.000Z',
     updated_at: '2026-01-15T10:00:00.000Z',
@@ -73,7 +75,14 @@ export async function mockEmptyCollection(page: Page): Promise<void> {
   await page.route('**/collection/stats', (route) => {
     if (isDocRequest(route)) return route.continue();
     return route.fulfill(
-      jsonResponse({ total_copies: 0, unique_items: 0, deleted_count: 0, by_franchise: [], by_condition: [] })
+      jsonResponse({
+        total_copies: 0,
+        unique_items: 0,
+        deleted_count: 0,
+        by_franchise: [],
+        by_package_condition: [],
+        by_item_condition: [],
+      })
     );
   });
 }
@@ -102,7 +111,8 @@ export class MockCollectionState {
   get stats() {
     const live = this.liveItems;
     const franchiseMap = new Map<string, { slug: string; name: string; count: number }>();
-    const conditionMap = new Map<string, number>();
+    const packageConditionMap = new Map<string, number>();
+    const itemConditionMap = new Map<number, number>();
 
     for (const item of live) {
       const fKey = item.franchise.slug;
@@ -112,7 +122,8 @@ export class MockCollectionState {
       } else {
         franchiseMap.set(fKey, { slug: fKey, name: item.franchise.name, count: 1 });
       }
-      conditionMap.set(item.condition, (conditionMap.get(item.condition) ?? 0) + 1);
+      packageConditionMap.set(item.package_condition, (packageConditionMap.get(item.package_condition) ?? 0) + 1);
+      itemConditionMap.set(item.item_condition, (itemConditionMap.get(item.item_condition) ?? 0) + 1);
     }
 
     const uniqueItemIds = new Set(live.map((i) => i.item_id));
@@ -122,11 +133,23 @@ export class MockCollectionState {
       unique_items: uniqueItemIds.size,
       deleted_count: this._deleted.size,
       by_franchise: Array.from(franchiseMap.values()),
-      by_condition: Array.from(conditionMap.entries()).map(([condition, count]) => ({ condition, count })),
+      by_package_condition: Array.from(packageConditionMap.entries()).map(([package_condition, count]) => ({
+        package_condition,
+        count,
+      })),
+      by_item_condition: Array.from(itemConditionMap.entries()).map(([item_condition, count]) => ({
+        item_condition,
+        count,
+      })),
     };
   }
 
-  addItem(partial: { item_id: string; condition?: string; notes?: string }): MockCollectionItem {
+  addItem(partial: {
+    item_id: string;
+    package_condition?: string;
+    item_condition?: number;
+    notes?: string;
+  }): MockCollectionItem {
     const existing = this._items.find((i) => i.item_id === partial.item_id);
     const newItem = makeCollectionItem({
       item_id: partial.item_id,
@@ -135,7 +158,8 @@ export class MockCollectionState {
       franchise: existing?.franchise ?? { slug: 'unknown', name: 'Unknown' },
       manufacturer: existing?.manufacturer ?? null,
       toy_line: existing?.toy_line ?? { slug: 'unknown', name: 'Unknown' },
-      condition: partial.condition ?? 'unknown',
+      package_condition: partial.package_condition ?? 'unknown',
+      item_condition: partial.item_condition ?? 5,
       notes: partial.notes?.trim() || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -153,10 +177,14 @@ export class MockCollectionState {
     return this._items.find((i) => i.id === id) ?? null;
   }
 
-  patchItem(id: string, updates: { condition?: string; notes?: string | null }): MockCollectionItem | null {
+  patchItem(
+    id: string,
+    updates: { package_condition?: string; item_condition?: number; notes?: string | null }
+  ): MockCollectionItem | null {
     const item = this._items.find((i) => i.id === id);
     if (!item) return null;
-    if (updates.condition !== undefined) item.condition = updates.condition;
+    if (updates.package_condition !== undefined) item.package_condition = updates.package_condition;
+    if (updates.item_condition !== undefined) item.item_condition = updates.item_condition;
     if (updates.notes !== undefined) item.notes = updates.notes;
     item.updated_at = new Date().toISOString();
     return item;
@@ -198,7 +226,12 @@ export class MockCollectionState {
       }
 
       if (method === 'POST') {
-        const body = route.request().postDataJSON() as { item_id: string; condition?: string; notes?: string };
+        const body = route.request().postDataJSON() as {
+          item_id: string;
+          package_condition?: string;
+          item_condition?: number;
+          notes?: string;
+        };
         const newItem = this.addItem(body);
         return route.fulfill(jsonResponse(newItem, 201));
       }
@@ -243,7 +276,8 @@ export class MockCollectionState {
         items: source.map((i) => ({
           franchise_slug: i.franchise.slug,
           item_slug: i.item_slug,
-          condition: i.condition,
+          package_condition: i.package_condition,
+          item_condition: i.item_condition,
           notes: i.notes,
           added_at: i.created_at,
           deleted_at: this._deleted.has(i.id) ? i.updated_at : null,
@@ -263,7 +297,8 @@ export class MockCollectionState {
         items: Array<{
           franchise_slug: string;
           item_slug: string;
-          condition: string;
+          package_condition: string;
+          item_condition?: number;
           notes?: string | null;
           added_at?: string;
         }>;
@@ -280,7 +315,13 @@ export class MockCollectionState {
       }
 
       // Resolve each incoming item against known items
-      const imported: Array<{ franchise_slug: string; item_slug: string; item_name: string; condition: string }> = [];
+      const imported: Array<{
+        franchise_slug: string;
+        item_slug: string;
+        item_name: string;
+        package_condition: string;
+        item_condition: number;
+      }> = [];
       const unresolved: Array<{ franchise_slug: string; item_slug: string; reason: string }> = [];
 
       for (const entry of body.items) {
@@ -288,12 +329,18 @@ export class MockCollectionState {
           (i) => i.item_slug === entry.item_slug && i.franchise.slug === entry.franchise_slug
         );
         if (match) {
-          this.addItem({ item_id: match.item_id, condition: entry.condition, notes: entry.notes ?? undefined });
+          this.addItem({
+            item_id: match.item_id,
+            package_condition: entry.package_condition,
+            item_condition: entry.item_condition ?? 5,
+            notes: entry.notes ?? undefined,
+          });
           imported.push({
             franchise_slug: entry.franchise_slug,
             item_slug: entry.item_slug,
             item_name: match.item_name,
-            condition: entry.condition,
+            package_condition: entry.package_condition,
+            item_condition: entry.item_condition ?? 5,
           });
         } else {
           unresolved.push({
@@ -329,7 +376,11 @@ export class MockCollectionState {
       const id = urlPath.split('/').pop()!;
 
       if (method === 'PATCH') {
-        const body = route.request().postDataJSON() as { condition?: string; notes?: string | null };
+        const body = route.request().postDataJSON() as {
+          package_condition?: string;
+          item_condition?: number;
+          notes?: string | null;
+        };
         const patched = this.patchItem(id, body);
         if (patched) return route.fulfill(jsonResponse(patched));
         return route.fulfill(jsonResponse({ error: 'Not found' }, 404));
