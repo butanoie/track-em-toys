@@ -12,7 +12,12 @@ interface CharacterDetailContentProps {
   hideTags?: boolean;
 }
 
-export function CharacterDetailContent({ data, relatedItems, relatedItemsCount, hideTags }: CharacterDetailContentProps) {
+export function CharacterDetailContent({
+  data,
+  relatedItems,
+  relatedItemsCount,
+  hideTags,
+}: CharacterDetailContentProps) {
   const franchise = data.franchise.slug;
 
   return (

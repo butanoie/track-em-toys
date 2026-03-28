@@ -96,6 +96,7 @@ error     error          error
 The dialog opens with a drag-and-drop target area.
 
 **Drop zone styling:**
+
 - Dashed amber border (SVG `stroke-dasharray` via `background-image` — avoids CSS border-style limitations for rounded corners with custom dash patterns)
 - Light amber background: `bg-amber-50/50 dark:bg-amber-950/20`
 - Archive box icon (Lucide `Archive`) centered, 56px container with `bg-amber-100 dark:bg-amber-900/60`
@@ -113,17 +114,20 @@ The dialog opens with a drag-and-drop target area.
 After file selection, the drop zone is replaced by a preview card.
 
 **Selected file chip:**
+
 - File icon + filename (monospace, truncated) + file size
 - "Replace" link button (amber text) to re-open file picker
 - Rounded card with muted background
 
 **Manifest summary card:**
+
 - Amber-tinted border and background (`border-amber-200 bg-amber-50/50`)
 - Header row: schema version badge (`v1` in amber monospace pill) + "Exported {date}" right-aligned
 - Stats row: item count (large bold number) + franchise pills with counts
 - Franchise pills: `bg-amber-200/60 text-amber-700` rounded-full badges
 
 **Info note:**
+
 - Light muted background with info icon
 - Explains: items matched by slug, unresolved items reported, import adds new entries
 
@@ -131,13 +135,13 @@ After file selection, the drop zone is replaced by a preview card.
 
 **Client-side validation (before showing preview):**
 
-| Check | Error message |
-|-------|--------------|
-| Not valid JSON | "The file could not be parsed as JSON" |
-| Missing `version` field | "Invalid export format — missing schema version" |
-| `version` > server max | "Unsupported schema version (v{N}), server supports up to v{max}" |
-| `items` array empty | "No items to import" (warning, not blocking — shows amber info, not red error) |
-| `items` not an array | "Invalid export format — items field is not an array" |
+| Check                   | Error message                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| Not valid JSON          | "The file could not be parsed as JSON"                                         |
+| Missing `version` field | "Invalid export format — missing schema version"                               |
+| `version` > server max  | "Unsupported schema version (v{N}), server supports up to v{max}"              |
+| `items` array empty     | "No items to import" (warning, not blocking — shows amber info, not red error) |
+| `items` not an array    | "Invalid export format — items field is not an array"                          |
 
 ### Rationale
 
@@ -160,11 +164,13 @@ The hero screen. Two variants:
 **Variant A: Mixed results (some failures)**
 
 Header:
+
 - "Import Complete" title
 - Summary counters: green pill "{N} imported" + red pill "{N} unresolved"
 - Counters use `aria-live="polite"` for screen readers
 
 Manifest (scrollable, max-height 360px):
+
 - **Unresolved section first** — red section header, items show:
   - Red X circle icon
   - "Unknown Item" label (since the item doesn't exist in catalog, we can't show its name)
@@ -183,6 +189,7 @@ Footer: "Items added as new entries to your collection" note + "Done" button (am
 **Variant B: All successful**
 
 Compact celebration view instead of full manifest:
+
 - Large green check icon with pop animation (64px circle)
 - "All items imported" heading
 - Large count number in emerald
@@ -208,6 +215,7 @@ Errors display within the dialog body (replacing the drop zone or preview), not 
 - "Choose a different file" or "Retry import" link button
 
 Four error types:
+
 1. **Invalid file format** — JSON parse failure
 2. **Unsupported schema version** — version number too high
 3. **Empty collection** — zero items (amber warning, not red error)
@@ -257,13 +265,13 @@ Four error types:
 
 ## 5. New Components
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `ExportImportToolbar` | `collection/components/` | Button group — triggers export and opens import dialog |
-| `ImportCollectionDialog` | `collection/components/` | Multi-step dialog shell with state machine |
-| `ImportDropZone` | `collection/components/` | Drag-and-drop file target with validation |
-| `ImportPreview` | `collection/components/` | File summary: version, date, franchise breakdown |
-| `ImportResultsManifest` | `collection/components/` | Scrollable success/failure ledger |
+| Component                | Location                 | Purpose                                                |
+| ------------------------ | ------------------------ | ------------------------------------------------------ |
+| `ExportImportToolbar`    | `collection/components/` | Button group — triggers export and opens import dialog |
+| `ImportCollectionDialog` | `collection/components/` | Multi-step dialog shell with state machine             |
+| `ImportDropZone`         | `collection/components/` | Drag-and-drop file target with validation              |
+| `ImportPreview`          | `collection/components/` | File summary: version, date, franchise breakdown       |
+| `ImportResultsManifest`  | `collection/components/` | Scrollable success/failure ledger                      |
 
 ### Reused Components
 
@@ -274,31 +282,31 @@ Four error types:
 
 ### New API Functions
 
-| Function | File | Endpoint |
-|----------|------|----------|
-| `exportCollection(includeDeleted?)` | `collection/api.ts` | `GET /collection/export` |
-| `importCollection(data)` | `collection/api.ts` | `POST /collection/import` |
+| Function                            | File                | Endpoint                  |
+| ----------------------------------- | ------------------- | ------------------------- |
+| `exportCollection(includeDeleted?)` | `collection/api.ts` | `GET /collection/export`  |
+| `importCollection(data)`            | `collection/api.ts` | `POST /collection/import` |
 
 ### New Hooks
 
-| Hook | Purpose |
-|------|---------|
-| `useCollectionExport()` | Triggers download, handles loading/error state |
+| Hook                    | Purpose                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `useCollectionExport()` | Triggers download, handles loading/error state                                     |
 | `useCollectionImport()` | `useMutation` wrapping `importCollection`, invalidates `['collection']` on success |
 
 ---
 
 ## 6. Accessibility
 
-| Element | Requirement |
-|---------|-------------|
-| Drop zone | `role="button"`, `tabIndex={0}`, activates on Enter/Space, `aria-label="Select export file to import"` |
-| File input | Visually hidden (`sr-only`), `accept=".json"`, linked via drop zone click |
-| Import button | `aria-disabled="true"` when no file selected, `aria-busy="true"` during import |
-| Summary counters | `aria-live="polite"` on the imported/unresolved count region |
-| Error messages | `role="alert"` for validation failures |
-| Manifest sections | `<h3>` headings for "Unresolved" and "Imported" sections |
-| Manifest scroll | `tabIndex={0}` on scroll container for keyboard scrolling, `aria-label="Import results"` |
+| Element           | Requirement                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| Drop zone         | `role="button"`, `tabIndex={0}`, activates on Enter/Space, `aria-label="Select export file to import"` |
+| File input        | Visually hidden (`sr-only`), `accept=".json"`, linked via drop zone click                              |
+| Import button     | `aria-disabled="true"` when no file selected, `aria-busy="true"` during import                         |
+| Summary counters  | `aria-live="polite"` on the imported/unresolved count region                                           |
+| Error messages    | `role="alert"` for validation failures                                                                 |
+| Manifest sections | `<h3>` headings for "Unresolved" and "Imported" sections                                               |
+| Manifest scroll   | `tabIndex={0}` on scroll container for keyboard scrolling, `aria-label="Import results"`               |
 
 ---
 
@@ -312,6 +320,7 @@ The export format includes `version: N` (integer). When the collection schema ev
 4. Client preview shows the detected version and whether upgrade will be applied
 
 Example: If v2 adds `purchase_price`, importing a v1 file shows:
+
 > "This file uses schema v1. Missing fields will use default values (purchase_price: none)."
 
 This is documented in the issue requirements — the UI simply surfaces the version information and lets the user know if an upgrade migration will be applied.
@@ -323,6 +332,7 @@ This is documented in the issue requirements — the UI simply surfaces the vers
 When the collection is empty, the existing empty state ("Your collection is empty — Browse Catalog") does not show the toolbar. Two options:
 
 **Option A (recommended):** Add an "Import" link/button to the empty state as a secondary CTA:
+
 ```
 Your collection is empty
 Start building your collection by browsing the catalog
@@ -343,25 +353,25 @@ and adding items you own.
 
 ### API Architecture
 
-| Decision | Choice |
-|----------|--------|
-| Slug resolution | `batchGetItemIdsBySlugs` — single UNNEST query resolving up to 500 pairs in one round-trip |
-| Partial success | SAVEPOINT per insert inside one transaction (PostgreSQL aborts entire tx on error without savepoints) |
-| Export query | Single query, no pagination — collections are small enough |
-| Version guard | `minimum: 1, maximum: 1` in Fastify schema — schema-level rejection |
-| Rate limits | Export: 20/min, Import: 10/min |
-| `added_at` on import | Accepted in schema but ignored — new rows get `created_at = now()` |
-| Stats `deleted_count` | Added to `GET /collection/stats` to support pre-export deleted-items prompt |
+| Decision              | Choice                                                                                                |
+| --------------------- | ----------------------------------------------------------------------------------------------------- |
+| Slug resolution       | `batchGetItemIdsBySlugs` — single UNNEST query resolving up to 500 pairs in one round-trip            |
+| Partial success       | SAVEPOINT per insert inside one transaction (PostgreSQL aborts entire tx on error without savepoints) |
+| Export query          | Single query, no pagination — collections are small enough                                            |
+| Version guard         | `minimum: 1, maximum: 1` in Fastify schema — schema-level rejection                                   |
+| Rate limits           | Export: 20/min, Import: 10/min                                                                        |
+| `added_at` on import  | Accepted in schema but ignored — new rows get `created_at = now()`                                    |
+| Stats `deleted_count` | Added to `GET /collection/stats` to support pre-export deleted-items prompt                           |
 
 ### Web Architecture
 
-| Decision | Choice |
-|----------|--------|
-| State machine | `useState` with discriminated union tag (matches existing collection patterns) |
-| Export hook | `useState`-based, not `useMutation` (produces blob download, not cache mutation) |
-| Import hook | `useMutation` with `['collection']` prefix invalidation |
-| Retry file | Client constructs from unresolved items (no server-side retry file generation) |
-| Pre-export deleted check | `AlertDialog` when `stats.deleted_count > 0` |
+| Decision                 | Choice                                                                           |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| State machine            | `useState` with discriminated union tag (matches existing collection patterns)   |
+| Export hook              | `useState`-based, not `useMutation` (produces blob download, not cache mutation) |
+| Import hook              | `useMutation` with `['collection']` prefix invalidation                          |
+| Retry file               | Client constructs from unresolved items (no server-side retry file generation)   |
+| Pre-export deleted check | `AlertDialog` when `stats.deleted_count > 0`                                     |
 
 ### Audit Findings (resolved)
 

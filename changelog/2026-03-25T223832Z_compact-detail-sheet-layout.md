@@ -139,13 +139,13 @@ Radix Dialog's `Content` component exposes `onFocusOutside` and `onInteractOutsi
 
 ## Summary Statistics
 
-| Metric | Value |
-|--------|-------|
-| Files changed | 22 |
-| Lines added | 274 |
-| Lines removed | 180 |
-| Tests passing | 687 |
-| Test files | 91 |
+| Metric        | Value |
+| ------------- | ----- |
+| Files changed | 22    |
+| Lines added   | 274   |
+| Lines removed | 180   |
+| Tests passing | 687   |
+| Test files    | 91    |
 
 ---
 

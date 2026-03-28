@@ -220,12 +220,7 @@ export function SearchPage() {
 
         {data && data.total_count > 0 && (
           <div className="min-w-0">
-            <ul
-              role="listbox"
-              className="space-y-1"
-              onKeyDown={handleKeyDown}
-              aria-label="Search results"
-            >
+            <ul role="listbox" className="space-y-1" onKeyDown={handleKeyDown} aria-label="Search results">
               {data.data.map((result, index) => {
                 const isSelected = result.slug === selectedSlug && result.entity_type === selectedType;
                 return (
