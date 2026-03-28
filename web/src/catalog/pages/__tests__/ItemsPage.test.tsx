@@ -112,7 +112,7 @@ describe('ItemsPage', () => {
   it('renders ItemList with item data', () => {
     setupDefaults();
     render(<ItemsPage />, { wrapper: createCatalogTestWrapper() });
-    expect(screen.getByText('Optimus Prime')).toBeInTheDocument();
+    expect(screen.getByText('Optimus Prime [G1-001]')).toBeInTheDocument();
     expect(screen.getByText('1 item')).toBeInTheDocument();
   });
 

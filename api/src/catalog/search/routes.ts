@@ -33,6 +33,7 @@ function formatResult(row: SearchResultRow) {
     year_released: row.year_released,
     is_third_party: row.is_third_party,
     data_quality: row.data_quality,
+    product_code: row.product_code,
   };
 }
 

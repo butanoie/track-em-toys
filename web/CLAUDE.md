@@ -186,8 +186,8 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Route files under `src/routes/_authenticated/catalog/` — directory-based nesting, no layout route (each page renders AppHeader + MainNav)
 - `MainNav` component (`src/components/MainNav.tsx`) renders on all non-admin pages — when adding it to a page, update that page's test file to mock `useRouterState` in the `@tanstack/react-router` mock
 - URL search params drive all catalog filter/pagination state — `useMemo` the filters object to prevent TanStack Query key instability
-- Item detail panel reads `selected` slug from URL, fetches independently via `useItemDetail`
-- Character and item detail pages share content components (`ItemDetailContent`, `CharacterDetailContent`) between sidebar panels and standalone pages
+- Item detail sheet reads `selected` slug from URL, fetches independently via `useItemDetail`
+- Character and item detail pages share content components (`ItemDetailContent`, `CharacterDetailContent`) between sheet overlays and standalone pages
 - TanStack Router: a flat route file (e.g., `items.tsx`) becomes a layout parent if a child directory (`items/`) is added alongside it. To add child routes without a layout, move the flat file to `items/index.tsx` first — both become flat siblings under `AuthenticatedRoute`. The `createFileRoute` path gains a trailing slash for index files (e.g., `'/_authenticated/catalog/$franchise/items/'`)
 - Item detail route uses directory structure: `$franchise/items/index.tsx` (browse) + `$franchise/items/$slug.tsx` (detail) — NOT a layout route
 - Character browse route: `$franchise/characters/index.tsx` (browse with faceted filters) + `$franchise/characters/$slug.tsx` (detail) — same directory structure as items
@@ -398,10 +398,7 @@ function ToyList() {
 }
 ```
 
-### Form with React Hook Form + Zod (planned — not yet installed)
-
-> `react-hook-form` and `@hookform/resolvers` are NOT in `package.json` yet.
-> Install them before using this pattern: `npm install react-hook-form @hookform/resolvers`
+### Form with React Hook Form + Zod
 
 ```tsx
 const schema = z.object({ name: z.string().min(1), year: z.number().int() });

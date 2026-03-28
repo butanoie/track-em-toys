@@ -22,7 +22,7 @@ describe('ItemList', () => {
 
   it('renders item name, manufacturer, and toy line', () => {
     render(<ItemList items={[mockCatalogItem]} selectedSlug={undefined} onSelect={vi.fn()} totalCount={1} />);
-    expect(screen.getByText('Optimus Prime')).toBeInTheDocument();
+    expect(screen.getByText('Optimus Prime [G1-001]')).toBeInTheDocument();
     expect(screen.getByText(/Hasbro/)).toBeInTheDocument();
     expect(screen.getByText(/Generation 1/)).toBeInTheDocument();
   });
@@ -53,7 +53,7 @@ describe('ItemList', () => {
   it('calls onSelect with slug when item is clicked', async () => {
     const onSelect = vi.fn();
     render(<ItemList items={[mockCatalogItem]} selectedSlug={undefined} onSelect={onSelect} totalCount={1} />);
-    await userEvent.click(screen.getByText('Optimus Prime'));
+    await userEvent.click(screen.getByText('Optimus Prime [G1-001]'));
     expect(onSelect).toHaveBeenCalledWith('optimus-prime');
   });
 

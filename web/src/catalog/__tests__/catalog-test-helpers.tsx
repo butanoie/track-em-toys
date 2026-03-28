@@ -90,6 +90,7 @@ export const mockCatalogItem: CatalogItem = {
   thumbnail_url: null,
   size_class: 'Leader',
   year_released: 1984,
+  product_code: 'G1-001',
   is_third_party: false,
   data_quality: 'verified',
 };

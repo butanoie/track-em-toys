@@ -37,6 +37,7 @@ const mockItemList = {
       thumbnail_url: null,
       size_class: 'Voyager',
       year_released: 2023,
+      product_code: null,
       is_third_party: false,
       data_quality: 'verified' as const,
     },

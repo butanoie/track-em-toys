@@ -60,7 +60,9 @@ export function SearchResultCard({ result, isSelected }: SearchResultCardProps) 
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-foreground truncate">{result.name}</p>
+          <p className="text-sm font-medium text-foreground truncate">
+            {result.product_code ? `${result.name} [${result.product_code}]` : result.name}
+          </p>
           <p className="text-xs text-muted-foreground mt-0.5">
             {result.franchise.name}
             {result.manufacturer && ` · ${result.manufacturer.name}`}

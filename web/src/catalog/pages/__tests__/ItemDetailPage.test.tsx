@@ -91,7 +91,7 @@ describe('ItemDetailPage', () => {
   it('renders item name as h1 when data loads', () => {
     setupDefaults();
     render(<ItemDetailPage />);
-    expect(screen.getByRole('heading', { level: 1, name: 'Optimus Prime' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Optimus Prime [G1-001]' })).toBeInTheDocument();
   });
 
   it('renders breadcrumb with Items link', () => {

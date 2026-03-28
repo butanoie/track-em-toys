@@ -125,6 +125,7 @@ export const CatalogItemSchema = z.object({
   thumbnail_url: z.string().nullable(),
   size_class: z.string().nullable(),
   year_released: z.number().int().nullable(),
+  product_code: z.string().nullable(),
   is_third_party: z.boolean(),
   data_quality: z.enum(['needs_review', 'verified', 'community_verified']),
 });
@@ -142,7 +143,6 @@ export const CatalogItemDetailSchema = CatalogItemSchema.extend({
   description: z.string().nullable(),
   barcode: z.string().nullable(),
   sku: z.string().nullable(),
-  product_code: z.string().nullable(),
   photos: z.array(
     z.object({
       id: z.string(),
@@ -272,6 +272,7 @@ const SearchResultBaseSchema = z.object({
   thumbnail_url: z.string().nullable(),
   size_class: z.string().nullable(),
   year_released: z.number().int().nullable(),
+  product_code: z.string().nullable(),
   is_third_party: z.boolean().nullable(),
   data_quality: z.string().nullable(),
 });

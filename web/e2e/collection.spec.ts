@@ -97,7 +97,7 @@ test.describe('Add to collection from catalog', () => {
     const toast = page.locator('[data-sonner-toast]').filter({ hasText: /Legacy Bulkhead added to your collection/ });
     await expect(toast).toBeVisible({ timeout: 5_000 });
 
-    await expect(page.getByText('In collection (1)')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('In Collection (1)')).toBeVisible({ timeout: 5_000 });
     await expect(page.getByRole('button', { name: 'Add Copy' })).toBeVisible();
   });
 
@@ -115,7 +115,7 @@ test.describe('Add to collection from catalog', () => {
     await page.goto('/catalog/transformers/items/legacy-bulkhead');
     await expect(page.getByRole('heading', { name: 'Legacy Bulkhead' })).toBeVisible({ timeout: 10_000 });
 
-    await expect(page.getByText('In collection (1)')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('In Collection (1)')).toBeVisible({ timeout: 5_000 });
     const addCopyButton = page.getByRole('button', { name: 'Add Copy' });
     await expect(addCopyButton).toBeVisible();
     await addCopyButton.click();
@@ -126,7 +126,7 @@ test.describe('Add to collection from catalog', () => {
     const toast = page.locator('[data-sonner-toast]').filter({ hasText: /Legacy Bulkhead added to your collection/ });
     await expect(toast).toBeVisible({ timeout: 5_000 });
 
-    await expect(page.getByText('In collection (2)')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('In Collection (2)')).toBeVisible({ timeout: 5_000 });
   });
 });
 

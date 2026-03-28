@@ -17,6 +17,7 @@ export function formatListItem(row: ItemListRow) {
     thumbnail_url: row.thumbnail_url,
     size_class: row.size_class,
     year_released: row.year_released,
+    product_code: row.product_code,
     is_third_party: row.is_third_party,
     data_quality: row.data_quality,
   };

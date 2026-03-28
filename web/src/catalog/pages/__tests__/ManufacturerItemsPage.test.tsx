@@ -101,7 +101,7 @@ describe('ManufacturerItemsPage', () => {
   it('renders ItemList with item data', () => {
     setupDefaults();
     render(<ManufacturerItemsPage />);
-    expect(screen.getByText('Optimus Prime')).toBeInTheDocument();
+    expect(screen.getByText('Optimus Prime [G1-001]')).toBeInTheDocument();
   });
 
   it('renders "Manufacturer not found" for 404 error', () => {
