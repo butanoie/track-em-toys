@@ -89,6 +89,7 @@ All push functions use `RETURNING updated_at` to capture the exact DB-committed 
 ### Unit Tests
 
 18 tests for shared helpers in `src/db/seed-io.test.ts`:
+
 - `seedIsNewer`: 5 tests (absent, null DB, newer, older, equal)
 - `dbIsNewer`: 5 tests (absent, null DB, newer, older, equal)
 - `assembleCharacterMetadata`: 2 tests (pack, omit nulls)

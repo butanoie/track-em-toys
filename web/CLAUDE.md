@@ -132,7 +132,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `mockEmptyCollection(page)` in `e2e/fixtures/mock-helpers.ts` — shared helper that mocks empty collection endpoints (check, stats, list). Required in any E2E spec that renders item detail components (they call `useCollectionCheck`).
 - `MockCollectionState` in `e2e/fixtures/mock-helpers.ts` — stateful mock for collection E2E tests. Route handlers close over the instance, so mutations (`addItem`, `removeItem`) are reflected in subsequent GET responses without re-registering routes.
 - When adding a field to a Zod schema (e.g., `CatalogItemSchema`), also update mock data in E2E spec files — E2E mocks go through Zod parse in the browser and will fail if required fields are missing.
-- `ConditionSelector` renders `<button>` elements (not Radix `Select`) — E2E tests click `getByRole('button', { name: /Opened Complete/ })`. The filter condition on the collection page uses a Radix `Select` combobox (`getByRole('combobox', { name: /Filter by condition/ })`).
+- `ConditionSelector` renders `<button>` elements (not Radix `Select`) — E2E tests click `getByRole('button', { name: /Opened Complete/ })`. The collection page has two condition filter dropdowns: package condition (`getByRole('combobox', { name: /Filter by package condition/ })`) and item grade (`getByRole('combobox', { name: /Filter by item grade/ })`).
 - `MockCollectionState` also handles export/import routes — `GET /collection/export` derives payload from `liveItems`, `POST /collection/import` resolves slugs against known items and mutates state. Overwrite mode snapshots + soft-deletes all live items before import.
 - File download assertions: `page.waitForEvent('download')` must be started **before** the click that triggers the download — use `Promise.all([page.waitForEvent('download'), button.click()])` or assign the promise first. Read content via `download.createReadStream()`.
 - File upload in tests: `page.locator('[role="dialog"] input[type="file"]').setInputFiles({ name, mimeType, buffer })` — the buffer form avoids temp files on disk, works on hidden inputs without `force: true`
@@ -167,8 +167,8 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `collection/api.ts` — 7 API functions consuming `/collection` endpoints
 - Query keys: `['collection', 'items', filters]`, `['collection', 'stats']`, `['collection', 'check', itemIds]` — all mutations invalidate the `['collection']` prefix
 - `useCollectionCheck(itemIds)` is lazy (`enabled: itemIds.length > 0`) — callers MUST memoize `itemIds` with `useMemo` to prevent infinite refetch loops
-- `ConditionSelector` and `NotesField` are shared components in `collection/components/` — used by both `AddToCollectionDialog` and `EditCollectionItemDialog`
-- `ConditionBadge` uses collector short codes (MISB, OC, LC, DMG, etc.) from `collection/lib/condition-config.ts`
+- `ConditionSelector` (package condition), `ItemConditionSelector` (C-grade 1-10), and `NotesField` are shared components in `collection/components/` — used by both `AddToCollectionDialog` and `EditCollectionItemDialog`
+- `ConditionBadge` uses collector short codes (MISB, OC, LC, etc.) from `collection/lib/condition-config.ts`; `ItemConditionBadge` uses C-grade labels (C1-C10) from `collection/lib/item-condition-config.ts`
 - Amber accent (`amber-600`/`amber-400`) differentiates collection UI from catalog's blue/purple
 - Soft-delete uses undo toast (Sonner action button, 8s duration), NOT confirmation dialog
 - `buildPhotoUrl` lives in `lib/photo-url.ts` but the documented import path is `@/catalog/photos/api` (re-export) — use the re-export for convention consistency

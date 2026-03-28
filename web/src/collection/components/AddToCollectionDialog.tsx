@@ -10,8 +10,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ConditionSelector } from '@/collection/components/ConditionSelector';
+import { ItemConditionSelector } from '@/collection/components/ItemConditionSelector';
 import { NotesField } from '@/collection/components/NotesField';
-import type { CollectionCondition } from '@/lib/zod-schemas';
+import { DEFAULT_ITEM_CONDITION } from '@/collection/lib/item-condition-config';
+import type { PackageCondition } from '@/lib/zod-schemas';
 import type { CollectionMutations } from '@/collection/hooks/useCollectionMutations';
 
 interface AddToCollectionDialogProps {
@@ -31,19 +33,26 @@ export function AddToCollectionDialog({
   alreadyOwned,
   mutations,
 }: AddToCollectionDialogProps) {
-  const [condition, setCondition] = useState<CollectionCondition>('unknown');
+  const [packageCondition, setPackageCondition] = useState<PackageCondition>('unknown');
+  const [itemCondition, setItemCondition] = useState(DEFAULT_ITEM_CONDITION);
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
     if (open) {
-      setCondition('unknown');
+      setPackageCondition('unknown');
+      setItemCondition(DEFAULT_ITEM_CONDITION);
       setNotes('');
     }
   }, [open]);
 
   const handleSubmit = () => {
     mutations.add.mutate(
-      { item_id: itemId, condition, notes: notes.trim() || undefined },
+      {
+        item_id: itemId,
+        package_condition: packageCondition,
+        item_condition: itemCondition,
+        notes: notes.trim() || undefined,
+      },
       {
         onSuccess: () => {
           toast.success(`${itemName} added to your collection`);
@@ -65,7 +74,12 @@ export function AddToCollectionDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <ConditionSelector value={condition} onChange={setCondition} disabled={mutations.add.isPending} />
+          <ConditionSelector
+            value={packageCondition}
+            onChange={setPackageCondition}
+            disabled={mutations.add.isPending}
+          />
+          <ItemConditionSelector value={itemCondition} onChange={setItemCondition} disabled={mutations.add.isPending} />
           <NotesField id="collection-notes" value={notes} onChange={setNotes} disabled={mutations.add.isPending} />
         </div>
 

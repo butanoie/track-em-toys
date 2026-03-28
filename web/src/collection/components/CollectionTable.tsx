@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { buildPhotoUrl } from '@/catalog/photos/api';
 import { ConditionBadge } from '@/collection/components/ConditionBadge';
+import { ItemConditionBadge } from '@/collection/components/ItemConditionBadge';
 import { formatRelativeDate } from '@/collection/lib/format-date';
 import type { CollectionItem } from '@/lib/zod-schemas';
 
@@ -21,7 +22,7 @@ export function CollectionTable({ items, isLoading, onEdit, onViewCatalog }: Col
           <TableHeader>
             <TableRow>
               <TableHead>Item</TableHead>
-              <TableHead className="hidden md:table-cell">Toy Line</TableHead>
+
               <TableHead>Condition</TableHead>
               <TableHead className="hidden md:table-cell">Notes</TableHead>
               <TableHead>Added</TableHead>
@@ -31,7 +32,7 @@ export function CollectionTable({ items, isLoading, onEdit, onViewCatalog }: Col
           <TableBody>
             {Array.from({ length: 6 }).map((_, i) => (
               <TableRow key={i}>
-                <TableCell colSpan={6}>
+                <TableCell colSpan={5}>
                   <div className="h-6 bg-muted animate-pulse rounded" />
                 </TableCell>
               </TableRow>
@@ -49,7 +50,7 @@ export function CollectionTable({ items, isLoading, onEdit, onViewCatalog }: Col
           <TableHeader>
             <TableRow>
               <TableHead>Item</TableHead>
-              <TableHead className="hidden md:table-cell">Toy Line</TableHead>
+
               <TableHead>Condition</TableHead>
               <TableHead className="hidden md:table-cell">Notes</TableHead>
               <TableHead>Added</TableHead>
@@ -58,7 +59,7 @@ export function CollectionTable({ items, isLoading, onEdit, onViewCatalog }: Col
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                 <Package className="h-8 w-8 mx-auto text-muted-foreground/30 mb-2" />
                 No items match your filters.
               </TableCell>
@@ -75,7 +76,6 @@ export function CollectionTable({ items, isLoading, onEdit, onViewCatalog }: Col
         <TableHeader>
           <TableRow>
             <TableHead>Item</TableHead>
-            <TableHead className="hidden md:table-cell">Toy Line</TableHead>
             <TableHead>Condition</TableHead>
             <TableHead className="hidden md:table-cell">Notes</TableHead>
             <TableHead>Added</TableHead>
@@ -102,14 +102,23 @@ export function CollectionTable({ items, isLoading, onEdit, onViewCatalog }: Col
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{item.item_name}</p>
-                    <p className="text-xs text-muted-foreground">{item.franchise.name}</p>
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {item.product_code ? `${item.item_name} [${item.product_code}]` : item.item_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {item.franchise.name}
+                      {item.manufacturer && ` · ${item.manufacturer.name}`}
+                      {` · ${item.toy_line.name}`}
+                    </p>
                   </div>
                 </div>
               </TableCell>
-              <TableCell className="hidden md:table-cell text-sm text-muted-foreground">{item.toy_line.name}</TableCell>
+
               <TableCell>
-                <ConditionBadge condition={item.condition} />
+                <div className="flex items-center gap-1">
+                  <ConditionBadge condition={item.package_condition} />
+                  <ItemConditionBadge grade={item.item_condition} />
+                </div>
               </TableCell>
               <TableCell className="hidden md:table-cell text-xs text-muted-foreground max-w-48 truncate">
                 {item.notes ?? '—'}

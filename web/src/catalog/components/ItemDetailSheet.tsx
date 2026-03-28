@@ -67,9 +67,7 @@ export function ItemDetailSheet({ franchise, itemSlug, onClose }: ItemDetailShee
         data && (
           <>
             <Badge variant="outline" className={dataQualityStyle(data.data_quality)}>
-              {data.data_quality
-                .replace(/_/g, ' ')
-                .replace(/\b\w/g, (c) => c.toUpperCase())}
+              {data.data_quality.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
             </Badge>
             {data.is_third_party && (
               <Badge

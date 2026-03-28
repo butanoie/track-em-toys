@@ -1,5 +1,5 @@
 import type { PoolClient } from '../db/pool.js';
-import type { ItemCondition } from '../types/index.js';
+import type { PackageCondition } from '../types/index.js';
 
 // ---------------------------------------------------------------------------
 // Row types
@@ -11,6 +11,7 @@ export interface CollectionListRow {
   item_id: string;
   item_name: string;
   item_slug: string;
+  product_code: string | null;
   franchise_slug: string;
   franchise_name: string;
   manufacturer_slug: string | null;
@@ -18,7 +19,8 @@ export interface CollectionListRow {
   toy_line_slug: string;
   toy_line_name: string;
   thumbnail_url: string | null;
-  condition: ItemCondition;
+  package_condition: PackageCondition;
+  item_condition: number;
   notes: string | null;
   deleted_at: string | null;
   created_at: string;
@@ -31,8 +33,19 @@ export interface FranchiseStat {
   count: number;
 }
 
-export interface ConditionStat {
-  condition: ItemCondition;
+export interface PackageConditionStat {
+  package_condition: PackageCondition;
+  count: number;
+}
+
+export interface ItemConditionStat {
+  item_condition: number;
+  count: number;
+}
+
+export interface ToyLineStat {
+  slug: string;
+  name: string;
   count: number;
 }
 
@@ -41,7 +54,9 @@ export interface CollectionStats {
   unique_items: number;
   deleted_count: number;
   by_franchise: FranchiseStat[];
-  by_condition: ConditionStat[];
+  by_toy_line: ToyLineStat[];
+  by_package_condition: PackageConditionStat[];
+  by_item_condition: ItemConditionStat[];
 }
 
 export interface CheckRow {
@@ -64,6 +79,7 @@ const COLLECTION_ITEM_SELECT = `
         i.id         AS item_id,
         i.name       AS item_name,
         i.slug       AS item_slug,
+        i.product_code,
         fr.slug      AS franchise_slug,
         fr.name      AS franchise_name,
         mfr.slug     AS manufacturer_slug,
@@ -71,7 +87,8 @@ const COLLECTION_ITEM_SELECT = `
         tl.slug      AS toy_line_slug,
         tl.name      AS toy_line_name,
         ip.url       AS thumbnail_url,
-        ci.condition,
+        ci.package_condition,
+        ci.item_condition,
         ci.notes,
         ci.deleted_at,
         ci.created_at,
@@ -92,7 +109,9 @@ const COLLECTION_ITEM_SELECT = `
 
 export interface ListCollectionParams {
   franchise: string | null;
-  condition: string | null;
+  toy_line: string | null;
+  package_condition: string | null;
+  item_condition_min: number | null;
   search: string | null;
   limit: number;
   offset: number;
@@ -109,28 +128,33 @@ export async function listCollectionItems(
   client: PoolClient,
   params: ListCollectionParams
 ): Promise<{ rows: CollectionListRow[]; totalCount: number }> {
-  const { franchise, condition, search, limit, offset } = params;
+  const { franchise, toy_line, package_condition, item_condition_min, search, limit, offset } = params;
 
   const dataQuery = `
     ${COLLECTION_ITEM_SELECT}
     WHERE ci.deleted_at IS NULL
       AND ($1::text IS NULL OR fr.slug = $1)
-      AND ($2::text IS NULL OR ci.condition = $2::item_condition)
-      AND ($3::text IS NULL OR i.search_vector @@ websearch_to_tsquery('simple', $3))
+      AND ($2::text IS NULL OR tl.slug = $2)
+      AND ($3::text IS NULL OR ci.package_condition = $3::package_condition)
+      AND ($4::int IS NULL OR ci.item_condition >= $4)
+      AND ($5::text IS NULL OR i.search_vector @@ websearch_to_tsquery('simple', $5))
     ORDER BY i.name ASC, ci.id ASC
-    LIMIT $4 OFFSET $5`;
+    LIMIT $6 OFFSET $7`;
 
   const countQuery = `
     SELECT COUNT(*)::int AS total_count
     FROM collection_items ci
     JOIN items i ON i.id = ci.item_id
     JOIN franchises fr ON fr.id = i.franchise_id
+    JOIN toy_lines tl ON tl.id = i.toy_line_id
     WHERE ci.deleted_at IS NULL
       AND ($1::text IS NULL OR fr.slug = $1)
-      AND ($2::text IS NULL OR ci.condition = $2::item_condition)
-      AND ($3::text IS NULL OR i.search_vector @@ websearch_to_tsquery('simple', $3))`;
+      AND ($2::text IS NULL OR tl.slug = $2)
+      AND ($3::text IS NULL OR ci.package_condition = $3::package_condition)
+      AND ($4::int IS NULL OR ci.item_condition >= $4)
+      AND ($5::text IS NULL OR i.search_vector @@ websearch_to_tsquery('simple', $5))`;
 
-  const filterParams = [franchise, condition, search];
+  const filterParams = [franchise, toy_line, package_condition, item_condition_min, search];
   const dataParams = [...filterParams, limit, offset];
 
   const dataResult = await client.query<CollectionListRow>(dataQuery, dataParams);
@@ -203,21 +227,23 @@ export async function itemExists(client: PoolClient, itemId: string): Promise<bo
  * @param client - Transaction client with RLS context
  * @param userId - Authenticated user's UUID
  * @param itemId - Catalog item UUID
- * @param condition - Physical condition of the copy
+ * @param packageCondition - Packaging condition of the copy
+ * @param itemCondition - Physical condition grade (C1–C10)
  * @param notes - Sanitized notes or null
  */
 export async function insertCollectionItem(
   client: PoolClient,
   userId: string,
   itemId: string,
-  condition: ItemCondition,
+  packageCondition: PackageCondition,
+  itemCondition: number,
   notes: string | null
 ): Promise<string> {
   const { rows } = await client.query<{ id: string }>(
-    `INSERT INTO collection_items (user_id, item_id, condition, notes)
-     VALUES ($1::uuid, $2::uuid, $3::item_condition, $4)
+    `INSERT INTO collection_items (user_id, item_id, package_condition, item_condition, notes)
+     VALUES ($1::uuid, $2::uuid, $3::package_condition, $4, $5)
      RETURNING id`,
-    [userId, itemId, condition, notes]
+    [userId, itemId, packageCondition, itemCondition, notes]
   );
   return rows[0]!.id;
 }
@@ -231,7 +257,9 @@ interface StatsRaw {
   unique_items: number;
   deleted_count: number;
   by_franchise: FranchiseStat[] | null;
-  by_condition: ConditionStat[] | null;
+  by_toy_line: ToyLineStat[] | null;
+  by_package_condition: PackageConditionStat[] | null;
+  by_item_condition: ItemConditionStat[] | null;
 }
 
 /**
@@ -243,7 +271,7 @@ interface StatsRaw {
 export async function getCollectionStats(client: PoolClient): Promise<CollectionStats> {
   const { rows } = await client.query<StatsRaw>(`
     WITH active AS (
-      SELECT ci.item_id, ci.condition, i.franchise_id
+      SELECT ci.item_id, ci.package_condition, ci.item_condition, i.franchise_id, i.toy_line_id
       FROM collection_items ci
       JOIN items i ON i.id = ci.item_id
       WHERE ci.deleted_at IS NULL
@@ -264,15 +292,36 @@ export async function getCollectionStats(client: PoolClient): Promise<Collection
         '[]'::json
       ) AS by_franchise,
       COALESCE(
+        (SELECT json_agg(row_to_json(tl))
+         FROM (
+           SELECT t.slug, t.name, COUNT(*)::int AS count
+           FROM active a
+           JOIN toy_lines t ON t.id = a.toy_line_id
+           GROUP BY t.slug, t.name
+           ORDER BY count DESC, t.name ASC
+         ) tl),
+        '[]'::json
+      ) AS by_toy_line,
+      COALESCE(
         (SELECT json_agg(row_to_json(c))
          FROM (
-           SELECT condition::text AS condition, COUNT(*)::int AS count
+           SELECT package_condition::text AS package_condition, COUNT(*)::int AS count
            FROM active
-           GROUP BY condition
+           GROUP BY package_condition
            ORDER BY count DESC
          ) c),
         '[]'::json
-      ) AS by_condition
+      ) AS by_package_condition,
+      COALESCE(
+        (SELECT json_agg(row_to_json(ic))
+         FROM (
+           SELECT item_condition, COUNT(*)::int AS count
+           FROM active
+           GROUP BY item_condition
+           ORDER BY item_condition DESC
+         ) ic),
+        '[]'::json
+      ) AS by_item_condition
   `);
 
   const raw = rows[0];
@@ -281,7 +330,9 @@ export async function getCollectionStats(client: PoolClient): Promise<Collection
     unique_items: raw?.unique_items ?? 0,
     deleted_count: raw?.deleted_count ?? 0,
     by_franchise: raw?.by_franchise ?? [],
-    by_condition: raw?.by_condition ?? [],
+    by_toy_line: raw?.by_toy_line ?? [],
+    by_package_condition: raw?.by_package_condition ?? [],
+    by_item_condition: raw?.by_item_condition ?? [],
   };
 }
 
@@ -315,7 +366,7 @@ export async function checkCollectionItems(client: PoolClient, itemIds: string[]
 // ---------------------------------------------------------------------------
 
 /**
- * Update condition and/or notes on a collection item.
+ * Update package condition, item condition, and/or notes on a collection item.
  * Uses dynamic SET to handle partial updates.
  *
  * @param client - Transaction client with RLS context
@@ -325,15 +376,26 @@ export async function checkCollectionItems(client: PoolClient, itemIds: string[]
 export async function updateCollectionItem(
   client: PoolClient,
   id: string,
-  fields: { condition?: ItemCondition; notes?: string | null; notesProvided: boolean }
+  fields: {
+    package_condition?: PackageCondition;
+    item_condition?: number;
+    notes?: string | null;
+    notesProvided: boolean;
+  }
 ): Promise<boolean> {
   const setClauses: string[] = [];
   const params: unknown[] = [id]; // $1 is always the id
   let idx = 2;
 
-  if (fields.condition !== undefined) {
-    setClauses.push(`condition = $${idx}::item_condition`);
-    params.push(fields.condition);
+  if (fields.package_condition !== undefined) {
+    setClauses.push(`package_condition = $${idx}::package_condition`);
+    params.push(fields.package_condition);
+    idx++;
+  }
+
+  if (fields.item_condition !== undefined) {
+    setClauses.push(`item_condition = $${idx}`);
+    params.push(fields.item_condition);
     idx++;
   }
 
@@ -403,7 +465,8 @@ export async function restoreCollectionItem(client: PoolClient, id: string): Pro
 export interface ExportRow {
   franchise_slug: string;
   item_slug: string;
-  condition: ItemCondition;
+  package_condition: PackageCondition;
+  item_condition: number;
   notes: string | null;
   added_at: string;
   deleted_at: string | null;
@@ -422,7 +485,8 @@ export async function exportCollectionItems(client: PoolClient, includeDeleted: 
     `SELECT
         fr.slug      AS franchise_slug,
         i.slug       AS item_slug,
-        ci.condition,
+        ci.package_condition,
+        ci.item_condition,
         ci.notes,
         ci.created_at AS added_at,
         ci.deleted_at

@@ -14,15 +14,15 @@ Replace the inline right-column detail panels with Shadcn Sheet overlays that sl
 
 ### Key Design Choices
 
-| Choice | Decision | Rationale |
-|--------|----------|-----------|
-| Sheet width | `sm:max-w-3xl` (768px) | Wide enough for photos + fields + character section without feeling cramped |
-| Modal behavior | `modal={false}` | No focus trap, no backdrop — list behind the sheet stays interactive |
-| Shared shell | `DetailSheet` component | Prevents duplicating loading/error/header/close chrome across Item and Character sheets |
-| "View full details" link | Dropped | Sheet shows full content; `ShareLinkButton` provides URL sharing |
-| Character section in item sheet | Included below item fields | Matches the standalone `ItemDetailPage` layout |
-| Photo management sheet width | Updated to `sm:max-w-3xl` (768px) | Consistent width with detail sheets |
-| URL state | `?selected=slug` (unchanged) | Bookmarkable, browser back/forward works |
+| Choice                          | Decision                          | Rationale                                                                               |
+| ------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------- |
+| Sheet width                     | `sm:max-w-3xl` (768px)            | Wide enough for photos + fields + character section without feeling cramped             |
+| Modal behavior                  | `modal={false}`                   | No focus trap, no backdrop — list behind the sheet stays interactive                    |
+| Shared shell                    | `DetailSheet` component           | Prevents duplicating loading/error/header/close chrome across Item and Character sheets |
+| "View full details" link        | Dropped                           | Sheet shows full content; `ShareLinkButton` provides URL sharing                        |
+| Character section in item sheet | Included below item fields        | Matches the standalone `ItemDetailPage` layout                                          |
+| Photo management sheet width    | Updated to `sm:max-w-3xl` (768px) | Consistent width with detail sheets                                                     |
+| URL state                       | `?selected=slug` (unchanged)      | Bookmarkable, browser back/forward works                                                |
 
 ### Non-Modal Sheet Behavior
 
@@ -41,11 +41,11 @@ Replace the inline right-column detail panels with Shadcn Sheet overlays that sl
 
 ### Layout Changes
 
-| Page | Before | After |
-|------|--------|-------|
-| ItemsPage | `grid-cols-[240px_1fr_380px]` | `grid-cols-[240px_1fr]` |
+| Page           | Before                        | After                   |
+| -------------- | ----------------------------- | ----------------------- |
+| ItemsPage      | `grid-cols-[240px_1fr_380px]` | `grid-cols-[240px_1fr]` |
 | CharactersPage | `grid-cols-[240px_1fr_380px]` | `grid-cols-[240px_1fr]` |
-| SearchPage | `grid-cols-[1fr_380px]` | Single column |
+| SearchPage     | `grid-cols-[1fr_380px]`       | Single column           |
 
 ### Files Affected
 

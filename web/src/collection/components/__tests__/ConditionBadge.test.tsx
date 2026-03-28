@@ -14,18 +14,17 @@ describe('ConditionBadge', () => {
   });
 
   it('renders title with full label for accessibility', () => {
-    render(<ConditionBadge condition="damaged" />);
-    expect(screen.getByTitle('Damaged')).toBeInTheDocument();
+    render(<ConditionBadge condition="unknown" />);
+    expect(screen.getByTitle('Unknown')).toBeInTheDocument();
   });
 
-  it('renders all 7 condition values without error', () => {
+  it('renders all 6 condition values without error', () => {
     const conditions = [
       'mint_sealed',
       'opened_complete',
       'opened_incomplete',
       'loose_complete',
       'loose_incomplete',
-      'damaged',
       'unknown',
     ] as const;
     for (const c of conditions) {

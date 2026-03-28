@@ -38,13 +38,13 @@ Phase 1.8 Slice 2 adds the personal collection browsing UI — the first user-pr
 
 **Where it appears:**
 
-| Element | Light Mode | Dark Mode |
-| --- | --- | --- |
-| Stats bar icon | `text-amber-600` | `text-amber-400` |
-| Franchise pills (selected) | `bg-amber-100 text-amber-800` | `bg-amber-900 text-amber-200` |
+| Element                      | Light Mode                        | Dark Mode                         |
+| ---------------------------- | --------------------------------- | --------------------------------- |
+| Stats bar icon               | `text-amber-600`                  | `text-amber-400`                  |
+| Franchise pills (selected)   | `bg-amber-100 text-amber-800`     | `bg-amber-900 text-amber-200`     |
 | Action buttons (Add, Browse) | `bg-amber-600 hover:bg-amber-700` | `bg-amber-500 hover:bg-amber-600` |
-| "In collection" indicator | `text-amber-600` | — |
-| Active pill borders | `border-amber-300` | — |
+| "In collection" indicator    | `text-amber-600`                  | —                                 |
+| Active pill borders          | `border-amber-300`                | —                                 |
 
 **Why amber?** Collectors mentally separate "the reference catalog" from "my stuff." A distinct accent reinforces this boundary at a glance. Amber/gold also connotes value and ownership — appropriate for a personal collection. The catalog uses Shadcn's default neutral tokens, so amber creates clear visual separation without requiring a custom theme.
 
@@ -65,11 +65,13 @@ Phase 1.8 Slice 2 adds the personal collection browsing UI — the first user-pr
 ```
 
 **Stats displayed:**
+
 - Total copies (Archive icon, amber accent) — large bold number
 - Unique items count
 - Vertical separator between stats (visible on `sm+` screens)
 
 **Franchise pills behavior:**
+
 - "All" pill shown first (amber highlight when no franchise filter active)
 - Per-franchise pills with counts from the stats endpoint
 - Click toggles the franchise filter; clicking already-selected pill clears it
@@ -125,6 +127,7 @@ Horizontal cards in a responsive grid: `grid-cols-1 md:grid-cols-2 xl:grid-cols-
 ```
 
 **Card layout:**
+
 - Thumbnail (left): 20x20 box, rounded, lazy-loaded image or Package icon placeholder
 - Content (center): item name (h3, truncate), franchise + toy line (text-xs muted), notes in quotes (italic, line-clamp-2), relative date, "View in catalog" link (hover-visible on `lg+`)
 - Actions (right): ConditionBadge + Edit button (Pencil icon)
@@ -135,14 +138,14 @@ Horizontal cards in a responsive grid: `grid-cols-1 md:grid-cols-2 xl:grid-cols-
 
 Standard Shadcn Table with 6 columns:
 
-| Column | Visibility | Details |
-| --- | --- | --- |
-| Item | Always | Thumbnail + name/franchise |
-| Toy Line | `hidden md:table-cell` | Text only |
-| Condition | Always | ConditionBadge |
-| Notes | `hidden md:table-cell` | Truncated, max-w-48 |
-| Added | Always | Relative date, `tabular-nums whitespace-nowrap` |
-| Actions | Always | Edit button + "Catalog" link, right-aligned |
+| Column    | Visibility             | Details                                         |
+| --------- | ---------------------- | ----------------------------------------------- |
+| Item      | Always                 | Thumbnail + name/franchise                      |
+| Toy Line  | `hidden md:table-cell` | Text only                                       |
+| Condition | Always                 | ConditionBadge                                  |
+| Notes     | `hidden md:table-cell` | Truncated, max-w-48                             |
+| Added     | Always                 | Relative date, `tabular-nums whitespace-nowrap` |
+| Actions   | Always                 | Edit button + "Catalog" link, right-aligned     |
 
 **Empty state (table):** Package icon + "No items match your filters."
 **Loading state:** 6 skeleton rows with `animate-pulse`
@@ -162,15 +165,15 @@ Standard Shadcn Table with 6 columns:
 
 **Decision:** 7 condition values displayed as compact badges using collector-standard abbreviations.
 
-| Value | Short Code | Light Mode | Dark Mode |
-| --- | --- | --- | --- |
-| Mint Sealed | MISB | Emerald bg + text | Emerald |
-| Opened Complete | OC | Sky bg + text | Sky |
-| Opened Incomplete | OI | Light sky | Light sky |
-| Loose Complete | LC | Slate bg + text | Slate |
-| Loose Incomplete | LI | Light slate | Light slate |
-| Damaged | DMG | Red bg + text | Red |
-| Unknown | ? | Zinc gray | Zinc gray |
+| Value             | Short Code | Light Mode        | Dark Mode   |
+| ----------------- | ---------- | ----------------- | ----------- |
+| Mint Sealed       | MISB       | Emerald bg + text | Emerald     |
+| Opened Complete   | OC         | Sky bg + text     | Sky         |
+| Opened Incomplete | OI         | Light sky         | Light sky   |
+| Loose Complete    | LC         | Slate bg + text   | Slate       |
+| Loose Incomplete  | LI         | Light slate       | Light slate |
+| Damaged           | DMG        | Red bg + text     | Red         |
+| Unknown           | ?          | Zinc gray         | Zinc gray   |
 
 **Why short codes in badges, full labels in dropdowns?** Badges appear in dense list/table contexts where space is precious. "MISB" and "OC" are universally understood by collectors. Dropdowns (filter selects, condition selector in dialogs) use full labels because new users may not know the abbreviations.
 
@@ -183,6 +186,7 @@ Standard Shadcn Table with 6 columns:
 **Decision:** Removing an item shows an undo toast for 8 seconds. No confirmation dialog.
 
 **Flow:**
+
 1. User clicks Remove in the edit dialog
 2. Item immediately disappears from the list (optimistic or mutation-driven)
 3. Toast appears: "Removed from collection" with [Undo] action button (8s duration)
@@ -200,14 +204,17 @@ Standard Shadcn Table with 6 columns:
 **Decision:** "Add to Collection" button appears on catalog item detail pages. Opens a Shadcn Dialog (`sm:max-w-md`).
 
 **Dialog variants:**
+
 - **First copy:** Title "Add to Collection"
 - **Additional copies:** Title "Add Another Copy" (when item already in collection)
 
 **Form fields:**
+
 - Condition selector (button group, required, defaults to "unknown")
 - Notes field (optional textarea with character counter)
 
 **Footer buttons:**
+
 - Cancel (ghost variant)
 - Add to Collection (amber: `bg-amber-600`, disabled during mutation, shows "Adding..." while submitting)
 
@@ -222,6 +229,7 @@ Standard Shadcn Table with 6 columns:
 **Decision:** Edit dialog mirrors the add dialog but includes a destructive "Remove" action.
 
 **Layout:**
+
 - Title: "Edit Collection Entry"
 - Description: Item name
 - Form: Same condition selector + notes field
@@ -241,18 +249,20 @@ Standard Shadcn Table with 6 columns:
 **Decision:** Forward/backward pagination using the API's cursor-based pagination, with a client-maintained cursor stack for "Previous" support.
 
 **Behavior:**
+
 - "Next" pushes the current cursor onto the stack, navigates to `next_cursor`
 - "Previous" pops the last cursor from the stack, navigates to it
 - Filter changes reset the cursor stack (fresh first page)
 - Cursor is stored in URL search params (`?cursor=...`) for shareability
 
 **Controls:**
+
 - Previous/Next buttons (outline, small) — only shown when there's a cursor stack or `next_cursor`
 - Item count displayed with `aria-live="polite"` and `tabular-nums`
 
 **Why cursor stack, not page numbers?** The API uses keyset cursor pagination (more efficient than offset for large datasets). Cursors are opaque — there's no way to calculate "page 3" without traversing. The stack pattern preserves "Previous" functionality while keeping the API contract simple.
 
-**Rejected alternative:** Offset/page-number pagination (requires COUNT(*) and is O(n) for deep pages). Infinite scroll (loses position on filter change, harder to navigate large collections).
+**Rejected alternative:** Offset/page-number pagination (requires COUNT(\*) and is O(n) for deep pages). Infinite scroll (loses position on filter change, harder to navigate large collections).
 
 ---
 
@@ -275,6 +285,7 @@ Standard Shadcn Table with 6 columns:
 ```
 
 **Elements:**
+
 - Amber circle background (20x20) with cabinet/archive SVG icon (10x10)
 - Heading: "Your collection is empty"
 - Supporting text with max-width `sm`
@@ -293,6 +304,7 @@ Standard Shadcn Table with 6 columns:
 **URL shape:** `/collection?franchise=transformers&condition=mint_sealed&search=optimus&cursor=abc123`
 
 **Benefits:**
+
 - Bookmarkable filtered views
 - Survives page refresh
 - Shareable (though collection data is per-user, the filter configuration transfers)
@@ -307,15 +319,15 @@ Standard Shadcn Table with 6 columns:
 
 **ARIA patterns used:**
 
-| Element | ARIA | Purpose |
-| --- | --- | --- |
-| Franchise pills | `aria-pressed` | Toggle state on filter pills |
-| Stats count | `aria-live="polite"` | Announces count changes during filtering |
-| View toggle | `role="radiogroup"` + `role="radio"` | Two-option exclusive toggle |
-| Condition buttons | `aria-label` per button | Full condition name for screen readers |
-| Edit buttons | `aria-label={`Edit ${item.item_name}`}` | Identifies which item the edit applies to |
-| Search input | `aria-label="Search collection"` | Labels the search field |
-| Filter selects | `aria-label` per select | "Filter by franchise", "Filter by condition" |
+| Element           | ARIA                                    | Purpose                                      |
+| ----------------- | --------------------------------------- | -------------------------------------------- |
+| Franchise pills   | `aria-pressed`                          | Toggle state on filter pills                 |
+| Stats count       | `aria-live="polite"`                    | Announces count changes during filtering     |
+| View toggle       | `role="radiogroup"` + `role="radio"`    | Two-option exclusive toggle                  |
+| Condition buttons | `aria-label` per button                 | Full condition name for screen readers       |
+| Edit buttons      | `aria-label={`Edit ${item.item_name}`}` | Identifies which item the edit applies to    |
+| Search input      | `aria-label="Search collection"`        | Labels the search field                      |
+| Filter selects    | `aria-label` per select                 | "Filter by franchise", "Filter by condition" |
 
 **E2E coverage:** Playwright tests verify all ARIA attributes, ensuring they're not just documented but actually rendered.
 
@@ -323,11 +335,11 @@ Standard Shadcn Table with 6 columns:
 
 ### 13. Responsive Behavior
 
-| Breakpoint | Grid View | Table View | Stats Bar |
-| --- | --- | --- | --- |
-| `< md` (mobile) | 1 column | Toy Line + Notes hidden | Stats stack vertically |
-| `md` - `xl` | 2 columns | All columns | Stats + pills horizontal |
-| `xl+` (desktop) | 3 columns | All columns | Full horizontal layout |
+| Breakpoint      | Grid View | Table View              | Stats Bar                |
+| --------------- | --------- | ----------------------- | ------------------------ |
+| `< md` (mobile) | 1 column  | Toy Line + Notes hidden | Stats stack vertically   |
+| `md` - `xl`     | 2 columns | All columns             | Stats + pills horizontal |
+| `xl+` (desktop) | 3 columns | All columns             | Full horizontal layout   |
 
 Filter bar uses `flex-wrap` to stack gracefully on narrow screens.
 

@@ -54,7 +54,8 @@ const validExportJson = JSON.stringify({
     {
       franchise_slug: 'transformers',
       item_slug: 'optimus-prime',
-      condition: 'mint_sealed',
+      package_condition: 'mint_sealed',
+      item_condition: 5,
       notes: null,
       added_at: '2026-03-20T00:00:00Z',
       deleted_at: null,
@@ -177,7 +178,8 @@ describe('ImportCollectionDialog', () => {
         {
           franchise_slug: 'tf',
           item_slug: 'op',
-          condition: 'unknown',
+          package_condition: 'unknown',
+          item_condition: 5,
           notes: null,
           added_at: '2026-01-01T00:00:00Z',
           deleted_at: null,

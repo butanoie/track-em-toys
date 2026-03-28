@@ -41,21 +41,21 @@ test.describe('Collection empty state', () => {
 test.describe('Dashboard populated stats', () => {
   test('Given populated collection, When navigating to /, Then stats cards are shown', async ({ page }) => {
     const state = new MockCollectionState([
-      makeCollectionItem({ condition: 'mint_sealed' }),
-      makeCollectionItem({ condition: 'mint_sealed' }),
-      makeCollectionItem({ condition: 'loose_complete' }),
+      makeCollectionItem({ package_condition: 'mint_sealed' }),
+      makeCollectionItem({ package_condition: 'mint_sealed' }),
+      makeCollectionItem({ package_condition: 'loose_complete' }),
       makeCollectionItem({
         item_id: 'a0000000-0000-4000-a000-000000000002',
         item_name: 'MP-44 Optimus Prime',
         item_slug: 'mp-44-optimus-prime',
-        condition: 'loose_complete',
+        package_condition: 'loose_complete',
       }),
       makeCollectionItem({
         item_id: 'a0000000-0000-4000-a000-000000000003',
         item_name: 'Classified Snake Eyes',
         item_slug: 'classified-snake-eyes',
         franchise: { slug: 'gi-joe', name: 'G.I. Joe' },
-        condition: 'loose_complete',
+        package_condition: 'loose_complete',
       }),
     ]);
     await state.register(page);
@@ -106,7 +106,7 @@ test.describe('Add to collection from catalog', () => {
     const state = new MockCollectionState([
       makeCollectionItem({
         item_id: 'a0000000-0000-4000-a000-000000000001',
-        condition: 'loose_complete',
+        package_condition: 'loose_complete',
       }),
     ]);
     await state.register(page);
@@ -137,13 +137,13 @@ test.describe('Collection page display and filtering', () => {
     page,
   }) => {
     const state = new MockCollectionState([
-      makeCollectionItem({ condition: 'loose_complete' }),
+      makeCollectionItem({ package_condition: 'loose_complete' }),
       makeCollectionItem({
         item_id: 'a0000000-0000-4000-a000-000000000002',
         item_name: 'Classified Snake Eyes',
         item_slug: 'classified-snake-eyes',
         franchise: { slug: 'gi-joe', name: 'G.I. Joe' },
-        condition: 'mint_sealed',
+        package_condition: 'mint_sealed',
       }),
     ]);
     await state.register(page);
@@ -167,13 +167,13 @@ test.describe('Collection page display and filtering', () => {
     page,
   }) => {
     const state = new MockCollectionState([
-      makeCollectionItem({ condition: 'loose_complete' }),
+      makeCollectionItem({ package_condition: 'loose_complete' }),
       makeCollectionItem({
         item_id: 'a0000000-0000-4000-a000-000000000002',
         item_name: 'Classified Snake Eyes',
         item_slug: 'classified-snake-eyes',
         franchise: { slug: 'gi-joe', name: 'G.I. Joe' },
-        condition: 'mint_sealed',
+        package_condition: 'mint_sealed',
       }),
     ]);
     await state.register(page);
@@ -183,9 +183,9 @@ test.describe('Collection page display and filtering', () => {
     await page.getByRole('button', { name: /Transformers/ }).click();
     await expect(page).toHaveURL(/franchise=transformers/);
 
-    await page.getByRole('combobox', { name: /Filter by condition/ }).click();
+    await page.getByRole('combobox', { name: /Filter by package condition/ }).click();
     await page.getByRole('option', { name: 'Loose Complete' }).click();
-    await expect(page).toHaveURL(/condition=loose_complete/);
+    await expect(page).toHaveURL(/package_condition=loose_complete/);
   });
 
   test('Given collection page, When typing in search, Then URL updates after debounce', async ({ page }) => {
@@ -205,7 +205,7 @@ test.describe('Collection page display and filtering', () => {
 
 test.describe('Edit and remove collection items', () => {
   test('Given collection item, When editing condition, Then success toast appears', async ({ page }) => {
-    const state = new MockCollectionState([makeCollectionItem({ condition: 'unknown' })]);
+    const state = new MockCollectionState([makeCollectionItem({ package_condition: 'unknown' })]);
     await state.register(page);
     await page.goto('/collection');
     await expect(page.getByText('Legacy Bulkhead')).toBeVisible({ timeout: 10_000 });

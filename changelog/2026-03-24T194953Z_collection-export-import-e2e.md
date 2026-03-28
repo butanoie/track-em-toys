@@ -34,14 +34,14 @@ Added two new route handlers to `MockCollectionState.register()`:
 
 ### 3. E2E Test Spec (18 tests, 6 groups)
 
-| Group | Tests | Coverage |
-|-------|-------|----------|
-| Export | 3 | Download + content verification, disabled on empty, toast with item count |
-| Empty state CTA | 2 | "Import from file" visible, opens dialog |
-| Confirmation dialogs | 3 | Append, overwrite, size-warning (10-item vs 4-item) |
-| Happy paths | 3 | Append all-success manifest, overwrite with archived count, Done closes dialog |
-| Error states | 5 | Invalid JSON, bad schema, bad version, empty items, API 500 |
-| Partial success | 2 | Imported/unresolved manifest, retry file download with content verification |
+| Group                | Tests | Coverage                                                                       |
+| -------------------- | ----- | ------------------------------------------------------------------------------ |
+| Export               | 3     | Download + content verification, disabled on empty, toast with item count      |
+| Empty state CTA      | 2     | "Import from file" visible, opens dialog                                       |
+| Confirmation dialogs | 3     | Append, overwrite, size-warning (10-item vs 4-item)                            |
+| Happy paths          | 3     | Append all-success manifest, overwrite with archived count, Done closes dialog |
+| Error states         | 5     | Invalid JSON, bad schema, bad version, empty items, API 500                    |
+| Partial success      | 2     | Imported/unresolved manifest, retry file download with content verification    |
 
 ### 4. Playwright Config
 

@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 
 import { HttpError } from '../auth/errors.js';
 import { withTransaction } from '../db/pool.js';
-import type { ItemCondition } from '../types/index.js';
+import type { PackageCondition } from '../types/index.js';
 import type { CollectionListRow } from './queries.js';
 import * as queries from './queries.js';
 import {
@@ -24,6 +24,9 @@ import {
 
 /** Application-enforced cap on collection_items.notes (TEXT column, no DB constraint). */
 const MAX_NOTES_LENGTH = 2000;
+
+/** Default C-grade for new collection items (C5 = Good+). Matches DB column default. */
+const DEFAULT_ITEM_CONDITION = 5;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_CHECK_ITEM_IDS = 50;
@@ -62,11 +65,13 @@ function formatCollectionItem(row: CollectionListRow): Record<string, unknown> {
     item_id: row.item_id,
     item_name: row.item_name,
     item_slug: row.item_slug,
+    product_code: row.product_code,
     franchise: { slug: row.franchise_slug, name: row.franchise_name },
     manufacturer: row.manufacturer_slug ? { slug: row.manufacturer_slug, name: row.manufacturer_name! } : null,
     toy_line: { slug: row.toy_line_slug, name: row.toy_line_name },
     thumbnail_url: row.thumbnail_url,
-    condition: row.condition,
+    package_condition: row.package_condition,
+    item_condition: row.item_condition,
     notes: row.notes,
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -83,7 +88,9 @@ interface IdParams {
 
 interface ListQuery {
   franchise?: string;
-  condition?: string;
+  toy_line?: string;
+  package_condition?: string;
+  item_condition_min?: number;
   search?: string;
   page?: number;
   limit?: number;
@@ -91,12 +98,14 @@ interface ListQuery {
 
 interface AddBody {
   item_id: string;
-  condition?: ItemCondition;
+  package_condition?: PackageCondition;
+  item_condition?: number;
   notes?: string;
 }
 
 interface PatchBody {
-  condition?: ItemCondition;
+  package_condition?: PackageCondition;
+  item_condition?: number;
   notes?: string | null;
 }
 
@@ -107,7 +116,8 @@ interface ExportQuery {
 interface ImportItem {
   franchise_slug: string;
   item_slug: string;
-  condition?: ItemCondition;
+  package_condition?: PackageCondition;
+  item_condition?: number;
   notes?: string | null;
   added_at?: string;
 }
@@ -261,7 +271,8 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
           franchise_slug: string;
           item_slug: string;
           item_name: string;
-          condition: ItemCondition;
+          package_condition: PackageCondition;
+          item_condition: number;
         }> = [];
         const unresolved: Array<{
           franchise_slug: string;
@@ -282,18 +293,27 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
             continue;
           }
 
-          const condition: ItemCondition = item.condition ?? 'unknown';
+          const packageCondition: PackageCondition = item.package_condition ?? 'unknown';
+          const itemCondition = item.item_condition ?? DEFAULT_ITEM_CONDITION;
           const sanitizedNotes = typeof item.notes === 'string' ? sanitizeNotes(item.notes) : null;
 
           await client.query('SAVEPOINT import_item');
           try {
-            await queries.insertCollectionItem(client, request.user.sub, match.item_id, condition, sanitizedNotes);
+            await queries.insertCollectionItem(
+              client,
+              request.user.sub,
+              match.item_id,
+              packageCondition,
+              itemCondition,
+              sanitizedNotes
+            );
             await client.query('RELEASE SAVEPOINT import_item');
             imported.push({
               franchise_slug: item.franchise_slug,
               item_slug: item.item_slug,
               item_name: match.item_name,
-              condition,
+              package_condition: packageCondition,
+              item_condition: itemCondition,
             });
           } catch (err) {
             request.log.warn(
@@ -327,7 +347,9 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
       const { rows, totalCount } = await withTransaction(async (client) => {
         return queries.listCollectionItems(client, {
           franchise: request.query.franchise ?? null,
-          condition: request.query.condition ?? null,
+          toy_line: request.query.toy_line ?? null,
+          package_condition: request.query.package_condition ?? null,
+          item_condition_min: request.query.item_condition_min ?? null,
           search: request.query.search ?? null,
           limit,
           offset,
@@ -344,7 +366,7 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
     '/',
     { schema: addCollectionItemSchema, preHandler: authPreHandler, config: writeRateLimit },
     async (request, reply) => {
-      const { item_id, condition, notes } = request.body;
+      const { item_id, package_condition, item_condition, notes } = request.body;
       const sanitizedNotes = notes !== undefined ? sanitizeNotes(notes) : null;
 
       const row = await withTransaction(async (client) => {
@@ -355,7 +377,8 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
           client,
           request.user.sub,
           item_id,
-          condition ?? 'unknown',
+          package_condition ?? 'unknown',
+          item_condition ?? DEFAULT_ITEM_CONDITION,
           sanitizedNotes
         );
 
@@ -389,11 +412,14 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
     { schema: patchCollectionItemSchema, preHandler: authPreHandler, config: writeRateLimit },
     async (request, reply) => {
       const body = request.body;
-      const hasCondition = Object.hasOwn(body, 'condition');
+      const hasPackageCondition = Object.hasOwn(body, 'package_condition');
+      const hasItemCondition = Object.hasOwn(body, 'item_condition');
       const hasNotes = Object.hasOwn(body, 'notes');
 
-      if (!hasCondition && !hasNotes) {
-        return reply.code(400).send({ error: 'At least one field (condition, notes) is required' });
+      if (!hasPackageCondition && !hasItemCondition && !hasNotes) {
+        return reply
+          .code(400)
+          .send({ error: 'At least one field (package_condition, item_condition, notes) is required' });
       }
 
       let sanitizedNotes: string | null = null;
@@ -409,7 +435,8 @@ export async function collectionRoutes(fastify: FastifyInstance, _opts: object):
         if (locked.deleted_at !== null) throw new HttpError(404, { error: 'Collection item not found' });
 
         const wasUpdated = await queries.updateCollectionItem(client, request.params.id, {
-          condition: hasCondition ? body.condition : undefined,
+          package_condition: hasPackageCondition ? body.package_condition : undefined,
+          item_condition: hasItemCondition ? body.item_condition : undefined,
           notes: sanitizedNotes,
           notesProvided: hasNotes,
         });

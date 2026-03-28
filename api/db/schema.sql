@@ -16,16 +16,15 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: item_condition; Type: TYPE; Schema: public; Owner: -
+-- Name: package_condition; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE public.item_condition AS ENUM (
+CREATE TYPE public.package_condition AS ENUM (
     'mint_sealed',
     'opened_complete',
     'opened_incomplete',
     'loose_complete',
     'loose_incomplete',
-    'damaged',
     'unknown'
 );
 
@@ -278,11 +277,13 @@ CREATE TABLE public.collection_items (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     user_id uuid NOT NULL,
     item_id uuid NOT NULL,
-    condition public.item_condition DEFAULT 'unknown'::public.item_condition NOT NULL,
+    package_condition public.package_condition DEFAULT 'unknown'::public.package_condition NOT NULL,
     notes text,
     deleted_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    item_condition smallint DEFAULT 5 NOT NULL,
+    CONSTRAINT collection_items_item_condition_range CHECK (((item_condition >= 1) AND (item_condition <= 10)))
 );
 
 ALTER TABLE ONLY public.collection_items FORCE ROW LEVEL SECURITY;
@@ -1754,4 +1755,6 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('028'),
     ('029'),
     ('030'),
-    ('031');
+    ('031'),
+    ('032'),
+    ('033');

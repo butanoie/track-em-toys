@@ -41,6 +41,7 @@ cd api && npm run format:check # Prettier check (CI mode)
 - ALL DB changes via migration files in `api/db/migrations/`, never direct schema edits
 - Migrations must be additive (add columns/tables) by default — destructive changes (drop column, drop table) require explicit user instruction
 - Migration filenames follow `NNN_description.sql` sequential numbering with no gaps
+- PostgreSQL enum values cannot be removed — use the rename-create-swap-drop pattern: `ALTER TYPE RENAME TO _old`, create new type, `DROP DEFAULT` on the column, `ALTER COLUMN TYPE ... USING col::text::new_type`, `SET DEFAULT` with new type, `DROP TYPE _old`. The `DROP DEFAULT` before `ALTER TYPE` is required — PG can't auto-cast defaults between enum types (error 42804).
 - TEXT→FK column migration pattern: (1) add nullable FK column, (2) populate from existing data via UPDATE+JOIN, (3) SET NOT NULL, (4) add FK constraint, (5) drop old indexes + create new, (6) drop old TEXT column. Always include `migrate:down`.
 - Catalog tables use UUID PKs with a unique `slug` column (e.g. `"optimus-prime"`) for stable references and URL-friendly routes
 - Seed data uses slug-based FK references between entities — NEVER integer IDs (integer IDs are positional and break when data is reordered or regenerated)

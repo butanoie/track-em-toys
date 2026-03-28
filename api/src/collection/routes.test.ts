@@ -108,6 +108,7 @@ function makeCollectionRow(overrides: Partial<CollectionListRow> = {}): Collecti
     item_id: ITEM_UUID,
     item_name: 'Optimus Prime',
     item_slug: 'optimus-prime',
+    product_code: null,
     franchise_slug: 'transformers',
     franchise_name: 'Transformers',
     manufacturer_slug: 'hasbro',
@@ -115,7 +116,8 @@ function makeCollectionRow(overrides: Partial<CollectionListRow> = {}): Collecti
     toy_line_slug: 'generations',
     toy_line_name: 'Generations',
     thumbnail_url: null,
-    condition: 'mint_sealed',
+    package_condition: 'mint_sealed',
+    item_condition: 5,
     notes: null,
     deleted_at: null,
     created_at: '2026-03-22T00:00:00Z',
@@ -199,7 +201,8 @@ describe('collection routes', () => {
       expect(json.data[0].id).toBe(COLLECTION_UUID);
       expect(json.data[0].franchise).toEqual({ slug: 'transformers', name: 'Transformers' });
       expect(json.data[0].manufacturer).toEqual({ slug: 'hasbro', name: 'Hasbro' });
-      expect(json.data[0].condition).toBe('mint_sealed');
+      expect(json.data[0].package_condition).toBe('mint_sealed');
+      expect(json.data[0].item_condition).toBe(5);
     });
 
     it('should pass franchise filter to query', async () => {
@@ -218,19 +221,35 @@ describe('collection routes', () => {
       );
     });
 
-    it('should pass condition filter to query', async () => {
+    it('should pass package_condition filter to query', async () => {
       mockTx();
       vi.mocked(queries.listCollectionItems).mockResolvedValue({ rows: [], totalCount: 0 });
 
       await server.inject({
         method: 'GET',
-        url: '/collection?condition=damaged',
+        url: '/collection?package_condition=loose_complete',
         headers: authHeaders(),
       });
 
       expect(vi.mocked(queries.listCollectionItems)).toHaveBeenCalledWith(
         fakeClient,
-        expect.objectContaining({ condition: 'damaged' })
+        expect.objectContaining({ package_condition: 'loose_complete' })
+      );
+    });
+
+    it('should pass item_condition_min filter to query', async () => {
+      mockTx();
+      vi.mocked(queries.listCollectionItems).mockResolvedValue({ rows: [], totalCount: 0 });
+
+      await server.inject({
+        method: 'GET',
+        url: '/collection?item_condition_min=7',
+        headers: authHeaders(),
+      });
+
+      expect(vi.mocked(queries.listCollectionItems)).toHaveBeenCalledWith(
+        fakeClient,
+        expect.objectContaining({ item_condition_min: 7 })
       );
     });
 
@@ -312,7 +331,7 @@ describe('collection routes', () => {
       mockTx();
       vi.mocked(queries.itemExists).mockResolvedValue(true);
       vi.mocked(queries.insertCollectionItem).mockResolvedValue(COLLECTION_UUID);
-      vi.mocked(queries.getCollectionItemById).mockResolvedValue(makeCollectionRow({ condition: 'unknown' }));
+      vi.mocked(queries.getCollectionItemById).mockResolvedValue(makeCollectionRow({ package_condition: 'unknown' }));
 
       const res = await server.inject({
         method: 'POST',
@@ -327,28 +346,35 @@ describe('collection routes', () => {
         USER_A_UUID,
         ITEM_UUID,
         'unknown',
+        5,
         null
       );
     });
 
-    it('should return 201 with condition and notes', async () => {
+    it('should return 201 with package_condition, item_condition, and notes', async () => {
       mockTx();
       vi.mocked(queries.itemExists).mockResolvedValue(true);
       vi.mocked(queries.insertCollectionItem).mockResolvedValue(COLLECTION_UUID);
       vi.mocked(queries.getCollectionItemById).mockResolvedValue(
-        makeCollectionRow({ condition: 'opened_complete', notes: 'Great condition' })
+        makeCollectionRow({ package_condition: 'opened_complete', item_condition: 8, notes: 'Great condition' })
       );
 
       const res = await server.inject({
         method: 'POST',
         url: '/collection',
         headers: { ...authHeaders(), 'content-type': 'application/json' },
-        payload: { item_id: ITEM_UUID, condition: 'opened_complete', notes: 'Great condition' },
+        payload: {
+          item_id: ITEM_UUID,
+          package_condition: 'opened_complete',
+          item_condition: 8,
+          notes: 'Great condition',
+        },
       });
 
       expect(res.statusCode).toBe(201);
       const json = res.json();
-      expect(json.condition).toBe('opened_complete');
+      expect(json.package_condition).toBe('opened_complete');
+      expect(json.item_condition).toBe(8);
       expect(json.notes).toBe('Great condition');
     });
 
@@ -377,12 +403,12 @@ describe('collection routes', () => {
       expect(res.statusCode).toBe(400);
     });
 
-    it('should return 400 for invalid condition value', async () => {
+    it('should return 400 for invalid package_condition value', async () => {
       const res = await server.inject({
         method: 'POST',
         url: '/collection',
         headers: { ...authHeaders(), 'content-type': 'application/json' },
-        payload: { item_id: ITEM_UUID, condition: 'invalid_condition' },
+        payload: { item_id: ITEM_UUID, package_condition: 'invalid_condition' },
       });
 
       expect(res.statusCode).toBe(400);
@@ -444,9 +470,14 @@ describe('collection routes', () => {
         unique_items: 3,
         deleted_count: 0,
         by_franchise: [{ slug: 'transformers', name: 'Transformers', count: 5 }],
-        by_condition: [
-          { condition: 'mint_sealed', count: 3 },
-          { condition: 'unknown', count: 2 },
+        by_toy_line: [{ slug: 'generations', name: 'Generations', count: 5 }],
+        by_package_condition: [
+          { package_condition: 'mint_sealed', count: 3 },
+          { package_condition: 'unknown', count: 2 },
+        ],
+        by_item_condition: [
+          { item_condition: 5, count: 3 },
+          { item_condition: 8, count: 2 },
         ],
       });
 
@@ -461,7 +492,8 @@ describe('collection routes', () => {
       expect(json.total_copies).toBe(5);
       expect(json.unique_items).toBe(3);
       expect(json.by_franchise).toHaveLength(1);
-      expect(json.by_condition).toHaveLength(2);
+      expect(json.by_package_condition).toHaveLength(2);
+      expect(json.by_item_condition).toHaveLength(2);
     });
 
     it('should return empty stats for empty collection', async () => {
@@ -471,7 +503,9 @@ describe('collection routes', () => {
         unique_items: 0,
         deleted_count: 0,
         by_franchise: [],
-        by_condition: [],
+        by_toy_line: [],
+        by_package_condition: [],
+        by_item_condition: [],
       });
 
       const res = await server.inject({
@@ -484,7 +518,8 @@ describe('collection routes', () => {
       const json = res.json();
       expect(json.total_copies).toBe(0);
       expect(json.by_franchise).toEqual([]);
-      expect(json.by_condition).toEqual([]);
+      expect(json.by_package_condition).toEqual([]);
+      expect(json.by_item_condition).toEqual([]);
     });
 
     it('should return 401 without auth', async () => {
@@ -661,21 +696,40 @@ describe('collection routes', () => {
   // ═══════════════════════════════════════════════════════════════════════════
 
   describe('PATCH /collection/:id', () => {
-    it('should return 200 when updating condition', async () => {
+    it('should return 200 when updating package_condition', async () => {
       mockTx();
       vi.mocked(queries.lockCollectionItem).mockResolvedValue({ id: COLLECTION_UUID, deleted_at: null });
       vi.mocked(queries.updateCollectionItem).mockResolvedValue(true);
-      vi.mocked(queries.getCollectionItemById).mockResolvedValue(makeCollectionRow({ condition: 'damaged' }));
+      vi.mocked(queries.getCollectionItemById).mockResolvedValue(
+        makeCollectionRow({ package_condition: 'loose_complete' })
+      );
 
       const res = await server.inject({
         method: 'PATCH',
         url: `/collection/${COLLECTION_UUID}`,
         headers: { ...authHeaders(), 'content-type': 'application/json' },
-        payload: { condition: 'damaged' },
+        payload: { package_condition: 'loose_complete' },
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.json().condition).toBe('damaged');
+      expect(res.json().package_condition).toBe('loose_complete');
+    });
+
+    it('should return 200 when updating item_condition', async () => {
+      mockTx();
+      vi.mocked(queries.lockCollectionItem).mockResolvedValue({ id: COLLECTION_UUID, deleted_at: null });
+      vi.mocked(queries.updateCollectionItem).mockResolvedValue(true);
+      vi.mocked(queries.getCollectionItemById).mockResolvedValue(makeCollectionRow({ item_condition: 9 }));
+
+      const res = await server.inject({
+        method: 'PATCH',
+        url: `/collection/${COLLECTION_UUID}`,
+        headers: { ...authHeaders(), 'content-type': 'application/json' },
+        payload: { item_condition: 9 },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json().item_condition).toBe(9);
     });
 
     it('should return 200 when updating notes', async () => {
@@ -734,7 +788,7 @@ describe('collection routes', () => {
         method: 'PATCH',
         url: `/collection/${COLLECTION_UUID}`,
         headers: { ...authHeaders(), 'content-type': 'application/json' },
-        payload: { condition: 'damaged' },
+        payload: { package_condition: 'loose_complete' },
       });
 
       expect(res.statusCode).toBe(404);
@@ -748,7 +802,7 @@ describe('collection routes', () => {
         method: 'PATCH',
         url: `/collection/${COLLECTION_UUID}`,
         headers: { ...authHeaders(), 'content-type': 'application/json' },
-        payload: { condition: 'damaged' },
+        payload: { package_condition: 'loose_complete' },
       });
 
       expect(res.statusCode).toBe(404);
@@ -759,7 +813,7 @@ describe('collection routes', () => {
         method: 'PATCH',
         url: `/collection/${COLLECTION_UUID}`,
         headers: { 'content-type': 'application/json' },
-        payload: { condition: 'damaged' },
+        payload: { package_condition: 'loose_complete' },
       });
       expect(res.statusCode).toBe(401);
     });
@@ -784,7 +838,7 @@ describe('collection routes', () => {
         method: 'PATCH',
         url: `/collection/${COLLECTION_UUID}`,
         headers: { ...authHeaders(), 'content-type': 'application/json' },
-        payload: { condition: 'damaged' },
+        payload: { package_condition: 'loose_complete' },
       });
 
       expect(res.statusCode).toBe(500);
@@ -932,7 +986,8 @@ describe('collection routes', () => {
         {
           franchise_slug: 'transformers',
           item_slug: 'optimus-prime',
-          condition: 'mint_sealed',
+          package_condition: 'mint_sealed',
+          item_condition: 9,
           notes: 'Excellent condition',
           added_at: '2026-03-20T08:30:00Z',
           deleted_at: null,
@@ -940,7 +995,8 @@ describe('collection routes', () => {
         {
           franchise_slug: 'gi-joe',
           item_slug: 'snake-eyes-v1',
-          condition: 'damaged',
+          package_condition: 'loose_incomplete',
+          item_condition: 3,
           notes: null,
           added_at: '2026-03-21T10:00:00Z',
           deleted_at: null,
@@ -960,7 +1016,8 @@ describe('collection routes', () => {
       expect(json.items).toHaveLength(2);
       expect(json.items[0].franchise_slug).toBe('transformers');
       expect(json.items[0].item_slug).toBe('optimus-prime');
-      expect(json.items[0].condition).toBe('mint_sealed');
+      expect(json.items[0].package_condition).toBe('mint_sealed');
+      expect(json.items[0].item_condition).toBe(9);
       expect(json.items[0].notes).toBe('Excellent condition');
       expect(json.items[0].added_at).toBeDefined();
       expect(json.items[0].deleted_at).toBeNull();
@@ -1026,8 +1083,19 @@ describe('collection routes', () => {
     const validPayload = {
       version: 1,
       items: [
-        { franchise_slug: 'transformers', item_slug: 'optimus-prime', condition: 'mint_sealed' },
-        { franchise_slug: 'gi-joe', item_slug: 'snake-eyes-v1', condition: 'damaged', notes: 'Missing arm' },
+        {
+          franchise_slug: 'transformers',
+          item_slug: 'optimus-prime',
+          package_condition: 'mint_sealed',
+          item_condition: 9,
+        },
+        {
+          franchise_slug: 'gi-joe',
+          item_slug: 'snake-eyes-v1',
+          package_condition: 'loose_incomplete',
+          item_condition: 3,
+          notes: 'Missing arm',
+        },
       ],
     };
 
@@ -1052,7 +1120,8 @@ describe('collection routes', () => {
       expect(json.imported[0].franchise_slug).toBe('transformers');
       expect(json.imported[0].item_slug).toBe('optimus-prime');
       expect(json.imported[0].item_name).toBe('Optimus Prime');
-      expect(json.imported[0].condition).toBe('mint_sealed');
+      expect(json.imported[0].package_condition).toBe('mint_sealed');
+      expect(json.imported[0].item_condition).toBe(9);
       expect(json.unresolved).toHaveLength(1);
       expect(json.unresolved[0].franchise_slug).toBe('gi-joe');
       expect(json.unresolved[0].reason).toBe('Item not found in catalog');
@@ -1191,6 +1260,7 @@ describe('collection routes', () => {
         USER_A_UUID,
         ITEM_UUID,
         'unknown',
+        5,
         'helloworld'
       );
     });

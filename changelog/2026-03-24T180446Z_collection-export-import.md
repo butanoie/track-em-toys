@@ -75,14 +75,15 @@ The web `importCollection` function strips `exported_at` (top-level) and `delete
 
 ### Test Coverage
 
-| Module | New Tests | Total |
-|--------|-----------|-------|
+| Module | New Tests                                    | Total      |
+| ------ | -------------------------------------------- | ---------- |
 | API    | 15 integration tests (export: 5, import: 10) | 750 passed |
-| Web    | 30 unit tests (7 test files) | 677 passed |
+| Web    | 30 unit tests (7 test files)                 | 677 passed |
 
 ### Quality Review
 
 Four review passes found and fixed 19 issues including:
+
 - Round-trip `additionalProperties` bug (export payload rejected by import endpoint)
 - Missing Zod validation (unsafe `as` cast replaced with `safeParse`)
 - Import schema rejecting `notes: null` (asymmetric with export)
@@ -93,7 +94,7 @@ Four review passes found and fixed 19 issues including:
 ### All Checks Green
 
 | Module | Tests | Lint | Typecheck | Format | Build |
-|--------|-------|------|-----------|--------|-------|
+| ------ | ----- | ---- | --------- | ------ | ----- |
 | API    | ✅    | ✅   | ✅        | ✅     | ✅    |
 | Web    | ✅    | ✅   | ✅        | ✅     | ✅    |
 

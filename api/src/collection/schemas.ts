@@ -1,12 +1,11 @@
 import { errorResponse, pageListResponse, slugNameRef } from '../catalog/shared/schemas.js';
 
-const CONDITION_ENUM = [
+const PACKAGE_CONDITION_ENUM = [
   'mint_sealed',
   'opened_complete',
   'opened_incomplete',
   'loose_complete',
   'loose_incomplete',
-  'damaged',
   'unknown',
 ] as const;
 
@@ -33,11 +32,13 @@ export const collectionItemSchema = {
     'item_id',
     'item_name',
     'item_slug',
+    'product_code',
     'franchise',
     'manufacturer',
     'toy_line',
     'thumbnail_url',
-    'condition',
+    'package_condition',
+    'item_condition',
     'notes',
     'created_at',
     'updated_at',
@@ -48,11 +49,13 @@ export const collectionItemSchema = {
     item_id: { type: 'string' },
     item_name: { type: 'string' },
     item_slug: { type: 'string' },
+    product_code: { type: ['string', 'null'] },
     franchise: slugNameRef,
     manufacturer: nullableSlugName,
     toy_line: slugNameRef,
     thumbnail_url: { type: ['string', 'null'] },
-    condition: { type: 'string', enum: CONDITION_ENUM },
+    package_condition: { type: 'string', enum: PACKAGE_CONDITION_ENUM },
+    item_condition: { type: 'integer', minimum: 1, maximum: 10 },
     notes: { type: ['string', 'null'] },
     created_at: { type: 'string' },
     updated_at: { type: 'string' },
@@ -79,7 +82,9 @@ export const listCollectionSchema = {
     additionalProperties: false,
     properties: {
       franchise: { type: 'string', maxLength: 120 },
-      condition: { type: 'string', enum: CONDITION_ENUM },
+      toy_line: { type: 'string', maxLength: 120 },
+      package_condition: { type: 'string', enum: PACKAGE_CONDITION_ENUM },
+      item_condition_min: { type: 'integer', minimum: 1, maximum: 10 },
       search: { type: 'string', maxLength: 200 },
       page: { type: 'integer', minimum: 1, default: 1 },
       limit: { type: 'integer', enum: [20, 50, 100], default: 20 },
@@ -105,7 +110,8 @@ export const addCollectionItemSchema = {
     additionalProperties: false,
     properties: {
       item_id: { type: 'string', format: 'uuid' },
-      condition: { type: 'string', enum: CONDITION_ENUM },
+      package_condition: { type: 'string', enum: PACKAGE_CONDITION_ENUM },
+      item_condition: { type: 'integer', minimum: 1, maximum: 10 },
       notes: { type: 'string', maxLength: 2000 },
     },
   },
@@ -127,7 +133,15 @@ export const collectionStatsSchema = {
   response: {
     200: {
       type: 'object',
-      required: ['total_copies', 'unique_items', 'deleted_count', 'by_franchise', 'by_condition'],
+      required: [
+        'total_copies',
+        'unique_items',
+        'deleted_count',
+        'by_franchise',
+        'by_toy_line',
+        'by_package_condition',
+        'by_item_condition',
+      ],
       additionalProperties: false,
       properties: {
         total_copies: { type: 'integer' },
@@ -146,14 +160,39 @@ export const collectionStatsSchema = {
             },
           },
         },
-        by_condition: {
+        by_toy_line: {
           type: 'array',
           items: {
             type: 'object',
-            required: ['condition', 'count'],
+            required: ['slug', 'name', 'count'],
             additionalProperties: false,
             properties: {
-              condition: { type: 'string', enum: CONDITION_ENUM },
+              slug: { type: 'string' },
+              name: { type: 'string' },
+              count: { type: 'integer' },
+            },
+          },
+        },
+        by_package_condition: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['package_condition', 'count'],
+            additionalProperties: false,
+            properties: {
+              package_condition: { type: 'string', enum: PACKAGE_CONDITION_ENUM },
+              count: { type: 'integer' },
+            },
+          },
+        },
+        by_item_condition: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['item_condition', 'count'],
+            additionalProperties: false,
+            properties: {
+              item_condition: { type: 'integer', minimum: 1, maximum: 10 },
               count: { type: 'integer' },
             },
           },
@@ -222,7 +261,8 @@ export const getCollectionItemSchema = {
 
 /** PATCH /collection/:id */
 export const patchCollectionItemSchema = {
-  description: 'Update condition and/or notes on a collection entry. Returns 404 if soft-deleted.',
+  description:
+    'Update package condition, item condition, and/or notes on a collection entry. Returns 404 if soft-deleted.',
   tags: ['collection'],
   summary: 'Update collection item',
   security: [{ bearerAuth: [] }],
@@ -231,7 +271,8 @@ export const patchCollectionItemSchema = {
     type: 'object',
     additionalProperties: false,
     properties: {
-      condition: { type: 'string', enum: CONDITION_ENUM },
+      package_condition: { type: 'string', enum: PACKAGE_CONDITION_ENUM },
+      item_condition: { type: 'integer', minimum: 1, maximum: 10 },
       notes: { type: ['string', 'null'], maxLength: 2000 },
     },
   },
@@ -277,12 +318,13 @@ export const restoreCollectionItemSchema = {
 /** Export item shape — slug-based, no UUIDs */
 const exportItemSchema = {
   type: 'object',
-  required: ['franchise_slug', 'item_slug', 'condition', 'notes', 'added_at', 'deleted_at'],
+  required: ['franchise_slug', 'item_slug', 'package_condition', 'item_condition', 'notes', 'added_at', 'deleted_at'],
   additionalProperties: false,
   properties: {
     franchise_slug: { type: 'string' },
     item_slug: { type: 'string' },
-    condition: { type: 'string', enum: CONDITION_ENUM },
+    package_condition: { type: 'string', enum: PACKAGE_CONDITION_ENUM },
+    item_condition: { type: 'integer', minimum: 1, maximum: 10 },
     notes: { type: ['string', 'null'] },
     added_at: { type: 'string' },
     deleted_at: { type: ['string', 'null'] },
@@ -326,7 +368,8 @@ const importItemSchema = {
   properties: {
     franchise_slug: { type: 'string', minLength: 1, maxLength: 120 },
     item_slug: { type: 'string', minLength: 1, maxLength: 120 },
-    condition: { type: 'string', enum: CONDITION_ENUM },
+    package_condition: { type: 'string', enum: PACKAGE_CONDITION_ENUM },
+    item_condition: { type: 'integer', minimum: 1, maximum: 10 },
     notes: { type: ['string', 'null'], maxLength: 2000 },
     added_at: { type: 'string', maxLength: 100 },
   },
@@ -335,13 +378,14 @@ const importItemSchema = {
 /** Imported item in the response — includes resolved item name */
 const importedItemSchema = {
   type: 'object',
-  required: ['franchise_slug', 'item_slug', 'item_name', 'condition'],
+  required: ['franchise_slug', 'item_slug', 'item_name', 'package_condition', 'item_condition'],
   additionalProperties: false,
   properties: {
     franchise_slug: { type: 'string' },
     item_slug: { type: 'string' },
     item_name: { type: 'string' },
-    condition: { type: 'string', enum: CONDITION_ENUM },
+    package_condition: { type: 'string', enum: PACKAGE_CONDITION_ENUM },
+    item_condition: { type: 'integer', minimum: 1, maximum: 10 },
   },
 } as const;
 

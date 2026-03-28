@@ -91,13 +91,13 @@ The `DetailSheet` component uses `<Sheet modal={false}>` which removes focus tra
 
 ## Validation & Testing
 
-| Check | Result |
-|-------|--------|
+| Check      | Result                        |
+| ---------- | ----------------------------- |
 | Unit tests | 91 files, 685 tests, all pass |
-| Lint | ✅ Pass |
-| Typecheck | ✅ Pass |
-| Format | ✅ Pass |
-| Build | ✅ Pass |
+| Lint       | ✅ Pass                       |
+| Typecheck  | ✅ Pass                       |
+| Format     | ✅ Pass                       |
+| Build      | ✅ Pass                       |
 
 ---
 

@@ -9,7 +9,7 @@ import {
   type CollectionItem,
   type CollectionStats,
   type CollectionCheckResponse,
-  type CollectionCondition,
+  type PackageCondition,
   type CollectionExportPayload,
   type CollectionImportResponse,
   type ImportMode,
@@ -17,7 +17,9 @@ import {
 
 export interface CollectionFilters {
   franchise?: string;
-  condition?: CollectionCondition;
+  toy_line?: string;
+  package_condition?: PackageCondition;
+  item_condition_min?: number;
   search?: string;
   page?: number;
   limit?: number;
@@ -26,7 +28,9 @@ export interface CollectionFilters {
 export async function listCollectionItems(filters?: CollectionFilters): Promise<CollectionItemList> {
   const params = new URLSearchParams();
   if (filters?.franchise) params.set('franchise', filters.franchise);
-  if (filters?.condition) params.set('condition', filters.condition);
+  if (filters?.toy_line) params.set('toy_line', filters.toy_line);
+  if (filters?.package_condition) params.set('package_condition', filters.package_condition);
+  if (filters?.item_condition_min !== undefined) params.set('item_condition_min', String(filters.item_condition_min));
   if (filters?.search) params.set('search', filters.search);
   if (filters?.page) params.set('page', String(filters.page));
   if (filters?.limit) params.set('limit', String(filters.limit));
@@ -47,7 +51,8 @@ export async function checkCollectionItems(itemIds: string[]): Promise<Collectio
 
 export async function addCollectionItem(body: {
   item_id: string;
-  condition?: CollectionCondition;
+  package_condition?: PackageCondition;
+  item_condition?: number;
   notes?: string;
 }): Promise<CollectionItem> {
   return apiFetchJson('/collection', CollectionItemSchema, {
@@ -58,7 +63,7 @@ export async function addCollectionItem(body: {
 
 export async function patchCollectionItem(
   id: string,
-  body: { condition?: CollectionCondition; notes?: string | null }
+  body: { package_condition?: PackageCondition; item_condition?: number; notes?: string | null }
 ): Promise<CollectionItem> {
   return apiFetchJson(`/collection/${encodeURIComponent(id)}`, CollectionItemSchema, {
     method: 'PATCH',
@@ -97,7 +102,8 @@ export async function importCollection(
       const entry: Record<string, unknown> = {
         franchise_slug: item.franchise_slug,
         item_slug: item.item_slug,
-        condition: item.condition,
+        package_condition: item.package_condition,
+        item_condition: item.item_condition,
       };
       if (item.notes != null) entry.notes = item.notes;
       if (item.added_at) entry.added_at = item.added_at;
