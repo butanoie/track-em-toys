@@ -97,9 +97,10 @@ export function EditCollectionItemDialog({ open, onOpenChange, item, mutations }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            Edit Collection - {item?.product_code ? `${item.item_name} [${item.product_code}]` : item?.item_name}
-          </DialogTitle>
+          <DialogTitle className="text-sm font-medium text-muted-foreground">Edit Collection Item</DialogTitle>
+          <p className="text-lg font-semibold text-foreground">
+            {item?.product_code ? `${item.item_name} [${item.product_code}]` : item?.item_name}
+          </p>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
