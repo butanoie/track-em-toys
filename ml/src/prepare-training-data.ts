@@ -9,8 +9,8 @@
 
 import 'dotenv/config';
 import { stat } from 'node:fs/promises';
-import { resolve } from 'node:path';
-import type { AugmentedImage, CliOptions } from './types.js';
+import { join, resolve } from 'node:path';
+import type { AugmentedImage, CliOptions, ImageCategory } from './types.js';
 import { readManifest, groupEntriesByLabel, flattenLabel } from './manifest.js';
 import { scanSourceDir } from './scan.js';
 import { analyzeBalance, printBalanceReport } from './balance.js';
@@ -29,10 +29,12 @@ function loadCliOptions(): CliOptions {
   const args = process.argv.slice(2);
   let manifestPath: string | undefined;
   let sourceDir: string | undefined;
-  let outputDir: string | undefined = process.env['ML_TRAINING_DATA_PATH'];
+  let outputDir: string | undefined;
   let targetCount = DEFAULT_TARGET_COUNT;
   let format: 'webp' | 'jpeg' = 'webp';
   let classes: string[] | null = null;
+  let category: CliOptions['category'] = null;
+  let noAugment = false;
   let noClean = false;
   let testSet = false;
 
@@ -62,6 +64,16 @@ function loadCliOptions(): CliOptions {
       if (classArg) {
         classes = classArg.split(',').map((c) => c.trim());
       }
+    } else if (arg === '--category' && i + 1 < args.length) {
+      const cat = args[++i] as ImageCategory;
+      const valid: ImageCategory[] = ['primary', 'secondary', 'package', 'accessories'];
+      if (!valid.includes(cat)) {
+        console.error(`Error: --category must be one of: ${valid.join(', ')}`);
+        process.exit(1);
+      }
+      category = cat;
+    } else if (arg === '--no-augment') {
+      noAugment = true;
     } else if (arg === '--no-clean') {
       noClean = true;
     } else if (arg === '--test-set') {
@@ -88,21 +100,35 @@ function loadCliOptions(): CliOptions {
     console.error('  npm run prepare-data -- --source-dir <path> [options]');
     console.error('Options:');
     console.error('  --manifest <path>       Path to ML export manifest JSON');
-    console.error('  --source-dir <path>     Path to seed-images directory (catalog/ + training-only/)');
+    console.error('  --source-dir <path>     Path to seed-images directory');
     console.error('  --output <path>         Output directory (default: ML_TRAINING_DATA_PATH env)');
     console.error('  --target-count <n>      Target images per class (default: 100)');
     console.error('  --format webp|jpeg      Output image format (default: webp)');
     console.error('  --classes <a,b,c>       Only process these labels (comma-separated)');
+    console.error('  --category <name>       Filter to a single category (primary|secondary|package|accessories)');
+    console.error('  --no-augment            Copy originals only, skip augmentation');
     console.error('  --no-clean              Skip cleaning class directories before writing');
-    console.error('  --test-set              Scan training-test/ tier only, copy without augmentation');
+    console.error('  --test-set              Scan test tiers only, copy without augmentation');
     process.exit(1);
   }
 
   if (!outputDir) {
+    outputDir = testSet
+      ? process.env['ML_TEST_DATA_PATH']
+      : process.env['ML_TRAINING_DATA_PATH'];
+  }
+
+  if (!outputDir) {
+    const envVar = testSet ? 'ML_TEST_DATA_PATH' : 'ML_TRAINING_DATA_PATH';
     console.error('Error: output directory is required');
-    console.error('Set ML_TRAINING_DATA_PATH environment variable or use --output <path>');
+    console.error(`Set ${envVar} environment variable or use --output <path>`);
     process.exit(1);
   }
+
+  // Append category subdirectory when using the default env path (no explicit --output)
+  const effectiveOutputDir = category && !args.includes('--output')
+    ? join(outputDir, category)
+    : outputDir;
 
   const source = manifestPath
     ? { mode: 'manifest' as const, manifestPath: resolve(manifestPath) }
@@ -110,10 +136,12 @@ function loadCliOptions(): CliOptions {
 
   return {
     source,
-    outputDir: resolve(outputDir),
+    outputDir: resolve(effectiveOutputDir),
     targetCount,
     format,
     classes,
+    category,
+    noAugment,
     noClean,
     testSet,
   };
@@ -152,8 +180,13 @@ async function main(): Promise<void> {
   console.log(`Target/class: ${options.targetCount}`);
   console.log(`Format:       ${options.format}`);
   console.log(`Clean mode:   ${options.noClean ? 'disabled' : 'enabled'}`);
+  const skipAugment = options.testSet || options.noAugment;
+  console.log(`Augmentation: ${skipAugment ? 'disabled' : 'enabled'}`);
+  if (options.category) {
+    console.log(`Category:     ${options.category}`);
+  }
   if (options.testSet) {
-    console.log(`Mode:         test-set (training-test/ tier, no augmentation)`);
+    console.log(`Mode:         test-set (test tiers, no augmentation)`);
   }
   if (options.classes) {
     console.log(`Filter:       ${options.classes.join(', ')}`);
@@ -174,7 +207,10 @@ async function main(): Promise<void> {
 
     manifest = await readManifest(options.source.manifestPath);
   } else {
-    manifest = await scanSourceDir(options.source.sourceDir, options.testSet);
+    manifest = await scanSourceDir(options.source.sourceDir, {
+      testSet: options.testSet,
+      category: options.category ?? undefined,
+    });
   }
 
   console.log(
@@ -203,8 +239,8 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // Step 3: Balance analysis (skip in test-set mode)
-  if (!options.testSet) {
+  // Step 3: Balance analysis (skip when augmentation is off)
+  if (!skipAugment) {
     const report = analyzeBalance(grouped, options.targetCount);
     printBalanceReport(report);
 
@@ -213,14 +249,14 @@ async function main(): Promise<void> {
     console.log(`Estimated output size: ~${estimatedMB} MB`);
   } else {
     const totalImages = [...grouped.values()].reduce((sum, entries) => sum + entries.length, 0);
-    console.log(`  ${grouped.size} classes, ${totalImages} images (test set — no augmentation)`);
+    console.log(`  ${grouped.size} classes, ${totalImages} images (no augmentation)`);
   }
 
-  // Step 4: Copy + augment (test-set mode: copy only)
+  // Step 4: Copy + augment
   console.log('\n[3/5] Preparing output directory...');
   await prepareOutputDir(options.outputDir);
 
-  console.log(`\n[4/5] Copying photos${options.testSet ? '' : ' and generating augmentations'}...`);
+  console.log(`\n[4/5] Copying photos${skipAugment ? '' : ' and generating augmentations'}...`);
   let totalOriginals = 0;
   let totalAugmented = 0;
   let totalSkipped = 0;
@@ -232,7 +268,7 @@ async function main(): Promise<void> {
   await processBatch(classEntries, CONCURRENCY_LIMIT, async ([label, entries]) => {
     let augmented: AugmentedImage[] = [];
 
-    if (!options.testSet) {
+    if (!skipAugment) {
       const augmentCount = Math.max(0, options.targetCount - entries.length);
       const result = await augmentClass(entries, augmentCount, TRANSFORMS, options.format);
       augmented = result.images;
@@ -254,7 +290,7 @@ async function main(): Promise<void> {
     }
 
     const flatLabel = flattenLabel(label);
-    if (options.testSet) {
+    if (skipAugment) {
       console.log(`  ${flatLabel}: ${entries.length} images`);
     } else {
       console.log(

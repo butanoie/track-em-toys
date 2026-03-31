@@ -9,15 +9,17 @@ And a valid manifest JSON exists with photo entries
 
 ### Directory Scanning
 
-#### Happy Path: Scan both tiers
+#### Happy Path: Scan training tiers (excludes catalog)
 
 ```gherkin
-Scenario: Discover images from catalog and training-only tiers
-  Given a source directory with catalog/ and training-only/ tiers
+Scenario: Discover images from training tiers only (excludes catalog)
+  Given a source directory with catalog/, training-primary/, and training-secondary/ tiers
+  And training-primary/transformers/mmc/r-03-bovis/ has 3 images
+  And training-secondary/transformers/mmc/r-03-bovis/ has 1 image
   And catalog/transformers/mmc/r-03-bovis/ has 3 images
-  And training-only/transformers/mmc/r-03-bovis/ has 2 images
   When scanSourceDir is called
-  Then it returns a Manifest with 5 entries for label "transformers/r-03-bovis"
+  Then it returns a Manifest with 4 entries for label "transformers/r-03-bovis"
+  And no entries reference catalog/ paths
 ```
 
 #### Happy Path: Correct label format
@@ -58,13 +60,51 @@ Scenario: Throw when no images found
   Then it throws an error mentioning "No images found"
 ```
 
+#### Happy Path: Category filter scans single tier
+
+```gherkin
+Scenario: Category filter scans only the matching tier
+  Given a source directory with training-primary/ and training-secondary/ tiers
+  When scanSourceDir is called with category "primary"
+  Then it returns entries only from training-primary/
+  And all entries have category "primary"
+```
+
+#### Happy Path: Category filter with testSet
+
+```gherkin
+Scenario: Category filter works with testSet
+  Given a source directory with test-primary/ and test-secondary/ tiers
+  When scanSourceDir is called with testSet and category "primary"
+  Then it returns entries only from test-primary/
+```
+
+#### Happy Path: Entries include category metadata
+
+```gherkin
+Scenario: Populates category from tier name
+  Given a source directory with training-primary/ and training-secondary/ tiers
+  When scanSourceDir is called
+  Then entries from training-primary/ have category "primary"
+  And entries from training-secondary/ have category "secondary"
+```
+
+#### Error: Category filter with no matching images
+
+```gherkin
+Scenario: Category filter with no matching images throws
+  Given a source directory with no training-package/ tier
+  When scanSourceDir is called with category "package"
+  Then it throws an error mentioning "No images found"
+```
+
 #### Graceful: Missing tier
 
 ```gherkin
-Scenario: Missing training-only tier does not cause failure
-  Given a source directory with only catalog/ (no training-only/)
+Scenario: Missing training tiers do not cause failure
+  Given a source directory with only training-primary/ (no other training tiers)
   When scanSourceDir is called
-  Then it returns entries from catalog/ only
+  Then it returns entries from training-primary/ only
 ```
 
 ### Manifest Parsing

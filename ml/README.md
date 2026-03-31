@@ -27,47 +27,50 @@ ml/
 
 ## Training Data Preparation
 
-Two mutually exclusive input modes, plus a test set mode:
+Two mutually exclusive input modes, with category filtering and test set support:
 
 ```bash
 # From API manifest (exported by POST /catalog/ml-export)
 npm run prepare-data -- --manifest <path>
 
-# From seed-images directory (catalog/ + training-only/ tiers)
+# From seed-images directory (all training tiers)
 npm run prepare-data -- --source-dir <path>
 
-# Prepare held-out test set (training-test/ tier only, no augmentation)
-npm run prepare-test-data -- --source-dir <path> --output <path>
+# Prepare a single category (e.g., primary model only)
+npm run prepare-data -- --source-dir <path> --category primary
+
+# Prepare held-out test set (test tiers only, no augmentation)
+npm run prepare-test-data -- --source-dir <path>
+npm run prepare-test-data -- --source-dir <path> --category primary
 ```
 
 ### Seed Images Directory Structure
 
 ```
 {source-dir}/
-  catalog/                          # API-importable reference photos
-    {franchise}/
-      {manufacturer}/
-        {item-slug}/
-          image-1.jpeg
-  training-only/                    # ML training only (not catalog-quality)
-    {franchise}/
-      {manufacturer}/
-        {item-slug}/
-          image-2.jpeg
-  training-test/                    # Held-out evaluation set (never used for training)
-    {franchise}/
-      {manufacturer}/
-        {item-slug}/
-          image-3.jpeg
+  catalog/                          # Product gallery DB only — excluded from ML training
+    {franchise}/{manufacturer}/{item-slug}/
+  training-primary/                 # Primary product photos (robot mode, hero shots)
+    {franchise}/{manufacturer}/{item-slug}/
+  training-secondary/               # Alternate views (alt-mode, vehicle, back angles)
+    {franchise}/{manufacturer}/{item-slug}/
+  training-package/                 # Packaging photos (optional)
+    {franchise}/{manufacturer}/{item-slug}/
+  training-accessories/             # Accessory close-ups (optional)
+    {franchise}/{manufacturer}/{item-slug}/
+  test-primary/                     # Held-out test set for primary model
+    {franchise}/{manufacturer}/{item-slug}/
+  test-secondary/                   # Held-out test set for secondary model
+    {franchise}/{manufacturer}/{item-slug}/
   _unmatched/                       # Ignored by tooling
 ```
 
-`catalog/` and `training-only/` are merged per item during training data preparation. `training-test/` is prepared separately via `--test-set` for unbiased model evaluation with Create ML's `evaluation(on:)` API.
+Without `--category`, all training tiers are merged per item. With `--category primary`, only `training-primary/` is scanned. Test tiers (`test-primary/`, `test-secondary/`, etc.) are scanned via `--test-set` and are never augmented.
 
 The output is a flat folder-per-class structure for Create ML:
 
 ```
-ML_TRAINING_DATA_PATH/
+ML_TRAINING_DATA_PATH/{category}/
   {franchise}__{item-slug}/
     image-1.jpeg                    # Original
     aug-0-hflip.webp               # Augmented
@@ -77,12 +80,13 @@ ML_TRAINING_DATA_PATH/
 ### Common Options
 
 ```bash
---output <path>         # Output directory (default: ML_TRAINING_DATA_PATH env)
+--output <path>         # Output directory (default: ML_TRAINING_DATA_PATH or ML_TEST_DATA_PATH env)
 --target-count <n>      # Target images per class (default: 100)
 --format webp|jpeg      # Output image format (default: webp)
 --classes <a,b,c>       # Only process specific labels (comma-separated)
+--category <name>       # Filter to a single category (primary|secondary|package|accessories)
 --no-clean              # Skip cleaning class directories before writing
---test-set              # Scan training-test/ tier only, copy without augmentation
+--test-set              # Scan test tiers only, copy without augmentation
 ```
 
 ## Constraints

@@ -294,7 +294,7 @@ Train image classification models using the collector's own catalog photos.
 - ✅ Export script with two input modes: API manifest (`--manifest`) and directory scan (`--source-dir`)
 - ✅ Data augmentation: 15 deterministic transforms (flip, rotation ±10°, brightness ±20%, compounds)
 - ✅ Class balance analysis with adaptive augmentation (target count per class, default 100)
-- ✅ Seed-images directory structure: `{tier}/{franchise}/{manufacturer}/{item}/` with `catalog/` and `training-only/` tiers
+- ✅ Seed-images directory structure: `{tier}/{franchise}/{manufacturer}/{item}/` with category-based tiers (`training-primary`, `training-secondary`, `training-package`, `training-accessories` + matching `test-*` tiers)
 - ✅ Output validation: Create ML format, minimum 10 images per class, clean-on-rerun
 - ✅ 87 unit tests across 7 test files
 

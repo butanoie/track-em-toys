@@ -13,18 +13,19 @@
 
 ## Training Data Source
 
-- ML training uses **catalog photos** from the `item_photos` table (shared, app-managed reference images)
-- Catalog photos are NOT user-private PII — no consent mechanism needed
+- ML training uses seed images organized by category — `catalog/` is excluded (product gallery only)
+- Training tiers: `training-primary`, `training-secondary`, `training-package`, `training-accessories`
+- Test tiers: `test-primary`, `test-secondary`, `test-package`, `test-accessories`
+- `--category` flag filters to a single tier (e.g., `--category primary` → `training-primary/` only)
+- Without `--category`, all training tiers are merged per item
 - Two input modes (mutually exclusive):
   - `npm run prepare-data -- --manifest <path>` — reads API export manifest JSON
   - `npm run prepare-data -- --source-dir <path>` — scans seed-images directory tree directly
-- Seed-images structure: `{sourceDir}/{tier}/{franchise}/{manufacturer}/{item}/{images}` where tier is `catalog/` or `training-only/`
-- `catalog/` images are API-importable reference photos; `training-only/` images are for ML training only
-- Both tiers are merged per item during training data preparation
+- Seed-images structure: `{sourceDir}/{tier}/{franchise}/{manufacturer}/{item}/{images}`
 - `_unmatched/` directories are skipped at any level
 - User collection photos (private, RLS-protected) are NOT used for training
-- Three tiers in seed-images: `catalog/` (API-importable), `training-only/` (ML training only), `training-test/` (held-out evaluation set — excluded from training, never augmented)
-- `prepare-data` scans `catalog/` + `training-only/`; `prepare-test-data` (or `--test-set` flag) scans only `training-test/`
+- `prepare-data` scans training tiers; `prepare-test-data` (or `--test-set` flag) scans test tiers only (no augmentation)
+- Default output: `ML_TRAINING_DATA_PATH` env for training, `ML_TEST_DATA_PATH` env for test sets
 
 ## Phase 4.0 Pipeline (planned)
 
@@ -160,7 +161,8 @@ Each subdirectory name becomes a class label in the trained model.
 cd ml && npm install           # Install dependencies (sharp, tsx, typescript)
 cd ml && npm run prepare-data -- --manifest <path>     # Prepare from API manifest
 cd ml && npm run prepare-data -- --source-dir <path>   # Prepare from seed-images directory
-cd ml && npm run prepare-test-data -- --source-dir <path> --output <path>  # Prepare held-out test set (no augmentation)
+cd ml && npm run prepare-data -- --source-dir <path> --category primary  # Single category
+cd ml && npm run prepare-test-data -- --source-dir <path>               # Prepare held-out test set (no augmentation)
 cd ml && npm test              # Run tests + lint
 cd ml && npm run typecheck     # TypeScript check only
 cd ml && npm run lint          # ESLint only

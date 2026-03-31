@@ -12,7 +12,11 @@ Two test classes are available: Commander Stack (18 photos) and Margh (19 photos
 
 ### 2026-03-22 Extension: Directory Scan Mode
 
-A `--source-dir` flag was added as an alternative to `--manifest`, allowing the pipeline to scan a seed-images directory tree directly instead of requiring an API export. This supports larger-scale training from curated image collections stored on external drives, organized as `{tier}/{franchise}/{manufacturer}/{item}/{images}`. Two tiers (`catalog/` and `training-only/`) are merged per item. Directories named `_unmatched/` are skipped.
+A `--source-dir` flag was added as an alternative to `--manifest`, allowing the pipeline to scan a seed-images directory tree directly instead of requiring an API export. This supports larger-scale training from curated image collections stored on external drives, organized as `{tier}/{franchise}/{manufacturer}/{item}/{images}`. Directories named `_unmatched/` are skipped.
+
+### 2026-03-30 Extension: Category-Based Tier System
+
+The tier system was restructured from 3 tiers (`catalog/`, `training-only/`, `training-test/`) to category-based tiers: `training-primary`, `training-secondary`, `training-package`, `training-accessories` for training data, and `test-primary`, `test-secondary`, `test-package`, `test-accessories` for held-out evaluation sets. The `catalog/` tier is now excluded from ML training entirely (used only for the product gallery DB). A `--category` flag filters to a single category (e.g., `--category primary` scans only `training-primary/`). A `--no-augment` flag copies originals without augmentation. Output defaults to `ML_TEST_DATA_PATH` env when `--test-set` is used. Category subdirectories are auto-appended to the output path when using env defaults.
 
 ## Decision
 
