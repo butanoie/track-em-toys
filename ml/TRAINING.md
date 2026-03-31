@@ -39,3 +39,53 @@ Every training script must include a header comment documenting:
 
 - Log accuracy metrics to stdout during training
 - Save confusion matrix or evaluation summary alongside the model when possible
+
+## PyTorch Training Workflow
+
+### Prerequisites
+
+Install [uv](https://docs.astral.sh/uv/):
+```bash
+brew install uv
+cd ml && uv sync
+```
+
+### Training
+
+```bash
+# Prepare training data (Node.js pipeline -- unchanged)
+npm run prepare-data -- --source-dir <seed-images-path> --category primary
+
+# Train model
+npm run train -- --category primary
+npm run train -- --category primary --epochs 25 --lr 0.001 --batch-size 32
+
+# Export to ONNX + Core ML
+npm run export-model -- --checkpoint models/<checkpoint>.pt
+
+# Validate cross-format agreement on held-out test set
+npm run validate-model -- --onnx-model models/<model>.onnx --coreml-model models/<model>.mlmodel --test-data-dir <test-data-path>
+```
+
+### Two-Phase Training
+
+Training uses progressive unfreezing:
+1. **Phase 1** (first 1/3 epochs): Base MobileNetV3 layers frozen, only classifier head trains
+2. **Phase 2** (remaining epochs): Last 3 InvertedResidual blocks unfrozen, learning rate reduced 10x
+
+This prevents overfitting with small datasets while allowing the model to adapt features.
+
+### Validation Split
+
+Training data is split 80/20 (stratified, seed=42) into train and validation sets. The held-out test set (`ML_TEST_DATA_PATH`) is only used by `validate.py` for unbiased final evaluation.
+
+### Model Output
+
+Training produces:
+- `{category}-classifier-{date}-c{N}-a{acc}.pt` -- best checkpoint by validation accuracy
+- `{category}-classifier-{date}-c{N}-a{acc}-metrics.json` -- per-class accuracy, confusion matrix, hyperparams
+
+Export produces:
+- `{stem}.onnx` -- for web inference (onnxruntime-web)
+- `{stem}.mlmodel` -- for iOS inference (Core ML)
+- `{stem}-metadata.json` -- label map, input shape, accuracy for the web client

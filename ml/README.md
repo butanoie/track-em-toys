@@ -10,19 +10,26 @@ Phase 4.0a (Training Data Preparation) is implemented. The pipeline supports two
 
 ```
 ml/
-├── src/
-│   ├── prepare-training-data.ts  # CLI entry point (5-step pipeline)
-│   ├── scan.ts                   # Directory scanner for seed images
-│   ├── manifest.ts               # Manifest JSON parser + label utilities
-│   ├── balance.ts                # Class balance analysis and reporting
-│   ├── transforms.ts             # 15 deterministic augmentation transforms
-│   ├── augment.ts                # Adaptive augmentation orchestrator
-│   ├── copy.ts                   # File copy with idempotency + clean-on-rerun
-│   ├── validate.ts               # Output validation (Create ML format)
-│   ├── types.ts                  # Shared interfaces
-│   └── *.test.ts                 # Companion tests for each module
-├── models/                       # Trained .mlmodel output files
-└── CLAUDE.md                     # Agent rules for this module
+├── src/                            # Node.js data preparation pipeline
+│   ├── prepare-training-data.ts    # CLI entry point (5-step pipeline)
+│   ├── scan.ts                     # Directory scanner for seed images
+│   ├── manifest.ts                 # Manifest JSON parser + label utilities
+│   ├── balance.ts                  # Class balance analysis and reporting
+│   ├── transforms.ts               # 15 deterministic augmentation transforms
+│   ├── augment.ts                  # Adaptive augmentation orchestrator
+│   ├── copy.ts                     # File copy with idempotency + clean-on-rerun
+│   ├── validate.ts                 # Output validation (Create ML format)
+│   ├── types.ts                    # Shared interfaces
+│   └── *.test.ts                   # Companion tests for each module
+├── scripts/                        # Python training pipeline
+│   ├── common.py                   # Shared utilities (device, transforms, model builder)
+│   ├── train.py                    # MobileNetV3-Small fine-tuning
+│   ├── export.py                   # Dual ONNX + Core ML export
+│   ├── validate.py                 # Cross-format agreement validation
+│   └── tests/                      # pytest unit + integration tests
+├── models/                         # Trained model output files
+├── pyproject.toml                  # Python dependencies (managed by uv)
+└── CLAUDE.md                       # Agent rules for this module
 ```
 
 ## Training Data Preparation
@@ -98,11 +105,37 @@ ML_TRAINING_DATA_PATH/{category}/
 - **Minimum images:** 10 per class (enforced by validation)
 - **Labels:** Use `__` delimiter (e.g., `transformers__ft-04-scoria`) — Create ML requires single-level directories
 
+## Model Training (PyTorch)
+
+Requires [uv](https://docs.astral.sh/uv/) for Python dependency management:
+
+```bash
+brew install uv
+cd ml && uv sync       # Create venv + install Python dependencies
+```
+
+### Training workflow
+
+```bash
+# 1. Train model (MobileNetV3-Small, progressive unfreezing)
+npm run train -- --category primary
+
+# 2. Export to ONNX (web) + Core ML (iOS)
+npm run export-model -- --checkpoint models/<checkpoint>.pt
+
+# 3. Validate cross-format agreement on held-out test set
+npm run validate-model -- --onnx-model models/<model>.onnx \
+  --coreml-model models/<model>.mlmodel --test-data-dir <path>
+```
+
+Training CLI flags: `--epochs` (default: 25), `--lr` (default: 0.001), `--batch-size` (default: 32), `--resume <checkpoint.pt>`.
+
 ## Build Commands
 
 ```bash
 npm install           # Install dependencies (sharp, tsx, typescript)
-npm test              # Run tests + lint
+npm test              # Run tests + lint (TypeScript)
+npm run test:python   # Run Python tests (pytest)
 npm run typecheck     # TypeScript check only
 npm run lint          # ESLint only
 npm run format        # Prettier format

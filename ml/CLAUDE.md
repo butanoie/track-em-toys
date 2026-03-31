@@ -163,7 +163,11 @@ cd ml && npm run prepare-data -- --manifest <path>     # Prepare from API manife
 cd ml && npm run prepare-data -- --source-dir <path>   # Prepare from seed-images directory
 cd ml && npm run prepare-data -- --source-dir <path> --category primary  # Single category
 cd ml && npm run prepare-test-data -- --source-dir <path>               # Prepare held-out test set (no augmentation)
-cd ml && npm test              # Run tests + lint
+cd ml && npm run train -- --category primary                    # Train PyTorch model
+cd ml && npm run export-model -- --checkpoint models/<ckpt>.pt  # Export ONNX + Core ML
+cd ml && npm run validate-model -- --onnx-model models/<m>.onnx --coreml-model models/<m>.mlmodel --test-data-dir <path>
+cd ml && npm test              # Run tests + lint (TypeScript)
+cd ml && npm run test:python   # Run Python tests (pytest)
 cd ml && npm run typecheck     # TypeScript check only
 cd ml && npm run lint          # ESLint only
 cd ml && npm run format        # Prettier format
