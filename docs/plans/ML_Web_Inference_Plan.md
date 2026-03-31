@@ -22,7 +22,7 @@ The existing `ml/src/` Node.js pipeline (scan, augment, copy, validate) is uncha
 ```
 Previous:  Create ML (.mlmodel) --[fragile conversion]--> ONNX (.onnx) --> browser
 New:       PyTorch (.pt)        --[torch.onnx.export]---> ONNX (.onnx) --> browser
-           PyTorch (.pt)        --[coremltools.convert]--> Core ML (.mlmodel) --> iOS
+           PyTorch (.pt)        --[torch.jit.trace + ct.convert]--> Core ML (.mlpackage) --> iOS
 ```
 
 New files:

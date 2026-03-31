@@ -12,11 +12,8 @@ ios/track-em-toys/*.apps.googleusercontent.com.plist
 ml/training-data/**/*.jpg
 ml/training-data/**/*.png
 ml/training-data/**/*.webp
-# Track .mlmodel files (they're ~7MB, worth versioning)
-!ml/models/*.mlmodel
-# Exclude heavy reproducible artifacts
-ml/models/*.pt
-ml/models/*.onnx
+# Model artifacts — stored in private data repo, not tracked here
+ml/models/
 
 # Python ML environment
 ml/.venv/

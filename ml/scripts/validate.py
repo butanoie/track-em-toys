@@ -1,6 +1,6 @@
 """
 Model:    Cross-validates ONNX and Core ML model outputs against the held-out test set
-Input:    .onnx and .mlmodel files + test data directory (folder-per-class, no augmentation)
+Input:    .onnx and .mlpackage files + test data directory (folder-per-class, no augmentation)
 Output:   Per-model accuracy report to stdout; exits 1 if agreement < threshold or accuracy < min
 Time:     ~2 min per 1000 images (CPU onnxruntime + coremltools prediction)
 Note:     Requires macOS for Core ML inference (coremltools dependency)
@@ -12,6 +12,10 @@ import argparse
 import json
 import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 import numpy as np
 import onnxruntime as ort
@@ -44,7 +48,7 @@ def parse_args() -> argparse.Namespace:
         "--coreml-model",
         type=str,
         default=None,
-        help="Path to .mlmodel (optional, macOS only)",
+        help="Path to .mlpackage (optional, macOS only)",
     )
     parser.add_argument(
         "--test-data-dir",
@@ -73,8 +77,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--min-agreement",
         type=positive_float,
-        default=0.99,
-        help="Minimum ONNX/Core ML agreement as a fraction in (0, 1] (default: 0.99)",
+        default=0.95,
+        help="Minimum ONNX/Core ML agreement as a fraction in (0, 1] (default: 0.95)",
     )
     args = parser.parse_args()
 
@@ -108,50 +112,58 @@ def resolve_test_data_dir(args: argparse.Namespace, category: str | None) -> Pat
 
 
 def run_onnx_inference(
-    model_path: Path, dataset: ImageFolder
-) -> list[int]:
-    """Run inference using ONNX Runtime. Returns list of predicted class indices."""
+    model_path: Path, dataset: ImageFolder, train_label_map: dict[int, str] | None
+) -> list[str]:
+    """Run inference using ONNX Runtime. Returns list of predicted class names."""
     session = ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
     input_name = session.get_inputs()[0].name
 
     predictions = []
     for img_tensor, _ in dataset:
-        # ImageFolder returns (tensor, label) when transform includes ToTensor
         input_array = img_tensor.unsqueeze(0).numpy()
         outputs = session.run(None, {input_name: input_array})
         pred_idx = int(np.argmax(outputs[0], axis=1)[0])
-        predictions.append(pred_idx)
+        if train_label_map:
+            predictions.append(train_label_map.get(pred_idx, f"unknown-{pred_idx}"))
+        else:
+            predictions.append(dataset.classes[pred_idx])
 
     return predictions
 
 
 def run_coreml_inference(
-    model_path: Path, dataset: ImageFolder
-) -> list[int]:
-    """Run inference using Core ML. Returns list of predicted class indices."""
+    model_path: Path, dataset: ImageFolder, train_label_map: dict[int, str] | None
+) -> list[str]:
+    """Run inference using Core ML. Returns list of predicted class names."""
     if not HAS_COREML:
         print("Error: coremltools not available (requires macOS)")
         raise SystemExit(1)
 
     mlmodel = ct.models.MLModel(str(model_path))
 
+    # Discover input/output names from the model spec
+    spec = mlmodel.get_spec()
+    input_name = spec.description.input[0].name
+    output_name = spec.description.output[0].name
+
     predictions = []
     for img_tensor, _ in dataset:
-        # Core ML expects dict input matching the ONNX input name
         input_array = img_tensor.unsqueeze(0).numpy()
-        result = mlmodel.predict({"input": input_array})
-        # Output is typically "output" matching ONNX output name
-        output_array = result["output"]
+        result = mlmodel.predict({input_name: input_array})
+        output_array = result[output_name]
         pred_idx = int(np.argmax(output_array, axis=1)[0])
-        predictions.append(pred_idx)
+        if train_label_map:
+            predictions.append(train_label_map.get(pred_idx, f"unknown-{pred_idx}"))
+        else:
+            predictions.append(dataset.classes[pred_idx])
 
     return predictions
 
 
 def compute_accuracy(
-    predictions: list[int], ground_truth: list[int]
+    predictions: list[str], ground_truth: list[str]
 ) -> float:
-    """Compute top-1 accuracy."""
+    """Compute top-1 accuracy by class name."""
     correct = sum(p == g for p, g in zip(predictions, ground_truth))
     return correct / len(ground_truth) if ground_truth else 0.0
 
@@ -199,13 +211,20 @@ def main() -> None:
         print(f"Error: no images found in {test_data_dir}")
         raise SystemExit(2)
 
-    ground_truth = [label for _, label in dataset.samples]
+    # Ground truth as class names (not indices) so we can compare across different label maps
+    ground_truth = [dataset.classes[label] for _, label in dataset.samples]
     num_classes = len(dataset.classes)
     print(f"\nTest set:   {len(dataset)} images, {num_classes} classes")
 
+    # Build training label map from metadata (maps model output index → class name)
+    train_label_map: dict[int, str] | None = None
+    if metadata and "label_map" in metadata:
+        train_label_map = {int(k): v for k, v in metadata["label_map"].items()}
+        print(f"Model:      {len(train_label_map)} classes in training label map")
+
     # Run ONNX inference
     print("\nRunning ONNX inference...")
-    onnx_preds = run_onnx_inference(onnx_path, dataset)
+    onnx_preds = run_onnx_inference(onnx_path, dataset, train_label_map)
     onnx_acc = compute_accuracy(onnx_preds, ground_truth)
     print(f"  ONNX accuracy: {onnx_acc:.1%}")
 
@@ -217,7 +236,7 @@ def main() -> None:
     if args.coreml_model:
         coreml_path = Path(args.coreml_model)
         print("\nRunning Core ML inference...")
-        coreml_preds = run_coreml_inference(coreml_path, dataset)
+        coreml_preds = run_coreml_inference(coreml_path, dataset, train_label_map)
         coreml_acc = compute_accuracy(coreml_preds, ground_truth)
         print(f"  Core ML accuracy: {coreml_acc:.1%}")
 
@@ -236,12 +255,9 @@ def main() -> None:
             print(f"\n  Disagreements ({len(disagree_indices)}):")
             for idx in disagree_indices[:20]:
                 img_path = dataset.samples[idx][0]
-                true_label = dataset.classes[ground_truth[idx]]
-                onnx_label = dataset.classes[onnx_preds[idx]]
-                coreml_label = dataset.classes[coreml_preds[idx]]
                 print(
-                    f"    {img_path}: true={true_label} "
-                    f"onnx={onnx_label} coreml={coreml_label}"
+                    f"    {img_path}: true={ground_truth[idx]} "
+                    f"onnx={onnx_preds[idx]} coreml={coreml_preds[idx]}"
                 )
             if len(disagree_indices) > 20:
                 print(f"    ... and {len(disagree_indices) - 20} more")

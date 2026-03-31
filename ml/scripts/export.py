@@ -2,7 +2,7 @@
 Model:    Exports trained MobileNetV3-Small checkpoint to ONNX and Core ML
 Input:    .pt checkpoint from train.py + sibling metrics JSON (auto-located)
 Output:   {output-dir}/{stem}.onnx
-          {output-dir}/{stem}.mlmodel
+          {output-dir}/{stem}.mlpackage
           {output-dir}/{stem}-metadata.json
 Time:     ~30s on any device (export is CPU-bound graph tracing)
 Note:     Requires macOS for Core ML export (coremltools dependency)
@@ -64,7 +64,7 @@ def export_onnx(model: torch.nn.Module, output_path: Path) -> None:
         model,
         dummy_input,
         str(output_path),
-        opset_version=17,
+        opset_version=18,
         input_names=["input"],
         output_names=["output"],
         dynamic_axes={"input": {0: "batch"}},
@@ -78,11 +78,17 @@ def export_onnx(model: torch.nn.Module, output_path: Path) -> None:
     print(f"  ONNX:     {output_path} ({size_mb:.1f} MB)")
 
 
-def export_coreml(onnx_path: Path, output_path: Path) -> None:
-    """Convert ONNX model to Core ML format."""
-    mlmodel = ct.converters.convert(
-        str(onnx_path),
-        source="onnx",
+def export_coreml(model: torch.nn.Module, output_path: Path) -> None:
+    """Convert PyTorch model directly to Core ML format."""
+    model = model.cpu()
+    model.eval()
+
+    dummy_input = torch.randn(1, 3, INPUT_SIZE, INPUT_SIZE)
+    traced_model = torch.jit.trace(model, dummy_input)
+
+    mlmodel = ct.convert(
+        traced_model,
+        inputs=[ct.TensorType(name="input", shape=dummy_input.shape)],
         minimum_deployment_target=ct.target.iOS16,
     )
 
@@ -141,9 +147,9 @@ def main() -> None:
     onnx_path = output_dir / f"{stem}.onnx"
     export_onnx(model, onnx_path)
 
-    # Export Core ML from ONNX
-    mlmodel_path = output_dir / f"{stem}.mlmodel"
-    export_coreml(onnx_path, mlmodel_path)
+    # Export Core ML directly from PyTorch
+    mlmodel_path = output_dir / f"{stem}.mlpackage"
+    export_coreml(model, mlmodel_path)
 
     # Write metadata JSON for the web client
     metadata = {

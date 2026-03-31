@@ -4,12 +4,15 @@
 
 ## Rules
 
-- Target model size: ≤ 10 MB (typically ~7 MB with transfer learning). Monitor with `du -sh models/*.mlmodel`.
-- All inference runs on-device via Core ML — no server-side ML calls
+- Target model size: ≤ 10 MB (typically ~5-7 MB with transfer learning)
+- Training: PyTorch MobileNetV3-Small with progressive unfreezing. Dual export: ONNX (web) + Core ML (iOS)
+- Inference: client-side via onnxruntime-web (Phase 4.0c), on-device via Core ML on iOS (Phase 2.0)
 - Training scripts must be idempotent and reproducible
 - ESLint `preserve-caught-error` rule: when re-throwing a new Error from a catch block, always attach `{ cause: err }`
-- Training data lives in `ML_TRAINING_DATA_PATH` (external, private data repo), model output in `models/`
-- Labels are flattened with `__` delimiter: `franchise__item-slug` (Create ML requires single-level directories)
+- Training data lives in `ML_TRAINING_DATA_PATH` (external, private data repo), model output in `models/` (gitignored, stored in private data repo)
+- Labels are flattened with `__` delimiter: `franchise__item-slug` (single-level directories required)
+- Python dependencies managed by `uv` + `pyproject.toml`; run `uv sync` after clone
+- Model artifacts (`.pt`, `.onnx`, `.mlpackage`, JSON) are NOT tracked in git — they live in the private data repo
 
 ## Training Data Source
 
@@ -27,13 +30,14 @@
 - `prepare-data` scans training tiers; `prepare-test-data` (or `--test-set` flag) scans test tiers only (no augmentation)
 - Default output: `ML_TRAINING_DATA_PATH` env for training, `ML_TEST_DATA_PATH` env for test sets
 
-## Phase 4.0 Pipeline (planned)
+## Phase 4.0 Pipeline
 
-- **4.0a Training Data Prep:** Export script, data augmentation (rotation, scale, brightness), class balance analysis
-- **4.0b Model Training:** Create ML Image Classification with transfer learning, ~7 MB target, ~80% accuracy with 80+ images/class
-- **4.0c Model Serving:** Metadata API (`GET /ml/models`), optional server-side inference (`POST /ml/classify`), or ONNX for web
-- **4.0d Retraining:** Documented workflow (export → train → evaluate → deploy), quality gates (minimum accuracy threshold)
-- Model versioning: naming convention includes training date, class count, accuracy metric
+- **4.0a Training Data Prep:** ✅ Export script, data augmentation, class balance analysis, category-based tier system
+- **4.0b Model Training:** ✅ PyTorch MobileNetV3-Small with transfer learning, progressive unfreezing, dual ONNX + Core ML export
+- **4.0c Model Serving:** Metadata API (`GET /ml/models`), client-side inference via onnxruntime-web, optional server-side fallback
+- **4.0d Retraining:** Documented workflow (prepare-data → train → export → validate → deploy), quality gates (min accuracy + cross-format agreement)
+- Model versioning: auto-generated filenames with training date, class count, accuracy metric
+- Python environment: `pyproject.toml` + `uv` for dependency management; `uv sync` to install
 
 ## Before Writing New Code
 
@@ -52,7 +56,7 @@ Before reporting any task complete, run these verifications and fix all failures
 ### 1. Model file size
 
 ```bash
-du -sh models/*.mlmodel 2>/dev/null || echo "No .mlmodel files yet"
+du -sh models/*.mlpackage models/*.onnx 2>/dev/null || echo "No model files yet"
 ```
 
 Each model must be ≤ 10 MB.
@@ -84,7 +88,8 @@ Must return zero results. Use environment variables for external service credent
 ### 5. Tests and lint
 
 ```bash
-cd ml && npm test
+cd ml && npm test           # TypeScript tests + ESLint
+cd ml && npm run test:python # Python tests (pytest)
 ```
 
 All tests must pass with zero failures. ESLint must have zero warnings.
@@ -143,7 +148,7 @@ func classifyToy(image: CVPixelBuffer) async throws -> String {
 ### Training data organization
 
 ```
-ML_TRAINING_DATA_PATH/
+ML_TRAINING_DATA_PATH/{category}/
   transformers__optimus-prime/
     {photoId}-original.webp
     aug-0-hflip.webp
@@ -152,20 +157,22 @@ ML_TRAINING_DATA_PATH/
     {photoId}-original.webp
 ```
 
-Labels use `__` delimiter (not `/`) because Create ML requires single-level directories.
+Labels use `__` delimiter (not `/`) for single-level directories.
 Each subdirectory name becomes a class label in the trained model.
+Two separate models: primary (robot mode) and secondary (alt-mode/vehicle).
 
 ### Build Commands
 
 ```bash
-cd ml && npm install           # Install dependencies (sharp, tsx, typescript)
+cd ml && npm install           # Install Node.js dependencies (sharp, tsx, typescript)
+cd ml && uv sync               # Install Python dependencies (torch, coremltools, etc.)
 cd ml && npm run prepare-data -- --manifest <path>     # Prepare from API manifest
 cd ml && npm run prepare-data -- --source-dir <path>   # Prepare from seed-images directory
 cd ml && npm run prepare-data -- --source-dir <path> --category primary  # Single category
 cd ml && npm run prepare-test-data -- --source-dir <path>               # Prepare held-out test set (no augmentation)
 cd ml && npm run train -- --category primary                    # Train PyTorch model
 cd ml && npm run export-model -- --checkpoint models/<ckpt>.pt  # Export ONNX + Core ML
-cd ml && npm run validate-model -- --onnx-model models/<m>.onnx --coreml-model models/<m>.mlmodel --test-data-dir <path>
+cd ml && npm run validate-model -- --onnx-model models/<m>.onnx --coreml-model models/<m>.mlpackage --category primary
 cd ml && npm test              # Run tests + lint (TypeScript)
 cd ml && npm run test:python   # Run Python tests (pytest)
 cd ml && npm run typecheck     # TypeScript check only

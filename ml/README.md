@@ -98,12 +98,13 @@ ML_TRAINING_DATA_PATH/{category}/
 
 ## Constraints
 
-- **Model size:** 10 MB maximum (typically ~7 MB with transfer learning)
-- **Inference:** On-device only via Core ML — no server-side ML calls
+- **Model size:** 10 MB maximum (typically ~5-7 MB with transfer learning)
+- **Inference:** Client-side via onnxruntime-web (Phase 4.0c), on-device via Core ML on iOS (Phase 2.0)
 - **Training scripts:** Must be idempotent, use relative paths only, contain no credentials
-- **Training data:** Follows Create ML's `<class-name>/<images>` folder format
+- **Training data:** Folder-per-class structure: `<franchise__item-slug>/<images>`
 - **Minimum images:** 10 per class (enforced by validation)
-- **Labels:** Use `__` delimiter (e.g., `transformers__ft-04-scoria`) — Create ML requires single-level directories
+- **Labels:** Use `__` delimiter (e.g., `transformers__ft-04-scoria`) — single-level directories
+- **Model artifacts:** Not tracked in git — stored in private data repo
 
 ## Model Training (PyTorch)
 
@@ -125,7 +126,7 @@ npm run export-model -- --checkpoint models/<checkpoint>.pt
 
 # 3. Validate cross-format agreement on held-out test set
 npm run validate-model -- --onnx-model models/<model>.onnx \
-  --coreml-model models/<model>.mlmodel --test-data-dir <path>
+  --coreml-model models/<model>.mlpackage --category primary
 ```
 
 Training CLI flags: `--epochs` (default: 25), `--lr` (default: 0.001), `--batch-size` (default: 32), `--resume <checkpoint.pt>`.

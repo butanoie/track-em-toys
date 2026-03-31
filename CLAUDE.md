@@ -52,7 +52,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - iOS/macOS: Swift 6, SwiftUI, SwiftData + CloudKit sync, MVVM w/ @Observable
 - Web: React 19 + TypeScript, Shadcn/ui, Tailwind CSS 4, TanStack Query
 - Backend: Node.js 22 LTS, Fastify 5, TypeScript, PostgreSQL 17, ES256 JWT
-- ML: Core ML + Create ML, transfer learning image classification (≤ 10 MB models). Create ML requires single-level directories for `.labeledDirectories(at:)` — labels use `franchise__item` (`__` delimiter, not `/`)
+- ML: PyTorch MobileNetV3-Small with transfer learning (≤ 10 MB models). Dual export: ONNX (web via onnxruntime-web) + Core ML (iOS). Training data uses single-level directories — labels use `franchise__item` (`__` delimiter, not `/`). Python deps managed by `uv`.
 
 ## Data Architecture
 

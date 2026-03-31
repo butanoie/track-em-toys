@@ -12,6 +12,10 @@ from __future__ import annotations
 import argparse
 import os
 from datetime import datetime, timezone
+
+from dotenv import load_dotenv
+
+load_dotenv()
 from pathlib import Path
 
 import torch
@@ -102,9 +106,38 @@ def build_data_loaders(
     targets = [s[1] for s in dataset.samples]
     indices = list(range(len(dataset)))
 
-    train_idx, val_idx = train_test_split(
-        indices, test_size=VAL_SPLIT, stratify=targets, random_state=SEED
-    )
+    # Classes with <2 samples can't be stratified — put them all in training
+    from collections import Counter
+
+    class_counts = Counter(targets)
+    splittable_idx = [i for i in indices if class_counts[targets[i]] >= 2]
+    unsplittable_idx = [i for i in indices if class_counts[targets[i]] < 2]
+
+    if unsplittable_idx:
+        small_classes = sorted(
+            {dataset.classes[targets[i]] for i in unsplittable_idx}
+        )
+        print(
+            f"  Note: {len(small_classes)} classes with <2 images go to training only: "
+            f"{', '.join(small_classes[:5])}"
+            f"{'...' if len(small_classes) > 5 else ''}"
+        )
+
+    if splittable_idx:
+        splittable_targets = [targets[i] for i in splittable_idx]
+        split_train, split_val = train_test_split(
+            splittable_idx,
+            test_size=VAL_SPLIT,
+            stratify=splittable_targets,
+            random_state=SEED,
+        )
+        train_idx = split_train + unsplittable_idx
+        val_idx = split_val
+    else:
+        # All classes have <2 images — no validation possible
+        print("  Warning: no classes have enough images for validation split")
+        train_idx = indices
+        val_idx = []
 
     train_subset = Subset(dataset, train_idx)
     val_subset = Subset(val_dataset, val_idx)
@@ -167,7 +200,7 @@ def validate_one_epoch(
     criterion: nn.Module,
     device: torch.device,
 ) -> tuple[float, float]:
-    """Validate for one epoch. Returns (accuracy, loss)."""
+    """Validate for one epoch. Returns (accuracy, loss). Returns (0, 0) if loader is empty."""
     model.eval()
     correct = 0
     total = 0
@@ -183,6 +216,9 @@ def validate_one_epoch(
         _, predicted = outputs.max(1)
         total += labels.size(0)
         correct += predicted.eq(labels).sum().item()
+
+    if total == 0:
+        return 0.0, 0.0
 
     return correct / total, running_loss / total
 

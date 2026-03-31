@@ -12,7 +12,7 @@ ml/
     optimus-prime/
     bumblebee/
     ...
-  models/              # Trained .mlmodel output files
+  models/              # Trained model output files (gitignored, stored in private data repo)
   TRAINING.md          # This file
   CLAUDE.md            # Agent rules
 ```
@@ -64,7 +64,7 @@ npm run train -- --category primary --epochs 25 --lr 0.001 --batch-size 32
 npm run export-model -- --checkpoint models/<checkpoint>.pt
 
 # Validate cross-format agreement on held-out test set
-npm run validate-model -- --onnx-model models/<model>.onnx --coreml-model models/<model>.mlmodel --test-data-dir <test-data-path>
+npm run validate-model -- --onnx-model models/<model>.onnx --coreml-model models/<model>.mlpackage --category primary
 ```
 
 ### Two-Phase Training
@@ -87,5 +87,5 @@ Training produces:
 
 Export produces:
 - `{stem}.onnx` -- for web inference (onnxruntime-web)
-- `{stem}.mlmodel` -- for iOS inference (Core ML)
+- `{stem}.mlpackage` -- for iOS inference (Core ML)
 - `{stem}-metadata.json` -- label map, input shape, accuracy for the web client
