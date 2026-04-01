@@ -163,6 +163,22 @@ Two distinct photo types:
 - Requires `admin` role (not `curator`) — this is an ML pipeline operation, not catalog curation
 - Web: "Export for ML" button on the search results page, visible only to admins when item results exist
 
+### ML Model Serving (Phase 4.0c-1)
+
+- ML model metadata route lives in `src/ml/models/` — registered at `/ml/models` (top-level, not catalog-scoped)
+- `GET /ml/models` — authenticated, rate-limited (30/min). Scans `ML_MODELS_PATH` for `*-metadata.json` files, returns model summaries (no label maps — those are in the static metadata JSON)
+- `ML_MODELS_PATH` is `optionalOrUndefined` — route returns `{ models: [] }` when unset (no 500)
+- `ML_MODELS_BASE_URL` defaults to `http://localhost:{port}/ml/model-files` — used to construct `download_url` and `metadata_url` in responses
+- Static model file serving (`.onnx`, `.onnx.data`, `-metadata.json`) via `@fastify/static` at `/ml/model-files/` prefix — dev-only, prod uses CDN
+- Scanner validates metadata JSON via hand-rolled type guard (`parseModelMetadata`) — malformed files are logged and skipped, never crash the response
+- `size_bytes` is derived by summing `fs.stat` on `.onnx` + `.onnx.data` files
+- `download_url` is `null` when the ONNX file is missing (metadata exists but model not yet exported)
+- No DB access — scanner only touches the filesystem
+
+### @fastify/static Route Collisions
+
+- `@fastify/static` with a prefix intercepts ALL requests under that prefix — including exact matches. A static prefix `/ml/models/` would catch `GET /ml/models` before the route handler runs. Use distinct prefixes for API routes vs static files (e.g., `/ml/models` for API, `/ml/model-files/` for static).
+
 ### Cookie Handling
 
 - Cookies are signed via `@fastify/cookie` with `signed: true`

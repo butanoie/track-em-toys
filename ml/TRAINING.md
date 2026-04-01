@@ -86,6 +86,7 @@ Training produces:
 - `{category}-classifier-{date}-c{N}-a{acc}-metrics.json` -- per-class accuracy, confusion matrix, hyperparams
 
 Export produces:
-- `{stem}.onnx` -- for web inference (onnxruntime-web)
+- `{stem}.onnx` -- ONNX graph for web inference (onnxruntime-web)
+- `{stem}.onnx.data` -- weights sidecar (both `.onnx` + `.onnx.data` are required for inference)
 - `{stem}.mlpackage` -- for iOS inference (Core ML)
 - `{stem}-metadata.json` -- label map, input shape, accuracy for the web client

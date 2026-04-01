@@ -16,6 +16,7 @@ import { docsPlugin } from './plugins/docs.js';
 import { catalogRoutes } from './catalog/routes.js';
 import { adminRoutes } from './admin/routes.js';
 import { collectionRoutes } from './collection/routes.js';
+import { mlRoutes } from './ml/routes.js';
 import { requireRole } from './auth/role.js';
 import type { UserRole } from './types/index.js';
 
@@ -238,6 +239,10 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   await fastify.register(collectionRoutes, { prefix: '/collection' });
 
+  // ─── ML routes ─────────────────────────────────────────────────────
+
+  await fastify.register(mlRoutes, { prefix: '/ml' });
+
   // ─── Photo storage validation ──────────────────────────────────────────
   // Validate storage path exists and is writable at startup (all environments).
   // Upload routes write to disk in all environments; only static serving is dev-only.
@@ -259,6 +264,20 @@ export async function buildServer(): Promise<FastifyInstance> {
     await fastify.register(fastifyStatic.default, {
       root: config.photos.storagePath,
       prefix: '/photos/',
+      decorateReply: false,
+      index: false,
+    });
+  }
+
+  // ─── ML model file serving (development only) ──────────────────────
+  // In production, model files are served by a CDN (ML_MODELS_BASE_URL).
+  // In development, the API serves them from ML_MODELS_PATH via @fastify/static.
+
+  if (config.nodeEnv === 'development' && config.ml.modelsPath) {
+    const fastifyStatic = await import('@fastify/static');
+    await fastify.register(fastifyStatic.default, {
+      root: config.ml.modelsPath,
+      prefix: '/ml/model-files/',
       decorateReply: false,
       index: false,
     });

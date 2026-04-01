@@ -105,6 +105,7 @@ ML_TRAINING_DATA_PATH/{category}/
 - **Minimum images:** 10 per class (enforced by validation)
 - **Labels:** Use `__` delimiter (e.g., `transformers__ft-04-scoria`) — single-level directories
 - **Model artifacts:** Not tracked in git — stored in private data repo
+- **ONNX sidecar:** Export produces `.onnx` graph + `.onnx.data` weights sidecar — both files required for inference
 
 ## Model Training (PyTorch)
 

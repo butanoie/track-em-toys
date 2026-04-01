@@ -180,6 +180,29 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `CatalogItemDetailSchema` extends `CatalogItemSchema` — any field added to the base schema MUST also be added to the API's `itemDetail` Fastify schema in `api/src/catalog/items/schemas.ts` (which is hand-written, not derived from `itemListItem`)
 - `ItemListItem` interface in `ItemList.tsx` uses optional `thumbnail_url?` — search results may not include it, so the field must be optional to avoid breaking the SearchPage
 
+### ML Photo Identification (Phase 4.0c-2)
+
+- ML service layer lives in `src/ml/` — framework-agnostic, no React imports. Handles model caching (IndexedDB), image preprocessing (canvas 224x224 + ImageNet normalization), ONNX inference (onnxruntime-web), and label parsing
+- `onnxruntime-web` is dynamically imported in `image-classifier.ts` to keep it out of the main bundle (~394KB JS + WASM loaded on demand)
+- WASM files served from jsDelivr CDN — configured via `ort.env.wasm.wasmPaths` in `image-classifier.ts`
+- ONNX models use `.onnx` graph + `.onnx.data` sidecar pattern — both must be downloaded and passed via `externalData` option to `InferenceSession.create()`
+- IndexedDB cache: DB `trackem-ml-models`, store `model-binaries`, keyPath `name`. Stores graph bytes, data bytes, label map, and version. Cache hit = version match
+- `AddByPhotoSheet` on the collection page — "Add by Photo" button opens a modal sheet with photo drop zone, model download progress, and top-5 prediction cards
+- `PredictionCard` eagerly fetches item detail via `useItemDetail` and collection check via `useCollectionCheck` — enables inline "Add to Collection" button per prediction
+- Primary model loads by default; "Try alt-mode" button switches to secondary model without re-uploading the photo
+- Model metadata via `useMlModels` hook consuming `GET /ml/models` (staleTime: 5 min)
+- `softmax` is always applied to model output (never conditionally) — ensures confidence values sum to 1
+- Query key: `['ml', 'models']`
+
+### onnxruntime-web Integration
+
+- Default Vite ESM import resolves to `ort.bundle.min.mjs` (~394KB) — no Vite config changes needed for WASM
+- Set `ort.env.wasm.wasmPaths` to CDN URL before first `InferenceSession.create()` — WASM files are not bundled
+- ONNX models may use `.onnx` + `.onnx.data` sidecar pattern — pass sidecar via `externalData: [{ path, data }]` to `InferenceSession.create()`
+- Dynamic import (`await import('onnxruntime-web')`) keeps the runtime out of the main bundle — use inside function bodies, not at module top level
+- jsdom does not implement `createImageBitmap` or `OffscreenCanvas` — canvas-based preprocessing must live in a separate module so tests can mock it via `vi.mock`
+- `vi.mock` cannot partially mock a module's own internal function calls — if `classifyImage` calls `preprocessImage` in the same file, the mock won't intercept it. Extract to a separate module.
+
 ### Catalog Browsing (Phase 1.7+)
 
 - Catalog pages live in `src/catalog/` with `api.ts`, `hooks/`, `components/`, `pages/` sub-directories

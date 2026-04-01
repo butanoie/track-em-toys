@@ -66,30 +66,38 @@ New files:
 
 ## Model Delivery
 
-### API Endpoint: `GET /ml/models` (public, rate-limited)
+### API Endpoint: `GET /ml/models` (authenticated, rate-limited)
 
-Returns available models with versions, label maps, and download URLs:
+Returns available models with version, accuracy, and download URLs. Label maps are excluded (fetched separately via `metadata_url` to keep the response lean at scale). Auto-discovers models by scanning `ML_MODELS_PATH` for `*-metadata.json` files.
 
 ```json
 {
   "models": [{
     "name": "primary-classifier",
-    "version": "2026-03-29-v1",
+    "version": "primary-classifier-20260331-c117-a83.8",
+    "category": "primary",
     "format": "onnx",
-    "size_bytes": 7340032,
-    "accuracy": 0.84,
-    "class_count": 45,
+    "size_bytes": 6870550,
+    "accuracy": 0.838,
+    "class_count": 117,
     "input_shape": [1, 3, 224, 224],
-    "labels": ["transformers__optimus-prime", ...],
-    "download_url": "/ml/models/primary-classifier/v1/model.onnx"
+    "download_url": "http://localhost:3010/ml/model-files/primary-classifier-20260331-c117-a83.8.onnx",
+    "metadata_url": "http://localhost:3010/ml/model-files/primary-classifier-20260331-c117-a83.8-metadata.json",
+    "trained_at": "2026-03-31T00:59:50.123Z",
+    "exported_at": "2026-03-31T01:10:30.456Z"
   }]
 }
 ```
 
 ### Static File Serving
 
-- **Dev:** `@fastify/static` at `/ml/models/` prefix
-- **Prod:** CDN via configurable base URL
+- **Dev:** `@fastify/static` at `/ml/model-files/` prefix (distinct from API route at `/ml/models`)
+- **Prod:** CDN via `ML_MODELS_BASE_URL` env var
+
+### Config
+
+- `ML_MODELS_PATH` — directory containing model artifacts (optional; returns empty array when unset)
+- `ML_MODELS_BASE_URL` — CDN base URL for download/metadata URLs (defaults to `http://localhost:{port}/ml/model-files`)
 
 ### Client-Side Caching Strategy
 
@@ -101,33 +109,44 @@ Returns available models with versions, label maps, and download URLs:
 ## UI Flow
 
 ```
-/classify route (auto code-split, authenticated)
-  → PhotoSelector (reuses DropZone pattern from catalog/photos/)
+Collection page → "Add by Photo" button in header
+  → Modal sheet slides open with photo drop zone (reuses DropZone pattern)
   → User selects/drops a photo
-  → Model loads from IndexedDB (or downloads on first use with progress bar)
-  → Client-side inference via onnxruntime-web
-  → Top-5 predictions with confidence bars
-  → Each prediction links to catalog item (/catalog/:franchise/items/:slug)
-  → Optional: "Try alt-mode model" loads secondary model on demand
+  → Model downloads on first use (progress bar), cached in IndexedDB for subsequent uses
+  → Client-side inference via onnxruntime-web (dynamic import, not in main bundle)
+  → Top-5 predictions with confidence bars and "Add" buttons
+  → Clicking "Add" opens AddToCollectionDialog (existing component, condition + notes)
+  → "Try alt-mode" button re-runs inference with secondary model
+  → "Browse catalog" fallback link
 ```
 
 ## New Files
 
-### Web (`web/src/classify/`)
+### ML Service Layer (`web/src/ml/`) — framework-agnostic, no React
 
-- `components/PhotoSelector.tsx` — single-photo drop zone
-- `components/ClassificationResults.tsx` — ranked predictions with catalog links
-- `components/ModelStatus.tsx` — download/loading progress indicator
-- `hooks/useClassifier.ts` — ONNX session lifecycle + inference orchestration
-- `hooks/useModelMetadata.ts` — TanStack Query for `GET /ml/models`
-- `lib/onnx-session.ts` — IndexedDB cache, ONNX session creation
-- `lib/image-preprocessing.ts` — canvas resize to 224x224, normalization
-- Route: `web/src/routes/_authenticated/classify.tsx`
+- `types.ts` — ML types (ModelCacheEntry, Prediction, InferenceResult, DownloadPhase)
+- `model-cache.ts` — IndexedDB cache + model download with progress (handles .onnx + .onnx.data sidecar)
+- `image-classifier.ts` — ONNX session management + canvas preprocessing + inference
+- `label-parser.ts` — parse `franchise__item-slug` labels, build catalog URLs
+
+### Collection Feature (`web/src/collection/`)
+
+- `hooks/useMlModels.ts` — TanStack Query for `GET /ml/models`
+- `hooks/usePhotoIdentify.ts` — stateful orchestration hook (download → classify → results)
+- `components/AddByPhotoSheet.tsx` — modal sheet with phases (drop zone → progress → results)
 
 ### API (`api/src/ml/`)
 
-- `routes.ts` — `GET /ml/models`, optional `POST /ml/classify`
-- `schemas.ts` — Fastify JSON schemas
+- `routes.ts` — top-level ML plugin (registers sub-plugins)
+- `models/routes.ts` — `GET /ml/models` handler
+- `models/schemas.ts` — Fastify JSON response schemas
+- `models/scanner.ts` — directory scan + metadata parse + type guard
+- `models/url-builder.ts` — pure URL construction for download/metadata URLs
+- `models/metadata-schema.ts` — type guard for `-metadata.json` files
+- `models/scanner.test.ts` — unit tests for scanner
+- `models/url-builder.test.ts` — unit tests for URL builder
+- `models/routes.test.ts` — integration tests
+- Optional future: `POST /ml/classify` (Phase 4.0c-3), telemetry endpoints
 
 ### ML (`ml/scripts/`)
 
@@ -141,9 +160,9 @@ Returns available models with versions, label maps, and download URLs:
 
 ## Implementation Sequence
 
-1. **Phase 4.0b** — PyTorch training scripts + dual export + validation
-2. **Phase 4.0c-1** — Model metadata API + static file serving
-3. **Phase 4.0c-2** — Client-side inference (classify page, ONNX session, IndexedDB caching)
+1. **Phase 4.0b** — ✅ PyTorch training scripts + dual export + validation
+2. **Phase 4.0c-1** — ✅ Model metadata API + static file serving
+3. **Phase 4.0c-2** — ✅ Client-side inference ("Add by Photo" on collection page, ONNX session, IndexedDB caching)
 4. **Phase 4.0c-3** — Server-side fallback (optional, progressive enhancement)
 5. **Phase 4.0c-4** — Secondary model support, curator integration, E2E tests
 

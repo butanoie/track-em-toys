@@ -442,6 +442,31 @@ export const MlExportResponseSchema = z.object({
 
 export type MlExportResponse = z.infer<typeof MlExportResponseSchema>;
 
+// ML Model Metadata
+// ---------------------------------------------------------------------------
+
+export const MlModelSummarySchema = z.object({
+  name: z.string(),
+  version: z.string(),
+  category: z.string(),
+  format: z.string(),
+  class_count: z.number().int(),
+  accuracy: z.number(),
+  input_shape: z.array(z.number().int()),
+  size_bytes: z.number().int(),
+  download_url: z.string().nullable(),
+  metadata_url: z.string(),
+  trained_at: z.string(),
+  exported_at: z.string(),
+});
+
+export const MlModelsResponseSchema = z.object({
+  models: z.array(MlModelSummarySchema),
+});
+
+export type MlModelSummary = z.infer<typeof MlModelSummarySchema>;
+export type MlModelsResponse = z.infer<typeof MlModelsResponseSchema>;
+
 // ---------------------------------------------------------------------------
 // Collection schemas
 // ---------------------------------------------------------------------------

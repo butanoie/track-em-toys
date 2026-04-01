@@ -13,6 +13,7 @@
 - Labels are flattened with `__` delimiter: `franchise__item-slug` (single-level directories required)
 - Python dependencies managed by `uv` + `pyproject.toml`; run `uv sync` after clone
 - Model artifacts (`.pt`, `.onnx`, `.mlpackage`, JSON) are NOT tracked in git — they live in the private data repo
+- ONNX export produces `.onnx` graph + `.onnx.data` weights sidecar — both files required for inference. The graph references the sidecar by filename (e.g., `primary-classifier-20260331-c117-a83.8.onnx.data`)
 
 ## Training Data Source
 
@@ -34,7 +35,9 @@
 
 - **4.0a Training Data Prep:** ✅ Export script, data augmentation, class balance analysis, category-based tier system
 - **4.0b Model Training:** ✅ PyTorch MobileNetV3-Small with transfer learning, progressive unfreezing, dual ONNX + Core ML export
-- **4.0c Model Serving:** Metadata API (`GET /ml/models`), client-side inference via onnxruntime-web, optional server-side fallback
+- **4.0c-1 Model Metadata API:** ✅ `GET /ml/models` endpoint + static file serving via `@fastify/static` (dev) / CDN (prod)
+- **4.0c-2 Client-Side Inference:** ✅ "Add by Photo" on collection page, onnxruntime-web, IndexedDB caching, top-5 predictions with inline add-to-collection
+- **4.0c-3 Server-Side Fallback:** Optional `POST /ml/classify` via onnxruntime-node
 - **4.0d Retraining:** Documented workflow (prepare-data → train → export → validate → deploy), quality gates (min accuracy + cross-format agreement)
 - Model versioning: auto-generated filenames with training date, class count, accuracy metric
 - Python environment: `pyproject.toml` + `uv` for dependency management; `uv sync` to install
