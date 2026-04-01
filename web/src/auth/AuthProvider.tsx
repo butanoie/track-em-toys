@@ -1,14 +1,18 @@
 import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useRouter } from '@tanstack/react-router';
+import { toast } from 'sonner';
 import { authStore, refreshTimer, sessionFlag, SESSION_KEYS } from '@/lib/auth-store';
 import { apiFetch, apiFetchJson, attemptRefresh, ApiError } from '@/lib/api-client';
 import { ApiErrorSchema, AuthResponseSchema, UserResponseSchema, type UserResponse } from '@/lib/zod-schemas';
 import { z } from 'zod';
 
+export const SESSION_EXPIRED_TOAST_ID = 'session-expired';
+
 export interface AuthContextValue {
   user: UserResponse | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  sessionExpired: boolean;
   signInWithGoogle: (credential: string) => Promise<void>;
   signInWithApple: (idToken: string, nonce: string, userName?: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -72,6 +76,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children, queryClientClear }: AuthProviderProps) {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const queryClientClearRef = useRef(queryClientClear);
   queryClientClearRef.current = queryClientClear;
   const navigate = useNavigate();
@@ -106,6 +111,21 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
       authStore.clear();
       sessionStorage.removeItem(SESSION_KEYS.user);
       setUser(null);
+      setSessionExpired(true);
+      toast.warning('Session expired', {
+        id: SESSION_EXPIRED_TOAST_ID,
+        description: 'Sign in again to continue managing content.',
+        duration: Infinity,
+        action: {
+          label: 'Sign in',
+          onClick: () => {
+            void navigateRef.current({
+              to: '/login',
+              search: { redirect: routerRef.current.state.location.href },
+            });
+          },
+        },
+      });
     }
   }, []);
 
@@ -120,9 +140,20 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
       sessionStorage.removeItem(SESSION_KEYS.user);
       queryClientClearRef.current?.();
       setUser(null);
-      void navigateRef.current({
-        to: '/login',
-        search: { redirect: routerRef.current.state.location.href },
+      setSessionExpired(true);
+      toast.warning('Session expired', {
+        id: SESSION_EXPIRED_TOAST_ID,
+        description: 'Sign in again to continue managing content.',
+        duration: Infinity,
+        action: {
+          label: 'Sign in',
+          onClick: () => {
+            void navigateRef.current({
+              to: '/login',
+              search: { redirect: routerRef.current.state.location.href },
+            });
+          },
+        },
       });
     }
     window.addEventListener('auth:sessionexpired', handleSessionExpired);
@@ -196,6 +227,8 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
       cacheUser(parsed.user);
       sessionFlag.set();
       setUser(parsed.user);
+      setSessionExpired(false);
+      toast.dismiss(SESSION_EXPIRED_TOAST_ID);
 
       refreshTimer.cancel();
       scheduleRefresh(parsed.access_token, handleRefreshCycle);
@@ -235,6 +268,8 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
       sessionStorage.removeItem(SESSION_KEYS.appleUserName);
       sessionFlag.set();
       setUser(parsed.user);
+      setSessionExpired(false);
+      toast.dismiss(SESSION_EXPIRED_TOAST_ID);
 
       refreshTimer.cancel();
       scheduleRefresh(parsed.access_token, handleRefreshCycle);
@@ -265,6 +300,7 @@ export function AuthProvider({ children, queryClientClear }: AuthProviderProps) 
     // than redirecting, so this signal is only acted upon once loading is done.
     isAuthenticated: user !== null || authStore.getToken() !== null,
     isLoading,
+    sessionExpired,
     signInWithGoogle,
     signInWithApple,
     logout,

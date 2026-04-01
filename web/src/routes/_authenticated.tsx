@@ -12,7 +12,7 @@ export const Route = createFileRoute('/_authenticated')({
 });
 
 function AuthenticatedLayout() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, sessionExpired } = useAuth();
   const location = useRouterState({ select: (s) => s.location });
   const navigate = useNavigate();
 
@@ -26,15 +26,20 @@ function AuthenticatedLayout() {
   hrefRef.current = location.href;
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    // Only redirect when the user was never authenticated in this session.
+    // When sessionExpired is true the user had a valid session that expired
+    // mid-browse — a toast notification handles re-login instead of a
+    // jarring redirect away from the page they were viewing.
+    if (!isLoading && !isAuthenticated && !sessionExpired) {
       void navigateRef.current({
         to: '/login',
         search: { redirect: hrefRef.current },
       });
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, sessionExpired]);
 
-  if (isLoading || !isAuthenticated) return <LoadingSpinner />;
+  if (isLoading) return <LoadingSpinner />;
+  if (!isAuthenticated && !sessionExpired) return <LoadingSpinner />;
 
   return <Outlet />;
 }

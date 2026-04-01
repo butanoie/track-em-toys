@@ -64,7 +64,10 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Dev environment: `VITE_API_URL` must use the same hostname as the web app (e.g., both on `dev.track-em-toys.com`) — the refresh token cookie uses `SameSite=Strict`, which requires same-site origins. Safari ITP blocks all cross-site cookies regardless of `SameSite` setting.
 - Account deletion: "Delete Account" button in settings with explicit confirmation dialog ("Type DELETE to confirm")
 - User role is included in the session data (alongside user profile) from `/auth/me` response
-- Shared test fixtures (mock user, fake JWT, response helpers) live in `src/auth/__tests__/auth-test-helpers.tsx` — update there, not per-test file
+- `sessionExpired` boolean in `AuthContextValue` — true when a valid session expires mid-browse (proactive refresh or 401 interceptor). `_authenticated.tsx` skips redirect when true, showing a persistent Sonner toast instead. Reset on re-login.
+- Session expiry toast uses `SESSION_EXPIRED_TOAST_ID` constant for deduplication — both `handleRefreshCycle` and `handleSessionExpired` paths show the same toast. `duration: Infinity` ensures it persists until user acts.
+- Adding a new field to `AuthContextValue` requires updating every `makeAuthContext()` helper across test files — search for `makeAuthContext` in `*.test.*` files. TypeScript catches these via `Partial<AuthContextValue>` type errors.
+- Shared test fixtures (mock user, fake JWT, response helpers) live in `src/auth/__tests__/auth-test-helpers.tsx` — update there, not per-test file. `TestConsumer` renders `session-expired` testid — update when adding new `AuthContextValue` fields.
 
 ### User Roles & Admin UI
 

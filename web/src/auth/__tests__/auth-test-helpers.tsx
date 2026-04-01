@@ -35,6 +35,7 @@ export function TestConsumer(): React.JSX.Element {
     <div>
       <div data-testid="loading">{String(ctx.isLoading)}</div>
       <div data-testid="authenticated">{String(ctx.isAuthenticated)}</div>
+      <div data-testid="session-expired">{String(ctx.sessionExpired)}</div>
       <div data-testid="user">{ctx.user?.display_name ?? 'null'}</div>
       <button onClick={() => void ctx.logout()}>Logout</button>
     </div>
