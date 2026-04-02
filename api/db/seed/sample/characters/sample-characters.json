@@ -10,6 +10,7 @@
       "alt_mode": "Freightliner FL86 semi-truck with trailer",
       "is_combined_form": false,
       "notes": "Autobot leader. Voiced by Peter Cullen.",
+      "search_aliases": "convoy",
       "slug": "optimus-prime",
       "faction_slug": "autobot",
       "sub_group_slugs": [],
@@ -22,6 +23,7 @@
       "alt_mode": "Volkswagen Beetle",
       "is_combined_form": false,
       "notes": "Youngest Autobot. Later reformatted as Goldbug.",
+      "search_aliases": "goldbug",
       "slug": "bumblebee",
       "faction_slug": "autobot",
       "sub_group_slugs": [

@@ -327,17 +327,19 @@ async function pushCharacters(
       const result = await client.query<{ id: string; updated_at: Date }>(
         `INSERT INTO characters
            (name, slug, franchise_id, faction_id, character_type, alt_mode,
-            is_combined_form, continuity_family_id, metadata)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            is_combined_form, continuity_family_id, search_aliases, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          ON CONFLICT (slug, franchise_id) DO UPDATE SET
            name = EXCLUDED.name, faction_id = EXCLUDED.faction_id,
            character_type = EXCLUDED.character_type, alt_mode = EXCLUDED.alt_mode,
            is_combined_form = EXCLUDED.is_combined_form,
            continuity_family_id = EXCLUDED.continuity_family_id,
+           search_aliases = EXCLUDED.search_aliases,
            metadata = EXCLUDED.metadata, updated_at = now()
          RETURNING id, updated_at`,
         [c.name, c.slug, franchiseId, factionId, c.character_type ?? null,
-         c.alt_mode ?? null, c.is_combined_form, continuityFamilyId, JSON.stringify(metadata)],
+         c.alt_mode ?? null, c.is_combined_form, continuityFamilyId,
+         c.search_aliases ?? null, JSON.stringify(metadata)],
       )
       const characterId = result.rows[0]!.id
       const dbUpdatedAt = result.rows[0]!.updated_at
@@ -441,18 +443,19 @@ async function pushItems(
       const result = await client.query<{ id: string; slug: string; updated_at: Date }>(
         `INSERT INTO items
            (name, slug, manufacturer_id, toy_line_id, size_class, year_released,
-            product_code, is_third_party, metadata)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            product_code, is_third_party, search_aliases, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          ON CONFLICT (slug, franchise_id) DO UPDATE SET
            name = EXCLUDED.name, manufacturer_id = EXCLUDED.manufacturer_id,
            toy_line_id = EXCLUDED.toy_line_id, size_class = EXCLUDED.size_class,
            year_released = EXCLUDED.year_released, product_code = EXCLUDED.product_code,
-           is_third_party = EXCLUDED.is_third_party, metadata = EXCLUDED.metadata,
-           updated_at = now()
+           is_third_party = EXCLUDED.is_third_party, search_aliases = EXCLUDED.search_aliases,
+           metadata = EXCLUDED.metadata, updated_at = now()
          RETURNING id, slug, updated_at`,
         [item.name, item.slug, manufacturerId, toyLineId,
          item.size_class ?? null, item.year_released ?? null,
-         item.product_code ?? null, item.is_third_party, JSON.stringify(item.metadata)],
+         item.product_code ?? null, item.is_third_party,
+         item.search_aliases ?? null, JSON.stringify(item.metadata)],
       )
       const row = result.rows[0]!
       itemMap.set(row.slug, row.id)
@@ -785,11 +788,12 @@ async function pullCharacters(client: pg.PoolClient): Promise<void> {
   // Query all characters with FK slugs and sub_group_slugs
   const { rows } = await client.query<{
     slug: string; name: string; character_type: string | null; alt_mode: string | null;
-    is_combined_form: boolean; metadata: Record<string, unknown>; updated_at: Date;
+    is_combined_form: boolean; search_aliases: string | null;
+    metadata: Record<string, unknown>; updated_at: Date;
     franchise_slug: string; faction_slug: string | null; continuity_family_slug: string;
     sub_group_slugs: string[];
   }>(`SELECT c.slug, c.name, c.character_type, c.alt_mode, c.is_combined_form,
-            c.metadata, c.updated_at,
+            c.search_aliases, c.metadata, c.updated_at,
             fr.slug AS franchise_slug, fa.slug AS faction_slug,
             cf.slug AS continuity_family_slug,
             COALESCE(array_agg(sg.slug ORDER BY sg.slug) FILTER (WHERE sg.slug IS NOT NULL), '{}') AS sub_group_slugs
@@ -800,7 +804,7 @@ async function pullCharacters(client: pg.PoolClient): Promise<void> {
      LEFT JOIN character_sub_groups csg ON csg.character_id = c.id
      LEFT JOIN sub_groups sg ON sg.id = csg.sub_group_id
      GROUP BY c.slug, c.name, c.character_type, c.alt_mode, c.is_combined_form,
-              c.metadata, c.updated_at, fr.slug, fa.slug, cf.slug
+              c.search_aliases, c.metadata, c.updated_at, fr.slug, fa.slug, cf.slug
      ORDER BY c.slug`)
 
   const dbSlugs = new Set<string>()
@@ -824,6 +828,7 @@ async function pullCharacters(client: pg.PoolClient): Promise<void> {
       alt_mode: row.alt_mode, is_combined_form: row.is_combined_form,
       continuity_family_slug: row.continuity_family_slug,
       sub_group_slugs: row.sub_group_slugs,
+      search_aliases: row.search_aliases,
       notes: meta.notes, series_year: meta.series_year, year_released: meta.year_released,
       last_modified: row.updated_at.toISOString(),
     }
@@ -959,11 +964,11 @@ async function pullItems(client: pg.PoolClient): Promise<void> {
   const { rows } = await client.query<{
     slug: string; name: string; product_code: string | null;
     year_released: number | null; is_third_party: boolean; size_class: string | null;
-    metadata: Record<string, unknown>; updated_at: Date;
+    search_aliases: string | null; metadata: Record<string, unknown>; updated_at: Date;
     manufacturer_slug: string; toy_line_slug: string;
     character_slug: string | null; character_appearance_slug: string | null;
   }>(`SELECT i.slug, i.name, i.product_code, i.year_released, i.is_third_party,
-            i.size_class, i.metadata, i.updated_at,
+            i.size_class, i.search_aliases, i.metadata, i.updated_at,
             mfr.slug AS manufacturer_slug, tl.slug AS toy_line_slug,
             c.slug AS character_slug, ca.slug AS character_appearance_slug
      FROM items i
@@ -992,7 +997,8 @@ async function pullItems(client: pg.PoolClient): Promise<void> {
       character_appearance_slug: row.character_appearance_slug,
       manufacturer_slug: row.manufacturer_slug, toy_line_slug: row.toy_line_slug,
       is_third_party: row.is_third_party, year_released: row.year_released,
-      size_class: row.size_class, metadata: row.metadata ?? {},
+      size_class: row.size_class, search_aliases: row.search_aliases,
+      metadata: row.metadata ?? {},
       last_modified: row.updated_at.toISOString(),
     }
 

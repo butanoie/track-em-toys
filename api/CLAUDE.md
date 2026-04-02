@@ -44,6 +44,7 @@ cd api && npm run format:check # Prettier check (CI mode)
 - Migrations must be additive (add columns/tables) by default — destructive changes (drop column, drop table) require explicit user instruction
 - Migration filenames follow `NNN_description.sql` sequential numbering with no gaps
 - PostgreSQL enum values cannot be removed — use the rename-create-swap-drop pattern: `ALTER TYPE RENAME TO _old`, create new type, `DROP DEFAULT` on the column, `ALTER COLUMN TYPE ... USING col::text::new_type`, `SET DEFAULT` with new type, `DROP TYPE _old`. The `DROP DEFAULT` before `ALTER TYPE` is required — PG can't auto-cast defaults between enum types (error 42804).
+- PostgreSQL `GENERATED ALWAYS AS` columns cannot be ALTERed — to change the expression, DROP the column (and its indexes) then re-ADD. See migration 035.
 - TEXT->FK column migration pattern: (1) add nullable FK column, (2) populate from existing data via UPDATE+JOIN, (3) SET NOT NULL, (4) add FK constraint, (5) drop old indexes + create new, (6) drop old TEXT column. Always include `migrate:down`.
 
 > **Detailed database patterns** (seed data, relationships, sync, GDPR, RLS): see `.claude/rules/api-database.md`

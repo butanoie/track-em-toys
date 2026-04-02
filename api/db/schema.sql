@@ -230,7 +230,8 @@ CREATE TABLE public.characters (
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     continuity_family_id uuid NOT NULL,
     franchise_id uuid NOT NULL,
-    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((((name || ' '::text) || COALESCE(alt_mode, ''::text)) || ' '::text) || COALESCE(character_type, ''::text)))) STORED
+    search_aliases text,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((((((name || ' '::text) || COALESCE(alt_mode, ''::text)) || ' '::text) || COALESCE(character_type, ''::text)) || ' '::text) || COALESCE(search_aliases, ''::text)))) STORED
 );
 
 
@@ -481,7 +482,8 @@ CREATE TABLE public.items (
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     size_class text,
     franchise_id uuid NOT NULL,
-    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((((((name || ' '::text) || COALESCE(description, ''::text)) || ' '::text) || COALESCE(product_code, ''::text)) || ' '::text) || COALESCE(sku, ''::text)))) STORED,
+    search_aliases text,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((((((((name || ' '::text) || COALESCE(description, ''::text)) || ' '::text) || COALESCE(product_code, ''::text)) || ' '::text) || COALESCE(sku, ''::text)) || ' '::text) || COALESCE(search_aliases, ''::text)))) STORED,
     CONSTRAINT items_data_quality_check CHECK ((data_quality = ANY (ARRAY['needs_review'::text, 'verified'::text, 'community_verified'::text])))
 );
 
@@ -1831,4 +1833,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('031'),
     ('032'),
     ('033'),
-    ('034');
+    ('034'),
+    ('035');

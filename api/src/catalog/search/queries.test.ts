@@ -45,4 +45,12 @@ describe('buildSearchTsquery', () => {
   it('handles three words', () => {
     expect(buildSearchTsquery('the transformers movie')).toBe("'the' & 'transformers' & 'movie':*");
   });
+
+  it('collapses punctuated acronyms (H.I.S.S. → hiss)', () => {
+    expect(buildSearchTsquery('H.I.S.S.')).toBe("'hiss':*");
+  });
+
+  it('collapses acronym with trailing word (H.I.S.S. Tank → hiss tank)', () => {
+    expect(buildSearchTsquery('H.I.S.S. Tank')).toBe("'hiss' & 'tank':*");
+  });
 });

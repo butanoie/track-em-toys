@@ -151,6 +151,7 @@ Two distinct photo types:
 - Detail lookups always validate franchise ownership: `WHERE slug = $1 AND fr.slug = $2`
 - Manufacturers stay globally unique slugs (franchise-agnostic)
 - FTS uses generated `search_vector tsvector STORED` columns — queries use `WHERE search_vector @@ ...`, never recompute the tsvector expression inline
+- `search_aliases TEXT` on `characters` and `items` feeds into `search_vector` — space-separated alternate search terms (acronym expansions, nicknames). NULL when not needed. Internal only, not in API responses.
 - Fastify's `fast-json-stringify` does NOT support `oneOf` for serialization — use a flat superset schema with nullable fields instead. Apply discriminated unions at the web Zod layer, not the Fastify schema layer
 - All list endpoints use page-based pagination: `{ data, page, limit, total_count }` response shape via `pageListResponse()` helper
 - Limit validation: `enum: [20, 50, 100]` on catalog and collection endpoints; `minimum: 1, maximum: 100` on search

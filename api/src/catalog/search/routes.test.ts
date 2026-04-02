@@ -24,6 +24,8 @@ describe('search routes', () => {
     franchise_slug: 'transformers',
     franchise_name: 'Transformers',
     rank: 0.0607927,
+    continuity_family_slug: 'g1',
+    continuity_family_name: 'Generation 1',
     character_slug: null,
     character_name: null,
     manufacturer_slug: null,
@@ -307,6 +309,25 @@ describe('search routes', () => {
       const dataCallArgs = mockQuery.mock.calls[0];
       expect(dataCallArgs).toBeDefined();
       expect(dataCallArgs![1]).toContain('item');
+    });
+
+    it('should return results matched via search_aliases (acronym/alternate name)', async () => {
+      // search_aliases feeds into the search_vector generated column, so
+      // searching "convoy" matches Optimus Prime who has search_aliases="convoy"
+      mockQuery
+        .mockResolvedValueOnce({ rows: [searchResult] })
+        .mockResolvedValueOnce({ rows: [{ character_count: 1, item_count: 0 }] });
+
+      const res = await server.inject({
+        method: 'GET',
+        url: '/catalog/search?q=convoy',
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json<{ data: Array<{ name: string; slug: string }>; total_count: number }>();
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0]).toBeDefined();
+      expect(body.data[0]!.name).toBe('Optimus Prime');
+      expect(body.total_count).toBe(1);
     });
 
     it('should return empty results for punctuation-only query', async () => {

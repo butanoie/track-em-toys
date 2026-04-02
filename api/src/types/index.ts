@@ -183,6 +183,7 @@ export interface Character {
   combined_form_id: string | null;
   combiner_role: string | null;
   continuity_family_id: string;
+  search_aliases: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -253,6 +254,7 @@ export interface Item {
   is_third_party: boolean;
   created_by: string | null;
   data_quality: DataQuality;
+  search_aliases: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
