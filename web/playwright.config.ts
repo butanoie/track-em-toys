@@ -49,13 +49,13 @@ export default defineConfig({
       name: 'user',
       use: { ...devices['Desktop Chrome'] },
       testMatch:
-        /authenticated-session\.spec\.ts|catalog-browse\.spec\.ts|catalog-detail-pages\.spec\.ts|catalog-search\.spec\.ts|session-persistence\.spec\.ts|collection\.spec\.ts|collection-export-import\.spec\.ts/,
+        /authenticated-session\.spec\.ts|catalog-browse\.spec\.ts|catalog-detail-pages\.spec\.ts|catalog-search\.spec\.ts|session-persistence\.spec\.ts|collection\.spec\.ts|collection-export-import\.spec\.ts|add-by-photo\.spec\.ts/,
     },
     // Authenticated as admin — admin dashboard
     {
       name: 'admin',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: /admin-users\.spec\.ts/,
+      testMatch: /admin-users\.spec\.ts|admin-ml-stats\.spec\.ts/,
     },
     // Authenticated as curator — future curator-specific tests
     {

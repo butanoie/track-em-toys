@@ -110,10 +110,11 @@ test.describe('Admin navigation', () => {
     await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
   });
 
-  test('Given admin on /admin/users, When clicking Back to App, Then navigated to /', async ({ page }) => {
+  test('Given admin on /admin/users, When clicking back arrow, Then navigated to /', async ({ page }) => {
     await mockAdminUsersEndpoint(page);
     await page.goto('/admin/users');
-    await page.getByRole('link', { name: /back to app/i }).click();
+    // The back link is an ArrowLeft icon in the admin header
+    await page.locator('header').getByRole('link').first().click();
     await expect(page).toHaveURL('/');
   });
 

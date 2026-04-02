@@ -71,6 +71,11 @@ interface ModelBreakdownRow {
   accepted: string;
 }
 
+/**
+ * Aggregate scan counts and per-model breakdown for the given time window.
+ *
+ * @param days - Number of days to look back
+ */
 export async function getSummaryStats(days: number): Promise<SummaryStats> {
   const interval = [days];
 

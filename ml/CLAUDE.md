@@ -76,10 +76,10 @@ Must return zero results. Use relative paths or environment variables.
 ### 3. Training data directory structure
 
 ```bash
-ls training-data/
+ls "$ML_TRAINING_DATA_PATH"
 ```
 
-Each class must be a subdirectory containing only image files, matching Create ML's `<class-name>/<images>` format.
+Each class must be a subdirectory containing only image files. Labels use `franchise__item-slug` format.
 
 ### 4. No credentials in training scripts
 

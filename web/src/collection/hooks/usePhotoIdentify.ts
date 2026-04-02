@@ -10,6 +10,16 @@ export type IdentifyPhase =
   | { step: 'results'; predictions: Prediction[] }
   | { step: 'error'; message: string };
 
+/** E2E test hook — set window.__ML_TEST_PREDICTIONS__ to bypass ONNX inference. */
+function getTestPredictions(): Prediction[] | null {
+  try {
+    const w = window as unknown as { __ML_TEST_PREDICTIONS__?: Prediction[] };
+    return Array.isArray(w.__ML_TEST_PREDICTIONS__) ? w.__ML_TEST_PREDICTIONS__ : null;
+  } catch {
+    return null;
+  }
+}
+
 export function usePhotoIdentify() {
   const [phase, setPhase] = useState<IdentifyPhase>({ step: 'idle' });
   const [activeCategory, setActiveCategory] = useState<'primary' | 'secondary'>('primary');
@@ -29,6 +39,22 @@ export function usePhotoIdentify() {
         model_version: model.version,
         model_category: model.category,
       });
+
+      // E2E test bypass — skip ONNX inference when test predictions are injected
+      const testPredictions = getTestPredictions();
+      if (testPredictions) {
+        setPhase({ step: 'classifying' });
+        await new Promise((r) => setTimeout(r, 50));
+        emitMlEvent('scan_completed', model.name, {
+          model_version: model.version,
+          model_category: model.category,
+          inference_ms: 50,
+          top1_confidence: testPredictions[0]?.confidence ?? 0,
+          top5_labels: testPredictions.map((p) => p.label),
+        });
+        setPhase({ step: 'results', predictions: testPredictions });
+        return;
+      }
 
       // Lazy import ML modules — keeps onnxruntime-web out of the main bundle
       const [{ loadModel }, { classifyImage }] = await Promise.all([

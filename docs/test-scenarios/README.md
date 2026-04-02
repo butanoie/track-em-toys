@@ -43,6 +43,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | [E2E_COLLECTION_EXPORT_IMPORT.md](E2E_COLLECTION_EXPORT_IMPORT.md) | `web/e2e/collection-export-import.spec.ts`                                                                                                                    | ✅ Implemented                          |
 | [INT_Seed_Sync.md](INT_Seed_Sync.md)                               | `api/db/seed/sync.test.ts`                                                                                                                                    | Scenarios written                       |
 | [UNIT_CATALOG_DETAIL_SHEETS.md](UNIT_CATALOG_DETAIL_SHEETS.md)     | `web/src/catalog/components/__tests__/DetailSheet.test.tsx`, `*DetailSheet.test.tsx`                                                                          | ✅ Implemented                          |
+| [E2E_ML_PHOTO_IDENTIFICATION.md](E2E_ML_PHOTO_IDENTIFICATION.md)  | `web/e2e/add-by-photo.spec.ts`, `web/e2e/admin-ml-stats.spec.ts`                                                                                            | ✅ Implemented                          |
 
 ## Creating a New Scenario
 

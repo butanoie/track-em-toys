@@ -137,13 +137,19 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `mockEmptyCollection(page)` in `e2e/fixtures/mock-helpers.ts` — shared helper that mocks empty collection endpoints (check, stats, list). Required in any E2E spec that renders item detail components (they call `useCollectionCheck`).
 - `MockCollectionState` in `e2e/fixtures/mock-helpers.ts` — stateful mock for collection E2E tests. Route handlers close over the instance, so mutations (`addItem`, `removeItem`) are reflected in subsequent GET responses without re-registering routes.
 - When adding a field to a Zod schema (e.g., `CatalogItemSchema`), also update mock data in E2E spec files — E2E mocks go through Zod parse in the browser and will fail if required fields are missing.
-- `ConditionSelector` renders `<button>` elements (not Radix `Select`) — E2E tests click `getByRole('button', { name: /Opened Complete/ })`. The collection page has two condition filter dropdowns: package condition (`getByRole('combobox', { name: /Filter by package condition/ })`) and item grade (`getByRole('combobox', { name: /Filter by item grade/ })`).
+- `ConditionSelector` renders `<button>` elements (not Radix `Select`) — E2E tests click `getByRole('button', { name: /OC Opened Complete/ })` (buttons show short code prefix + full label). The collection page has two condition filter dropdowns: package condition (`getByRole('combobox', { name: /Filter by package condition/ })`) and item grade (`getByRole('combobox', { name: /Filter by item grade/ })`).
 - `MockCollectionState` also handles export/import routes — `GET /collection/export` derives payload from `liveItems`, `POST /collection/import` resolves slugs against known items and mutates state. Overwrite mode snapshots + soft-deletes all live items before import.
 - File download assertions: `page.waitForEvent('download')` must be started **before** the click that triggers the download — use `Promise.all([page.waitForEvent('download'), button.click()])` or assign the promise first. Read content via `download.createReadStream()`.
 - File upload in tests: `page.locator('[role="dialog"] input[type="file"]').setInputFiles({ name, mimeType, buffer })` — the buffer form avoids temp files on disk, works on hidden inputs without `force: true`
 - Radix AlertDialog portals: scope assertions with `page.getByRole('alertdialog')` — the portal renders outside the parent `Dialog`, so `page.getByRole('dialog')` won't contain it
 - Error injection pattern: register a `page.route()` override **after** `state.register(page)` to intercept specific endpoints with error responses — Playwright's last-registered-wins rule gives the override higher priority
 - Import test helpers in `e2e/fixtures/import-helpers.ts` — `buildExportFileDescriptor`, `buildRawFileDescriptor`, `selectImportFile`, `clickAppend`/`clickReplace`, `confirmAppendDialog`/`confirmReplaceDialog`, `readDownloadJson`
+- E2E tests bypass ONNX inference via `window.__ML_TEST_PREDICTIONS__` — set by `injectTestPredictions()` in `e2e/fixtures/ml-helpers.ts`, checked by `getTestPredictions()` in `usePhotoIdentify.ts`. New ML inference paths must check this hook.
+- "Add by Photo" button only renders in `CollectionStatsBar` actions (non-empty collection). E2E tests needing this button must use `MockCollectionState` with at least one item.
+- E2E tests use `npm run preview` (serves built bundle). After modifying source, run `npm run build` before `npm run test:e2e` — changes won't appear otherwise.
+- Scope E2E assertions inside Sheet/Dialog via `const sheet = page.getByRole('dialog')` to avoid strict mode violations when items appear in both the sheet and the page behind it.
+- ML mock helpers in `e2e/fixtures/ml-helpers.ts`: `mockMlModels`, `mockMlModelsEmpty`, `mockMlEvents`, `injectTestPredictions`, `mockPredictionItemDetails`, `mockMlStats`
+- Rate limiting: running with 3 workers can exhaust `test-signin` rate limits (60/min). Use `--workers=1` when debugging or after many retries.
 
 ### Image Loading
 

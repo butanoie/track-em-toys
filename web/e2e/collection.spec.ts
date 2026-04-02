@@ -211,9 +211,9 @@ test.describe('Edit and remove collection items', () => {
     await expect(page.getByText('Legacy Bulkhead')).toBeVisible({ timeout: 10_000 });
 
     await page.getByRole('button', { name: /Edit Legacy Bulkhead/ }).click();
-    await expect(page.getByRole('heading', { name: 'Edit Collection Entry' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Edit Collection Item' })).toBeVisible();
 
-    await page.getByRole('button', { name: /Opened Complete/ }).click();
+    await page.getByRole('button', { name: /OC Opened Complete/ }).click();
     await page.getByRole('button', { name: 'Save Changes' }).click();
 
     const toast = page.locator('[data-sonner-toast]').filter({ hasText: /Collection entry updated/ });
@@ -227,7 +227,7 @@ test.describe('Edit and remove collection items', () => {
     await expect(page.getByText('Legacy Bulkhead')).toBeVisible({ timeout: 10_000 });
 
     await page.getByRole('button', { name: /Edit Legacy Bulkhead/ }).click();
-    await expect(page.getByRole('heading', { name: 'Edit Collection Entry' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Edit Collection Item' })).toBeVisible();
     await page.getByRole('button', { name: 'Remove' }).click();
 
     const removeToast = page.locator('[data-sonner-toast]').filter({ hasText: /Removed from collection/ });

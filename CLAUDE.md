@@ -92,6 +92,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 ## Development Strategy
 
 - ML-accelerated, web-first roadmap: 1.4 (Seed) → 1.5 (Catalog API) → 1.5b (Roles) → 1.9 (Photos) → 4.0 (ML) → 2.0 (iOS)
+- Phase 4.0c (model serving, client-side inference, telemetry) is complete — "Add by Photo" on collection page, admin ML stats at `/admin/ml`
 - Collection features (pricing, tags, reporting) deferred until post-ML
 - Photo enhancements (moderation, soft delete, captions, approval dashboard) deferred to Phase 1.9b (post-ML)
 - Photo API endpoints have no LIMIT on returned photos — curators decide photo count, no API cap (decided 2026-03-23)
@@ -113,6 +114,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 
 - `MainNav` (Dashboard | Catalog | My Collection) renders on all non-admin authenticated pages
 - Admin pages use their own sidebar layout — do NOT render MainNav on admin routes
+- Admin default redirect: `/admin` → `/admin/ml` (ML Stats). Sidebar nav: ML Stats, Users.
 - Collection URLs: `/collection` (collection browse with franchise/condition/search filters in search params)
 - Catalog URLs: `/catalog` (franchise list), `/catalog/:franchise` (hub, `?view=characters` toggles to characters view), `/catalog/:franchise/items` (items browse with filters in search params), `/catalog/:franchise/items/:slug` (item detail), `/catalog/:franchise/characters` (characters browse with filters in search params), `/catalog/:franchise/characters/:slug` (character detail)
 - Manufacturer URLs: `/catalog/manufacturers` (manufacturer list), `/catalog/manufacturers/:slug` (hub), `/catalog/manufacturers/:slug/items` (items browse with filters in search params)
