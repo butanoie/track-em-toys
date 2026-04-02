@@ -214,6 +214,9 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `PredictionCard` emits `prediction_accepted` via `AddToCollectionDialog`'s `onSuccess` callback
 - Terminal event tracking: `hasTerminalEventRef` prevents double-counting abandonment when `prediction_accepted` or `browse_catalog` already fired
 - Admin dashboard at `/admin/ml` — stat cards + recharts line/bar charts, `days` selector (7/30/90) via URL search params
+- Model quality section below telemetry: `ModelQualitySection` → `ModelComparisonCards` + `PerClassAccuracyChart` + `ConfusedPairsTable`. Data from `GET /ml/stats/model-quality` (filesystem-backed, staleTime: 5 min)
+- `formatClassLabel` in `admin/ml/format-utils.ts` — converts `franchise__item-slug` to title-cased "Item Name" for chart labels
+- `PerClassAccuracyChart` shows first 30 classes with "Show all" toggle — color-coded bars (green ≥70%, amber ≥50%, red <50%)
 - recharts mock pattern for jsdom tests: mock `ResponsiveContainer`, `LineChart`, `BarChart` etc. as plain divs
 
 ### onnxruntime-web Integration

@@ -92,7 +92,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 ## Development Strategy
 
 - ML-accelerated, web-first roadmap: 1.4 (Seed) → 1.5 (Catalog API) → 1.5b (Roles) → 1.9 (Photos) → 4.0 (ML) → 2.0 (iOS)
-- Phase 4.0c (model serving, client-side inference, telemetry) is complete — "Add by Photo" on collection page, admin ML stats at `/admin/ml`
+- Phase 4.0 (ML pipeline) is complete — training (4.0a-b), model serving + client-side inference + telemetry (4.0c), quality dashboard + retraining docs (4.0d). Next: Phase 2.0 (iOS) or Phase 1.12 (GDPR)
 - Collection features (pricing, tags, reporting) deferred until post-ML
 - Photo enhancements (moderation, soft delete, captions, approval dashboard) deferred to Phase 1.9b (post-ML)
 - Photo API endpoints have no LIMIT on returned photos — curators decide photo count, no API cap (decided 2026-03-23)

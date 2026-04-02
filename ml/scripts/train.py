@@ -229,17 +229,26 @@ def compute_per_class_accuracy(
     loader: DataLoader,
     device: torch.device,
     num_classes: int,
-) -> tuple[dict[int, float], list[list[int]]]:
-    """Compute per-class accuracy and confusion matrix on the validation set."""
+) -> tuple[dict[int, float], list[list[int]], float]:
+    """Compute per-class accuracy, confusion matrix, and top-3 accuracy."""
     model.eval()
     class_correct = [0] * num_classes
     class_total = [0] * num_classes
     confusion = [[0] * num_classes for _ in range(num_classes)]
+    top3_correct = 0
+    total_samples = 0
 
     for inputs, labels in loader:
         inputs, labels = inputs.to(device), labels.to(device)
         outputs = model(inputs)
         _, predicted = outputs.max(1)
+
+        # Top-3 accuracy: check if true label is in top-3 predictions
+        _, top3_preds = outputs.topk(min(3, num_classes), dim=1)
+        for label, top3 in zip(labels, top3_preds):
+            if label in top3:
+                top3_correct += 1
+            total_samples += 1
 
         for label, pred in zip(labels, predicted):
             l_idx, p_idx = label.item(), pred.item()
@@ -252,8 +261,9 @@ def compute_per_class_accuracy(
         i: class_correct[i] / class_total[i] if class_total[i] > 0 else 0.0
         for i in range(num_classes)
     }
+    top3_accuracy = top3_correct / total_samples if total_samples > 0 else 0.0
 
-    return per_class, confusion
+    return per_class, confusion, top3_accuracy
 
 
 def main() -> None:
@@ -389,7 +399,7 @@ def main() -> None:
     # Compute per-class accuracy and confusion matrix on val set
     model.load_state_dict(best_ckpt_state["model_state_dict"])
     model = model.to(device)
-    per_class_acc, confusion = compute_per_class_accuracy(
+    per_class_acc, confusion, top3_acc = compute_per_class_accuracy(
         model, val_loader, device, num_classes
     )
 
@@ -400,6 +410,7 @@ def main() -> None:
         "category": args.category,
         "class_count": num_classes,
         "best_val_accuracy": best_val_acc,
+        "top3_accuracy": top3_acc,
         "label_map": label_maps["label_map"],
         "label_hierarchy": label_maps["label_hierarchy"],
         "per_class_accuracy": {
@@ -415,7 +426,7 @@ def main() -> None:
     metrics_path = output_dir / f"{stem}-metrics.json"
     save_metadata_json(metrics_path, metrics)
     print(f"Metrics:    {metrics_path}")
-    print(f"\nBest val accuracy: {best_val_acc:.1%}")
+    print(f"\nBest val accuracy: {best_val_acc:.1%} (top-3: {top3_acc:.1%})")
     print("Done.")
 
 

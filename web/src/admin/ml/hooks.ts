@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getMlStatsSummary, getMlStatsDaily, getMlStatsModels } from './api';
+import { getMlStatsSummary, getMlStatsDaily, getMlStatsModels, getMlModelQuality } from './api';
 
 export function useMlStatsSummary(days: number) {
   return useQuery({
@@ -22,5 +22,13 @@ export function useMlStatsModels(days: number) {
     queryKey: ['admin', 'ml', 'stats', 'models', days],
     queryFn: () => getMlStatsModels(days),
     staleTime: 60_000,
+  });
+}
+
+export function useMlModelQuality() {
+  return useQuery({
+    queryKey: ['admin', 'ml', 'quality'],
+    queryFn: getMlModelQuality,
+    staleTime: 5 * 60_000,
   });
 }

@@ -187,6 +187,16 @@ Two distinct photo types:
 - Stats queries use `$1::integer * INTERVAL '1 day'` (not string concatenation) for the time window
 - Daily stats use `generate_series` LEFT JOIN to fill zero-count days for chart rendering
 
+### ML Model Quality (Phase 4.0c-4)
+
+- `GET /ml/stats/model-quality` — admin-only, filesystem-backed (reads `-metrics.json` files from `ML_MODELS_PATH`)
+- Returns per-model: accuracy, top-3 accuracy, class count, size, quality gate status, per-class accuracy (sorted worst-first), top-20 confused pairs
+- `metrics-schema.ts` validates `-metrics.json` with hand-rolled type guard (same pattern as `metadata-schema.ts`)
+- `quality-reader.ts` reads metrics files + `computeConfusedPairs` (off-diagonal extraction from confusion matrix)
+- `metrics_available: false` when metrics file is missing — quality fields become null in response
+- Quality gates: accuracy ≥ 0.70, model size ≤ 10 MB (constants in `quality-routes.ts`)
+- Separate plugin from telemetry stats: filesystem reads (quality) vs DB queries (telemetry)
+
 ### @fastify/static Route Collisions
 
 - `@fastify/static` with a prefix intercepts ALL requests under that prefix — including exact matches. A static prefix `/ml/models/` would catch `GET /ml/models` before the route handler runs. Use distinct prefixes for API routes vs static files (e.g., `/ml/models` for API, `/ml/model-files/` for static).

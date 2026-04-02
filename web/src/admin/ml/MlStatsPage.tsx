@@ -15,7 +15,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { useMlStatsSummary, useMlStatsDaily, useMlStatsModels } from './hooks';
+import { useMlStatsSummary, useMlStatsDaily, useMlStatsModels, useMlModelQuality } from './hooks';
+import { ModelQualitySection } from './ModelQualitySection';
 import { Route } from '@/routes/_authenticated/admin/ml';
 
 // Shared recharts styles — inherit app font, use CSS variable colors
@@ -37,6 +38,7 @@ export function MlStatsPage() {
   const { data: summary, isPending: summaryLoading } = useMlStatsSummary(days);
   const { data: daily, isPending: dailyLoading } = useMlStatsDaily(days);
   const { data: models, isPending: modelsLoading } = useMlStatsModels(days);
+  const { data: quality, isPending: qualityLoading } = useMlModelQuality();
 
   const handleDaysChange = useCallback(
     (value: string) => {
@@ -169,6 +171,9 @@ export function MlStatsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Model quality metrics (from training metrics files) */}
+      <ModelQualitySection data={quality} isPending={qualityLoading} />
     </div>
   );
 }

@@ -38,8 +38,9 @@
 - **4.0c-1 Model Metadata API:** ✅ `GET /ml/models` endpoint + static file serving via `@fastify/static` (dev) / CDN (prod)
 - **4.0c-2 Client-Side Inference:** ✅ "Add by Photo" on collection page, onnxruntime-web, IndexedDB caching, top-5 predictions with inline add-to-collection
 - **4.0c-T ML Telemetry:** ✅ `ml_inference_events` table, `POST /ml/events`, admin dashboard at `/admin/ml` with recharts
-- **4.0c-3 Server-Side Fallback:** Optional `POST /ml/classify` via onnxruntime-node
-- **4.0d Retraining:** Documented workflow (prepare-data → train → export → validate → deploy), quality gates (min accuracy + cross-format agreement)
+- **4.0c-4 E2E Tests + Quality Dashboard:** ✅ 15 Playwright E2E tests, model quality metrics on admin dashboard (per-class accuracy chart, confused pairs table, quality gate badges)
+- **4.0c-3 Server-Side Fallback:** Optional `POST /ml/classify` via onnxruntime-node (not needed for current scale)
+- **4.0d Retraining Docs:** ✅ End-to-end pipeline, retraining triggers, quality gates checklist, deployment/rollback, data versioning
 - Model versioning: auto-generated filenames with training date, class count, accuracy metric
 - Python environment: `pyproject.toml` + `uv` for dependency management; `uv sync` to install
 

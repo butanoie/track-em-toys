@@ -166,8 +166,8 @@ Collection page → "Add by Photo" button in header
 2. **Phase 4.0c-1** — ✅ Model metadata API + static file serving
 3. **Phase 4.0c-2** — ✅ Client-side inference ("Add by Photo" on collection page, ONNX session, IndexedDB caching)
 4. **Phase 4.0c-T** — ✅ ML inference telemetry (events table, POST /ml/events, admin dashboard at /admin/ml with recharts)
-5. **Phase 4.0c-3** — Server-side fallback (optional, progressive enhancement)
-6. **Phase 4.0c-4** — Secondary model support, curator integration, E2E tests
+5. **Phase 4.0c-4** — ✅ E2E tests (15 Playwright tests), model quality dashboard (per-class accuracy, confused pairs, quality gates)
+6. **Phase 4.0c-3** — Server-side fallback (optional, progressive enhancement — not needed for current scale)
 
 ## Risks
 

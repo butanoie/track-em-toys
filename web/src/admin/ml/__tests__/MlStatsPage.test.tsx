@@ -26,6 +26,10 @@ vi.mock('../hooks', () => ({
     data: { data: [] },
     isPending: false,
   }),
+  useMlModelQuality: vi.fn().mockReturnValue({
+    data: { models: [] },
+    isPending: false,
+  }),
 }));
 
 vi.mock('@/routes/_authenticated/admin/ml', () => ({
