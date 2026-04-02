@@ -19,6 +19,7 @@ import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedCatalogSearchRouteImport } from './routes/_authenticated/catalog/search'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedAdminMlRouteImport } from './routes/_authenticated/admin/ml'
 import { Route as AuthenticatedCatalogManufacturersIndexRouteImport } from './routes/_authenticated/catalog/manufacturers/index'
 import { Route as AuthenticatedCatalogFranchiseIndexRouteImport } from './routes/_authenticated/catalog/$franchise/index'
 import { Route as AuthenticatedCatalogManufacturersSlugIndexRouteImport } from './routes/_authenticated/catalog/manufacturers/$slug/index'
@@ -79,6 +80,11 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminMlRoute = AuthenticatedAdminMlRouteImport.update({
+  id: '/ml',
+  path: '/ml',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedCatalogManufacturersIndexRoute =
   AuthenticatedCatalogManufacturersIndexRouteImport.update({
     id: '/catalog/manufacturers/',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/collection': typeof AuthenticatedCollectionRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/admin/ml': typeof AuthenticatedAdminMlRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/catalog/search': typeof AuthenticatedCatalogSearchRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/collection': typeof AuthenticatedCollectionRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin/ml': typeof AuthenticatedAdminMlRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/catalog/search': typeof AuthenticatedCatalogSearchRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/_authenticated/collection': typeof AuthenticatedCollectionRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/admin/ml': typeof AuthenticatedAdminMlRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/catalog/search': typeof AuthenticatedCatalogSearchRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/collection'
     | '/settings'
+    | '/admin/ml'
     | '/admin/users'
     | '/catalog/search'
     | '/admin/'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/collection'
     | '/settings'
     | '/'
+    | '/admin/ml'
     | '/admin/users'
     | '/catalog/search'
     | '/admin'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/_authenticated/collection'
     | '/_authenticated/settings'
     | '/_authenticated/'
+    | '/_authenticated/admin/ml'
     | '/_authenticated/admin/users'
     | '/_authenticated/catalog/search'
     | '/_authenticated/admin/'
@@ -323,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/ml': {
+      id: '/_authenticated/admin/ml'
+      path: '/ml'
+      fullPath: '/admin/ml'
+      preLoaderRoute: typeof AuthenticatedAdminMlRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/catalog/manufacturers/': {
       id: '/_authenticated/catalog/manufacturers/'
       path: '/catalog/manufacturers'
@@ -383,11 +402,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminMlRoute: typeof AuthenticatedAdminMlRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminMlRoute: AuthenticatedAdminMlRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }

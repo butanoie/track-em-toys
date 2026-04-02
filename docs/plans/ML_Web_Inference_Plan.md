@@ -72,20 +72,22 @@ Returns available models with version, accuracy, and download URLs. Label maps a
 
 ```json
 {
-  "models": [{
-    "name": "primary-classifier",
-    "version": "primary-classifier-20260331-c117-a83.8",
-    "category": "primary",
-    "format": "onnx",
-    "size_bytes": 6870550,
-    "accuracy": 0.838,
-    "class_count": 117,
-    "input_shape": [1, 3, 224, 224],
-    "download_url": "http://localhost:3010/ml/model-files/primary-classifier-20260331-c117-a83.8.onnx",
-    "metadata_url": "http://localhost:3010/ml/model-files/primary-classifier-20260331-c117-a83.8-metadata.json",
-    "trained_at": "2026-03-31T00:59:50.123Z",
-    "exported_at": "2026-03-31T01:10:30.456Z"
-  }]
+  "models": [
+    {
+      "name": "primary-classifier",
+      "version": "primary-classifier-20260331-c117-a83.8",
+      "category": "primary",
+      "format": "onnx",
+      "size_bytes": 6870550,
+      "accuracy": 0.838,
+      "class_count": 117,
+      "input_shape": [1, 3, 224, 224],
+      "download_url": "http://localhost:3010/ml/model-files/primary-classifier-20260331-c117-a83.8.onnx",
+      "metadata_url": "http://localhost:3010/ml/model-files/primary-classifier-20260331-c117-a83.8-metadata.json",
+      "trained_at": "2026-03-31T00:59:50.123Z",
+      "exported_at": "2026-03-31T01:10:30.456Z"
+    }
+  ]
 }
 ```
 
@@ -163,15 +165,16 @@ Collection page → "Add by Photo" button in header
 1. **Phase 4.0b** — ✅ PyTorch training scripts + dual export + validation
 2. **Phase 4.0c-1** — ✅ Model metadata API + static file serving
 3. **Phase 4.0c-2** — ✅ Client-side inference ("Add by Photo" on collection page, ONNX session, IndexedDB caching)
-4. **Phase 4.0c-3** — Server-side fallback (optional, progressive enhancement)
-5. **Phase 4.0c-4** — Secondary model support, curator integration, E2E tests
+4. **Phase 4.0c-T** — ✅ ML inference telemetry (events table, POST /ml/events, admin dashboard at /admin/ml with recharts)
+5. **Phase 4.0c-3** — Server-side fallback (optional, progressive enhancement)
+6. **Phase 4.0c-4** — Secondary model support, curator integration, E2E tests
 
 ## Risks
 
-| Risk | Mitigation |
-|------|------------|
-| PyTorch accuracy < Create ML | Benchmark both; same MobileNet architecture family, expect parity |
-| 7MB model download UX | FP16 quantization halves to ~3.5MB; IndexedDB caching for repeat visits |
-| WASM fallback slow on old devices | Server-side fallback (Phase 4.0c-3) |
-| Training workflow complexity | Python scripts are CLI tools; existing Node.js data prep pipeline unchanged |
-| IndexedDB quota on mobile Safari | 7MB well within limits; evict old versions on update |
+| Risk                              | Mitigation                                                                  |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| PyTorch accuracy < Create ML      | Benchmark both; same MobileNet architecture family, expect parity           |
+| 7MB model download UX             | FP16 quantization halves to ~3.5MB; IndexedDB caching for repeat visits     |
+| WASM fallback slow on old devices | Server-side fallback (Phase 4.0c-3)                                         |
+| Training workflow complexity      | Python scripts are CLI tools; existing Node.js data prep pipeline unchanged |
+| IndexedDB quota on mobile Safari  | 7MB well within limits; evict old versions on update                        |

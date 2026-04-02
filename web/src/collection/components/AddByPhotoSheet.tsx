@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { Camera, RefreshCw, Search } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -8,6 +8,7 @@ import { DropZone } from '@/catalog/photos/DropZone';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useMlModels } from '@/collection/hooks/useMlModels';
 import { usePhotoIdentify } from '@/collection/hooks/usePhotoIdentify';
+import { emitMlEvent } from '@/ml/telemetry';
 import { PredictionCard } from './PredictionCard';
 import type { CollectionMutations } from '@/collection/hooks/useCollectionMutations';
 
@@ -21,6 +22,9 @@ export function AddByPhotoSheet({ open, onOpenChange, mutations }: AddByPhotoShe
   const { data: modelsData, isPending: modelsLoading } = useMlModels();
   const { phase, activeCategory, identify, tryAltMode, reset } = usePhotoIdentify();
 
+  // Track whether a terminal event (accepted/browse) already fired this session
+  const hasTerminalEventRef = useRef(false);
+
   const models = useMemo(() => modelsData?.models ?? [], [modelsData]);
   const primaryModel = useMemo(() => models.find((m) => m.category === 'primary'), [models]);
   const secondaryModel = useMemo(() => models.find((m) => m.category === 'secondary'), [models]);
@@ -31,21 +35,46 @@ export function AddByPhotoSheet({ open, onOpenChange, mutations }: AddByPhotoShe
     (files: File[]) => {
       const file = files[0];
       if (!file || !activeModel) return;
+      hasTerminalEventRef.current = false;
       void identify(file, activeModel);
     },
     [activeModel, identify]
   );
 
   const handleAltMode = useCallback(() => {
+    hasTerminalEventRef.current = false;
     tryAltMode(models);
   }, [tryAltMode, models]);
 
+  const handlePredictionAccepted = useCallback(() => {
+    hasTerminalEventRef.current = true;
+  }, []);
+
+  const handleBrowseCatalog = useCallback(() => {
+    hasTerminalEventRef.current = true;
+    emitMlEvent('browse_catalog', activeModel?.name, {
+      model_version: activeModel?.version,
+      model_category: activeModel?.category,
+    });
+  }, [activeModel]);
+
   const handleClose = useCallback(
     (isOpen: boolean) => {
-      if (!isOpen) reset();
+      if (!isOpen) {
+        // Fire scan_abandoned if sheet closes without a terminal event
+        if (!hasTerminalEventRef.current && phase.step !== 'idle' && phase.step !== 'error') {
+          emitMlEvent('scan_abandoned', activeModel?.name, {
+            model_version: activeModel?.version,
+            model_category: activeModel?.category,
+            had_results: phase.step === 'results',
+          });
+        }
+        hasTerminalEventRef.current = false;
+        reset();
+      }
       onOpenChange(isOpen);
     },
-    [onOpenChange, reset]
+    [onOpenChange, reset, phase.step, activeModel]
   );
 
   const noModels = !modelsLoading && models.length === 0;
@@ -113,8 +142,15 @@ export function AddByPhotoSheet({ open, onOpenChange, mutations }: AddByPhotoShe
                 </p>
               ) : (
                 <div className="space-y-2">
-                  {phase.predictions.map((prediction) => (
-                    <PredictionCard key={prediction.label} prediction={prediction} mutations={mutations} />
+                  {phase.predictions.map((prediction, i) => (
+                    <PredictionCard
+                      key={prediction.label}
+                      prediction={prediction}
+                      predictionRank={i + 1}
+                      activeModel={activeModel}
+                      mutations={mutations}
+                      onAccepted={handlePredictionAccepted}
+                    />
                   ))}
                 </div>
               )}
@@ -127,14 +163,21 @@ export function AddByPhotoSheet({ open, onOpenChange, mutations }: AddByPhotoShe
                       Try {activeCategory === 'primary' ? 'alt-mode' : 'robot mode'}
                     </Button>
                   )}
-                  <Link to="/catalog">
+                  <Link to="/catalog" onClick={handleBrowseCatalog}>
                     <Button variant="outline" size="sm">
                       <Search className="h-3.5 w-3.5 mr-1.5" />
                       Browse catalog
                     </Button>
                   </Link>
                 </div>
-                <Button variant="ghost" size="sm" onClick={reset}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    hasTerminalEventRef.current = false;
+                    reset();
+                  }}
+                >
                   Try another photo
                 </Button>
               </div>

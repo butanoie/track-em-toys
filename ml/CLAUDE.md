@@ -37,6 +37,7 @@
 - **4.0b Model Training:** ✅ PyTorch MobileNetV3-Small with transfer learning, progressive unfreezing, dual ONNX + Core ML export
 - **4.0c-1 Model Metadata API:** ✅ `GET /ml/models` endpoint + static file serving via `@fastify/static` (dev) / CDN (prod)
 - **4.0c-2 Client-Side Inference:** ✅ "Add by Photo" on collection page, onnxruntime-web, IndexedDB caching, top-5 predictions with inline add-to-collection
+- **4.0c-T ML Telemetry:** ✅ `ml_inference_events` table, `POST /ml/events`, admin dashboard at `/admin/ml` with recharts
 - **4.0c-3 Server-Side Fallback:** Optional `POST /ml/classify` via onnxruntime-node
 - **4.0d Retraining:** Documented workflow (prepare-data → train → export → validate → deploy), quality gates (min accuracy + cross-format agreement)
 - Model versioning: auto-generated filenames with training date, class count, accuracy metric

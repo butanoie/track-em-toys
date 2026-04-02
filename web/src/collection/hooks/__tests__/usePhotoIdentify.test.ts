@@ -13,6 +13,10 @@ vi.mock('@/ml/image-classifier', () => ({
   classifyImage: (...args: unknown[]) => mockClassifyImage(...args),
 }));
 
+vi.mock('@/ml/telemetry', () => ({
+  emitMlEvent: vi.fn(),
+}));
+
 import { usePhotoIdentify } from '../usePhotoIdentify';
 
 function makeModel(overrides?: Partial<MlModelSummary>): MlModelSummary {

@@ -28,6 +28,10 @@ vi.mock('./PredictionCard', () => ({
   PredictionCard: () => <div data-testid="prediction-card">Prediction</div>,
 }));
 
+vi.mock('@/ml/telemetry', () => ({
+  emitMlEvent: vi.fn(),
+}));
+
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, ...props }: { children: React.ReactNode; to: string }) => (
     <a href={to} {...props}>

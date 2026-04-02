@@ -467,6 +467,48 @@ export const MlModelsResponseSchema = z.object({
 export type MlModelSummary = z.infer<typeof MlModelSummarySchema>;
 export type MlModelsResponse = z.infer<typeof MlModelsResponseSchema>;
 
+// ML Stats
+// ---------------------------------------------------------------------------
+
+export const MlStatsSummarySchema = z.object({
+  total_scans: z.number().int(),
+  scans_completed: z.number().int(),
+  scans_failed: z.number().int(),
+  predictions_accepted: z.number().int(),
+  acceptance_rate: z.number(),
+  error_rate: z.number(),
+});
+
+const MlStatsDailyPointSchema = z.object({
+  date: z.string(),
+  scans_started: z.number().int(),
+  scans_completed: z.number().int(),
+  scans_failed: z.number().int(),
+  predictions_accepted: z.number().int(),
+});
+
+export const MlStatsDailySchema = z.object({
+  data: z.array(MlStatsDailyPointSchema),
+});
+
+const MlStatsModelRowSchema = z.object({
+  model_name: z.string(),
+  total_scans: z.number().int(),
+  predictions_accepted: z.number().int(),
+  scans_failed: z.number().int(),
+  avg_confidence: z.number().nullable(),
+});
+
+export const MlStatsModelsSchema = z.object({
+  data: z.array(MlStatsModelRowSchema),
+});
+
+export type MlStatsSummary = z.infer<typeof MlStatsSummarySchema>;
+export type MlStatsDaily = z.infer<typeof MlStatsDailySchema>;
+export type MlStatsDailyPoint = z.infer<typeof MlStatsDailyPointSchema>;
+export type MlStatsModels = z.infer<typeof MlStatsModelsSchema>;
+export type MlStatsModelRow = z.infer<typeof MlStatsModelRowSchema>;
+
 // ---------------------------------------------------------------------------
 // Collection schemas
 // ---------------------------------------------------------------------------

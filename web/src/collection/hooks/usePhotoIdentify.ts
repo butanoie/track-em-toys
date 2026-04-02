@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import type { MlModelSummary } from '@/lib/zod-schemas';
 import type { ModelCacheEntry, Prediction } from '@/ml/types';
+import { emitMlEvent } from '@/ml/telemetry';
 
 export type IdentifyPhase =
   | { step: 'idle' }
@@ -24,6 +25,11 @@ export function usePhotoIdentify() {
     }
 
     try {
+      emitMlEvent('scan_started', model.name, {
+        model_version: model.version,
+        model_category: model.category,
+      });
+
       // Lazy import ML modules — keeps onnxruntime-web out of the main bundle
       const [{ loadModel }, { classifyImage }] = await Promise.all([
         import('@/ml/model-cache'),
@@ -52,11 +58,26 @@ export function usePhotoIdentify() {
 
       // Run inference
       setPhase({ step: 'classifying' });
+      const t0 = performance.now();
       const predictions = await classifyImage(file, cacheEntry);
+      const inferenceMs = Math.round(performance.now() - t0);
+
+      emitMlEvent('scan_completed', model.name, {
+        model_version: model.version,
+        model_category: model.category,
+        inference_ms: inferenceMs,
+        top1_confidence: predictions[0]?.confidence ?? 0,
+        top5_labels: predictions.map((p) => p.label),
+      });
 
       setPhase({ step: 'results', predictions });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Classification failed';
+      emitMlEvent('scan_failed', model.name, {
+        model_version: model.version,
+        model_category: model.category,
+        error_message: message,
+      });
       setPhase({ step: 'error', message });
     }
   }, []);

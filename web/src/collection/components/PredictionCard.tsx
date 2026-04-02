@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,9 @@ import { useItemDetail } from '@/catalog/hooks/useItemDetail';
 import { useCollectionCheck } from '@/collection/hooks/useCollectionCheck';
 import { AddToCollectionDialog } from '@/collection/components/AddToCollectionDialog';
 import { formatSlugAsName } from '@/ml/label-parser';
+import { emitMlEvent } from '@/ml/telemetry';
 import type { Prediction } from '@/ml/types';
+import type { MlModelSummary } from '@/lib/zod-schemas';
 import type { CollectionMutations } from '@/collection/hooks/useCollectionMutations';
 
 /**
@@ -37,10 +39,19 @@ function confidenceColors(confidence: number): { bar: string; text: string } {
 
 interface PredictionCardProps {
   prediction: Prediction;
+  predictionRank: number;
+  activeModel: MlModelSummary | undefined;
   mutations: CollectionMutations;
+  onAccepted?: () => void;
 }
 
-export function PredictionCard({ prediction, mutations }: PredictionCardProps) {
+export function PredictionCard({
+  prediction,
+  predictionRank,
+  activeModel,
+  mutations,
+  onAccepted,
+}: PredictionCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { franchiseSlug, itemSlug, confidence } = prediction;
 
@@ -62,6 +73,18 @@ export function PredictionCard({ prediction, mutations }: PredictionCardProps) {
 
   const details = [franchise, manufacturer, toyLine].filter(Boolean).join(', ');
 
+  const handleAddSuccess = useCallback(() => {
+    emitMlEvent('prediction_accepted', activeModel?.name, {
+      model_version: activeModel?.version,
+      model_category: activeModel?.category,
+      accepted_label: prediction.label,
+      accepted_rank: predictionRank,
+      accepted_confidence: confidence,
+      item_id: itemDetail?.id,
+    });
+    onAccepted?.();
+  }, [activeModel, prediction.label, predictionRank, confidence, itemDetail, onAccepted]);
+
   return (
     <div className="flex items-start gap-3 rounded-lg border border-border p-3">
       <div className="flex-1 min-w-0 space-y-1">
@@ -73,9 +96,7 @@ export function PredictionCard({ prediction, mutations }: PredictionCardProps) {
           >
             {displayName}
           </Link>
-          {productCode && (
-            <span className="text-xs text-muted-foreground shrink-0">[{productCode}]</span>
-          )}
+          {productCode && <span className="text-xs text-muted-foreground shrink-0">[{productCode}]</span>}
           {alreadyOwned && (
             <Badge variant="secondary" className="text-xs shrink-0">
               Owned
@@ -118,6 +139,7 @@ export function PredictionCard({ prediction, mutations }: PredictionCardProps) {
           itemName={itemDetail.name}
           alreadyOwned={alreadyOwned}
           mutations={mutations}
+          onSuccess={handleAddSuccess}
         />
       )}
     </div>

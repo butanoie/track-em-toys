@@ -54,6 +54,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Path alias `@/*` maps to `./src/*` — configured in both `tsconfig.app.json` and `vite.config.ts`
 - Auth: `@react-oauth/google` for Google Sign-In, custom Apple Sign-In JS SDK integration
 - Access tokens are held in a module-scoped variable (never persisted to storage); `localStorage` stores only a boolean session flag (`trackem:has_session`); `sessionStorage` stores user profile data
+- `apiFetch` returns a never-resolving promise on expired sessions (by design — page navigates away). For fire-and-forget calls (telemetry, analytics), use plain `fetch` with manual auth header from `authStore.getToken()` to avoid memory leaks from hanging promises
 - `vitest.config.ts` is separate from `vite.config.ts` — excludes TanStack Router Vite plugin and uses `jsdom` environment
 - `QueryClient` is instantiated inside `RootLayout` via `useState` (stable per render, not shared between test runs) — not a top-level singleton
 - `useRef<T>()` requires an explicit initial value in React 19 — use `useRef<T>(undefined)` or `useRef<T>(null)`, not bare `useRef<T>()`
@@ -79,6 +80,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Admin API hooks: `src/admin/hooks/` for shared hooks, entity-specific code in `src/admin/users/`
 - Admin test fixtures: `src/admin/__tests__/admin-test-helpers.tsx` — separate from auth test helpers (`.tsx` because it contains JSX wrapper components)
 - Shared `AppHeader` component (`src/components/AppHeader.tsx`) replaces duplicate header code in Dashboard and Settings
+- Admin layout `<main>` already has `p-4 sm:p-6 lg:p-8` — child pages must NOT add their own padding (double-padding). Use `<div className="space-y-6">` as the top-level wrapper, matching `AdminUsersPage`
 - Admin data table uses `placeholderData: keepPreviousData` for smooth pagination (no skeleton flash between pages)
 - URL search params (not React state) for admin filter/pagination state — bookmarkable, survives refresh
 - `ConfirmDialog` pattern for destructive actions: generic component in `src/admin/components/`, reusable for deactivation, purge, and future catalog deletes
@@ -196,6 +198,17 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Model metadata via `useMlModels` hook consuming `GET /ml/models` (staleTime: 5 min)
 - `softmax` is always applied to model output (never conditionally) — ensures confidence values sum to 1
 - Query key: `['ml', 'models']`
+
+### ML Telemetry (Phase 4.0c-T)
+
+- `emitMlEvent` in `src/ml/telemetry.ts` — fire-and-forget, uses plain `fetch` with manual auth header (NOT `apiFetch` — avoids never-resolving promise on expired sessions)
+- Returns `void` (not `Promise<void>`) to prevent accidental awaiting
+- `usePhotoIdentify` emits `scan_started`, `scan_completed`, `scan_failed`
+- `AddByPhotoSheet` emits `scan_abandoned` (on sheet close without terminal event) and `browse_catalog`
+- `PredictionCard` emits `prediction_accepted` via `AddToCollectionDialog`'s `onSuccess` callback
+- Terminal event tracking: `hasTerminalEventRef` prevents double-counting abandonment when `prediction_accepted` or `browse_catalog` already fired
+- Admin dashboard at `/admin/ml` — stat cards + recharts line/bar charts, `days` selector (7/30/90) via URL search params
+- recharts mock pattern for jsdom tests: mock `ResponsiveContainer`, `LineChart`, `BarChart` etc. as plain divs
 
 ### onnxruntime-web Integration
 

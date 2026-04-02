@@ -28,6 +28,10 @@ vi.mock('@/collection/components/AddToCollectionDialog', () => ({
   AddToCollectionDialog: () => null,
 }));
 
+vi.mock('@/ml/telemetry', () => ({
+  emitMlEvent: vi.fn(),
+}));
+
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, params }: { children: React.ReactNode; to: string; params?: Record<string, string> }) => {
     let href = to;
@@ -42,6 +46,7 @@ vi.mock('@tanstack/react-router', () => ({
 
 import { PredictionCard } from '../PredictionCard';
 import type { Prediction } from '@/ml/types';
+import type { MlModelSummary } from '@/lib/zod-schemas';
 import type { CollectionMutations } from '@/collection/hooks/useCollectionMutations';
 
 const mockMutations = {
@@ -49,6 +54,21 @@ const mockMutations = {
   update: { mutate: vi.fn(), isPending: false },
   remove: { mutate: vi.fn(), isPending: false },
 } as unknown as CollectionMutations;
+
+const mockModel: MlModelSummary = {
+  name: 'primary-classifier',
+  version: 'v1',
+  category: 'primary',
+  format: 'onnx',
+  class_count: 10,
+  accuracy: 0.85,
+  input_shape: [1, 3, 224, 224],
+  size_bytes: 7000000,
+  download_url: 'http://localhost/model.onnx',
+  metadata_url: 'http://localhost/model-metadata.json',
+  trained_at: '2026-03-31T00:00:00Z',
+  exported_at: '2026-03-31T00:00:00Z',
+};
 
 const mockPrediction: Prediction = {
   label: 'transformers__optimus-prime',
@@ -59,32 +79,67 @@ const mockPrediction: Prediction = {
 
 describe('PredictionCard', () => {
   it('renders prediction with name and confidence', () => {
-    render(<PredictionCard prediction={mockPrediction} mutations={mockMutations} />);
+    render(
+      <PredictionCard
+        prediction={mockPrediction}
+        predictionRank={1}
+        activeModel={mockModel}
+        mutations={mockMutations}
+      />
+    );
 
     expect(screen.getByText('Optimus Prime')).toBeInTheDocument();
     expect(screen.getByText('85.0%')).toBeInTheDocument();
   });
 
   it('renders item details line', () => {
-    render(<PredictionCard prediction={mockPrediction} mutations={mockMutations} />);
+    render(
+      <PredictionCard
+        prediction={mockPrediction}
+        predictionRank={1}
+        activeModel={mockModel}
+        mutations={mockMutations}
+      />
+    );
 
     expect(screen.getByText('Transformers, FansToys, Masterpiece')).toBeInTheDocument();
   });
 
   it('renders product code', () => {
-    render(<PredictionCard prediction={mockPrediction} mutations={mockMutations} />);
+    render(
+      <PredictionCard
+        prediction={mockPrediction}
+        predictionRank={1}
+        activeModel={mockModel}
+        mutations={mockMutations}
+      />
+    );
 
     expect(screen.getByText('[FT-01]')).toBeInTheDocument();
   });
 
   it('renders Add button', () => {
-    render(<PredictionCard prediction={mockPrediction} mutations={mockMutations} />);
+    render(
+      <PredictionCard
+        prediction={mockPrediction}
+        predictionRank={1}
+        activeModel={mockModel}
+        mutations={mockMutations}
+      />
+    );
 
     expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument();
   });
 
   it('links to catalog item page', () => {
-    render(<PredictionCard prediction={mockPrediction} mutations={mockMutations} />);
+    render(
+      <PredictionCard
+        prediction={mockPrediction}
+        predictionRank={1}
+        activeModel={mockModel}
+        mutations={mockMutations}
+      />
+    );
 
     const link = screen.getByRole('link', { name: 'Optimus Prime' });
     expect(link).toHaveAttribute('href', '/catalog/transformers/items/optimus-prime');

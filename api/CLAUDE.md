@@ -37,6 +37,7 @@ cd api && npm run format:check # Prettier check (CI mode)
 
 - PostgreSQL auto-names inline FK constraints as `{table}_{column}_fkey` — use this pattern when dropping/recreating constraints in migrations
 - NEVER use `SELECT *` or `RETURNING *` — always list explicit columns matching the TypeScript interface
+- Time-window queries: use `$1::integer * INTERVAL '1 day'` (parameterized integer multiplication), NEVER `($1 || ' days')::INTERVAL` (string concatenation, fragile)
 - Column lists must stay in sync with the corresponding TypeScript type in `src/types/index.ts`
 - ALL DB changes via migration files in `api/db/migrations/`, never direct schema edits
 - Migrations must be additive (add columns/tables) by default — destructive changes (drop column, drop table) require explicit user instruction
@@ -174,6 +175,17 @@ Two distinct photo types:
 - `size_bytes` is derived by summing `fs.stat` on `.onnx` + `.onnx.data` files
 - `download_url` is `null` when the ONNX file is missing (metadata exists but model not yet exported)
 - No DB access — scanner only touches the filesystem
+
+### ML Inference Telemetry (Phase 4.0c-T)
+
+- `ml_inference_events` table: 6 event types (`scan_started`, `scan_completed`, `scan_failed`, `prediction_accepted`, `scan_abandoned`, `browse_catalog`), `model_name` denormalized column, `user_id NOT NULL` (RESTRICT, tombstone pattern)
+- `POST /ml/events` — authenticated (any user), rate-limited 60/min. Telemetry insert failures return 204 anyway (non-fatal)
+- `GET /ml/stats/summary?days=N` — admin-only. Returns aggregate counts + computed `acceptance_rate` and `error_rate`
+- `GET /ml/stats/daily?days=N` — admin-only. Returns pivoted daily data points for recharts
+- `GET /ml/stats/models?days=N` — admin-only. Returns per-model comparison grouped by `model_name`
+- `days` param uses `enum: [7, 30, 90]`, defaults to 7
+- Stats queries use `$1::integer * INTERVAL '1 day'` (not string concatenation) for the time window
+- Daily stats use `generate_series` LEFT JOIN to fill zero-count days for chart rendering
 
 ### @fastify/static Route Collisions
 

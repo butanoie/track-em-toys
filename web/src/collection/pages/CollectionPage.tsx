@@ -278,11 +278,7 @@ export function CollectionPage() {
         onClose={closeCatalogItem}
       />
 
-      <AddByPhotoSheet
-        open={addByPhotoOpen}
-        onOpenChange={setAddByPhotoOpen}
-        mutations={mutations}
-      />
+      <AddByPhotoSheet open={addByPhotoOpen} onOpenChange={setAddByPhotoOpen} mutations={mutations} />
     </div>
   );
 }

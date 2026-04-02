@@ -4,7 +4,7 @@ import { useAuth } from '@/auth/useAuth';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Users, ArrowLeft } from 'lucide-react';
+import { Users, BarChart3, ArrowLeft } from 'lucide-react';
 
 export const Route = createFileRoute('/_authenticated/admin')({
   component: AdminLayout,
@@ -12,8 +12,7 @@ export const Route = createFileRoute('/_authenticated/admin')({
 
 const NAV_ITEMS = [
   { to: '/admin/users' as const, label: 'Users', icon: Users },
-  // Future: { to: '/admin/catalog', label: 'Catalog', icon: LayoutList },
-  // Future: { to: '/admin/system', label: 'System', icon: Settings },
+  { to: '/admin/ml' as const, label: 'ML Stats', icon: BarChart3 },
 ] as const;
 
 function AdminLayout() {
