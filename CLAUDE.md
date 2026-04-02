@@ -52,7 +52,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 - iOS/macOS: Swift 6, SwiftUI, SwiftData + CloudKit sync, MVVM w/ @Observable
 - Web: React 19 + TypeScript, Shadcn/ui, Tailwind CSS 4, TanStack Query
 - Backend: Node.js 22 LTS, Fastify 5, TypeScript, PostgreSQL 17, ES256 JWT
-- ML: Core ML + Create ML, transfer learning image classification (≤ 10 MB models). Create ML requires single-level directories for `.labeledDirectories(at:)` — labels use `franchise__item` (`__` delimiter, not `/`)
+- ML: PyTorch MobileNetV3-Small with transfer learning (≤ 10 MB models). Dual export: ONNX (web via onnxruntime-web) + Core ML (iOS). Training data uses single-level directories — labels use `franchise__item` (`__` delimiter, not `/`). Python deps managed by `uv`.
 
 ## Data Architecture
 
@@ -92,6 +92,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 ## Development Strategy
 
 - ML-accelerated, web-first roadmap: 1.4 (Seed) → 1.5 (Catalog API) → 1.5b (Roles) → 1.9 (Photos) → 4.0 (ML) → 2.0 (iOS)
+- Phase 4.0 (ML pipeline) is complete — training (4.0a-b), model serving + client-side inference + telemetry (4.0c), quality dashboard + retraining docs (4.0d). Next: Phase 2.0 (iOS) or Phase 1.12 (GDPR)
 - Collection features (pricing, tags, reporting) deferred until post-ML
 - Photo enhancements (moderation, soft delete, captions, approval dashboard) deferred to Phase 1.9b (post-ML)
 - Photo API endpoints have no LIMIT on returned photos — curators decide photo count, no API cap (decided 2026-03-23)
@@ -113,6 +114,7 @@ Plus shared Swift Package: packages/TrackEmToysDataKit/
 
 - `MainNav` (Dashboard | Catalog | My Collection) renders on all non-admin authenticated pages
 - Admin pages use their own sidebar layout — do NOT render MainNav on admin routes
+- Admin default redirect: `/admin` → `/admin/ml` (ML Stats). Sidebar nav: ML Stats, Users.
 - Collection URLs: `/collection` (collection browse with franchise/condition/search filters in search params)
 - Catalog URLs: `/catalog` (franchise list), `/catalog/:franchise` (hub, `?view=characters` toggles to characters view), `/catalog/:franchise/items` (items browse with filters in search params), `/catalog/:franchise/items/:slug` (item detail), `/catalog/:franchise/characters` (characters browse with filters in search params), `/catalog/:franchise/characters/:slug` (character detail)
 - Manufacturer URLs: `/catalog/manufacturers` (manufacturer list), `/catalog/manufacturers/:slug` (hub), `/catalog/manufacturers/:slug/items` (items browse with filters in search params)

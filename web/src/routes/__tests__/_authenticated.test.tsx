@@ -40,9 +40,10 @@ function LoadingSpinner() {
 }
 
 function AuthenticatedLayout() {
-  const { isAuthenticated, isLoading } = mockUseAuth() as {
+  const { isAuthenticated, isLoading, sessionExpired } = mockUseAuth() as {
     isAuthenticated: boolean;
     isLoading: boolean;
+    sessionExpired: boolean;
   };
 
   const navigateRef = React.useRef(mockNavigate);
@@ -51,15 +52,16 @@ function AuthenticatedLayout() {
   hrefRef.current = mockLocation.href;
 
   React.useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated && !sessionExpired) {
       void navigateRef.current({
         to: '/login',
         search: { redirect: hrefRef.current },
       });
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, sessionExpired]);
 
-  if (isLoading || !isAuthenticated) return <LoadingSpinner />;
+  if (isLoading) return <LoadingSpinner />;
+  if (!isAuthenticated && !sessionExpired) return <LoadingSpinner />;
   return <MockOutlet />;
 }
 
@@ -71,7 +73,7 @@ describe('_authenticated layout route', () => {
   });
 
   it('shows loading spinner while isLoading', () => {
-    mockUseAuth.mockReturnValue({ isAuthenticated: false, isLoading: true });
+    mockUseAuth.mockReturnValue({ isAuthenticated: false, isLoading: true, sessionExpired: false });
 
     render(<AuthenticatedLayout />);
 
@@ -80,7 +82,7 @@ describe('_authenticated layout route', () => {
   });
 
   it('renders Outlet when authenticated', () => {
-    mockUseAuth.mockReturnValue({ isAuthenticated: true, isLoading: false });
+    mockUseAuth.mockReturnValue({ isAuthenticated: true, isLoading: false, sessionExpired: false });
 
     render(<AuthenticatedLayout />);
 
@@ -89,7 +91,7 @@ describe('_authenticated layout route', () => {
   });
 
   it('redirects to /login when not authenticated and not loading', async () => {
-    mockUseAuth.mockReturnValue({ isAuthenticated: false, isLoading: false });
+    mockUseAuth.mockReturnValue({ isAuthenticated: false, isLoading: false, sessionExpired: false });
 
     render(<AuthenticatedLayout />);
 
@@ -106,12 +108,24 @@ describe('_authenticated layout route', () => {
   });
 
   it('does NOT redirect while still loading', () => {
-    mockUseAuth.mockReturnValue({ isAuthenticated: false, isLoading: true });
+    mockUseAuth.mockReturnValue({ isAuthenticated: false, isLoading: true, sessionExpired: false });
 
     render(<AuthenticatedLayout />);
 
     // Navigate must NOT be called while loading
     expect(mockNavigate).not.toHaveBeenCalled();
     expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
+  });
+
+  it('renders Outlet and does NOT redirect when session expired mid-browse', () => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: false, isLoading: false, sessionExpired: true });
+
+    render(<AuthenticatedLayout />);
+
+    // Outlet should still render — user keeps browsing public catalog data
+    expect(screen.getByTestId('outlet')).toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    // No redirect — the toast handles re-login
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

@@ -109,6 +109,10 @@ vi.mock('@/collection/components/ImportCollectionDialog', () => ({
   ImportCollectionDialog: () => null,
 }));
 
+vi.mock('@/collection/components/AddByPhotoSheet', () => ({
+  AddByPhotoSheet: () => null,
+}));
+
 describe('CollectionPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();

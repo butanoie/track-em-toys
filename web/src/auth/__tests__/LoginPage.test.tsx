@@ -44,6 +44,7 @@ function makeAuthContext(overrides: Partial<AuthContextValue> = {}): AuthContext
     user: null,
     isAuthenticated: false,
     isLoading: false,
+    sessionExpired: false,
     signInWithGoogle: vi.fn(),
     signInWithApple: vi.fn().mockResolvedValue(undefined),
     logout: vi.fn(),

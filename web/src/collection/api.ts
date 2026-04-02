@@ -5,6 +5,7 @@ import {
   CollectionStatsSchema,
   CollectionCheckResponseSchema,
   CollectionImportResponseSchema,
+  MlModelsResponseSchema,
   type CollectionItemList,
   type CollectionItem,
   type CollectionStats,
@@ -13,6 +14,7 @@ import {
   type CollectionExportPayload,
   type CollectionImportResponse,
   type ImportMode,
+  type MlModelsResponse,
 } from '@/lib/zod-schemas';
 
 export interface CollectionFilters {
@@ -114,4 +116,8 @@ export async function importCollection(
     method: 'POST',
     body: JSON.stringify(payload),
   });
+}
+
+export async function listMlModels(): Promise<MlModelsResponse> {
+  return apiFetchJson('/ml/models', MlModelsResponseSchema);
 }

@@ -8,7 +8,12 @@
   },
   "scripts": {
     "prepare-data": "tsx src/prepare-training-data.ts",
+    "prepare-test-data": "tsx src/prepare-training-data.ts --test-set",
+    "train": "uv run python scripts/train.py",
+    "export-model": "uv run python scripts/export.py",
+    "validate-model": "uv run python scripts/validate.py",
     "test": "vitest run && eslint src/ --max-warnings 0",
+    "test:python": "uv run pytest scripts/tests/ -v",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",

@@ -37,6 +37,7 @@ cd api && npm run format:check # Prettier check (CI mode)
 
 - PostgreSQL auto-names inline FK constraints as `{table}_{column}_fkey` — use this pattern when dropping/recreating constraints in migrations
 - NEVER use `SELECT *` or `RETURNING *` — always list explicit columns matching the TypeScript interface
+- Time-window queries: use `$1::integer * INTERVAL '1 day'` (parameterized integer multiplication), NEVER `($1 || ' days')::INTERVAL` (string concatenation, fragile)
 - Column lists must stay in sync with the corresponding TypeScript type in `src/types/index.ts`
 - ALL DB changes via migration files in `api/db/migrations/`, never direct schema edits
 - Migrations must be additive (add columns/tables) by default — destructive changes (drop column, drop table) require explicit user instruction
@@ -162,6 +163,43 @@ Two distinct photo types:
 - `ML_EXPORT_PATH` is `optionalOrUndefined` in config — the route returns 500 if not configured. Made optional to avoid breaking all test mocks that don't need ML export.
 - Requires `admin` role (not `curator`) — this is an ML pipeline operation, not catalog curation
 - Web: "Export for ML" button on the search results page, visible only to admins when item results exist
+
+### ML Model Serving (Phase 4.0c-1)
+
+- ML model metadata route lives in `src/ml/models/` — registered at `/ml/models` (top-level, not catalog-scoped)
+- `GET /ml/models` — authenticated, rate-limited (30/min). Scans `ML_MODELS_PATH` for `*-metadata.json` files, returns model summaries (no label maps — those are in the static metadata JSON)
+- `ML_MODELS_PATH` is `optionalOrUndefined` — route returns `{ models: [] }` when unset (no 500)
+- `ML_MODELS_BASE_URL` defaults to `http://localhost:{port}/ml/model-files` — used to construct `download_url` and `metadata_url` in responses
+- Static model file serving (`.onnx`, `.onnx.data`, `-metadata.json`) via `@fastify/static` at `/ml/model-files/` prefix — dev-only, prod uses CDN
+- Scanner validates metadata JSON via hand-rolled type guard (`parseModelMetadata`) — malformed files are logged and skipped, never crash the response
+- `size_bytes` is derived by summing `fs.stat` on `.onnx` + `.onnx.data` files
+- `download_url` is `null` when the ONNX file is missing (metadata exists but model not yet exported)
+- No DB access — scanner only touches the filesystem
+
+### ML Inference Telemetry (Phase 4.0c-T)
+
+- `ml_inference_events` table: 6 event types (`scan_started`, `scan_completed`, `scan_failed`, `prediction_accepted`, `scan_abandoned`, `browse_catalog`), `model_name` denormalized column, `user_id NOT NULL` (RESTRICT, tombstone pattern)
+- `POST /ml/events` — authenticated (any user), rate-limited 60/min. Telemetry insert failures return 204 anyway (non-fatal)
+- `GET /ml/stats/summary?days=N` — admin-only. Returns aggregate counts + computed `acceptance_rate` and `error_rate`
+- `GET /ml/stats/daily?days=N` — admin-only. Returns pivoted daily data points for recharts
+- `GET /ml/stats/models?days=N` — admin-only. Returns per-model comparison grouped by `model_name`
+- `days` param uses `enum: [7, 30, 90]`, defaults to 7
+- Stats queries use `$1::integer * INTERVAL '1 day'` (not string concatenation) for the time window
+- Daily stats use `generate_series` LEFT JOIN to fill zero-count days for chart rendering
+
+### ML Model Quality (Phase 4.0c-4)
+
+- `GET /ml/stats/model-quality` — admin-only, filesystem-backed (reads `-metrics.json` files from `ML_MODELS_PATH`)
+- Returns per-model: accuracy, top-3 accuracy, class count, size, quality gate status, per-class accuracy (sorted worst-first), top-20 confused pairs
+- `metrics-schema.ts` validates `-metrics.json` with hand-rolled type guard (same pattern as `metadata-schema.ts`)
+- `quality-reader.ts` reads metrics files + `computeConfusedPairs` (off-diagonal extraction from confusion matrix)
+- `metrics_available: false` when metrics file is missing — quality fields become null in response
+- Quality gates: accuracy ≥ 0.70, model size ≤ 10 MB (constants in `quality-routes.ts`)
+- Separate plugin from telemetry stats: filesystem reads (quality) vs DB queries (telemetry)
+
+### @fastify/static Route Collisions
+
+- `@fastify/static` with a prefix intercepts ALL requests under that prefix — including exact matches. A static prefix `/ml/models/` would catch `GET /ml/models` before the route handler runs. Use distinct prefixes for API routes vs static files (e.g., `/ml/models` for API, `/ml/model-files/` for static).
 
 ### Cookie Handling
 

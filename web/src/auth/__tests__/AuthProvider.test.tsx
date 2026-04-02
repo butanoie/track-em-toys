@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { AuthProvider, AuthContext } from '../AuthProvider';
+import { AuthProvider, AuthContext, SESSION_EXPIRED_TOAST_ID } from '../AuthProvider';
 import { authStore, refreshTimer, sessionFlag, SESSION_KEYS } from '@/lib/auth-store';
 import {
   validUser,
@@ -20,6 +20,16 @@ vi.mock('@tanstack/react-router', () => ({
   useRouter: () => ({ state: { location: { href: '/current-path' } } }),
 }));
 
+// Mock sonner toast
+const mockToastWarning = vi.fn();
+const mockToastDismiss = vi.fn();
+vi.mock('sonner', () => ({
+  toast: {
+    warning: (...args: unknown[]) => mockToastWarning(...args),
+    dismiss: (...args: unknown[]) => mockToastDismiss(...args),
+  },
+}));
+
 // Mock fetch globally
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
@@ -28,6 +38,8 @@ stubLocalStorage();
 describe('AuthProvider', () => {
   beforeEach(() => {
     resetAuthTestState(mockFetch, mockNavigate);
+    mockToastWarning.mockReset();
+    mockToastDismiss.mockReset();
   });
 
   afterEach(() => {
@@ -332,7 +344,7 @@ describe('AuthProvider', () => {
     expect(mockClear).toHaveBeenCalledOnce();
   });
 
-  it('clears session flag and navigates to login on auth:sessionexpired event', async () => {
+  it('clears session flag and shows toast on auth:sessionexpired event (no redirect)', async () => {
     sessionFlag.set();
     sessionStorage.setItem(SESSION_KEYS.user, JSON.stringify(validUser));
     authStore.setToken('some-token');
@@ -354,12 +366,83 @@ describe('AuthProvider', () => {
     });
 
     expect(screen.getByTestId('authenticated')).toHaveTextContent('false');
+    expect(screen.getByTestId('session-expired')).toHaveTextContent('true');
     expect(authStore.getToken()).toBeNull();
     expect(sessionStorage.getItem(SESSION_KEYS.user)).toBeNull();
     expect(sessionFlag.check()).toBe(false);
-    expect(mockNavigate).toHaveBeenCalledWith({
-      to: '/login',
-      search: { redirect: '/current-path' },
+    // Shows a persistent toast instead of redirecting
+    expect(mockToastWarning).toHaveBeenCalledWith(
+      'Session expired',
+      expect.objectContaining({
+        id: SESSION_EXPIRED_TOAST_ID,
+        duration: Infinity,
+      })
+    );
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('sessionExpired is false by default', async () => {
+    render(
+      <AuthProvider>
+        <TestConsumer />
+      </AuthProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading')).toHaveTextContent('false');
     });
+    expect(screen.getByTestId('session-expired')).toHaveTextContent('false');
+  });
+
+  it('dismisses session-expired toast on sign-in after expiry', async () => {
+    sessionFlag.set();
+    sessionStorage.setItem(SESSION_KEYS.user, JSON.stringify(validUser));
+    authStore.setToken('some-token');
+
+    // Initial silent refresh succeeds
+    mockFetch.mockResolvedValueOnce(makeResponse({ access_token: makeFakeJwt(), refresh_token: null }));
+
+    let signInFn: ((cred: string) => Promise<void>) | undefined;
+
+    function CaptureContext() {
+      const ctx = React.useContext(AuthContext);
+      signInFn = ctx?.signInWithGoogle;
+      return <TestConsumer />;
+    }
+
+    render(
+      <AuthProvider>
+        <CaptureContext />
+      </AuthProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+    });
+
+    // Trigger session expiry
+    await act(async () => {
+      window.dispatchEvent(new CustomEvent('auth:sessionexpired'));
+    });
+
+    expect(screen.getByTestId('session-expired')).toHaveTextContent('true');
+    mockToastWarning.mockClear();
+
+    // Sign in again
+    mockFetch.mockResolvedValueOnce(
+      makeResponse({
+        access_token: makeFakeJwt(),
+        refresh_token: null,
+        user: validUser,
+      })
+    );
+
+    await act(async () => {
+      await signInFn?.('google-credential-token');
+    });
+
+    expect(screen.getByTestId('session-expired')).toHaveTextContent('false');
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
+    expect(mockToastDismiss).toHaveBeenCalledWith(SESSION_EXPIRED_TOAST_ID);
   });
 });

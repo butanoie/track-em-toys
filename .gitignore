@@ -12,8 +12,13 @@ ios/track-em-toys/*.apps.googleusercontent.com.plist
 ml/training-data/**/*.jpg
 ml/training-data/**/*.png
 ml/training-data/**/*.webp
-# But track the models themselves (they're ~7MB, worth versioning)
-!ml/models/*.mlmodel
+# Model artifacts — stored in private data repo, not tracked here
+ml/models/
+
+# Python ML environment
+ml/.venv/
+ml/**/__pycache__/
+ml/**/*.pyc
 
 # Dependencies
 node_modules/

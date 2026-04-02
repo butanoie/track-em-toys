@@ -71,7 +71,7 @@ The project has completed its authentication foundation (Phases 1.1–1.3) and i
 | Catalog API Routes            | NOT STARTED       | Blocked by seed ingestion                  |
 | Web Catalog UI                | NOT STARTED       | Blocked by catalog API                     |
 | Photo Upload API + UI         | NOT STARTED       | Schema exists (`item_photos`), no app code |
-| ML Training Pipeline          | 4.0a DONE         | 4.0b ready (training data prep complete)   |
+| ML Training Pipeline          | 4.0a–d DONE       | Full pipeline complete: training, serving, telemetry, quality dashboard, docs |
 | iOS App + On-Device Inference | NOT STARTED       | Blocked by trained model                   |
 
 ### What's Deferred (Post-ML)
@@ -294,30 +294,35 @@ Train image classification models using the collector's own catalog photos.
 - ✅ Export script with two input modes: API manifest (`--manifest`) and directory scan (`--source-dir`)
 - ✅ Data augmentation: 15 deterministic transforms (flip, rotation ±10°, brightness ±20%, compounds)
 - ✅ Class balance analysis with adaptive augmentation (target count per class, default 100)
-- ✅ Seed-images directory structure: `{tier}/{franchise}/{manufacturer}/{item}/` with `catalog/` and `training-only/` tiers
+- ✅ Seed-images directory structure: `{tier}/{franchise}/{manufacturer}/{item}/` with category-based tiers (`training-primary`, `training-secondary`, `training-package`, `training-accessories` + matching `test-*` tiers)
 - ✅ Output validation: Create ML format, minimum 10 images per class, clean-on-rerun
 - ✅ 87 unit tests across 7 test files
 
-#### 4.0b: Model Training (macOS)
+#### 4.0b: Model Training — DONE
 
-- Create ML Image Classification with transfer learning
-- Training via Create ML app (GUI) or `MLImageClassifier` API
-- Model evaluation: accuracy, confusion matrix, per-class performance
-- Target: ~7 MB model, ~80% accuracy with 80+ images/class
-- Model versioning: naming convention, metadata (training date, class count, accuracy)
+- ✅ PyTorch MobileNetV3-Small with progressive unfreezing (2-phase training)
+- ✅ Dual export: ONNX (web via onnxruntime-web) + Core ML (iOS)
+- ✅ Cross-format validation script with accuracy gates (≥70%) and agreement gates (≥95%)
+- ✅ Model evaluation: per-class accuracy, confusion matrix, top-3 accuracy in metrics JSON
+- ✅ Model versioning: `{category}-classifier-{date}-c{N}-a{acc}` naming convention
 
-#### 4.0c: Model Serving & Web Integration
+#### 4.0c: Model Serving & Web Integration — DONE
 
-- Model metadata API: `GET /ml/models` (list available models, accuracy stats)
-- Optional: ONNX conversion for web-based inference (TensorFlow.js or ONNX Runtime Web)
-- Or: server-side inference endpoint `POST /ml/classify` (upload photo, get predictions)
-- Display classification suggestions on photo upload in web UI
+- ✅ Model metadata API: `GET /ml/models` (auto-discovers models from filesystem)
+- ✅ Client-side inference via onnxruntime-web with IndexedDB caching
+- ✅ "Add by Photo" on collection page with top-5 predictions and inline add-to-collection
+- ✅ ML inference telemetry: 6 event types, `POST /ml/events`, admin dashboard at `/admin/ml`
+- ✅ Model quality dashboard: per-class accuracy chart, confused pairs table, quality gate badges
+- ✅ E2E tests: 15 Playwright tests covering Add by Photo flow and admin ML stats
+- Optional: server-side fallback `POST /ml/classify` (Phase 4.0c-3, not needed for current scale)
 
-#### 4.0d: Retraining Pipeline Documentation
+#### 4.0d: Retraining Pipeline Documentation — DONE
 
-- Documented workflow: export photos → train on macOS → evaluate → deploy
-- Quality gates: minimum accuracy threshold before deploying new model
-- Tracking: which model version is active, performance over time
+- ✅ End-to-end pipeline: prepare-data → train → export → validate → deploy
+- ✅ Retraining triggers (new data, accuracy degradation, new classes)
+- ✅ Quality gates checklist (7 items: 3 automated, 4 manual review)
+- ✅ Deployment and rollback procedures
+- ✅ Data versioning and CI/automation recommendations
 
 ---
 

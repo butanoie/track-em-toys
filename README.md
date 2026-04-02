@@ -73,16 +73,19 @@ See [`ml/README.md`](ml/README.md) and [`ml/TRAINING.md`](ml/TRAINING.md) for th
 
 ## Development Commands
 
-| Command                       | Description                    |
-| ----------------------------- | ------------------------------ |
-| `cd api && npm run dev`       | API dev server with hot reload |
-| `cd api && npm test`          | API tests + lint               |
-| `cd api && npm run typecheck` | API type-check (no emit)       |
-| `cd web && npm run dev`       | Web dev server (Vite)          |
-| `cd web && npm test`          | Web unit tests (vitest)        |
-| `cd web && npm run test:e2e`  | Web E2E tests (Playwright)     |
-| `cd web && npm run lint`      | Web ESLint                     |
-| `cd web && npm run typecheck` | Web type-check (tsc -b)        |
+| Command                                                                     | Description                        |
+| --------------------------------------------------------------------------- | ---------------------------------- |
+| `cd api && npm run dev`                                                     | API dev server with hot reload     |
+| `cd api && npm test`                                                        | API tests + lint                   |
+| `cd api && npm run typecheck`                                               | API type-check (no emit)           |
+| `cd web && npm run dev`                                                     | Web dev server (Vite)              |
+| `cd web && npm test`                                                        | Web unit tests (vitest)            |
+| `cd web && npm run test:e2e`                                                | Web E2E tests (Playwright)         |
+| `cd web && npm run lint`                                                    | Web ESLint                         |
+| `cd web && npm run typecheck`                                               | Web type-check (tsc -b)            |
+| `cd ml && npm run prepare-data -- --source-dir <path>`                      | ML training data prep              |
+| `cd ml && npm run prepare-test-data -- --source-dir <path> --output <path>` | ML test set prep (no augmentation) |
+| `cd ml && npm test`                                                         | ML tests + lint                    |
 
 ## Architecture
 
@@ -97,7 +100,7 @@ See [`docs/README.md`](docs/README.md) for an index of architecture decisions, r
 
 ## Development Strategy
 
-**ML-Accelerated, Web-First:** The shortest path from the current state to on-device ML image classification. All collection management features (private items, pricing, tags, CSV import, reporting) are deferred until after ML is functional.
+**ML-Accelerated, Web-First:** The shortest path from the current state to on-device ML image classification. Collection enhancements (pricing, tags, reporting) are deferred until after ML is functional.
 
 See [`docs/plans/Development_Roadmap_v1_0.md`](docs/plans/Development_Roadmap_v1_0.md) for the full roadmap with dependency graphs, issue tracking strategy, and sprint plans.
 
@@ -109,27 +112,29 @@ See [`docs/plans/Development_Roadmap_v1_0.md`](docs/plans/Development_Roadmap_v1
 
 ### Project Status
 
-| Phase                     | Description                                                                  | Status         |
-| ------------------------- | ---------------------------------------------------------------------------- | -------------- |
-| **Foundation (Complete)** |                                                                              |                |
-| 1.1                       | Database migrations (auth tables, RLS)                                       | ✅ Complete    |
-| 1.2                       | API authentication (OAuth2, ES256 JWT, token rotation)                       | ✅ Complete    |
-| 1.3                       | Web SPA authentication (Google + Apple Sign-In)                              | ✅ Complete    |
-| —                         | Account settings UI, Apple webhooks, API docs (Swagger + Scalar)             | ✅ Complete    |
-| **ML Track (Active)**     |                                                                              |                |
-| 1.4                       | Catalog schema & seed data (migrations 011–013, seed JSON, validation tests) | 🔄 In Progress |
-| 1.5                       | Catalog API routes (read-only REST with full-text search)                    | Planned        |
-| 1.5b                      | User roles & admin foundation (user/curator/admin, requireRole middleware)   | Planned        |
-| 1.7                       | Web catalog browsing UI (grid/list, detail pages, search)                    | Planned        |
-| 1.9                       | Photo management (catalog photo upload, thumbnails, ML training export)      | Planned        |
-| 4.0                       | ML training pipeline (Create ML, transfer learning, model serving)           | Planned        |
-| 2.0                       | iOS app with on-device Core ML inference + barcode scanning                  | Planned        |
-| **Parallel**              |                                                                              |                |
-| 1.12                      | Account security & GDPR compliance (account deletion, PII scrubbing)         | Planned        |
-| **Post-ML (Deferred)**    |                                                                              |                |
-| 1.6                       | Collection schema & API (private CRUD with RLS)                              | Deferred       |
-| 1.8                       | Web collection management UI                                                 | Deferred       |
-| 1.10                      | CSV import                                                                   | Deferred       |
-| 1.11                      | Basic reporting & dashboard                                                  | Deferred       |
-| 3.0                       | Pricing integration (eBay API, valuation, insurance reports)                 | Deferred       |
-| 5.0                       | Polish & expansion (object detection, Android, community features)           | Deferred       |
+| Phase                     | Description                                                                  | Status      |
+| ------------------------- | ---------------------------------------------------------------------------- | ----------- |
+| **Foundation (Complete)** |                                                                              |             |
+| 1.1                       | Database migrations (auth tables, RLS)                                       | ✅ Complete |
+| 1.2                       | API authentication (OAuth2, ES256 JWT, token rotation)                       | ✅ Complete |
+| 1.3                       | Web SPA authentication (Google + Apple Sign-In)                              | ✅ Complete |
+| —                         | Account settings UI, Apple webhooks, API docs (Swagger + Scalar)             | ✅ Complete |
+| **ML Track (Active)**     |                                                                              |             |
+| 1.4                       | Catalog schema & seed data (migrations 011–013, seed JSON, validation tests) | ✅ Complete |
+| 1.5                       | Catalog API routes (read-only REST with full-text search)                    | ✅ Complete |
+| 1.5b                      | User roles & admin foundation (user/curator/admin, requireRole middleware)   | ✅ Complete |
+| 1.7                       | Web catalog browsing UI (grid/list, detail pages, search)                    | ✅ Complete |
+| 1.8                       | Personal collection (browse, add/edit/remove, export/import)                 | ✅ Complete |
+| 1.9                       | Photo management (catalog photo upload, thumbnails, ML training export)      | ✅ Complete |
+| 4.0a                      | ML training data preparation (export, augmentation, balance analysis)        | ✅ Complete |
+| 4.0b                      | ML model training (PyTorch MobileNetV3-Small, dual ONNX + Core ML export)   | ✅ Complete |
+| 4.0c                      | Model serving, client-side inference, telemetry, admin quality dashboard     | ✅ Complete |
+| 4.0d                      | Retraining pipeline documentation and quality gates                          | ✅ Complete |
+| 2.0                       | iOS app with on-device Core ML inference + barcode scanning                  | 🔜 Next     |
+| **Parallel**              |                                                                              |             |
+| 1.12                      | Account security & GDPR compliance (account deletion, PII scrubbing)         | Planned     |
+| **Post-ML (Deferred)**    |                                                                              |             |
+| 1.10                      | CSV import                                                                   | Deferred    |
+| 1.11                      | Basic reporting & dashboard                                                  | Deferred    |
+| 3.0                       | Pricing integration (eBay API, valuation, insurance reports)                 | Deferred    |
+| 5.0                       | Polish & expansion (object detection, Android, community features)           | Deferred    |

@@ -158,6 +158,8 @@ export const config = {
 
   ml: {
     exportPath: optionalOrUndefined('ML_EXPORT_PATH'),
+    modelsPath: optionalOrUndefined('ML_MODELS_PATH'),
+    modelsBaseUrl: optional('ML_MODELS_BASE_URL', `http://localhost:${parsedPort}/ml/model-files`),
   },
 } as const;
 

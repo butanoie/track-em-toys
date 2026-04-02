@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ChevronRight, Upload } from 'lucide-react';
+import { Camera, ChevronRight, Upload } from 'lucide-react';
 import { ItemDetailSheet } from '@/catalog/components/ItemDetailSheet';
 import { Route } from '@/routes/_authenticated/collection';
 import { AppHeader } from '@/components/AppHeader';
@@ -22,6 +22,7 @@ import { ViewToggle, type CollectionViewMode } from '@/collection/components/Vie
 import { ExportImportToolbar } from '@/collection/components/ExportImportToolbar';
 import { EditCollectionItemDialog } from '@/collection/components/EditCollectionItemDialog';
 import { ImportCollectionDialog } from '@/collection/components/ImportCollectionDialog';
+import { AddByPhotoSheet } from '@/collection/components/AddByPhotoSheet';
 import type { CollectionFilters as CollectionFiltersType } from '@/collection/api';
 import type { CollectionItem } from '@/lib/zod-schemas';
 
@@ -32,6 +33,7 @@ export function CollectionPage() {
   const { runExport, isExporting } = useCollectionExport();
   const [editTarget, setEditTarget] = useState<CollectionItem | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [addByPhotoOpen, setAddByPhotoOpen] = useState(false);
   const [view, setView] = useLocalStorage<CollectionViewMode>('trackem:collection-view', 'grid');
 
   const page = search.page ?? 1;
@@ -183,14 +185,24 @@ export function CollectionPage() {
               activeFranchise={search.franchise}
               onFranchiseClick={(slug) => updateSearch({ franchise: slug })}
               actions={
-                <ExportImportToolbar
-                  hasItems={(stats?.total_copies ?? 0) > 0}
-                  isExporting={isExporting}
-                  onExport={() => {
-                    void runExport();
-                  }}
-                  onImportOpen={() => setImportOpen(true)}
-                />
+                <div className="flex items-center gap-2">
+                  <ExportImportToolbar
+                    hasItems={(stats?.total_copies ?? 0) > 0}
+                    isExporting={isExporting}
+                    onExport={() => {
+                      void runExport();
+                    }}
+                    onImportOpen={() => setImportOpen(true)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setAddByPhotoOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950 transition-colors"
+                  >
+                    <Camera className="h-3.5 w-3.5" />
+                    Add by Photo
+                  </button>
+                </div>
               }
             />
 
@@ -265,6 +277,8 @@ export function CollectionPage() {
         itemSlug={search.selected}
         onClose={closeCatalogItem}
       />
+
+      <AddByPhotoSheet open={addByPhotoOpen} onOpenChange={setAddByPhotoOpen} mutations={mutations} />
     </div>
   );
 }

@@ -442,6 +442,126 @@ export const MlExportResponseSchema = z.object({
 
 export type MlExportResponse = z.infer<typeof MlExportResponseSchema>;
 
+// ML Model Metadata
+// ---------------------------------------------------------------------------
+
+export const MlModelSummarySchema = z.object({
+  name: z.string(),
+  version: z.string(),
+  category: z.string(),
+  format: z.string(),
+  class_count: z.number().int(),
+  accuracy: z.number(),
+  input_shape: z.array(z.number().int()),
+  size_bytes: z.number().int(),
+  download_url: z.string().nullable(),
+  metadata_url: z.string(),
+  trained_at: z.string(),
+  exported_at: z.string(),
+});
+
+export const MlModelsResponseSchema = z.object({
+  models: z.array(MlModelSummarySchema),
+});
+
+export type MlModelSummary = z.infer<typeof MlModelSummarySchema>;
+export type MlModelsResponse = z.infer<typeof MlModelsResponseSchema>;
+
+// ML Stats
+// ---------------------------------------------------------------------------
+
+const MlModelBreakdownSchema = z.object({
+  model_name: z.string(),
+  scans: z.number().int(),
+  accepted: z.number().int(),
+});
+
+export const MlStatsSummarySchema = z.object({
+  total_scans: z.number().int(),
+  scans_completed: z.number().int(),
+  scans_failed: z.number().int(),
+  predictions_accepted: z.number().int(),
+  acceptance_rate: z.number(),
+  error_rate: z.number(),
+  by_model: z.array(MlModelBreakdownSchema),
+});
+
+const MlStatsDailyPointSchema = z.object({
+  date: z.string(),
+  scans_started: z.number().int(),
+  scans_completed: z.number().int(),
+  scans_failed: z.number().int(),
+  predictions_accepted: z.number().int(),
+});
+
+export const MlStatsDailySchema = z.object({
+  data: z.array(MlStatsDailyPointSchema),
+});
+
+const MlStatsModelRowSchema = z.object({
+  model_name: z.string(),
+  total_scans: z.number().int(),
+  predictions_accepted: z.number().int(),
+  scans_failed: z.number().int(),
+  avg_confidence: z.number().nullable(),
+});
+
+export const MlStatsModelsSchema = z.object({
+  data: z.array(MlStatsModelRowSchema),
+});
+
+export type MlStatsSummary = z.infer<typeof MlStatsSummarySchema>;
+export type MlStatsDaily = z.infer<typeof MlStatsDailySchema>;
+export type MlStatsDailyPoint = z.infer<typeof MlStatsDailyPointSchema>;
+export type MlStatsModels = z.infer<typeof MlStatsModelsSchema>;
+export type MlStatsModelRow = z.infer<typeof MlStatsModelRowSchema>;
+
+// ML Model Quality
+// ---------------------------------------------------------------------------
+
+const ConfusedPairSchema = z.object({
+  true_label: z.string(),
+  predicted_label: z.string(),
+  count: z.number().int(),
+  pct_of_true_class: z.number(),
+});
+
+const PerClassItemSchema = z.object({
+  label: z.string(),
+  accuracy: z.number(),
+});
+
+const QualityGatesSchema = z.object({
+  accuracy_pass: z.boolean(),
+  size_pass: z.boolean(),
+});
+
+const ModelQualityItemSchema = z.object({
+  name: z.string(),
+  version: z.string(),
+  category: z.string(),
+  accuracy: z.number(),
+  class_count: z.number().int(),
+  size_bytes: z.number().int(),
+  trained_at: z.string(),
+  metrics_available: z.boolean(),
+  top3_accuracy: z.number().nullable(),
+  quality_gates: QualityGatesSchema,
+  per_class_accuracy: z.array(PerClassItemSchema).nullable(),
+  confused_pairs: z.array(ConfusedPairSchema).nullable(),
+  hyperparams: z.record(z.unknown()).nullable(),
+});
+
+export const MlModelQualitySchema = z.object({
+  models: z.array(ModelQualityItemSchema),
+});
+
+export type MlModelQuality = z.infer<typeof MlModelQualitySchema>;
+export type ModelQualityItem = z.infer<typeof ModelQualityItemSchema>;
+export type ConfusedPair = z.infer<typeof ConfusedPairSchema>;
+export type PerClassItem = z.infer<typeof PerClassItemSchema>;
+export type QualityGates = z.infer<typeof QualityGatesSchema>;
+
 // ---------------------------------------------------------------------------
 // Collection schemas
 // ---------------------------------------------------------------------------

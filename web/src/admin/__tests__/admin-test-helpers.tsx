@@ -61,6 +61,7 @@ export function makeAdminAuthContext(overrides: Partial<AuthContextValue> = {}):
     user: mockAdminUser,
     isAuthenticated: true,
     isLoading: false,
+    sessionExpired: false,
     signInWithGoogle: vi.fn(),
     signInWithApple: vi.fn(),
     logout: vi.fn(),

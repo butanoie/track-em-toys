@@ -54,6 +54,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Path alias `@/*` maps to `./src/*` — configured in both `tsconfig.app.json` and `vite.config.ts`
 - Auth: `@react-oauth/google` for Google Sign-In, custom Apple Sign-In JS SDK integration
 - Access tokens are held in a module-scoped variable (never persisted to storage); `localStorage` stores only a boolean session flag (`trackem:has_session`); `sessionStorage` stores user profile data
+- `apiFetch` returns a never-resolving promise on expired sessions (by design — page navigates away). For fire-and-forget calls (telemetry, analytics), use plain `fetch` with manual auth header from `authStore.getToken()` to avoid memory leaks from hanging promises
 - `vitest.config.ts` is separate from `vite.config.ts` — excludes TanStack Router Vite plugin and uses `jsdom` environment
 - `QueryClient` is instantiated inside `RootLayout` via `useState` (stable per render, not shared between test runs) — not a top-level singleton
 - `useRef<T>()` requires an explicit initial value in React 19 — use `useRef<T>(undefined)` or `useRef<T>(null)`, not bare `useRef<T>()`
@@ -64,7 +65,10 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Dev environment: `VITE_API_URL` must use the same hostname as the web app (e.g., both on `dev.track-em-toys.com`) — the refresh token cookie uses `SameSite=Strict`, which requires same-site origins. Safari ITP blocks all cross-site cookies regardless of `SameSite` setting.
 - Account deletion: "Delete Account" button in settings with explicit confirmation dialog ("Type DELETE to confirm")
 - User role is included in the session data (alongside user profile) from `/auth/me` response
-- Shared test fixtures (mock user, fake JWT, response helpers) live in `src/auth/__tests__/auth-test-helpers.tsx` — update there, not per-test file
+- `sessionExpired` boolean in `AuthContextValue` — true when a valid session expires mid-browse (proactive refresh or 401 interceptor). `_authenticated.tsx` skips redirect when true, showing a persistent Sonner toast instead. Reset on re-login.
+- Session expiry toast uses `SESSION_EXPIRED_TOAST_ID` constant for deduplication — both `handleRefreshCycle` and `handleSessionExpired` paths show the same toast. `duration: Infinity` ensures it persists until user acts.
+- Adding a new field to `AuthContextValue` requires updating every `makeAuthContext()` helper across test files — search for `makeAuthContext` in `*.test.*` files. TypeScript catches these via `Partial<AuthContextValue>` type errors.
+- Shared test fixtures (mock user, fake JWT, response helpers) live in `src/auth/__tests__/auth-test-helpers.tsx` — update there, not per-test file. `TestConsumer` renders `session-expired` testid — update when adding new `AuthContextValue` fields.
 
 ### User Roles & Admin UI
 
@@ -76,6 +80,7 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Admin API hooks: `src/admin/hooks/` for shared hooks, entity-specific code in `src/admin/users/`
 - Admin test fixtures: `src/admin/__tests__/admin-test-helpers.tsx` — separate from auth test helpers (`.tsx` because it contains JSX wrapper components)
 - Shared `AppHeader` component (`src/components/AppHeader.tsx`) replaces duplicate header code in Dashboard and Settings
+- Admin layout `<main>` already has `p-4 sm:p-6 lg:p-8` — child pages must NOT add their own padding (double-padding). Use `<div className="space-y-6">` as the top-level wrapper, matching `AdminUsersPage`
 - Admin data table uses `placeholderData: keepPreviousData` for smooth pagination (no skeleton flash between pages)
 - URL search params (not React state) for admin filter/pagination state — bookmarkable, survives refresh
 - `ConfirmDialog` pattern for destructive actions: generic component in `src/admin/components/`, reusable for deactivation, purge, and future catalog deletes
@@ -132,13 +137,19 @@ cd web && npm run format:check # Prettier check (CI mode)
 - `mockEmptyCollection(page)` in `e2e/fixtures/mock-helpers.ts` — shared helper that mocks empty collection endpoints (check, stats, list). Required in any E2E spec that renders item detail components (they call `useCollectionCheck`).
 - `MockCollectionState` in `e2e/fixtures/mock-helpers.ts` — stateful mock for collection E2E tests. Route handlers close over the instance, so mutations (`addItem`, `removeItem`) are reflected in subsequent GET responses without re-registering routes.
 - When adding a field to a Zod schema (e.g., `CatalogItemSchema`), also update mock data in E2E spec files — E2E mocks go through Zod parse in the browser and will fail if required fields are missing.
-- `ConditionSelector` renders `<button>` elements (not Radix `Select`) — E2E tests click `getByRole('button', { name: /Opened Complete/ })`. The collection page has two condition filter dropdowns: package condition (`getByRole('combobox', { name: /Filter by package condition/ })`) and item grade (`getByRole('combobox', { name: /Filter by item grade/ })`).
+- `ConditionSelector` renders `<button>` elements (not Radix `Select`) — E2E tests click `getByRole('button', { name: /OC Opened Complete/ })` (buttons show short code prefix + full label). The collection page has two condition filter dropdowns: package condition (`getByRole('combobox', { name: /Filter by package condition/ })`) and item grade (`getByRole('combobox', { name: /Filter by item grade/ })`).
 - `MockCollectionState` also handles export/import routes — `GET /collection/export` derives payload from `liveItems`, `POST /collection/import` resolves slugs against known items and mutates state. Overwrite mode snapshots + soft-deletes all live items before import.
 - File download assertions: `page.waitForEvent('download')` must be started **before** the click that triggers the download — use `Promise.all([page.waitForEvent('download'), button.click()])` or assign the promise first. Read content via `download.createReadStream()`.
 - File upload in tests: `page.locator('[role="dialog"] input[type="file"]').setInputFiles({ name, mimeType, buffer })` — the buffer form avoids temp files on disk, works on hidden inputs without `force: true`
 - Radix AlertDialog portals: scope assertions with `page.getByRole('alertdialog')` — the portal renders outside the parent `Dialog`, so `page.getByRole('dialog')` won't contain it
 - Error injection pattern: register a `page.route()` override **after** `state.register(page)` to intercept specific endpoints with error responses — Playwright's last-registered-wins rule gives the override higher priority
 - Import test helpers in `e2e/fixtures/import-helpers.ts` — `buildExportFileDescriptor`, `buildRawFileDescriptor`, `selectImportFile`, `clickAppend`/`clickReplace`, `confirmAppendDialog`/`confirmReplaceDialog`, `readDownloadJson`
+- E2E tests bypass ONNX inference via `window.__ML_TEST_PREDICTIONS__` — set by `injectTestPredictions()` in `e2e/fixtures/ml-helpers.ts`, checked by `getTestPredictions()` in `usePhotoIdentify.ts`. New ML inference paths must check this hook.
+- "Add by Photo" button only renders in `CollectionStatsBar` actions (non-empty collection). E2E tests needing this button must use `MockCollectionState` with at least one item.
+- E2E tests use `npm run preview` (serves built bundle). After modifying source, run `npm run build` before `npm run test:e2e` — changes won't appear otherwise.
+- Scope E2E assertions inside Sheet/Dialog via `const sheet = page.getByRole('dialog')` to avoid strict mode violations when items appear in both the sheet and the page behind it.
+- ML mock helpers in `e2e/fixtures/ml-helpers.ts`: `mockMlModels`, `mockMlModelsEmpty`, `mockMlEvents`, `injectTestPredictions`, `mockPredictionItemDetails`, `mockMlStats`
+- Rate limiting: running with 3 workers can exhaust `test-signin` rate limits (60/min). Use `--workers=1` when debugging or after many retries.
 
 ### Image Loading
 
@@ -179,6 +190,43 @@ cd web && npm run format:check # Prettier check (CI mode)
 - Route tree regeneration: `npx tsr generate` does not work standalone — use `npm run build` or `npm run dev` to trigger the TanStack Router Vite plugin
 - `CatalogItemDetailSchema` extends `CatalogItemSchema` — any field added to the base schema MUST also be added to the API's `itemDetail` Fastify schema in `api/src/catalog/items/schemas.ts` (which is hand-written, not derived from `itemListItem`)
 - `ItemListItem` interface in `ItemList.tsx` uses optional `thumbnail_url?` — search results may not include it, so the field must be optional to avoid breaking the SearchPage
+
+### ML Photo Identification (Phase 4.0c-2)
+
+- ML service layer lives in `src/ml/` — framework-agnostic, no React imports. Handles model caching (IndexedDB), image preprocessing (canvas 224x224 + ImageNet normalization), ONNX inference (onnxruntime-web), and label parsing
+- `onnxruntime-web` is dynamically imported in `image-classifier.ts` to keep it out of the main bundle (~394KB JS + WASM loaded on demand)
+- WASM files served from jsDelivr CDN — configured via `ort.env.wasm.wasmPaths` in `image-classifier.ts`
+- ONNX models use `.onnx` graph + `.onnx.data` sidecar pattern — both must be downloaded and passed via `externalData` option to `InferenceSession.create()`
+- IndexedDB cache: DB `trackem-ml-models`, store `model-binaries`, keyPath `name`. Stores graph bytes, data bytes, label map, and version. Cache hit = version match
+- `AddByPhotoSheet` on the collection page — "Add by Photo" button opens a modal sheet with photo drop zone, model download progress, and top-5 prediction cards
+- `PredictionCard` eagerly fetches item detail via `useItemDetail` and collection check via `useCollectionCheck` — enables inline "Add to Collection" button per prediction
+- Primary model loads by default; "Try alt-mode" button switches to secondary model without re-uploading the photo
+- Model metadata via `useMlModels` hook consuming `GET /ml/models` (staleTime: 5 min)
+- `softmax` is always applied to model output (never conditionally) — ensures confidence values sum to 1
+- Query key: `['ml', 'models']`
+
+### ML Telemetry (Phase 4.0c-T)
+
+- `emitMlEvent` in `src/ml/telemetry.ts` — fire-and-forget, uses plain `fetch` with manual auth header (NOT `apiFetch` — avoids never-resolving promise on expired sessions)
+- Returns `void` (not `Promise<void>`) to prevent accidental awaiting
+- `usePhotoIdentify` emits `scan_started`, `scan_completed`, `scan_failed`
+- `AddByPhotoSheet` emits `scan_abandoned` (on sheet close without terminal event) and `browse_catalog`
+- `PredictionCard` emits `prediction_accepted` via `AddToCollectionDialog`'s `onSuccess` callback
+- Terminal event tracking: `hasTerminalEventRef` prevents double-counting abandonment when `prediction_accepted` or `browse_catalog` already fired
+- Admin dashboard at `/admin/ml` — stat cards + recharts line/bar charts, `days` selector (7/30/90) via URL search params
+- Model quality section below telemetry: `ModelQualitySection` → `ModelComparisonCards` + `PerClassAccuracyChart` + `ConfusedPairsTable`. Data from `GET /ml/stats/model-quality` (filesystem-backed, staleTime: 5 min)
+- `formatClassLabel` in `admin/ml/format-utils.ts` — converts `franchise__item-slug` to title-cased "Item Name" for chart labels
+- `PerClassAccuracyChart` shows first 30 classes with "Show all" toggle — color-coded bars (green ≥70%, amber ≥50%, red <50%)
+- recharts mock pattern for jsdom tests: mock `ResponsiveContainer`, `LineChart`, `BarChart` etc. as plain divs
+
+### onnxruntime-web Integration
+
+- Default Vite ESM import resolves to `ort.bundle.min.mjs` (~394KB) — no Vite config changes needed for WASM
+- Set `ort.env.wasm.wasmPaths` to CDN URL before first `InferenceSession.create()` — WASM files are not bundled
+- ONNX models may use `.onnx` + `.onnx.data` sidecar pattern — pass sidecar via `externalData: [{ path, data }]` to `InferenceSession.create()`
+- Dynamic import (`await import('onnxruntime-web')`) keeps the runtime out of the main bundle — use inside function bodies, not at module top level
+- jsdom does not implement `createImageBitmap` or `OffscreenCanvas` — canvas-based preprocessing must live in a separate module so tests can mock it via `vi.mock`
+- `vi.mock` cannot partially mock a module's own internal function calls — if `classifyImage` calls `preprocessImage` in the same file, the mock won't intercept it. Extract to a separate module.
 
 ### Catalog Browsing (Phase 1.7+)
 

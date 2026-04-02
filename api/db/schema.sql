@@ -540,6 +540,35 @@ COMMENT ON COLUMN public.manufacturers.slug IS 'URL-safe kebab-case key (e.g., f
 
 
 --
+-- Name: ml_inference_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ml_inference_events (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    event_type character varying(50) NOT NULL,
+    model_name character varying(120),
+    metadata jsonb,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT ml_inference_events_event_type_check CHECK (((event_type)::text = ANY ((ARRAY['scan_started'::character varying, 'scan_completed'::character varying, 'scan_failed'::character varying, 'prediction_accepted'::character varying, 'scan_abandoned'::character varying, 'browse_catalog'::character varying])::text[])))
+);
+
+
+--
+-- Name: COLUMN ml_inference_events.event_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.ml_inference_events.event_type IS 'scan_started | scan_completed | scan_failed | prediction_accepted | scan_abandoned | browse_catalog';
+
+
+--
+-- Name: COLUMN ml_inference_events.model_name; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.ml_inference_events.model_name IS 'Denormalized model name for aggregate grouping without JSONB extraction';
+
+
+--
 -- Name: oauth_accounts; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -846,6 +875,14 @@ ALTER TABLE ONLY public.manufacturers
 
 ALTER TABLE ONLY public.manufacturers
     ADD CONSTRAINT manufacturers_slug_key UNIQUE (slug);
+
+
+--
+-- Name: ml_inference_events ml_inference_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ml_inference_events
+    ADD CONSTRAINT ml_inference_events_pkey PRIMARY KEY (id);
 
 
 --
@@ -1232,6 +1269,34 @@ CREATE UNIQUE INDEX idx_items_slug_franchise ON public.items USING btree (slug, 
 --
 
 CREATE INDEX idx_items_toy_line ON public.items USING btree (toy_line_id);
+
+
+--
+-- Name: idx_ml_events_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_ml_events_created_at ON public.ml_inference_events USING btree (created_at);
+
+
+--
+-- Name: idx_ml_events_model_created; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_ml_events_model_created ON public.ml_inference_events USING btree (model_name, created_at) WHERE (model_name IS NOT NULL);
+
+
+--
+-- Name: idx_ml_events_type_created; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_ml_events_type_created ON public.ml_inference_events USING btree (event_type, created_at);
+
+
+--
+-- Name: idx_ml_events_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_ml_events_user_id ON public.ml_inference_events USING btree (user_id);
 
 
 --
@@ -1632,6 +1697,14 @@ ALTER TABLE ONLY public.items
 
 
 --
+-- Name: ml_inference_events ml_inference_events_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ml_inference_events
+    ADD CONSTRAINT ml_inference_events_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- Name: oauth_accounts oauth_accounts_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1757,4 +1830,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('030'),
     ('031'),
     ('032'),
-    ('033');
+    ('033'),
+    ('034');

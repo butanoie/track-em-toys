@@ -5,12 +5,15 @@
  * Keep in sync manually — ml/ has no dependency on api/.
  */
 
+export type ImageCategory = 'primary' | 'secondary' | 'package' | 'accessories';
+
 export interface ManifestEntry {
   photo_path: string;
   label: string;
   item_name: string;
   franchise_slug: string;
   item_slug: string;
+  category?: ImageCategory;
 }
 
 export interface ManifestWarning {
@@ -40,7 +43,10 @@ export interface CliOptions {
   targetCount: number;
   format: 'webp' | 'jpeg';
   classes: string[] | null;
+  category: ImageCategory | null;
+  noAugment: boolean;
   noClean: boolean;
+  testSet: boolean;
 }
 
 export interface ClassBalance {

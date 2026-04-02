@@ -23,6 +23,7 @@ interface AddToCollectionDialogProps {
   itemName: string;
   alreadyOwned: boolean;
   mutations: CollectionMutations;
+  onSuccess?: () => void;
 }
 
 export function AddToCollectionDialog({
@@ -32,6 +33,7 @@ export function AddToCollectionDialog({
   itemName,
   alreadyOwned,
   mutations,
+  onSuccess,
 }: AddToCollectionDialogProps) {
   const [packageCondition, setPackageCondition] = useState<PackageCondition>('unknown');
   const [itemCondition, setItemCondition] = useState(DEFAULT_ITEM_CONDITION);
@@ -57,6 +59,7 @@ export function AddToCollectionDialog({
         onSuccess: () => {
           toast.success(`${itemName} added to your collection`);
           onOpenChange(false);
+          onSuccess?.();
         },
         onError: (err) => {
           toast.error(err.message);
