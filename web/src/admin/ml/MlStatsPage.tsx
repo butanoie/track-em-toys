@@ -18,6 +18,11 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useMlStatsSummary, useMlStatsDaily, useMlStatsModels } from './hooks';
 import { Route } from '@/routes/_authenticated/admin/ml';
 
+// Shared recharts styles — inherit app font, use CSS variable colors
+const TICK_STYLE = { fontSize: 12, fontFamily: 'inherit', fill: 'var(--muted-foreground)' };
+const TOOLTIP_STYLE: React.CSSProperties = { fontFamily: 'inherit', fontSize: 13, borderRadius: 8 };
+const LEGEND_STYLE: React.CSSProperties = { fontFamily: 'inherit', fontSize: 13 };
+
 const DAYS_OPTIONS = [
   { value: '7', label: 'Last 7 days' },
   { value: '30', label: 'Last 30 days' },
@@ -66,11 +71,20 @@ export function MlStatsPage() {
         <LoadingSpinner className="py-8" />
       ) : summary ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Total Scans" value={summary.total_scans} />
+          <StatCard
+            title="Total Scans"
+            value={summary.total_scans}
+            subtitle={summary.by_model.map((m) => `${m.model_name}: ${m.scans}`).join(', ') || undefined}
+          />
           <StatCard
             title="Acceptance Rate"
             value={`${(summary.acceptance_rate * 100).toFixed(1)}%`}
-            subtitle={`${summary.predictions_accepted} accepted`}
+            subtitle={summary.by_model
+              .map((m) => {
+                const rate = m.scans > 0 ? ((m.accepted / m.scans) * 100).toFixed(0) : '0';
+                return `${m.model_name}: ${rate}%`;
+              })
+              .join(', ') || `${summary.predictions_accepted} accepted`}
           />
           <StatCard
             title="Error Rate"
@@ -93,10 +107,10 @@ export function MlStatsPage() {
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={daily.data}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} tickFormatter={(d: string) => d.slice(5)} />
-                <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                <Tooltip />
-                <Legend />
+                <XAxis dataKey="date" tick={TICK_STYLE} tickFormatter={(d: string) => d.slice(5)} />
+                <YAxis tick={TICK_STYLE} allowDecimals={false} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} />
+                <Legend wrapperStyle={LEGEND_STYLE} />
                 <Line
                   type="monotone"
                   dataKey="scans_completed"
@@ -141,10 +155,10 @@ export function MlStatsPage() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={models.data}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis dataKey="model_name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                <Tooltip />
-                <Legend />
+                <XAxis dataKey="model_name" tick={TICK_STYLE} />
+                <YAxis tick={TICK_STYLE} allowDecimals={false} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} />
+                <Legend wrapperStyle={LEGEND_STYLE} />
                 <Bar dataKey="total_scans" name="Total Scans" fill="#3b82f6" />
                 <Bar dataKey="predictions_accepted" name="Accepted" fill="#22c55e" />
                 <Bar dataKey="scans_failed" name="Failed" fill="#ef4444" />

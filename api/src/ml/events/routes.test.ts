@@ -166,6 +166,7 @@ describe('GET /ml/stats/summary', () => {
       scans_completed: 80,
       scans_failed: 5,
       predictions_accepted: 40,
+      by_model: [{ model_name: 'primary', scans: 60, accepted: 30 }],
     });
 
     const res = await server.inject({
@@ -179,6 +180,7 @@ describe('GET /ml/stats/summary', () => {
     expect(body.total_scans).toBe(100);
     expect(body.acceptance_rate).toBeCloseTo(0.4);
     expect(body.error_rate).toBeCloseTo(0.05);
+    expect(body.by_model).toHaveLength(1);
   });
 
   it('handles zero scans without division error', async () => {
@@ -187,6 +189,7 @@ describe('GET /ml/stats/summary', () => {
       scans_completed: 0,
       scans_failed: 0,
       predictions_accepted: 0,
+      by_model: [],
     });
 
     const res = await server.inject({

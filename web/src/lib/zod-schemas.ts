@@ -470,6 +470,12 @@ export type MlModelsResponse = z.infer<typeof MlModelsResponseSchema>;
 // ML Stats
 // ---------------------------------------------------------------------------
 
+const MlModelBreakdownSchema = z.object({
+  model_name: z.string(),
+  scans: z.number().int(),
+  accepted: z.number().int(),
+});
+
 export const MlStatsSummarySchema = z.object({
   total_scans: z.number().int(),
   scans_completed: z.number().int(),
@@ -477,6 +483,7 @@ export const MlStatsSummarySchema = z.object({
   predictions_accepted: z.number().int(),
   acceptance_rate: z.number(),
   error_rate: z.number(),
+  by_model: z.array(MlModelBreakdownSchema),
 });
 
 const MlStatsDailyPointSchema = z.object({

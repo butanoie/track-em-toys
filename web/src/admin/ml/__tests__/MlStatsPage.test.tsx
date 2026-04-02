@@ -11,6 +11,10 @@ vi.mock('../hooks', () => ({
       predictions_accepted: 40,
       acceptance_rate: 0.4,
       error_rate: 0.05,
+      by_model: [
+        { model_name: 'primary-classifier', scans: 60, accepted: 30 },
+        { model_name: 'secondary-classifier', scans: 40, accepted: 10 },
+      ],
     },
     isPending: false,
   }),

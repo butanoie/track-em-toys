@@ -11,6 +11,7 @@ vi.mock('../api', () => ({
     predictions_accepted: 20,
     acceptance_rate: 0.4,
     error_rate: 0.04,
+    by_model: [{ model_name: 'primary', scans: 50, accepted: 20 }],
   }),
   getMlStatsDaily: vi.fn().mockResolvedValue({ data: [] }),
   getMlStatsModels: vi.fn().mockResolvedValue({ data: [] }),

@@ -38,9 +38,28 @@ const daysQuerystring = {
   },
 } as const;
 
+const modelBreakdownItem = {
+  type: 'object',
+  required: ['model_name', 'scans', 'accepted'],
+  additionalProperties: false,
+  properties: {
+    model_name: { type: 'string' },
+    scans: { type: 'integer' },
+    accepted: { type: 'integer' },
+  },
+} as const;
+
 const summaryResponse = {
   type: 'object',
-  required: ['total_scans', 'scans_completed', 'scans_failed', 'predictions_accepted', 'acceptance_rate', 'error_rate'],
+  required: [
+    'total_scans',
+    'scans_completed',
+    'scans_failed',
+    'predictions_accepted',
+    'acceptance_rate',
+    'error_rate',
+    'by_model',
+  ],
   additionalProperties: false,
   properties: {
     total_scans: { type: 'integer' },
@@ -49,6 +68,7 @@ const summaryResponse = {
     predictions_accepted: { type: 'integer' },
     acceptance_rate: { type: 'number' },
     error_rate: { type: 'number' },
+    by_model: { type: 'array', items: modelBreakdownItem },
   },
 } as const;
 

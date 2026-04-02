@@ -7,11 +7,18 @@ export interface InsertEventParams {
   metadata: Record<string, unknown> | undefined;
 }
 
+export interface ModelBreakdown {
+  model_name: string;
+  scans: number;
+  accepted: number;
+}
+
 export interface SummaryStats {
   total_scans: number;
   scans_completed: number;
   scans_failed: number;
   predictions_accepted: number;
+  by_model: ModelBreakdown[];
 }
 
 export interface DailyRawRow {
@@ -51,18 +58,57 @@ export async function insertMlEvent(params: InsertEventParams): Promise<void> {
  *
  * @param days - Number of days to look back
  */
+interface SummaryTotalsRow {
+  total_scans: number;
+  scans_completed: number;
+  scans_failed: number;
+  predictions_accepted: number;
+}
+
+interface ModelBreakdownRow {
+  model_name: string;
+  scans: string;
+  accepted: string;
+}
+
 export async function getSummaryStats(days: number): Promise<SummaryStats> {
-  const result = await pool.query<SummaryStats>(
-    `SELECT
-       COUNT(*) FILTER (WHERE event_type = 'scan_started')::integer       AS total_scans,
-       COUNT(*) FILTER (WHERE event_type = 'scan_completed')::integer     AS scans_completed,
-       COUNT(*) FILTER (WHERE event_type = 'scan_failed')::integer        AS scans_failed,
-       COUNT(*) FILTER (WHERE event_type = 'prediction_accepted')::integer AS predictions_accepted
-     FROM ml_inference_events
-     WHERE created_at > NOW() - ($1::integer * INTERVAL '1 day')`,
-    [days]
-  );
-  return result.rows[0] ?? { total_scans: 0, scans_completed: 0, scans_failed: 0, predictions_accepted: 0 };
+  const interval = [days];
+
+  const [totalsResult, modelResult] = await Promise.all([
+    pool.query<SummaryTotalsRow>(
+      `SELECT
+         COUNT(*) FILTER (WHERE event_type = 'scan_started')::integer       AS total_scans,
+         COUNT(*) FILTER (WHERE event_type = 'scan_completed')::integer     AS scans_completed,
+         COUNT(*) FILTER (WHERE event_type = 'scan_failed')::integer        AS scans_failed,
+         COUNT(*) FILTER (WHERE event_type = 'prediction_accepted')::integer AS predictions_accepted
+       FROM ml_inference_events
+       WHERE created_at > NOW() - ($1::integer * INTERVAL '1 day')`,
+      interval,
+    ),
+    pool.query<ModelBreakdownRow>(
+      `SELECT
+         model_name,
+         COUNT(*) FILTER (WHERE event_type = 'scan_started')::text AS scans,
+         COUNT(*) FILTER (WHERE event_type = 'prediction_accepted')::text AS accepted
+       FROM ml_inference_events
+       WHERE created_at > NOW() - ($1::integer * INTERVAL '1 day')
+         AND model_name IS NOT NULL
+       GROUP BY model_name
+       ORDER BY COUNT(*) DESC`,
+      interval,
+    ),
+  ]);
+
+  const totals = totalsResult.rows[0] ?? { total_scans: 0, scans_completed: 0, scans_failed: 0, predictions_accepted: 0 };
+
+  return {
+    ...totals,
+    by_model: modelResult.rows.map((r) => ({
+      model_name: r.model_name,
+      scans: parseInt(r.scans, 10) || 0,
+      accepted: parseInt(r.accepted, 10) || 0,
+    })),
+  };
 }
 
 /**
@@ -106,7 +152,7 @@ export async function getModelStats(days: number): Promise<ModelStatsRow[]> {
   const result = await pool.query<ModelStatsRow>(
     `SELECT
        model_name,
-       COUNT(*) FILTER (WHERE event_type IN ('scan_started', 'scan_completed'))::text AS total_scans,
+       COUNT(*) FILTER (WHERE event_type = 'scan_started')::text AS total_scans,
        COUNT(*) FILTER (WHERE event_type = 'prediction_accepted')::text               AS predictions_accepted,
        COUNT(*) FILTER (WHERE event_type = 'scan_failed')::text                       AS scans_failed,
        AVG(CASE WHEN event_type = 'scan_completed'
