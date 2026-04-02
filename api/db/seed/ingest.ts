@@ -277,8 +277,8 @@ async function upsertCharactersPass1(
     await client.query(
       `INSERT INTO characters
          (name, slug, franchise_id, faction_id, character_type, alt_mode,
-          is_combined_form, continuity_family_id, metadata)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          is_combined_form, continuity_family_id, search_aliases, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        ON CONFLICT (slug, franchise_id) DO UPDATE SET
          name = EXCLUDED.name,
          faction_id = EXCLUDED.faction_id,
@@ -286,6 +286,7 @@ async function upsertCharactersPass1(
          alt_mode = EXCLUDED.alt_mode,
          is_combined_form = EXCLUDED.is_combined_form,
          continuity_family_id = EXCLUDED.continuity_family_id,
+         search_aliases = EXCLUDED.search_aliases,
          metadata = EXCLUDED.metadata,
          updated_at = now()`,
       [
@@ -297,6 +298,7 @@ async function upsertCharactersPass1(
         c.alt_mode ?? null,
         c.is_combined_form,
         continuityFamilyId,
+        c.search_aliases ?? null,
         JSON.stringify(metadata),
       ],
     )
@@ -461,8 +463,8 @@ async function upsertItems(
         `INSERT INTO items
            (name, slug, manufacturer_id, toy_line_id,
             size_class, year_released,
-            product_code, is_third_party, metadata)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            product_code, is_third_party, search_aliases, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          ON CONFLICT (slug, franchise_id) DO UPDATE SET
            name = EXCLUDED.name,
            manufacturer_id = EXCLUDED.manufacturer_id,
@@ -471,6 +473,7 @@ async function upsertItems(
            year_released = EXCLUDED.year_released,
            product_code = EXCLUDED.product_code,
            is_third_party = EXCLUDED.is_third_party,
+           search_aliases = EXCLUDED.search_aliases,
            metadata = EXCLUDED.metadata,
            updated_at = now()
          RETURNING id, slug`,
@@ -483,6 +486,7 @@ async function upsertItems(
           item.year_released ?? null,
           item.product_code ?? null,
           item.is_third_party,
+          item.search_aliases ?? null,
           JSON.stringify(item.metadata),
         ],
       )

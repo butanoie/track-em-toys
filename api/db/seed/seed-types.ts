@@ -61,6 +61,7 @@ export interface CharacterRecord {
   is_combined_form: boolean
   continuity_family_slug: string
   sub_group_slugs: string[]
+  search_aliases?: string | null
   notes: string | null
   series_year?: string | null
   year_released?: number | null
@@ -92,6 +93,7 @@ export interface ItemRecord {
   is_third_party: boolean
   year_released: number | null
   size_class: string | null
+  search_aliases?: string | null
   metadata: Record<string, unknown>
   last_modified?: string
 }
