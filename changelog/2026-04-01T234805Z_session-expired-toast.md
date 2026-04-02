@@ -58,12 +58,12 @@ Both expiry paths (proactive refresh and 401 interceptor) use the same `SESSION_
 
 ### Expiry Path Differentiation
 
-| Scenario | `sessionExpired` | Behavior |
-|----------|-----------------|----------|
-| Never authenticated | `false` | Redirect to `/login` |
-| Session expired mid-browse | `true` | Toast shown, user keeps browsing |
-| Explicit logout | `false` | Redirect to `/login` |
-| Page reload with expired session | `false` | Redirect to `/login` |
+| Scenario                         | `sessionExpired` | Behavior                         |
+| -------------------------------- | ---------------- | -------------------------------- |
+| Never authenticated              | `false`          | Redirect to `/login`             |
+| Session expired mid-browse       | `true`           | Toast shown, user keeps browsing |
+| Explicit logout                  | `false`          | Redirect to `/login`             |
+| Page reload with expired session | `false`          | Redirect to `/login`             |
 
 ---
 
@@ -87,18 +87,18 @@ Lint:      Zero warnings
 
 ## Related Files
 
-| File | Action |
-|------|--------|
-| `web/src/auth/AuthProvider.tsx` | Modified |
-| `web/src/routes/_authenticated.tsx` | Modified |
-| `web/src/auth/__tests__/AuthProvider.test.tsx` | Modified |
+| File                                               | Action   |
+| -------------------------------------------------- | -------- |
+| `web/src/auth/AuthProvider.tsx`                    | Modified |
+| `web/src/routes/_authenticated.tsx`                | Modified |
+| `web/src/auth/__tests__/AuthProvider.test.tsx`     | Modified |
 | `web/src/routes/__tests__/_authenticated.test.tsx` | Modified |
-| `web/src/auth/__tests__/auth-test-helpers.tsx` | Modified |
-| `web/src/auth/__tests__/LoginPage.test.tsx` | Modified |
-| `web/src/auth/__tests__/SettingsPage.test.tsx` | Modified |
-| `web/src/components/__tests__/AppHeader.test.tsx` | Modified |
-| `web/src/admin/__tests__/admin-test-helpers.tsx` | Modified |
-| `web/CLAUDE.md` | Modified |
+| `web/src/auth/__tests__/auth-test-helpers.tsx`     | Modified |
+| `web/src/auth/__tests__/LoginPage.test.tsx`        | Modified |
+| `web/src/auth/__tests__/SettingsPage.test.tsx`     | Modified |
+| `web/src/components/__tests__/AppHeader.test.tsx`  | Modified |
+| `web/src/admin/__tests__/admin-test-helpers.tsx`   | Modified |
+| `web/CLAUDE.md`                                    | Modified |
 
 ## Summary Statistics
 

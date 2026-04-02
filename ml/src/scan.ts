@@ -6,12 +6,8 @@ const IMAGE_EXTENSIONS = new Set(['.webp', '.jpg', '.jpeg', '.png', '.heic']);
 // Canonical tier list in track-em-toys-data/lib/tiers.ts — keep in sync
 // Note: catalog/ is excluded — it's for the product gallery DB, not ML training.
 // Use C-Copy in the review tool to copy catalog images into training tiers if needed.
-const TRAINING_TIERS = [
-  'training-primary', 'training-secondary', 'training-package', 'training-accessories',
-] as const;
-const TEST_TIERS = [
-  'test-primary', 'test-secondary', 'test-package', 'test-accessories',
-] as const;
+const TRAINING_TIERS = ['training-primary', 'training-secondary', 'training-package', 'training-accessories'] as const;
+const TEST_TIERS = ['test-primary', 'test-secondary', 'test-package', 'test-accessories'] as const;
 const SKIP_DIRS = new Set(['_unmatched', '.DS_Store']);
 
 export interface ScanOptions {
@@ -45,9 +41,7 @@ export async function scanSourceDir(sourceDir: string, options: ScanOptions = {}
   const items = new Set<string>();
 
   const allTiers = options.testSet ? TEST_TIERS : TRAINING_TIERS;
-  const tiers = options.category
-    ? allTiers.filter((t) => t.endsWith(`-${options.category}`))
-    : allTiers;
+  const tiers = options.category ? allTiers.filter((t) => t.endsWith(`-${options.category}`)) : allTiers;
 
   for (const tier of tiers) {
     const tierPath = join(sourceDir, tier);
@@ -86,9 +80,8 @@ export async function scanSourceDir(sourceDir: string, options: ScanOptions = {}
           });
 
           // Derive category from tier name (e.g., 'training-primary' → 'primary')
-          const category = tier.indexOf('-') >= 0
-            ? tier.slice(tier.indexOf('-') + 1) as ManifestEntry['category']
-            : undefined;
+          const category =
+            tier.indexOf('-') >= 0 ? (tier.slice(tier.indexOf('-') + 1) as ManifestEntry['category']) : undefined;
 
           for (const file of imageFiles) {
             const label = `${franchise}/${item}`;

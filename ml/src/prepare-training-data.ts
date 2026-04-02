@@ -113,9 +113,7 @@ function loadCliOptions(): CliOptions {
   }
 
   if (!outputDir) {
-    outputDir = testSet
-      ? process.env['ML_TEST_DATA_PATH']
-      : process.env['ML_TRAINING_DATA_PATH'];
+    outputDir = testSet ? process.env['ML_TEST_DATA_PATH'] : process.env['ML_TRAINING_DATA_PATH'];
   }
 
   if (!outputDir) {
@@ -126,9 +124,7 @@ function loadCliOptions(): CliOptions {
   }
 
   // Append category subdirectory when using the default env path (no explicit --output)
-  const effectiveOutputDir = category && !args.includes('--output')
-    ? join(outputDir, category)
-    : outputDir;
+  const effectiveOutputDir = category && !args.includes('--output') ? join(outputDir, category) : outputDir;
 
   const source = manifestPath
     ? { mode: 'manifest' as const, manifestPath: resolve(manifestPath) }

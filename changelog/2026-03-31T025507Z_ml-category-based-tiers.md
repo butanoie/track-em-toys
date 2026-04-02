@@ -19,6 +19,7 @@ Restructured the ML seed-images tier system from 3 tiers (`catalog/`, `training-
 Replaced the flat tier model with category-based tiers that distinguish image types (primary hero shots, alternate views, packaging, accessories). Each category exists independently for both training and test sets, enabling per-category model training.
 
 **Key behavior changes:**
+
 - `catalog/` tier no longer included in ML scans — training tiers only
 - `scanSourceDir()` API changed from `(dir, testSet?)` to `(dir, ScanOptions?)` with `testSet` and `category` fields
 - `ManifestEntry` now carries an optional `category` field derived from tier name
@@ -55,12 +56,8 @@ Updated ADR, test scenarios, roadmap, and module docs to reflect the new tier st
 ### Tier Constants
 
 ```typescript
-const TRAINING_TIERS = [
-  'training-primary', 'training-secondary', 'training-package', 'training-accessories',
-] as const;
-const TEST_TIERS = [
-  'test-primary', 'test-secondary', 'test-package', 'test-accessories',
-] as const;
+const TRAINING_TIERS = ['training-primary', 'training-secondary', 'training-package', 'training-accessories'] as const;
+const TEST_TIERS = ['test-primary', 'test-secondary', 'test-package', 'test-accessories'] as const;
 ```
 
 ### Category Derivation
@@ -92,6 +89,7 @@ ML_TEST_DATA_PATH/primary/       (with --test-set --category primary)
 ```
 
 New test cases added:
+
 - `populates category from tier name`
 - `category filter scans only the matching tier`
 - `category filter works with testSet`
@@ -109,18 +107,18 @@ New test cases added:
 
 ## Related Files
 
-| File | Change |
-|------|--------|
-| `ml/src/types.ts` | `ImageCategory` type, new fields |
-| `ml/src/scan.ts` | `ScanOptions`, category-based tiers |
-| `ml/src/scan.test.ts` | Rewrote test tree, +4 tests |
-| `ml/src/prepare-training-data.ts` | CLI flags, output logic |
-| `ml/.env.example` | `ML_TEST_DATA_PATH` |
-| `ml/CLAUDE.md` | Tier docs |
-| `ml/README.md` | Usage docs |
-| `docs/decisions/ADR_ML_Training_Data_Preparation.md` | New extension section |
-| `docs/plans/Development_Roadmap_v1_0.md` | Phase 4.0a update |
-| `docs/test-scenarios/UNIT_ML_TRAINING_DATA.md` | Category scenarios |
+| File                                                 | Change                              |
+| ---------------------------------------------------- | ----------------------------------- |
+| `ml/src/types.ts`                                    | `ImageCategory` type, new fields    |
+| `ml/src/scan.ts`                                     | `ScanOptions`, category-based tiers |
+| `ml/src/scan.test.ts`                                | Rewrote test tree, +4 tests         |
+| `ml/src/prepare-training-data.ts`                    | CLI flags, output logic             |
+| `ml/.env.example`                                    | `ML_TEST_DATA_PATH`                 |
+| `ml/CLAUDE.md`                                       | Tier docs                           |
+| `ml/README.md`                                       | Usage docs                          |
+| `docs/decisions/ADR_ML_Training_Data_Preparation.md` | New extension section               |
+| `docs/plans/Development_Roadmap_v1_0.md`             | Phase 4.0a update                   |
+| `docs/test-scenarios/UNIT_ML_TRAINING_DATA.md`       | Category scenarios                  |
 
 ---
 

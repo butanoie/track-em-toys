@@ -45,6 +45,7 @@ Every training script must include a header comment documenting:
 ### Prerequisites
 
 Install [uv](https://docs.astral.sh/uv/):
+
 ```bash
 brew install uv
 cd ml && uv sync
@@ -70,6 +71,7 @@ npm run validate-model -- --onnx-model models/<model>.onnx --coreml-model models
 ### Two-Phase Training
 
 Training uses progressive unfreezing:
+
 1. **Phase 1** (first 1/3 epochs): Base MobileNetV3 layers frozen, only classifier head trains
 2. **Phase 2** (remaining epochs): Last 3 InvertedResidual blocks unfrozen, learning rate reduced 10x
 
@@ -82,10 +84,12 @@ Training data is split 80/20 (stratified, seed=42) into train and validation set
 ### Model Output
 
 Training produces:
+
 - `{category}-classifier-{date}-c{N}-a{acc}.pt` -- best checkpoint by validation accuracy
 - `{category}-classifier-{date}-c{N}-a{acc}-metrics.json` -- per-class accuracy, confusion matrix, hyperparams
 
 Export produces:
+
 - `{stem}.onnx` -- ONNX graph for web inference (onnxruntime-web)
 - `{stem}.onnx.data` -- weights sidecar (both `.onnx` + `.onnx.data` are required for inference)
 - `{stem}.mlpackage` -- for iOS inference (Core ML)

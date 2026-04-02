@@ -30,11 +30,7 @@ export async function mlModelsRoutes(fastify: FastifyInstance, _opts: object): P
 
       return {
         models: scanned.map(({ metadata, onnxFilename, metadataFilename, sizeBytes }) => {
-          const { download_url, metadata_url } = buildModelUrls(
-            modelsBaseUrl,
-            onnxFilename,
-            metadataFilename
-          );
+          const { download_url, metadata_url } = buildModelUrls(modelsBaseUrl, onnxFilename, metadataFilename);
           return {
             name: metadata.name,
             version: metadata.version,
