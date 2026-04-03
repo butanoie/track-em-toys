@@ -1,7 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { withTransaction } from '../db/pool.js';
+import { config } from '../config.js';
 import * as queries from '../db/queries.js';
 import * as adminQueries from './queries.js';
+import { deleteUserPhotoDirectory } from '../collection/photos/storage.js';
 import {
   listUsersSchema,
   patchUserRoleSchema,
@@ -264,6 +266,14 @@ export async function adminRoutes(fastify: FastifyInstance, _opts: object): Prom
           fastify.log.error({ err: auditErr }, 'audit log failed for user_purged — purge will commit');
         }
       }, actor.sub);
+
+      // Best-effort file cleanup after transaction commits.
+      // Orphaned files are acceptable — they don't contain PII (photos of toys).
+      try {
+        await deleteUserPhotoDirectory(config.photos.storagePath, targetId);
+      } catch (err) {
+        fastify.log.error({ err, targetId }, 'Failed to delete user photo directory after GDPR purge');
+      }
 
       return reply.code(204).send();
     }

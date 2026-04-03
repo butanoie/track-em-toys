@@ -203,3 +203,9 @@ Adding a column to item list API responses requires updating ALL of these (missi
 - Export/import: `GET /collection/export` returns slug-based JSON (no UUIDs), `POST /collection/import` resolves slugs via `batchGetItemIdsBySlugs` (UNNEST query), uses SAVEPOINT per insert for partial success
 - Partial-success inserts require `SAVEPOINT` / `ROLLBACK TO SAVEPOINT` per insert — PostgreSQL aborts the entire transaction on any error without savepoints. Always log the error before rolling back.
 - Export includes `deleted_count` in stats for UI to prompt about soft-deleted items
+- Collection photo routes live in `src/collection/photos/` — registered as a sub-plugin of `collectionRoutes` at `/:id/photos`. `@fastify/multipart` registered scoped to the photo plugin (same pattern as catalog photos)
+- Collection photo queries accept `client: PoolClient` (collection RLS pattern), unlike catalog photo queries which use `pool.query()` directly
+- `getCollectionItemRef(client, collectionItemId)` is the shared lookup function for all collection photo handlers — returns `{ id, item_id } | null`, verifies existence and ownership via RLS
+- Collection photos have no `status` column (private, no approval needed). Catalog photos contributed by users enter `item_photos` with `status: 'pending'` via `insertPendingCatalogPhoto`
+- `photo_contributions` table has no RLS (shared audit data). `collection_item_photo_id` is nullable with `ON DELETE SET NULL` for GDPR compatibility
+- Content-type hook in `collectionRoutes` accepts both `application/json` and `multipart/form-data` (updated from JSON-only when photo routes were added)

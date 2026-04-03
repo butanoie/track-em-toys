@@ -5,6 +5,7 @@ import { withTransaction } from '../db/pool.js';
 import type { PackageCondition } from '../types/index.js';
 import type { CollectionListRow } from './queries.js';
 import * as queries from './queries.js';
+import { collectionPhotoRoutes } from './photos/routes.js';
 import {
   addCollectionItemSchema,
   checkCollectionSchema,
@@ -156,18 +157,21 @@ const importRateLimit = { rateLimit: { max: 20, timeWindow: '1 minute' } } as co
  * @param fastify - Fastify instance
  * @param _opts - Plugin options (unused)
  */
-// eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function collectionRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   // ─── Content-Type enforcement ─────────────────────────────────────────
+  // Accept application/json for standard routes and multipart/form-data for photo uploads
   fastify.addHook('preValidation', async (request, reply) => {
     if (request.method !== 'POST' && request.method !== 'PATCH') return;
     const contentType = request.headers['content-type'];
     if (contentType === undefined) return;
     const baseType = (contentType.split(';')[0] ?? '').trim();
-    if (baseType !== 'application/json') {
-      return reply.code(415).send({ error: 'Content-Type must be application/json' });
+    if (baseType !== 'application/json' && !baseType.startsWith('multipart/form-data')) {
+      return reply.code(415).send({ error: 'Content-Type must be application/json or multipart/form-data' });
     }
   });
+
+  // ─── Photo sub-plugin (must precede /:id routes) ──────────────────────
+  await fastify.register(collectionPhotoRoutes, { prefix: '/:id/photos' });
 
   // requireRole('user') accepts all authenticated users (user, curator, admin)
   // per the role hierarchy. The real access control is RLS on collection_items.

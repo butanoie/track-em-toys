@@ -271,6 +271,26 @@ COMMENT ON COLUMN public.characters.continuity_family_id IS 'FK → continuity_f
 
 
 --
+-- Name: collection_item_photos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.collection_item_photos (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    collection_item_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    url text NOT NULL,
+    caption text,
+    is_primary boolean DEFAULT false NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL,
+    dhash text DEFAULT ''::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE ONLY public.collection_item_photos FORCE ROW LEVEL SECURITY;
+
+
+--
 -- Name: collection_items; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -588,6 +608,26 @@ CREATE TABLE public.oauth_accounts (
 
 
 --
+-- Name: photo_contributions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.photo_contributions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    collection_item_photo_id uuid,
+    item_photo_id uuid,
+    contributed_by uuid NOT NULL,
+    item_id uuid NOT NULL,
+    consent_version text NOT NULL,
+    consent_granted_at timestamp with time zone DEFAULT now() NOT NULL,
+    file_copied boolean DEFAULT false NOT NULL,
+    status text DEFAULT 'pending'::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT photo_contributions_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'revoked'::text])))
+);
+
+
+--
 -- Name: refresh_tokens; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -760,6 +800,14 @@ ALTER TABLE ONLY public.characters
 
 
 --
+-- Name: collection_item_photos collection_item_photos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_item_photos
+    ADD CONSTRAINT collection_item_photos_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: collection_items collection_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -893,6 +941,14 @@ ALTER TABLE ONLY public.ml_inference_events
 
 ALTER TABLE ONLY public.oauth_accounts
     ADD CONSTRAINT oauth_accounts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: photo_contributions photo_contributions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.photo_contributions
+    ADD CONSTRAINT photo_contributions_pkey PRIMARY KEY (id);
 
 
 --
@@ -1089,6 +1145,20 @@ CREATE UNIQUE INDEX idx_characters_slug_franchise ON public.characters USING btr
 --
 
 CREATE INDEX idx_characters_type ON public.characters USING btree (character_type);
+
+
+--
+-- Name: idx_collection_item_photos_item; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_collection_item_photos_item ON public.collection_item_photos USING btree (collection_item_id, sort_order);
+
+
+--
+-- Name: idx_collection_item_photos_one_primary; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_collection_item_photos_one_primary ON public.collection_item_photos USING btree (collection_item_id) WHERE (is_primary = true);
 
 
 --
@@ -1316,6 +1386,27 @@ CREATE INDEX idx_oauth_accounts_user_id ON public.oauth_accounts USING btree (us
 
 
 --
+-- Name: idx_photo_contributions_item; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_photo_contributions_item ON public.photo_contributions USING btree (item_id, status);
+
+
+--
+-- Name: idx_photo_contributions_source; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_photo_contributions_source ON public.photo_contributions USING btree (collection_item_photo_id) WHERE ((status <> 'revoked'::text) AND (collection_item_photo_id IS NOT NULL));
+
+
+--
+-- Name: idx_photo_contributions_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_photo_contributions_user ON public.photo_contributions USING btree (contributed_by);
+
+
+--
 -- Name: idx_refresh_tokens_active; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1407,6 +1498,13 @@ CREATE TRIGGER characters_updated_at BEFORE UPDATE ON public.characters FOR EACH
 
 
 --
+-- Name: collection_item_photos collection_item_photos_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER collection_item_photos_updated_at BEFORE UPDATE ON public.collection_item_photos FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
 -- Name: collection_items collection_items_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -1467,6 +1565,13 @@ CREATE TRIGGER items_updated_at BEFORE UPDATE ON public.items FOR EACH ROW EXECU
 --
 
 CREATE TRIGGER manufacturers_updated_at BEFORE UPDATE ON public.manufacturers FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: photo_contributions photo_contributions_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER photo_contributions_updated_at BEFORE UPDATE ON public.photo_contributions FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
 
 --
@@ -1584,6 +1689,22 @@ ALTER TABLE ONLY public.characters
 
 ALTER TABLE ONLY public.characters
     ADD CONSTRAINT characters_franchise_id_fkey FOREIGN KEY (franchise_id) REFERENCES public.franchises(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: collection_item_photos collection_item_photos_collection_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_item_photos
+    ADD CONSTRAINT collection_item_photos_collection_item_id_fkey FOREIGN KEY (collection_item_id) REFERENCES public.collection_items(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: collection_item_photos collection_item_photos_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_item_photos
+    ADD CONSTRAINT collection_item_photos_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
 
 
 --
@@ -1715,6 +1836,38 @@ ALTER TABLE ONLY public.oauth_accounts
 
 
 --
+-- Name: photo_contributions photo_contributions_collection_item_photo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.photo_contributions
+    ADD CONSTRAINT photo_contributions_collection_item_photo_id_fkey FOREIGN KEY (collection_item_photo_id) REFERENCES public.collection_item_photos(id) ON DELETE SET NULL;
+
+
+--
+-- Name: photo_contributions photo_contributions_contributed_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.photo_contributions
+    ADD CONSTRAINT photo_contributions_contributed_by_fkey FOREIGN KEY (contributed_by) REFERENCES public.users(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: photo_contributions photo_contributions_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.photo_contributions
+    ADD CONSTRAINT photo_contributions_item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: photo_contributions photo_contributions_item_photo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.photo_contributions
+    ADD CONSTRAINT photo_contributions_item_photo_id_fkey FOREIGN KEY (item_photo_id) REFERENCES public.item_photos(id) ON DELETE SET NULL;
+
+
+--
 -- Name: refresh_tokens refresh_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1752,6 +1905,40 @@ ALTER TABLE ONLY public.toy_lines
 
 ALTER TABLE ONLY public.toy_lines
     ADD CONSTRAINT toy_lines_manufacturer_id_fkey FOREIGN KEY (manufacturer_id) REFERENCES public.manufacturers(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: collection_item_photos; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.collection_item_photos ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: collection_item_photos collection_item_photos_delete; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY collection_item_photos_delete ON public.collection_item_photos FOR DELETE USING ((user_id = ( SELECT public.current_app_user_id() AS current_app_user_id)));
+
+
+--
+-- Name: collection_item_photos collection_item_photos_insert; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY collection_item_photos_insert ON public.collection_item_photos FOR INSERT WITH CHECK ((user_id = ( SELECT public.current_app_user_id() AS current_app_user_id)));
+
+
+--
+-- Name: collection_item_photos collection_item_photos_select; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY collection_item_photos_select ON public.collection_item_photos FOR SELECT USING ((user_id = ( SELECT public.current_app_user_id() AS current_app_user_id)));
+
+
+--
+-- Name: collection_item_photos collection_item_photos_update; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY collection_item_photos_update ON public.collection_item_photos FOR UPDATE USING ((user_id = ( SELECT public.current_app_user_id() AS current_app_user_id))) WITH CHECK ((user_id = ( SELECT public.current_app_user_id() AS current_app_user_id)));
 
 
 --
@@ -1834,4 +2021,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('032'),
     ('033'),
     ('034'),
-    ('035');
+    ('035'),
+    ('036');
