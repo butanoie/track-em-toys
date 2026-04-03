@@ -71,6 +71,7 @@ function formatCollectionItem(row: CollectionListRow): Record<string, unknown> {
     manufacturer: row.manufacturer_slug ? { slug: row.manufacturer_slug, name: row.manufacturer_name! } : null,
     toy_line: { slug: row.toy_line_slug, name: row.toy_line_name },
     thumbnail_url: row.thumbnail_url,
+    collection_photo_count: row.collection_photo_count,
     package_condition: row.package_condition,
     item_condition: row.item_condition,
     notes: row.notes,

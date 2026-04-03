@@ -1,4 +1,4 @@
-import { Eye, Pencil, Package } from 'lucide-react';
+import { Camera, Eye, Pencil, Package } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { buildPhotoUrl } from '@/catalog/photos/api';
@@ -12,9 +12,10 @@ interface CollectionTableProps {
   isLoading: boolean;
   onEdit: (item: CollectionItem) => void;
   onViewCatalog: (franchise: string, slug: string) => void;
+  onManagePhotos: (item: CollectionItem) => void;
 }
 
-export function CollectionTable({ items, isLoading, onEdit, onViewCatalog }: CollectionTableProps) {
+export function CollectionTable({ items, isLoading, onEdit, onViewCatalog, onManagePhotos }: CollectionTableProps) {
   if (isLoading && items.length === 0) {
     return (
       <div className="rounded-md border">
@@ -145,6 +146,15 @@ export function CollectionTable({ items, isLoading, onEdit, onViewCatalog }: Col
                     aria-label={`Edit ${item.item_name}`}
                   >
                     <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => onManagePhotos(item)}
+                    aria-label={`Manage photos for ${item.item_name}`}
+                  >
+                    <Camera className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </TableCell>

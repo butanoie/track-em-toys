@@ -32,7 +32,12 @@ paths:
 
 - Catalog photo gallery on item detail page — shared, visible to all users
 - Photo upload UI (Phase 1.9) requires `curator` role — show/hide upload controls based on user role
-- User collection photos (private, per-item condition shots) are deferred to post-ML Phase 1.6
+- Collection photo management (Phase 1.6) — private per-item photos, any authenticated user. `CollectionPhotoSheet` in `collection/photos/` reuses catalog `DropZone`, `UploadQueue`, and `PhotoGrid` directly
+- `CollectionPhotoSchema` and `PhotoSchema` are structurally identical (`{ id, url, caption, is_primary, sort_order }`, no `status` in either) — catalog `PhotoGrid` accepts `CollectionPhoto[]` via structural typing, no adapter needed
+- `CollectionPhotoSheet` fetches its own photo list via `listCollectionPhotos()` on open (unlike catalog `PhotoManagementSheet` which receives `photos` as a prop)
+- `thumbnail_url` in collection list uses `COALESCE(collection_primary.url, catalog_primary.url)` — user's own photo takes priority. Both URL formats work with `buildPhotoUrl()` (relative paths under same `PHOTO_BASE_URL`)
+- `collection_photo_count` on `CollectionItem` drives the Camera button badge. Correlated subquery, RLS-safe (scoped through parent `collection_items` JOIN)
+- `onManagePhotos` prop threads through `CollectionPage` → `CollectionGrid`/`CollectionTable` → `CollectionItemCard`/rows → opens `CollectionPhotoSheet` via `photoTarget` state
 - Photo URLs are stored as relative paths in the DB (e.g., `abc-123/def-456-original.webp`) — `buildPhotoUrl()` from `catalog/photos/api.ts` prepends `VITE_PHOTO_BASE_URL` for display
 - `VITE_PHOTO_BASE_URL` defaults to `http://localhost:3010/photos` in dev (matches `@fastify/static` route)
 - `buildHeaders()` in `api-client.ts` skips `Content-Type: application/json` when `body instanceof FormData` — required for multipart uploads

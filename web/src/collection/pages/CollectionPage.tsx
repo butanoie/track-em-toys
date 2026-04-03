@@ -23,6 +23,7 @@ import { ExportImportToolbar } from '@/collection/components/ExportImportToolbar
 import { EditCollectionItemDialog } from '@/collection/components/EditCollectionItemDialog';
 import { ImportCollectionDialog } from '@/collection/components/ImportCollectionDialog';
 import { AddByPhotoSheet } from '@/collection/components/AddByPhotoSheet';
+import { CollectionPhotoSheet } from '@/collection/photos/CollectionPhotoSheet';
 import type { CollectionFilters as CollectionFiltersType } from '@/collection/api';
 import type { CollectionItem } from '@/lib/zod-schemas';
 
@@ -32,6 +33,7 @@ export function CollectionPage() {
   const mutations = useCollectionMutations();
   const { runExport, isExporting } = useCollectionExport();
   const [editTarget, setEditTarget] = useState<CollectionItem | null>(null);
+  const [photoTarget, setPhotoTarget] = useState<CollectionItem | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [addByPhotoOpen, setAddByPhotoOpen] = useState(false);
   const [view, setView] = useLocalStorage<CollectionViewMode>('trackem:collection-view', 'grid');
@@ -236,6 +238,7 @@ export function CollectionPage() {
                 isLoading={isPending}
                 onEdit={setEditTarget}
                 onViewCatalog={handleViewCatalog}
+                onManagePhotos={setPhotoTarget}
               />
             ) : (
               <CollectionTable
@@ -243,6 +246,7 @@ export function CollectionPage() {
                 isLoading={isPending}
                 onEdit={setEditTarget}
                 onViewCatalog={handleViewCatalog}
+                onManagePhotos={setPhotoTarget}
               />
             )}
 
@@ -279,6 +283,17 @@ export function CollectionPage() {
       />
 
       <AddByPhotoSheet open={addByPhotoOpen} onOpenChange={setAddByPhotoOpen} mutations={mutations} />
+
+      {photoTarget && (
+        <CollectionPhotoSheet
+          open={photoTarget !== null}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) setPhotoTarget(null);
+          }}
+          collectionItemId={photoTarget.id}
+          collectionItemName={photoTarget.item_name}
+        />
+      )}
     </div>
   );
 }
