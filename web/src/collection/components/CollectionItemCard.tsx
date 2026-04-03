@@ -1,4 +1,5 @@
-import { Eye, Pencil, Package } from 'lucide-react';
+import { Camera, Eye, Pencil, Package } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { buildPhotoUrl } from '@/catalog/photos/api';
 import { ConditionBadge } from '@/collection/components/ConditionBadge';
@@ -10,9 +11,10 @@ interface CollectionItemCardProps {
   item: CollectionItem;
   onEdit: (item: CollectionItem) => void;
   onViewCatalog: (franchise: string, slug: string) => void;
+  onManagePhotos: (item: CollectionItem) => void;
 }
 
-export function CollectionItemCard({ item, onEdit, onViewCatalog }: CollectionItemCardProps) {
+export function CollectionItemCard({ item, onEdit, onViewCatalog, onManagePhotos }: CollectionItemCardProps) {
   return (
     <article className="group rounded-lg border bg-card hover:shadow-md hover:border-border/80 transition-all duration-200 overflow-hidden">
       <div className="flex gap-4 p-4">
@@ -69,6 +71,20 @@ export function CollectionItemCard({ item, onEdit, onViewCatalog }: CollectionIt
             aria-label={`Edit ${item.item_name}`}
           >
             <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 relative"
+            onClick={() => onManagePhotos(item)}
+            aria-label={`Manage photos for ${item.item_name}`}
+          >
+            <Camera className="h-3.5 w-3.5" />
+            {item.collection_photo_count > 0 && (
+              <Badge variant="secondary" className="absolute -top-1 -right-1 text-[10px] px-1 h-4 min-w-4 flex items-center justify-center">
+                {item.collection_photo_count}
+              </Badge>
+            )}
           </Button>
         </div>
       </div>

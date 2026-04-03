@@ -121,6 +121,7 @@ function makeCollectionRow(overrides: Partial<CollectionListRow> = {}): Collecti
     toy_line_slug: 'generations',
     toy_line_name: 'Generations',
     thumbnail_url: null,
+    collection_photo_count: 0,
     package_condition: 'mint_sealed',
     item_condition: 5,
     notes: null,

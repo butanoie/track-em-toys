@@ -33,7 +33,7 @@ paths:
 Two distinct photo types:
 
 - **Catalog photos** (`item_photos`): Shared reference images, no RLS. `uploaded_by` tracks contributor for attribution. Feed ML training directly. Upload requires `curator` role.
-- **User collection photos** (future, post-ML): Private, RLS-protected. Separate table with `user_id` + RLS policy using `(SELECT current_app_user_id())`.
+- **User collection photos** (`collection_item_photos`, Phase 1.6): Private, RLS-protected (`FORCE ROW LEVEL SECURITY`). `user_id` denormalized for efficient per-row RLS. Upload requires `user` role (any authenticated user).
 - `item_photos` does NOT have RLS — this is intentional. Catalog photos are app-managed content visible to all users.
 
 ## Photo Upload API (Phase 1.9+)

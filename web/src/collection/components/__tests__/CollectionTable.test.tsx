@@ -17,6 +17,7 @@ const mockItem: CollectionItem = {
   manufacturer: { slug: 'hasbro', name: 'Hasbro' },
   toy_line: { slug: 'g1', name: 'Generation 1' },
   thumbnail_url: 'abc/thumb.webp',
+  collection_photo_count: 0,
   package_condition: 'mint_sealed',
   item_condition: 5,
   product_code: null,
@@ -28,18 +29,18 @@ const mockItem: CollectionItem = {
 describe('CollectionTable', () => {
   it('renders skeleton rows when loading with no items', () => {
     const { container } = render(
-      <CollectionTable items={[]} isLoading={true} onEdit={vi.fn()} onViewCatalog={vi.fn()} />
+      <CollectionTable items={[]} isLoading={true} onEdit={vi.fn()} onViewCatalog={vi.fn()} onManagePhotos={vi.fn()} />
     );
     expect(container.querySelectorAll('.animate-pulse')).toHaveLength(6);
   });
 
   it('renders empty state when no items and not loading', () => {
-    render(<CollectionTable items={[]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
+    render(<CollectionTable items={[]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} onManagePhotos={vi.fn()} />);
     expect(screen.getByText('No items match your filters.')).toBeInTheDocument();
   });
 
   it('renders table headers', () => {
-    render(<CollectionTable items={[mockItem]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
+    render(<CollectionTable items={[mockItem]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} onManagePhotos={vi.fn()} />);
     expect(screen.getByText('Item')).toBeInTheDocument();
     expect(screen.getByText('Condition')).toBeInTheDocument();
     expect(screen.getByText('Added')).toBeInTheDocument();
@@ -47,7 +48,7 @@ describe('CollectionTable', () => {
   });
 
   it('renders item data in table row', () => {
-    render(<CollectionTable items={[mockItem]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
+    render(<CollectionTable items={[mockItem]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} onManagePhotos={vi.fn()} />);
     expect(screen.getByText('Optimus Prime')).toBeInTheDocument();
     expect(screen.getByText(/Transformers/)).toBeInTheDocument();
     expect(screen.getByTitle('Mint Sealed')).toBeInTheDocument();
@@ -56,13 +57,13 @@ describe('CollectionTable', () => {
 
   it('calls onEdit when edit button is clicked', async () => {
     const onEdit = vi.fn();
-    render(<CollectionTable items={[mockItem]} isLoading={false} onEdit={onEdit} onViewCatalog={vi.fn()} />);
+    render(<CollectionTable items={[mockItem]} isLoading={false} onEdit={onEdit} onViewCatalog={vi.fn()} onManagePhotos={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: /Edit Optimus Prime/ }));
     expect(onEdit).toHaveBeenCalledWith(mockItem);
   });
 
   it('renders catalog detail button for each item', () => {
-    render(<CollectionTable items={[mockItem]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} />);
+    render(<CollectionTable items={[mockItem]} isLoading={false} onEdit={vi.fn()} onViewCatalog={vi.fn()} onManagePhotos={vi.fn()} />);
     expect(screen.getByRole('button', { name: /View catalog details for Optimus Prime/ })).toBeInTheDocument();
   });
 });

@@ -29,6 +29,7 @@ export interface MockCollectionItem {
   manufacturer: { slug: string; name: string } | null;
   toy_line: { slug: string; name: string };
   thumbnail_url: string | null;
+  collection_photo_count: number;
   product_code: string | null;
   package_condition: string;
   item_condition: number;
@@ -47,6 +48,7 @@ export function makeCollectionItem(overrides?: Partial<MockCollectionItem>): Moc
     manufacturer: { slug: 'hasbro', name: 'Hasbro' },
     toy_line: { slug: 'legacy', name: 'Legacy' },
     thumbnail_url: null,
+    collection_photo_count: 0,
     product_code: null,
     package_condition: 'loose_complete',
     item_condition: 5,

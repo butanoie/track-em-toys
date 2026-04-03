@@ -19,6 +19,7 @@ export interface CollectionListRow {
   toy_line_slug: string;
   toy_line_name: string;
   thumbnail_url: string | null;
+  collection_photo_count: number;
   package_condition: PackageCondition;
   item_condition: number;
   notes: string | null;
@@ -86,7 +87,8 @@ const COLLECTION_ITEM_SELECT = `
         mfr.name     AS manufacturer_name,
         tl.slug      AS toy_line_slug,
         tl.name      AS toy_line_name,
-        ip.url       AS thumbnail_url,
+        COALESCE(cip.url, ip.url) AS thumbnail_url,
+        (SELECT COUNT(*)::int FROM collection_item_photos WHERE collection_item_id = ci.id) AS collection_photo_count,
         ci.package_condition,
         ci.item_condition,
         ci.notes,
@@ -101,7 +103,10 @@ const COLLECTION_ITEM_SELECT = `
     LEFT JOIN item_photos ip
         ON ip.item_id    = i.id
        AND ip.is_primary = true
-       AND ip.status     = 'approved'`;
+       AND ip.status     = 'approved'
+    LEFT JOIN collection_item_photos cip
+        ON cip.collection_item_id = ci.id
+       AND cip.is_primary = true`;
 
 // ---------------------------------------------------------------------------
 // List

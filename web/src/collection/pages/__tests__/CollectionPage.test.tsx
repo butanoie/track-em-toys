@@ -113,6 +113,10 @@ vi.mock('@/collection/components/AddByPhotoSheet', () => ({
   AddByPhotoSheet: () => null,
 }));
 
+vi.mock('@/collection/photos/CollectionPhotoSheet', () => ({
+  CollectionPhotoSheet: () => null,
+}));
+
 describe('CollectionPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();

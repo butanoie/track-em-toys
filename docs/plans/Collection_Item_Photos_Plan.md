@@ -186,7 +186,7 @@ Submit chains: (1) create collection item, (2) upload photo if checked, (3) cont
 
 - **CollectionItemCard** (grid): Primary collection photo takes priority over catalog thumbnail. New Camera button in action row opens CollectionPhotoSheet. Photo count badge when count > 0.
 - **CollectionTable** (table): Same thumbnail priority logic. Camera icon in actions column.
-- API response gains `collection_photo_url: string | null` and `collection_photo_count: number` from LEFT JOIN.
+- API response: `thumbnail_url` uses `COALESCE(collection_primary_photo.url, catalog_photo.url)` — collection photo takes priority when available, no new field needed. New `collection_photo_count: number` field added for camera button badge.
 
 ## Reused Modules
 

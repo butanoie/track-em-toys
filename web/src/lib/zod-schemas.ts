@@ -585,6 +585,7 @@ export const CollectionItemSchema = z.object({
   manufacturer: SlugNameRefSchema.nullable(),
   toy_line: SlugNameRefSchema,
   thumbnail_url: z.string().nullable(),
+  collection_photo_count: z.number().int().min(0),
   package_condition: PackageConditionSchema,
   item_condition: z.number().int().min(1).max(10),
   notes: z.string().nullable(),
@@ -680,7 +681,37 @@ export const CollectionImportResponseSchema = z.object({
   overwritten_count: z.number().int(),
 });
 
+// Collection photo schemas — no status field (private photos, no approval)
+export const CollectionPhotoSchema = z.object({
+  id: z.string(),
+  url: z.string(),
+  caption: z.string().nullable(),
+  is_primary: z.boolean(),
+  sort_order: z.number().int(),
+});
+
+export const CollectionPhotosResponseSchema = z.object({
+  photos: z.array(CollectionPhotoSchema),
+});
+
+export const SetPrimaryCollectionPhotoResponseSchema = z.object({
+  photo: CollectionPhotoSchema,
+});
+
+export const ReorderCollectionPhotosResponseSchema = z.object({
+  photos: z.array(CollectionPhotoSchema),
+});
+
+export const ContributePhotoResponseSchema = z.object({
+  contribution_id: z.string(),
+});
+
+export const RevokeContributionResponseSchema = z.object({
+  revoked: z.boolean(),
+});
+
 // Collection types
+export type CollectionPhoto = z.infer<typeof CollectionPhotoSchema>;
 export type PackageCondition = z.infer<typeof PackageConditionSchema>;
 export type CollectionItem = z.infer<typeof CollectionItemSchema>;
 export type CollectionItemList = z.infer<typeof CollectionItemListSchema>;
