@@ -87,6 +87,11 @@ vi.mock('./queries.js', () => ({
   restoreCollectionItem: vi.fn(),
 }));
 
+// Mock the photo sub-plugin to avoid multipart/sharp/fs dependencies in collection tests
+vi.mock('./photos/routes.js', () => ({
+  collectionPhotoRoutes: vi.fn().mockImplementation(async () => {}),
+}));
+
 // ─── Import after mocks ─────────────────────────────────────────────────────
 
 import { buildServer } from '../server.js';

@@ -88,6 +88,10 @@ vi.mock('./queries.js', () => ({
   countActiveAdmins: vi.fn(),
 }));
 
+vi.mock('../collection/photos/storage.js', () => ({
+  deleteUserPhotoDirectory: vi.fn().mockResolvedValue(undefined),
+}));
+
 // ─── Import after mocks are registered ───────────────────────────────────────
 
 import { buildServer } from '../server.js';

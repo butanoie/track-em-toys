@@ -154,6 +154,25 @@ export async function gdprPurgeUser(client: QueryOnlyClient, userId: string): Pr
     'UPDATE auth_events SET ip_address = NULL, user_agent = NULL, metadata = NULL WHERE user_id = $1',
     [userId]
   );
+
+  // 4. Delete collection photos and items (both tables have FORCE RLS).
+  //    Switch RLS context to the target user so DELETE can see their rows.
+  //    Subsequent operations touch non-RLS tables, so the context switch is safe.
+  await client.query("SELECT set_config('app.user_id', $1, true)", [userId]);
+
+  // 4a. Delete collection item photos first (FK child of collection_items).
+  //     ON DELETE SET NULL on photo_contributions.collection_item_photo_id
+  //     preserves contribution audit records with a NULL source reference.
+  await client.query('DELETE FROM collection_item_photos WHERE user_id = $1', [userId]);
+
+  // 4b. Delete collection items (FK parent, now safe after photo deletion)
+  await client.query('DELETE FROM collection_items WHERE user_id = $1', [userId]);
+
+  // 5. Scrub attribution on contributed catalog photos (item_photos has no RLS)
+  await client.query(
+    'UPDATE item_photos SET uploaded_by = NULL, updated_at = NOW() WHERE uploaded_by = $1',
+    [userId]
+  );
 }
 
 /**

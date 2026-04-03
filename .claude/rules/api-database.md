@@ -71,6 +71,10 @@ paths:
 - `auth_events.user_id` uses `ON DELETE RESTRICT` (fixed in migration 030 from legacy SET NULL) — `user_id` is nullable (some events are pre-auth/system-generated), nullability is independent of the RESTRICT constraint
 - `deleteOrphanUser` only guards against `oauth_accounts` FK — RESTRICT on other tables causes the delete to fail if rows exist, but the caller's try/catch handles this gracefully
 - When adding a new table with a user FK, no special ON DELETE clause is needed (default RESTRICT is correct)
+- GDPR purge deletes `collection_item_photos` and `collection_items` rows (user data, not audit). `photo_contributions` rows are preserved as audit trail with `collection_item_photo_id` set to NULL via `ON DELETE SET NULL`. `item_photos.uploaded_by` is scrubbed to NULL (attribution removal).
+- GDPR purge of FORCE RLS tables requires a **context switch**: `gdprPurgeUser` calls `set_config('app.user_id', $targetUserId, true)` before DELETE statements on `collection_item_photos` and `collection_items`. Without this, the admin's RLS context would filter out the target user's rows. The context switch is safe because all subsequent operations in `gdprPurgeUser` and the caller touch only non-RLS tables.
+- `ON DELETE SET NULL` on `photo_contributions.collection_item_photo_id` is an intentional exception to the "NEVER ON DELETE SET NULL on user FKs" rule — this FK points to `collection_item_photos` (not `users`), and SET NULL is required so GDPR deletion of collection photos preserves contribution audit records.
+- GDPR file cleanup (`deleteUserPhotoDirectory`) runs after the transaction commits — best-effort, logged on failure. Orphaned files don't contain PII (photos of toys, not users).
 
 ## Collection API RLS Patterns
 
