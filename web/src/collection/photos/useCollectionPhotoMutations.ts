@@ -1,6 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { deleteCollectionPhoto, setPrimaryCollectionPhoto, reorderCollectionPhotos } from './api';
+import {
+  deleteCollectionPhoto,
+  setPrimaryCollectionPhoto,
+  reorderCollectionPhotos,
+  contributeCollectionPhoto,
+  revokeCollectionPhotoContribution,
+} from './api';
 import type { CollectionPhoto } from '@/lib/zod-schemas';
+
+const CONSENT_VERSION = '1.0';
 
 export function useCollectionPhotoMutations(collectionItemId: string) {
   const queryClient = useQueryClient();
@@ -24,7 +32,17 @@ export function useCollectionPhotoMutations(collectionItemId: string) {
     onSuccess: invalidateCollection,
   });
 
-  return { deleteMutation, setPrimaryMutation, reorderMutation };
+  const contributeMutation = useMutation<string, Error, string>({
+    mutationFn: (photoId) => contributeCollectionPhoto(collectionItemId, photoId, CONSENT_VERSION),
+    onSuccess: invalidateCollection,
+  });
+
+  const revokeMutation = useMutation<boolean, Error, string>({
+    mutationFn: (photoId) => revokeCollectionPhotoContribution(collectionItemId, photoId),
+    onSuccess: invalidateCollection,
+  });
+
+  return { deleteMutation, setPrimaryMutation, reorderMutation, contributeMutation, revokeMutation };
 }
 
 export type CollectionPhotoMutations = ReturnType<typeof useCollectionPhotoMutations>;

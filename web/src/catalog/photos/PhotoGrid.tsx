@@ -10,19 +10,29 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Star, Trash2 } from 'lucide-react';
+import { Share2, Star, Trash2 } from 'lucide-react';
 import { buildPhotoUrl } from './api';
 import type { Photo } from '@/lib/zod-schemas';
 
+type PhotoWithContribution = Photo & { contribution_status?: string | null };
+
 interface PhotoGridProps {
-  photos: Photo[];
+  photos: PhotoWithContribution[];
   onReorder: (photos: Array<{ id: string; sort_order: number }>) => void;
   onSetPrimary: (photoId: string) => void;
   onDelete: (photoId: string) => void;
+  onContribute?: (photoId: string) => void;
   disabled?: boolean;
 }
 
-export function PhotoGrid({ photos, onReorder, onSetPrimary, onDelete, disabled = false }: PhotoGridProps) {
+export function PhotoGrid({
+  photos,
+  onReorder,
+  onSetPrimary,
+  onDelete,
+  onContribute,
+  disabled = false,
+}: PhotoGridProps) {
   const [orderedPhotos, setOrderedPhotos] = useState(photos);
 
   useEffect(() => {
@@ -87,6 +97,7 @@ export function PhotoGrid({ photos, onReorder, onSetPrimary, onDelete, disabled 
                 photo={photo}
                 onSetPrimary={onSetPrimary}
                 onDelete={onDelete}
+                onContribute={onContribute}
                 disabled={disabled}
               />
             ))}
@@ -102,13 +113,14 @@ export function PhotoGrid({ photos, onReorder, onSetPrimary, onDelete, disabled 
 }
 
 interface SortablePhotoCardProps {
-  photo: Photo;
+  photo: PhotoWithContribution;
   onSetPrimary: (photoId: string) => void;
   onDelete: (photoId: string) => void;
+  onContribute?: (photoId: string) => void;
   disabled?: boolean;
 }
 
-function SortablePhotoCard({ photo, onSetPrimary, onDelete, disabled }: SortablePhotoCardProps) {
+function SortablePhotoCard({ photo, onSetPrimary, onDelete, onContribute, disabled }: SortablePhotoCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: photo.id,
     disabled,
@@ -118,6 +130,9 @@ function SortablePhotoCard({ photo, onSetPrimary, onDelete, disabled }: Sortable
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  const contributionStatus = photo.contribution_status ?? null;
+  const canContribute = onContribute && (contributionStatus === null || contributionStatus === 'rejected');
 
   return (
     <div
@@ -157,7 +172,37 @@ function SortablePhotoCard({ photo, onSetPrimary, onDelete, disabled }: Sortable
         </button>
       )}
 
-      <div className="absolute bottom-0 inset-x-0 flex items-end justify-end p-1.5 bg-gradient-to-t from-black/50 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+      {contributionStatus === 'pending' && (
+        <div
+          className="absolute top-1 right-1 z-10 rounded-full bg-amber-600/80 px-1.5 py-0.5 text-[10px] font-semibold text-white dark:bg-amber-500/80 dark:text-amber-950"
+          role="status"
+          aria-label="Photo submitted for review"
+        >
+          Submitted
+        </div>
+      )}
+
+      {contributionStatus === 'approved' && (
+        <div
+          className="absolute top-1 right-1 z-10 rounded-full bg-green-600/80 px-1.5 py-0.5 text-[10px] font-semibold text-white dark:bg-green-500/80 dark:text-green-950"
+          role="status"
+          aria-label="Photo shared to catalog"
+        >
+          Shared
+        </div>
+      )}
+
+      <div className="absolute bottom-0 inset-x-0 flex items-end justify-end gap-1 p-1.5 bg-gradient-to-t from-black/50 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+        {canContribute && (
+          <button
+            type="button"
+            className="text-white/80 hover:text-white"
+            aria-label="Contribute photo to catalog"
+            onClick={() => onContribute(photo.id)}
+          >
+            <Share2 className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
         <button
           type="button"
           className="text-white/80 hover:text-white"

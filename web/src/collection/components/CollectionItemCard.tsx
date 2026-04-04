@@ -81,7 +81,10 @@ export function CollectionItemCard({ item, onEdit, onViewCatalog, onManagePhotos
           >
             <Camera className="h-3.5 w-3.5" />
             {item.collection_photo_count > 0 && (
-              <Badge variant="secondary" className="absolute -top-1 -right-1 text-[10px] px-1 h-4 min-w-4 flex items-center justify-center">
+              <Badge
+                variant="secondary"
+                className="absolute -top-1 -right-1 text-[10px] px-1 h-4 min-w-4 flex items-center justify-center"
+              >
                 {item.collection_photo_count}
               </Badge>
             )}

@@ -80,6 +80,18 @@ Scenario: User lists photos for their collection item
   When they GET /collection/{itemId}/photos
   Then the response status is 200
   And the response contains 3 photos ordered by is_primary DESC, sort_order ASC
+  And each photo includes contribution_status (null if not contributed)
+
+Scenario: List shows contribution status for contributed photos
+  Given user A has contributed one of their 3 photos
+  When they GET /collection/{itemId}/photos
+  Then the contributed photo has contribution_status "pending"
+  And the other photos have contribution_status null
+
+Scenario: List excludes revoked contribution status
+  Given user A contributed and then revoked a photo
+  When they GET /collection/{itemId}/photos
+  Then the revoked photo has contribution_status null (not "revoked")
 
 Scenario: User cannot list photos for another user's collection item (RLS)
   Given user B has photos on their collection item

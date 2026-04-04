@@ -3,10 +3,14 @@ import { authStore } from '@/lib/auth-store';
 import { DuplicateUploadError } from '@/catalog/photos/api';
 import {
   CollectionPhotosResponseSchema,
+  CollectionPhotoListResponseSchema,
   SetPrimaryCollectionPhotoResponseSchema,
   ReorderCollectionPhotosResponseSchema,
+  ContributePhotoResponseSchema,
+  RevokeContributionResponseSchema,
   DuplicatePhotoResponseSchema,
   type CollectionPhoto,
+  type CollectionPhotoListItem,
 } from '@/lib/zod-schemas';
 
 export { buildPhotoUrl, PHOTO_BASE_URL } from '@/lib/photo-url';
@@ -114,23 +118,19 @@ function extractErrorMessage(responseText: string, status: number): string {
   return `Upload failed (${status})`;
 }
 
-export async function listCollectionPhotos(collectionItemId: string): Promise<CollectionPhoto[]> {
-  const result = await apiFetchJson(collectionPhotoPath(collectionItemId), CollectionPhotosResponseSchema);
+export async function listCollectionPhotos(collectionItemId: string): Promise<CollectionPhotoListItem[]> {
+  const result = await apiFetchJson(collectionPhotoPath(collectionItemId), CollectionPhotoListResponseSchema);
   return result.photos;
 }
 
 export async function deleteCollectionPhoto(collectionItemId: string, photoId: string): Promise<void> {
-  const response = await apiFetch(
-    `${collectionPhotoPath(collectionItemId)}/${encodeURIComponent(photoId)}`,
-    { method: 'DELETE' }
-  );
+  const response = await apiFetch(`${collectionPhotoPath(collectionItemId)}/${encodeURIComponent(photoId)}`, {
+    method: 'DELETE',
+  });
   if (!response.ok) await throwApiError(response);
 }
 
-export async function setPrimaryCollectionPhoto(
-  collectionItemId: string,
-  photoId: string
-): Promise<CollectionPhoto> {
+export async function setPrimaryCollectionPhoto(collectionItemId: string, photoId: string): Promise<CollectionPhoto> {
   const result = await apiFetchJson(
     `${collectionPhotoPath(collectionItemId)}/${encodeURIComponent(photoId)}/primary`,
     SetPrimaryCollectionPhotoResponseSchema,
@@ -149,4 +149,29 @@ export async function reorderCollectionPhotos(
     { method: 'PATCH', body: JSON.stringify({ photos }) }
   );
   return result.photos;
+}
+
+export async function contributeCollectionPhoto(
+  collectionItemId: string,
+  photoId: string,
+  consentVersion: string
+): Promise<string> {
+  const result = await apiFetchJson(
+    `${collectionPhotoPath(collectionItemId)}/${encodeURIComponent(photoId)}/contribute`,
+    ContributePhotoResponseSchema,
+    {
+      method: 'POST',
+      body: JSON.stringify({ consent_version: consentVersion, consent_acknowledged: true }),
+    }
+  );
+  return result.contribution_id;
+}
+
+export async function revokeCollectionPhotoContribution(collectionItemId: string, photoId: string): Promise<boolean> {
+  const result = await apiFetchJson(
+    `${collectionPhotoPath(collectionItemId)}/${encodeURIComponent(photoId)}/contribution`,
+    RevokeContributionResponseSchema,
+    { method: 'DELETE' }
+  );
+  return result.revoked;
 }

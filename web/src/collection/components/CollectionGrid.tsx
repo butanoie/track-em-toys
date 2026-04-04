@@ -49,7 +49,12 @@ export function CollectionGrid({ items, isLoading, onEdit, onViewCatalog, onMana
     <ul role="list" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {items.map((item) => (
         <li key={item.id}>
-          <CollectionItemCard item={item} onEdit={onEdit} onViewCatalog={onViewCatalog} onManagePhotos={onManagePhotos} />
+          <CollectionItemCard
+            item={item}
+            onEdit={onEdit}
+            onViewCatalog={onViewCatalog}
+            onManagePhotos={onManagePhotos}
+          />
         </li>
       ))}
     </ul>
