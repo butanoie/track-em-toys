@@ -410,6 +410,214 @@ export class MockCollectionState {
   }
 }
 
+// ─── MockCollectionPhotoState ────────────────────────────────────────────────
+
+export interface MockCollectionPhoto {
+  id: string;
+  url: string;
+  caption: string | null;
+  is_primary: boolean;
+  sort_order: number;
+  contribution_status: 'pending' | 'approved' | 'rejected' | null;
+}
+
+/**
+ * Stateful mock for `/collection/:id/photos*` endpoints.
+ *
+ * Mirrors `MockCollectionState`'s closure-based pattern: route handlers read
+ * from `_photosByItem` at request time, so mutations are reflected without
+ * re-registering routes.
+ *
+ * **Registration order matters.** This MUST be registered AFTER
+ * `MockCollectionState.register(page)`, because that catch-all on
+ * `**\/collection\/**` would otherwise win for photo paths.
+ *
+ * Response shapes intentionally follow the schema split: POST/PATCH/DELETE
+ * use the **base** photo shape (no `contribution_status`), while GET list
+ * uses the **extended** shape (with `contribution_status`). The web client's
+ * Zod parsers will reject mismatches, so the split is load-bearing.
+ */
+export class MockCollectionPhotoState {
+  private _photosByItem = new Map<string, MockCollectionPhoto[]>();
+  private _nextUploadResponse: { status: number; body: unknown } | null = null;
+
+  constructor(initial?: Record<string, Partial<MockCollectionPhoto>[]>) {
+    if (initial) {
+      for (const [itemId, photos] of Object.entries(initial)) {
+        for (const partial of photos) {
+          this.addPhoto(itemId, partial);
+        }
+      }
+    }
+  }
+
+  addPhoto(collectionItemId: string, partial: Partial<MockCollectionPhoto> = {}): MockCollectionPhoto {
+    const list = this._photosByItem.get(collectionItemId) ?? [];
+    const photo: MockCollectionPhoto = {
+      id: partial.id ?? crypto.randomUUID(),
+      url: partial.url ?? `collection/u-1/${collectionItemId}/${crypto.randomUUID()}-original.webp`,
+      caption: partial.caption ?? null,
+      is_primary: partial.is_primary ?? list.length === 0,
+      sort_order: partial.sort_order ?? list.length,
+      contribution_status: partial.contribution_status ?? null,
+    };
+    list.push(photo);
+    this._photosByItem.set(collectionItemId, list);
+    return photo;
+  }
+
+  listPhotos(collectionItemId: string): MockCollectionPhoto[] {
+    return [...(this._photosByItem.get(collectionItemId) ?? [])].sort((a, b) => {
+      if (a.is_primary !== b.is_primary) return a.is_primary ? -1 : 1;
+      return a.sort_order - b.sort_order;
+    });
+  }
+
+  setPrimary(collectionItemId: string, photoId: string): MockCollectionPhoto | null {
+    const list = this._photosByItem.get(collectionItemId);
+    if (!list) return null;
+    let target: MockCollectionPhoto | null = null;
+    for (const p of list) {
+      if (p.id === photoId) {
+        p.is_primary = true;
+        target = p;
+      } else {
+        p.is_primary = false;
+      }
+    }
+    return target;
+  }
+
+  deletePhoto(collectionItemId: string, photoId: string): void {
+    const list = this._photosByItem.get(collectionItemId);
+    if (!list) return;
+    this._photosByItem.set(
+      collectionItemId,
+      list.filter((p) => p.id !== photoId)
+    );
+  }
+
+  contribute(collectionItemId: string, photoId: string): void {
+    const photo = this._photosByItem.get(collectionItemId)?.find((p) => p.id === photoId);
+    if (photo) photo.contribution_status = 'pending';
+  }
+
+  revokeContribution(collectionItemId: string, photoId: string): void {
+    const photo = this._photosByItem.get(collectionItemId)?.find((p) => p.id === photoId);
+    if (photo) photo.contribution_status = null;
+  }
+
+  /**
+   * One-shot override for the next POST /photos request. Cleared after use.
+   * Use this to test 409 duplicate detection.
+   */
+  setNextUploadResponse(response: { status: number; body: unknown }): void {
+    this._nextUploadResponse = response;
+  }
+
+  private toBaseShape(photo: MockCollectionPhoto) {
+    // POST/PATCH/DELETE responses — no contribution_status field
+    return {
+      id: photo.id,
+      url: photo.url,
+      caption: photo.caption,
+      is_primary: photo.is_primary,
+      sort_order: photo.sort_order,
+    };
+  }
+
+  async register(page: Page): Promise<void> {
+    // POST/GET /collection/:id/photos
+    await page.route(/\/collection\/[0-9a-f-]{36}\/photos(\?.*)?$/, (route) => {
+      if (isDocRequest(route)) return route.continue();
+      const url = new URL(route.request().url());
+      const itemId = url.pathname.split('/').slice(-2, -1)[0]!;
+      const method = route.request().method();
+
+      if (method === 'GET') {
+        return route.fulfill(
+          jsonResponse({
+            photos: this.listPhotos(itemId).map((p) => ({
+              ...this.toBaseShape(p),
+              contribution_status: p.contribution_status,
+            })),
+          })
+        );
+      }
+
+      if (method === 'POST') {
+        if (this._nextUploadResponse) {
+          const response = this._nextUploadResponse;
+          this._nextUploadResponse = null;
+          return route.fulfill(jsonResponse(response.body, response.status));
+        }
+        const photo = this.addPhoto(itemId);
+        return route.fulfill(jsonResponse({ photos: [this.toBaseShape(photo)] }, 201));
+      }
+
+      return route.fallback();
+    });
+
+    // DELETE /collection/:id/photos/:photoId — register FIRST so more-specific
+    // suffix routes (primary, contribute, contribution, reorder) registered
+    // later take priority via Playwright's last-wins rule.
+    await page.route(/\/collection\/[0-9a-f-]{36}\/photos\/[^/]+$/, (route) => {
+      if (isDocRequest(route)) return route.continue();
+      if (route.request().method() !== 'DELETE') return route.fallback();
+      const parts = new URL(route.request().url()).pathname.split('/');
+      const itemId = parts.at(-3)!;
+      const photoId = parts.at(-1)!;
+      this.deletePhoto(itemId, photoId);
+      return route.fulfill({ status: 204, body: '' });
+    });
+
+    // PATCH /collection/:id/photos/reorder
+    await page.route(/\/collection\/[0-9a-f-]{36}\/photos\/reorder$/, (route) => {
+      if (isDocRequest(route)) return route.continue();
+      const itemId = new URL(route.request().url()).pathname.split('/').slice(-3, -2)[0]!;
+      const body = route.request().postDataJSON() as { photos: Array<{ id: string; sort_order: number }> };
+      const list = this._photosByItem.get(itemId) ?? [];
+      for (const update of body.photos) {
+        const photo = list.find((p) => p.id === update.id);
+        if (photo) photo.sort_order = update.sort_order;
+      }
+      return route.fulfill(jsonResponse({ photos: this.listPhotos(itemId).map((p) => this.toBaseShape(p)) }));
+    });
+
+    // PATCH /collection/:id/photos/:photoId/primary
+    await page.route(/\/collection\/[0-9a-f-]{36}\/photos\/[^/]+\/primary$/, (route) => {
+      if (isDocRequest(route)) return route.continue();
+      const parts = new URL(route.request().url()).pathname.split('/');
+      const itemId = parts.at(-4)!;
+      const photoId = parts.at(-2)!;
+      const photo = this.setPrimary(itemId, photoId);
+      if (!photo) return route.fulfill(jsonResponse({ error: 'Not found' }, 404));
+      return route.fulfill(jsonResponse(this.toBaseShape(photo)));
+    });
+
+    // POST /collection/:id/photos/:photoId/contribute
+    await page.route(/\/collection\/[0-9a-f-]{36}\/photos\/[^/]+\/contribute$/, (route) => {
+      if (isDocRequest(route)) return route.continue();
+      const parts = new URL(route.request().url()).pathname.split('/');
+      const itemId = parts.at(-4)!;
+      const photoId = parts.at(-2)!;
+      this.contribute(itemId, photoId);
+      return route.fulfill(jsonResponse({ contribution_id: 'mock-contribution-' + photoId }, 201));
+    });
+
+    // DELETE /collection/:id/photos/:photoId/contribution
+    await page.route(/\/collection\/[0-9a-f-]{36}\/photos\/[^/]+\/contribution$/, (route) => {
+      if (isDocRequest(route)) return route.continue();
+      const parts = new URL(route.request().url()).pathname.split('/');
+      const itemId = parts.at(-4)!;
+      const photoId = parts.at(-2)!;
+      this.revokeContribution(itemId, photoId);
+      return route.fulfill(jsonResponse({ revoked: true }));
+    });
+
+  }
+}
+
 // ─── Catalog mocks for "add from catalog" flow ───────────────────────────────
 
 const MOCK_FRANCHISE_DETAIL = {

@@ -9,7 +9,11 @@
  */
 
 import { test, expect } from './fixtures/e2e-fixtures';
-import { MockCollectionState, makeCollectionItem } from './fixtures/mock-helpers';
+import {
+  MockCollectionState,
+  MockCollectionPhotoState,
+  makeCollectionItem,
+} from './fixtures/mock-helpers';
 import {
   mockMlModels,
   mockMlModelsEmpty,
@@ -194,6 +198,116 @@ test.describe('Add by Photo — reset and retry', () => {
 });
 
 // ─── Item Details in Predictions ─────────────────────────────────────────────
+
+// ─── Add-by-Photo Integration (Slice 4: Photo Options) ─────────────────────
+
+test.describe('Add by Photo — photo options integration', () => {
+  /** Set up everything needed to reach the AddToCollectionDialog from a prediction. */
+  async function reachAddDialog(page: import('@playwright/test').Page): Promise<void> {
+    const state = new MockCollectionState([makeCollectionItem()]);
+    const photoState = new MockCollectionPhotoState();
+    await setupPhotoFlow(page, state);
+    await photoState.register(page); // photo upload mock for the chained flow
+
+    await page.goto('/collection');
+    await expect(page.getByText('1 item')).toBeVisible({ timeout: 10_000 });
+
+    await page.getByRole('button', { name: /Add by Photo/ }).click();
+    await uploadTestPhoto(page);
+
+    const sheet = page.getByRole('dialog');
+    await expect(sheet.getByText('Possible matches')).toBeVisible({ timeout: 10_000 });
+
+    const firstAdd = sheet.getByRole('button', { name: 'Add' }).first();
+    await expect(firstAdd).toBeEnabled({ timeout: 10_000 });
+    await firstAdd.click();
+  }
+
+  test('Given Add to Collection dialog from Add-by-Photo, Then Photo Options section is shown with default state', async ({
+    page,
+  }) => {
+    await reachAddDialog(page);
+
+    const dialog = page.getByRole('dialog', { name: /Add Another Copy|Add to Collection/ });
+    await expect(dialog.getByText('Photo Options')).toBeVisible();
+    await expect(dialog.getByLabel(/Save this photo/)).toBeChecked();
+    await expect(dialog.getByLabel(/Contribute this photo/)).not.toBeChecked();
+  });
+
+  test('Given default checkboxes (save only), When submitting, Then item is created and photo is uploaded', async ({
+    page,
+  }) => {
+    await reachAddDialog(page);
+
+    const dialog = page.getByRole('dialog', { name: /Add Another Copy|Add to Collection/ });
+    await dialog.getByRole('button', { name: 'Add to Collection' }).click();
+
+    const successToast = page.locator('[data-sonner-toast]').filter({
+      hasText: /Legacy Bulkhead added to your collection/,
+    });
+    await expect(successToast).toBeVisible({ timeout: 5_000 });
+
+    // Contribute toast should NOT appear when contribute is unchecked
+    const contributeToast = page.locator('[data-sonner-toast]').filter({
+      hasText: /Photo contributed for review/,
+    });
+    await expect(contributeToast).not.toBeVisible();
+  });
+
+  test('Given save and contribute checked, When submitting, Then both upload and contribute toasts fire', async ({
+    page,
+  }) => {
+    await reachAddDialog(page);
+
+    const dialog = page.getByRole('dialog', { name: /Add Another Copy|Add to Collection/ });
+    await dialog.getByLabel(/Contribute this photo/).click();
+
+    // Inline disclaimer expands when contribute is checked
+    await expect(dialog.getByText(/perpetual, non-exclusive, royalty-free license/)).toBeVisible();
+
+    await dialog.getByRole('button', { name: 'Add to Collection' }).click();
+
+    const addedToast = page.locator('[data-sonner-toast]').filter({
+      hasText: /Legacy Bulkhead added to your collection/,
+    });
+    await expect(addedToast).toBeVisible({ timeout: 5_000 });
+
+    const contributeToast = page.locator('[data-sonner-toast]').filter({
+      hasText: /Photo contributed for review/,
+    });
+    await expect(contributeToast).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('Given save unchecked, Then contribute checkbox is hidden', async ({ page }) => {
+    await reachAddDialog(page);
+
+    const dialog = page.getByRole('dialog', { name: /Add Another Copy|Add to Collection/ });
+    await expect(dialog.getByLabel(/Contribute this photo/)).toBeVisible();
+
+    await dialog.getByLabel(/Save this photo/).click();
+    await expect(dialog.getByLabel(/Contribute this photo/)).not.toBeVisible();
+  });
+
+  test('Given Add to Collection from catalog item page (no photoFile), Then Photo Options section is hidden', async ({
+    page,
+  }) => {
+    // Use the existing catalog setup helper — this opens AddToCollectionDialog
+    // without going through Add-by-Photo, so no photoFile prop is passed.
+    const { setupCatalogForAddFlow } = await import('./fixtures/mock-helpers');
+    const state = new MockCollectionState([]);
+    await state.register(page);
+    await setupCatalogForAddFlow(page);
+
+    await page.goto('/catalog/transformers/items/legacy-bulkhead');
+    await expect(page.getByRole('heading', { name: 'Legacy Bulkhead' })).toBeVisible({ timeout: 10_000 });
+
+    await page.getByRole('button', { name: 'Add to Collection' }).click();
+    const dialog = page.getByRole('dialog', { name: /Add to Collection/ });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText('Photo Options')).not.toBeVisible();
+    await expect(dialog.getByLabel(/Save this photo/)).not.toBeVisible();
+  });
+});
 
 test.describe('Add by Photo — prediction details', () => {
   test('Given results shown, Then each card shows franchise, manufacturer, and product code', async ({ page }) => {
