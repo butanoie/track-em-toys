@@ -129,7 +129,7 @@ export function AddToCollectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{alreadyOwned ? 'Add Another Copy' : 'Add to Collection'}</DialogTitle>
           <DialogDescription>{itemName}</DialogDescription>
