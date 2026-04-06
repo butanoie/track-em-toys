@@ -20,7 +20,7 @@ interface AddByPhotoSheetProps {
 
 export function AddByPhotoSheet({ open, onOpenChange, mutations }: AddByPhotoSheetProps) {
   const { data: modelsData, isPending: modelsLoading } = useMlModels();
-  const { phase, activeCategory, identify, tryAltMode, reset } = usePhotoIdentify();
+  const { phase, activeCategory, identify, tryAltMode, reset, getCurrentFile } = usePhotoIdentify();
 
   // Track whether a terminal event (accepted/browse) already fired this session
   const hasTerminalEventRef = useRef(false);
@@ -48,7 +48,8 @@ export function AddByPhotoSheet({ open, onOpenChange, mutations }: AddByPhotoShe
 
   const handlePredictionAccepted = useCallback(() => {
     hasTerminalEventRef.current = true;
-  }, []);
+    onOpenChange(false);
+  }, [onOpenChange]);
 
   const handleBrowseCatalog = useCallback(() => {
     hasTerminalEventRef.current = true;
@@ -150,6 +151,7 @@ export function AddByPhotoSheet({ open, onOpenChange, mutations }: AddByPhotoShe
                       activeModel={activeModel}
                       mutations={mutations}
                       onAccepted={handlePredictionAccepted}
+                      photoFile={getCurrentFile() ?? undefined}
                     />
                   ))}
                 </div>

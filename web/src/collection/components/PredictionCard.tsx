@@ -43,6 +43,7 @@ interface PredictionCardProps {
   activeModel: MlModelSummary | undefined;
   mutations: CollectionMutations;
   onAccepted?: () => void;
+  photoFile?: File;
 }
 
 export function PredictionCard({
@@ -51,6 +52,7 @@ export function PredictionCard({
   activeModel,
   mutations,
   onAccepted,
+  photoFile,
 }: PredictionCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { franchiseSlug, itemSlug, confidence } = prediction;
@@ -140,6 +142,7 @@ export function PredictionCard({
           alreadyOwned={alreadyOwned}
           mutations={mutations}
           onSuccess={handleAddSuccess}
+          photoFile={photoFile}
         />
       )}
     </div>
