@@ -98,4 +98,97 @@ describe('PhotoGrid', () => {
 
     expect(onDelete).toHaveBeenCalledWith('p-1');
   });
+
+  it('does not render contribute buttons when onContribute is not provided', () => {
+    render(<PhotoGrid photos={mockPhotos} onReorder={vi.fn()} onSetPrimary={vi.fn()} onDelete={vi.fn()} />);
+
+    expect(screen.queryByLabelText('Contribute photo to catalog')).not.toBeInTheDocument();
+  });
+
+  it('renders contribute buttons when onContribute is provided and contribution_status is null', () => {
+    const photosWithStatus = mockPhotos.map((p) => ({ ...p, contribution_status: null }));
+    render(
+      <PhotoGrid
+        photos={photosWithStatus}
+        onReorder={vi.fn()}
+        onSetPrimary={vi.fn()}
+        onDelete={vi.fn()}
+        onContribute={vi.fn()}
+      />
+    );
+
+    expect(screen.getAllByLabelText('Contribute photo to catalog')).toHaveLength(3);
+  });
+
+  it('renders "Submitted" badge for pending contributions', () => {
+    const photosWithStatus = [
+      { ...mockPhotos[0], contribution_status: 'pending' as const },
+      { ...mockPhotos[1], contribution_status: null },
+    ];
+    render(
+      <PhotoGrid
+        photos={photosWithStatus}
+        onReorder={vi.fn()}
+        onSetPrimary={vi.fn()}
+        onDelete={vi.fn()}
+        onContribute={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole('status', { name: 'Photo submitted for review' })).toBeInTheDocument();
+    expect(screen.getAllByLabelText('Contribute photo to catalog')).toHaveLength(1);
+  });
+
+  it('renders "Shared" badge for approved contributions', () => {
+    const photosWithStatus = [{ ...mockPhotos[0], contribution_status: 'approved' as const }];
+    render(
+      <PhotoGrid
+        photos={photosWithStatus}
+        onReorder={vi.fn()}
+        onSetPrimary={vi.fn()}
+        onDelete={vi.fn()}
+        onContribute={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole('status', { name: 'Photo shared to catalog' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Contribute photo to catalog')).not.toBeInTheDocument();
+  });
+
+  it('renders contribute button for rejected photos (re-contribution allowed)', () => {
+    const photosWithStatus = [{ ...mockPhotos[0], contribution_status: 'rejected' as const }];
+    render(
+      <PhotoGrid
+        photos={photosWithStatus}
+        onReorder={vi.fn()}
+        onSetPrimary={vi.fn()}
+        onDelete={vi.fn()}
+        onContribute={vi.fn()}
+      />
+    );
+
+    expect(screen.getByLabelText('Contribute photo to catalog')).toBeInTheDocument();
+  });
+
+  it('calls onContribute with correct photoId when contribute button is clicked', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onContribute = vi.fn();
+    const photosWithStatus = mockPhotos.map((p) => ({ ...p, contribution_status: null }));
+
+    render(
+      <PhotoGrid
+        photos={photosWithStatus}
+        onReorder={vi.fn()}
+        onSetPrimary={vi.fn()}
+        onDelete={vi.fn()}
+        onContribute={onContribute}
+      />
+    );
+
+    const buttons = screen.getAllByLabelText('Contribute photo to catalog');
+    await user.click(buttons[0]);
+
+    expect(onContribute).toHaveBeenCalledWith('p-1');
+  });
 });

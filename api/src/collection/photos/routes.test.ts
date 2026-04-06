@@ -164,6 +164,12 @@ const mockPhotoRow = {
   sort_order: 1,
 };
 
+/** Extended row for list responses (includes contribution_status from LEFT JOIN). */
+const mockPhotoListRow = {
+  ...mockPhotoRow,
+  contribution_status: null as string | null,
+};
+
 // ─── Test helpers ────────────────────────────────────────────────────────────
 
 const fakeQuery = vi.fn();
@@ -337,7 +343,7 @@ describe('GET /collection/:id/photos', () => {
   it('should return 200 with photos list', async () => {
     mockTx();
     mockCollectionItemExists();
-    vi.mocked(photoQueries.listCollectionPhotos).mockResolvedValue([mockPhotoRow]);
+    vi.mocked(photoQueries.listCollectionPhotos).mockResolvedValue([mockPhotoListRow]);
 
     const res = await server.inject({
       method: 'GET',
@@ -346,8 +352,29 @@ describe('GET /collection/:id/photos', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    const json = JSON.parse(res.payload) as { photos: unknown[] };
+    const json = JSON.parse(res.payload) as { photos: Array<{ contribution_status: string | null }> };
     expect(json.photos).toHaveLength(1);
+    expect(json.photos[0]).toBeDefined();
+    expect(json.photos[0]!.contribution_status).toBeNull();
+  });
+
+  it('should include contribution_status when photo is contributed', async () => {
+    mockTx();
+    mockCollectionItemExists();
+    vi.mocked(photoQueries.listCollectionPhotos).mockResolvedValue([
+      { ...mockPhotoListRow, contribution_status: 'pending' },
+    ]);
+
+    const res = await server.inject({
+      method: 'GET',
+      url: BASE_URL,
+      headers: authHeaders(),
+    });
+
+    expect(res.statusCode).toBe(200);
+    const json = JSON.parse(res.payload) as { photos: Array<{ contribution_status: string | null }> };
+    expect(json.photos[0]).toBeDefined();
+    expect(json.photos[0]!.contribution_status).toBe('pending');
   });
 
   it('should return 404 for non-existent collection item', async () => {

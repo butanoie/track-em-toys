@@ -47,9 +47,7 @@ export async function mlModelQualityRoutes(fastify: FastifyInstance, _opts: obje
                 .sort((a, b) => a.accuracy - b.accuracy)
             : null;
 
-          const confusedPairs = metrics
-            ? computeConfusedPairs(metrics.confusion_matrix, metrics.label_map, 20)
-            : null;
+          const confusedPairs = metrics ? computeConfusedPairs(metrics.confusion_matrix, metrics.label_map, 20) : null;
 
           return {
             name: metadata.name,

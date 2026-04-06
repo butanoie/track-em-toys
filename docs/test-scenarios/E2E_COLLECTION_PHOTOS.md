@@ -104,17 +104,29 @@ Scenario: User contributes a photo to the catalog
   When they click "Contribute to Catalog"
   Then a success toast says "Photo contributed for review"
   And the dialog closes
-  And the photo tile shows a "Contributed" badge
+  And the photo tile shows a "Submitted" badge (amber)
   And the contribute icon is no longer visible on that photo
 
 Scenario: Contributed badge persists after sheet reopen
   Given a photo has been contributed
   When the user closes and reopens the photo management sheet
-  Then the contributed photo still shows the "Contributed" badge
+  Then the contributed photo still shows the "Submitted" badge
 
 Scenario: User cannot contribute the same photo twice
-  Given a photo already has a "Contributed" badge
+  Given a photo already has a "Submitted" badge
   Then there is no contribute action available on that photo tile
+
+Scenario: Approved contribution shows "Shared" badge
+  Given a photo's contribution has been approved by a curator
+  When the user views the photo management sheet
+  Then the photo tile shows a "Shared" badge (green)
+  And there is no contribute action available on that photo tile
+
+Scenario: Rejected contribution allows re-contribution
+  Given a photo's contribution was rejected by a curator
+  When the user views the photo management sheet
+  Then the contribute icon is visible on that photo (no badge)
+  And the user can click contribute to submit again
 ```
 
 ### Add-by-Photo Integration

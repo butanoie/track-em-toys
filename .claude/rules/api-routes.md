@@ -1,6 +1,6 @@
 ---
 paths:
-  - "api/src/**/*.ts"
+  - 'api/src/**/*.ts'
 ---
 
 # API Route & Domain Patterns

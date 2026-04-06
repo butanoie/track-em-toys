@@ -1,7 +1,7 @@
 ---
 paths:
-  - "web/src/**/*.tsx"
-  - "web/src/**/*.ts"
+  - 'web/src/**/*.tsx'
+  - 'web/src/**/*.ts'
 ---
 
 # Web Component & Domain Patterns
@@ -33,8 +33,10 @@ paths:
 - Catalog photo gallery on item detail page — shared, visible to all users
 - Photo upload UI (Phase 1.9) requires `curator` role — show/hide upload controls based on user role
 - Collection photo management (Phase 1.6) — private per-item photos, any authenticated user. `CollectionPhotoSheet` in `collection/photos/` reuses catalog `DropZone`, `UploadQueue`, and `PhotoGrid` directly
-- `CollectionPhotoSchema` and `PhotoSchema` are structurally identical (`{ id, url, caption, is_primary, sort_order }`, no `status` in either) — catalog `PhotoGrid` accepts `CollectionPhoto[]` via structural typing, no adapter needed
-- `CollectionPhotoSheet` fetches its own photo list via `listCollectionPhotos()` on open (unlike catalog `PhotoManagementSheet` which receives `photos` as a prop)
+- `CollectionPhotoSchema` (base) and `PhotoSchema` are structurally identical (`{ id, url, caption, is_primary, sort_order }`). `CollectionPhotoListSchema` extends the base with `contribution_status: z.enum(['pending', 'approved', 'rejected']).nullable()` — only the list endpoint returns this field (via LEFT JOIN on `photo_contributions`). CRUD responses (upload, set-primary, reorder) use the base schema.
+- PhotoGrid accepts `Array<Photo & { contribution_status?: string | null }>` — backward compatible with catalog `Photo[]`. Optional `onContribute?: (photoId: string) => void` prop renders Share2 icon (when status is null/rejected) and "Submitted"/"Shared" badges (when pending/approved). Catalog callers omit `onContribute`.
+- `ContributeDialog` in `collection/photos/` — consent dialog with disclaimer, checkbox, amber submit. Callback pattern (`onConfirm: () => void`), parent owns the mutation. `CONSENT_VERSION = '1.0'` lives in `useCollectionPhotoMutations`.
+- `CollectionPhotoSheet` fetches its own photo list via `listCollectionPhotos()` on open (unlike catalog `PhotoManagementSheet` which receives `photos` as a prop). Uses `contributeTarget: string | null` state mirroring the `deleteTarget` pattern.
 - `thumbnail_url` in collection list uses `COALESCE(collection_primary.url, catalog_primary.url)` — user's own photo takes priority. Both URL formats work with `buildPhotoUrl()` (relative paths under same `PHOTO_BASE_URL`)
 - `collection_photo_count` on `CollectionItem` drives the Camera button badge. Correlated subquery, RLS-safe (scoped through parent `collection_items` JOIN)
 - `onManagePhotos` prop threads through `CollectionPage` → `CollectionGrid`/`CollectionTable` → `CollectionItemCard`/rows → opens `CollectionPhotoSheet` via `photoTarget` state

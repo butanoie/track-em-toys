@@ -6,7 +6,7 @@
  */
 export function formatClassLabel(raw: string): string {
   const parts = raw.split('__');
-  const item = parts.length > 1 ? parts.at(-1) ?? raw : raw;
+  const item = parts.length > 1 ? (parts.at(-1) ?? raw) : raw;
   return item
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

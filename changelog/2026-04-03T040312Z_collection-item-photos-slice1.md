@@ -25,19 +25,20 @@ Two new tables:
 
 All under `/collection/:id/photos`, using `withTransaction` with RLS context:
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| POST | `/` | Upload photos (multipart, max 10) |
-| GET | `/` | List photos |
-| PATCH | `/reorder` | Reorder photos |
-| PATCH | `/:photoId/primary` | Set primary |
-| DELETE | `/:photoId` | Delete photo |
-| POST | `/:photoId/contribute` | Contribute to catalog |
-| DELETE | `/:photoId/contribution` | Revoke contribution |
+| Method | Path                     | Purpose                           |
+| ------ | ------------------------ | --------------------------------- |
+| POST   | `/`                      | Upload photos (multipart, max 10) |
+| GET    | `/`                      | List photos                       |
+| PATCH  | `/reorder`               | Reorder photos                    |
+| PATCH  | `/:photoId/primary`      | Set primary                       |
+| DELETE | `/:photoId`              | Delete photo                      |
+| POST   | `/:photoId/contribute`   | Contribute to catalog             |
+| DELETE | `/:photoId/contribution` | Revoke contribution               |
 
 ### 3. GDPR Extension
 
 Extended `gdprPurgeUser()` with RLS context switch pattern:
+
 - Switches `app.user_id` to target user for FORCE RLS table access
 - Deletes `collection_item_photos` (ON DELETE SET NULL preserves audit)
 - Deletes `collection_items`

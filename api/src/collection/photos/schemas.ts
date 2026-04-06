@@ -41,6 +41,17 @@ const collectionPhotoItem = {
   },
 } as const;
 
+/** Extended collection photo with contribution status — used only in list response. */
+const collectionPhotoListItem = {
+  type: 'object',
+  required: ['id', 'url', 'caption', 'is_primary', 'sort_order', 'contribution_status'],
+  additionalProperties: false,
+  properties: {
+    ...collectionPhotoItem.properties,
+    contribution_status: { type: ['string', 'null'] },
+  },
+} as const;
+
 const duplicatePhotoError = {
   type: 'object',
   required: ['error', 'matched'],
@@ -107,7 +118,7 @@ export const listCollectionPhotosSchema = {
       required: ['photos'],
       additionalProperties: false,
       properties: {
-        photos: { type: 'array', items: collectionPhotoItem },
+        photos: { type: 'array', items: collectionPhotoListItem },
       },
     },
     401: errorResponse,

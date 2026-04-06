@@ -1,7 +1,7 @@
 ---
 paths:
-  - "api/db/**"
-  - "api/src/db/**"
+  - 'api/db/**'
+  - 'api/src/db/**'
 ---
 
 # API Database Detailed Patterns

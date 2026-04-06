@@ -64,15 +64,15 @@ The project has completed its authentication foundation (Phases 1.1–1.3) and i
 
 ### What's on the Critical Path to ML
 
-| Area                          | Status            | Blocking?                                  |
-| ----------------------------- | ----------------- | ------------------------------------------ |
-| Seed Ingestion Script         | NOT STARTED (#30) | Yes — blocks catalog API                   |
-| Seed Integration Tests        | NOT STARTED (#31) | Yes — validates ingestion                  |
-| Catalog API Routes            | NOT STARTED       | Blocked by seed ingestion                  |
-| Web Catalog UI                | NOT STARTED       | Blocked by catalog API                     |
-| Photo Upload API + UI         | NOT STARTED       | Schema exists (`item_photos`), no app code |
+| Area                          | Status            | Blocking?                                                                     |
+| ----------------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| Seed Ingestion Script         | NOT STARTED (#30) | Yes — blocks catalog API                                                      |
+| Seed Integration Tests        | NOT STARTED (#31) | Yes — validates ingestion                                                     |
+| Catalog API Routes            | NOT STARTED       | Blocked by seed ingestion                                                     |
+| Web Catalog UI                | NOT STARTED       | Blocked by catalog API                                                        |
+| Photo Upload API + UI         | NOT STARTED       | Schema exists (`item_photos`), no app code                                    |
 | ML Training Pipeline          | 4.0a–d DONE       | Full pipeline complete: training, serving, telemetry, quality dashboard, docs |
-| iOS App + On-Device Inference | NOT STARTED       | Blocked by trained model                   |
+| iOS App + On-Device Inference | NOT STARTED       | Blocked by trained model                                                      |
 
 ### What's Deferred (Post-ML)
 

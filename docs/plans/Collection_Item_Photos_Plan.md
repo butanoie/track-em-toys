@@ -50,11 +50,13 @@ When `gdprPurgeUser()` runs:
 5. **Delete photo files** — after transaction commits, `rm -rf PHOTO_STORAGE_PATH/collection/{userId}/` (best-effort, log failures)
 
 **What survives:**
+
 - `photo_contributions` rows (audit trail) — `collection_item_photo_id = NULL`, `contributed_by` → tombstone user, `item_photo_id` → surviving catalog photo, `consent_version` preserved
 - Contributed catalog photos (`item_photos` rows + files) — user granted a perpetual license; photo content (a toy) is not PII
 - `users` tombstone row — PII scrubbed, FKs intact
 
 **What is deleted:**
+
 - All `collection_item_photos` rows and files
 - All `collection_items` rows
 - `uploaded_by` attribution on catalog photos (set to NULL)
@@ -121,15 +123,15 @@ CREATE TABLE public.photo_contributions (
 
 All under `/collection/:id/photos`, registered as a sub-plugin of `collectionRoutes`.
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| POST | `/collection/:id/photos` | Upload photos (multipart, max 10 files) |
-| GET | `/collection/:id/photos` | List photos for a collection item |
-| PATCH | `/collection/:id/photos/reorder` | Reorder photos |
-| PATCH | `/collection/:id/photos/:photoId/primary` | Set primary photo |
-| DELETE | `/collection/:id/photos/:photoId` | Hard-delete a photo |
-| POST | `/collection/:id/photos/:photoId/contribute` | Contribute to catalog |
-| DELETE | `/collection/:id/photos/:photoId/contribution` | Revoke contribution |
+| Method | Path                                           | Purpose                                 |
+| ------ | ---------------------------------------------- | --------------------------------------- |
+| POST   | `/collection/:id/photos`                       | Upload photos (multipart, max 10 files) |
+| GET    | `/collection/:id/photos`                       | List photos for a collection item       |
+| PATCH  | `/collection/:id/photos/reorder`               | Reorder photos                          |
+| PATCH  | `/collection/:id/photos/:photoId/primary`      | Set primary photo                       |
+| DELETE | `/collection/:id/photos/:photoId`              | Hard-delete a photo                     |
+| POST   | `/collection/:id/photos/:photoId/contribute`   | Contribute to catalog                   |
+| DELETE | `/collection/:id/photos/:photoId/contribution` | Revoke contribution                     |
 
 Auth: `[fastify.authenticate, fastify.requireRole('user')]` — all authenticated users, RLS enforces ownership.
 
@@ -155,25 +157,42 @@ The `collectionRoutes` preValidation hook (line 162-169 of `api/src/collection/r
 
 Mirrors `PhotoManagementSheet` (right panel Sheet, `sm:max-w-3xl`) with collection-scoped props. Composes existing `DropZone`, `UploadQueue`, and an extended `PhotoGrid`.
 
-**Extended photo tile actions:**
+**Extended photo tile actions (Slice 3):**
+
 - Star (set primary) — top-left, same as catalog
-- Contribute (Share2 icon) — bottom-left, gradient overlay, same opacity transition as delete
-- Delete (Trash2 icon) — bottom-right
-- "Contributed" badge — replaces contribute action when already contributed (`bg-amber-600/80 text-white text-[10px]`, same pattern as primary badge)
+- Contribute (Share2 icon) — bottom overlay alongside delete, visible when `contribution_status` is null and `onContribute` is provided
+- Delete (Trash2 icon) — bottom-right overlay
+- "Submitted" badge (amber) — replaces contribute action when `contribution_status === 'pending'`
+- "Shared" badge (green) — replaces contribute action when `contribution_status === 'approved'`
+
+**Data flow:** `contributeTarget: string | null` state mirrors `deleteTarget` pattern. `ContributeDialog` is a sibling fragment outside the Sheet, same as `ConfirmDialog`.
+
+### Contribution Status in List Response (Slice 3)
+
+`GET /collection/:id/photos` returns `contribution_status: string | null` on each photo via LEFT JOIN on `photo_contributions WHERE status != 'revoked'`. Values: `null` (not contributed), `'pending'`, `'approved'`, `'rejected'`.
+
+**Schema split:** `CollectionPhotoRow` (base, used by CRUD RETURNING clauses) stays unchanged. `CollectionPhotoListRow` extends it with `contribution_status`. Only `listCollectionPhotos` uses the JOIN. Similarly, Fastify schemas split into `collectionPhotoItem` (base) and `collectionPhotoListItem` (with `contribution_status`). Web Zod schemas: `CollectionPhotoSchema` (base) + `CollectionPhotoListSchema` (extended). This prevents Zod parse failures when set-primary/reorder/upload responses lack the field.
 
 ### ContributeDialog
 
 Modal `Dialog` (`sm:max-w-md`) with:
-- Photo thumbnail preview (max-h-48, object-contain)
+
+- Photo thumbnail preview (max-h-48, object-contain, derived from `photos.find()`)
 - Disclaimer text in a subtle boxed callout (`bg-muted/50 border border-border p-3`)
 - Checkbox: "I confirm I have the right to share this photo" (requires Shadcn Checkbox install)
 - Submit button: amber accent, disabled until checkbox checked
+- Callback pattern: `onConfirm: () => void` — parent owns the mutation
 
-Consent version tracked as `'1.0'` — bumped when disclaimer text changes.
+Consent version tracked as `'1.0'` in `useCollectionPhotoMutations` — bumped when disclaimer text changes.
+
+### PhotoGrid Modification (Slice 3)
+
+Option A chosen: add optional `onContribute?: (photoId: string) => void` to shared `PhotoGrid`. Photos type widened to `Array<Photo & { contribution_status?: string | null }>` — backward compatible with catalog callers passing `Photo[]`. Badge and contribute button rendering gated on `onContribute` being defined. No impact on catalog `PhotoManagementSheet`.
 
 ### AddToCollectionDialog Enhancements
 
 When `photoFile?: File` prop is provided (from Add-by-Photo ML flow):
+
 - Labeled divider: "Photo Options" with horizontal rule
 - Photo preview row: 48x48 thumbnail + filename + file size
 - Checkbox: "Save this photo to your collection item" (default: checked)
@@ -190,18 +209,19 @@ Submit chains: (1) create collection item, (2) upload photo if checked, (3) cont
 
 ## Reused Modules
 
-| Module | Reuse Type |
-|--------|-----------|
-| `api/src/catalog/photos/thumbnails.ts` | Direct import (processUpload, DimensionError) |
-| `api/src/catalog/photos/dhash.ts` | Direct import (computeDHash, hammingDistance) |
-| `api/src/catalog/photos/storage.ts` | Import ensureDir, writePhoto; new collection-scoped path functions |
-| `web/src/catalog/photos/DropZone.tsx` | Direct use (generic, no domain coupling) |
-| `web/src/catalog/photos/UploadQueue.tsx` | Direct use |
-| `web/src/lib/photo-url.ts` | Direct use (buildPhotoUrl works with any relative URL) |
+| Module                                   | Reuse Type                                                         |
+| ---------------------------------------- | ------------------------------------------------------------------ |
+| `api/src/catalog/photos/thumbnails.ts`   | Direct import (processUpload, DimensionError)                      |
+| `api/src/catalog/photos/dhash.ts`        | Direct import (computeDHash, hammingDistance)                      |
+| `api/src/catalog/photos/storage.ts`      | Import ensureDir, writePhoto; new collection-scoped path functions |
+| `web/src/catalog/photos/DropZone.tsx`    | Direct use (generic, no domain coupling)                           |
+| `web/src/catalog/photos/UploadQueue.tsx` | Direct use                                                         |
+| `web/src/lib/photo-url.ts`               | Direct use (buildPhotoUrl works with any relative URL)             |
 
 ## New Files
 
 ### API
+
 - `api/db/migrations/036_collection_item_photos.sql`
 - `api/src/collection/photos/routes.ts`
 - `api/src/collection/photos/queries.ts`
@@ -210,6 +230,7 @@ Submit chains: (1) create collection item, (2) upload photo if checked, (3) cont
 - `api/src/collection/photos/routes.test.ts`
 
 ### Web
+
 - `web/src/collection/photos/CollectionPhotoSheet.tsx`
 - `web/src/collection/photos/ContributeDialog.tsx`
 - `web/src/collection/photos/api.ts`

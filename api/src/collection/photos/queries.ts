@@ -12,6 +12,11 @@ export interface CollectionPhotoRow {
   sort_order: number;
 }
 
+/** Extended row with contribution status, returned only by listCollectionPhotos. */
+export interface CollectionPhotoListRow extends CollectionPhotoRow {
+  contribution_status: string | null;
+}
+
 export interface InsertCollectionPhotoParams {
   id: string;
   collectionItemId: string;
@@ -122,11 +127,18 @@ export async function insertCollectionPhoto(
  * @param client - Transaction client with RLS context
  * @param collectionItemId - Collection item UUID
  */
-export async function listCollectionPhotos(client: PoolClient, collectionItemId: string): Promise<CollectionPhotoRow[]> {
-  const { rows } = await client.query<CollectionPhotoRow>(
-    `SELECT ${PHOTO_COLUMNS} FROM collection_item_photos
-     WHERE collection_item_id = $1
-     ORDER BY ${DISPLAY_ORDER}`,
+export async function listCollectionPhotos(
+  client: PoolClient,
+  collectionItemId: string
+): Promise<CollectionPhotoListRow[]> {
+  const { rows } = await client.query<CollectionPhotoListRow>(
+    `SELECT cip.id, cip.url, cip.caption, cip.is_primary, cip.sort_order,
+            pc.status AS contribution_status
+     FROM collection_item_photos cip
+     LEFT JOIN photo_contributions pc
+       ON pc.collection_item_photo_id = cip.id AND pc.status != 'revoked'
+     WHERE cip.collection_item_id = $1
+     ORDER BY cip.is_primary DESC, cip.sort_order ASC, cip.created_at ASC`,
     [collectionItemId]
   );
   return rows;
@@ -334,11 +346,7 @@ export async function updateContributionCopied(
  * @param photoId - Collection item photo UUID
  * @param contributedBy - User UUID (for ownership verification)
  */
-export async function revokeContribution(
-  client: PoolClient,
-  photoId: string,
-  contributedBy: string
-): Promise<boolean> {
+export async function revokeContribution(client: PoolClient, photoId: string, contributedBy: string): Promise<boolean> {
   const { rowCount } = await client.query(
     `UPDATE photo_contributions SET status = 'revoked', updated_at = now()
      WHERE collection_item_photo_id = $1 AND contributed_by = $2 AND status != 'revoked'`,

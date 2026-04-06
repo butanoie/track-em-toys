@@ -6,10 +6,11 @@ import { ConfirmDialog } from '@/admin/components/ConfirmDialog';
 import { DropZone } from '@/catalog/photos/DropZone';
 import { UploadQueue } from '@/catalog/photos/UploadQueue';
 import { PhotoGrid } from '@/catalog/photos/PhotoGrid';
+import { ContributeDialog } from './ContributeDialog';
 import { useCollectionPhotoUpload } from './useCollectionPhotoUpload';
 import { useCollectionPhotoMutations } from './useCollectionPhotoMutations';
 import { listCollectionPhotos } from './api';
-import type { CollectionPhoto } from '@/lib/zod-schemas';
+import type { CollectionPhotoListItem } from '@/lib/zod-schemas';
 
 interface CollectionPhotoSheetProps {
   open: boolean;
@@ -24,11 +25,13 @@ export function CollectionPhotoSheet({
   collectionItemId,
   collectionItemName,
 }: CollectionPhotoSheetProps) {
-  const [photos, setPhotos] = useState<CollectionPhoto[]>([]);
+  const [photos, setPhotos] = useState<CollectionPhotoListItem[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [contributeTarget, setContributeTarget] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  const { deleteMutation, setPrimaryMutation, reorderMutation } = useCollectionPhotoMutations(collectionItemId);
+  const { deleteMutation, setPrimaryMutation, reorderMutation, contributeMutation } =
+    useCollectionPhotoMutations(collectionItemId);
 
   const refreshPhotos = useCallback(async () => {
     try {
@@ -104,6 +107,23 @@ export function CollectionPhotoSheet({
     });
   }, [deleteTarget, deleteMutation, refreshPhotos]);
 
+  const handleConfirmContribute = useCallback(() => {
+    if (!contributeTarget) return;
+    contributeMutation.mutate(contributeTarget, {
+      onSuccess: () => {
+        setContributeTarget(null);
+        toast.success('Photo contributed for review');
+        void refreshPhotos();
+      },
+      onError: () => {
+        setContributeTarget(null);
+        toast.error('Failed to contribute photo');
+      },
+    });
+  }, [contributeTarget, contributeMutation, refreshPhotos]);
+
+  const contributePhotoUrl = contributeTarget ? (photos.find((p) => p.id === contributeTarget)?.url ?? null) : null;
+
   const photoLabel = photos.length === 1 ? '1 photo' : `${photos.length} photos`;
 
   return (
@@ -128,6 +148,7 @@ export function CollectionPhotoSheet({
               onReorder={handleReorder}
               onSetPrimary={handleSetPrimary}
               onDelete={setDeleteTarget}
+              onContribute={setContributeTarget}
               disabled={isUploading}
             />
           </div>
@@ -145,6 +166,16 @@ export function CollectionPhotoSheet({
         variant="destructive"
         onConfirm={handleConfirmDelete}
         isPending={deleteMutation.isPending}
+      />
+
+      <ContributeDialog
+        open={contributeTarget !== null}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setContributeTarget(null);
+        }}
+        photoUrl={contributePhotoUrl}
+        onConfirm={handleConfirmContribute}
+        isPending={contributeMutation.isPending}
       />
     </>
   );

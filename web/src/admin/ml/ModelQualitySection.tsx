@@ -28,7 +28,9 @@ export function ModelQualitySection({ data, isPending }: ModelQualitySectionProp
       {data.models.map((model) => (
         <div key={model.version} className="space-y-4">
           {data.models.length > 1 && (
-            <h3 className="text-sm font-medium text-muted-foreground">{model.name} ({model.category})</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">
+              {model.name} ({model.category})
+            </h3>
           )}
 
           {!model.metrics_available && (

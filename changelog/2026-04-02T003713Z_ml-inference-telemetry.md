@@ -84,14 +84,14 @@ New ML Stats page at `/admin/ml` with recharts visualizations and time range sel
 
 ### Event Types and Metadata
 
-| Event | Metadata |
-|---|---|
-| `scan_started` | model_version, model_category |
-| `scan_completed` | model_version, model_category, inference_ms, top1_confidence, top5_labels |
-| `scan_failed` | model_version, model_category, error_message |
+| Event                 | Metadata                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| `scan_started`        | model_version, model_category                                                              |
+| `scan_completed`      | model_version, model_category, inference_ms, top1_confidence, top5_labels                  |
+| `scan_failed`         | model_version, model_category, error_message                                               |
 | `prediction_accepted` | model_version, model_category, accepted_label, accepted_rank, accepted_confidence, item_id |
-| `scan_abandoned` | model_version, model_category, had_results |
-| `browse_catalog` | model_version, model_category |
+| `scan_abandoned`      | model_version, model_category, had_results                                                 |
+| `browse_catalog`      | model_version, model_category                                                              |
 
 ### SQL Safety
 

@@ -8,7 +8,9 @@ interface ConfusedPairsTableProps {
 
 export function ConfusedPairsTable({ pairs }: ConfusedPairsTableProps) {
   if (pairs.length === 0) {
-    return <p className="text-sm text-muted-foreground text-center py-4">No confused pairs — perfect classification.</p>;
+    return (
+      <p className="text-sm text-muted-foreground text-center py-4">No confused pairs — perfect classification.</p>
+    );
   }
 
   return (

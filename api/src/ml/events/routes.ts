@@ -54,9 +54,7 @@ export async function mlEventWriteRoutes(fastify: FastifyInstance, _opts: object
  *
  * @param rows - Raw rows from getDailyStats query
  */
-function pivotDailyRows(
-  rows: { date: string; event_type: string; count: string }[]
-): {
+function pivotDailyRows(rows: { date: string; event_type: string; count: string }[]): {
   date: string;
   scans_started: number;
   scans_completed: number;

@@ -690,8 +690,17 @@ export const CollectionPhotoSchema = z.object({
   sort_order: z.number().int(),
 });
 
+/** Extended schema with contribution status — returned by the list endpoint only. */
+export const CollectionPhotoListSchema = CollectionPhotoSchema.extend({
+  contribution_status: z.enum(['pending', 'approved', 'rejected']).nullable(),
+});
+
 export const CollectionPhotosResponseSchema = z.object({
   photos: z.array(CollectionPhotoSchema),
+});
+
+export const CollectionPhotoListResponseSchema = z.object({
+  photos: z.array(CollectionPhotoListSchema),
 });
 
 export const SetPrimaryCollectionPhotoResponseSchema = z.object({
@@ -712,6 +721,7 @@ export const RevokeContributionResponseSchema = z.object({
 
 // Collection types
 export type CollectionPhoto = z.infer<typeof CollectionPhotoSchema>;
+export type CollectionPhotoListItem = z.infer<typeof CollectionPhotoListSchema>;
 export type PackageCondition = z.infer<typeof PackageConditionSchema>;
 export type CollectionItem = z.infer<typeof CollectionItemSchema>;
 export type CollectionItemList = z.infer<typeof CollectionItemListSchema>;

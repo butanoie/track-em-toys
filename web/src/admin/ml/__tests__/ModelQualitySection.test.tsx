@@ -35,7 +35,12 @@ const mockQualityData: MlModelQuality = {
         { label: 'transformers__optimus-prime', accuracy: 0.9 },
       ],
       confused_pairs: [
-        { true_label: 'transformers__bumblebee', predicted_label: 'transformers__optimus-prime', count: 2, pct_of_true_class: 0.2 },
+        {
+          true_label: 'transformers__bumblebee',
+          predicted_label: 'transformers__optimus-prime',
+          count: 2,
+          pct_of_true_class: 0.2,
+        },
       ],
       hyperparams: { lr: 0.001 },
     },

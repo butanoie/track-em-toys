@@ -127,7 +127,7 @@ See [`docs/plans/Development_Roadmap_v1_0.md`](docs/plans/Development_Roadmap_v1
 | 1.8                       | Personal collection (browse, add/edit/remove, export/import)                 | ✅ Complete |
 | 1.9                       | Photo management (catalog photo upload, thumbnails, ML training export)      | ✅ Complete |
 | 4.0a                      | ML training data preparation (export, augmentation, balance analysis)        | ✅ Complete |
-| 4.0b                      | ML model training (PyTorch MobileNetV3-Small, dual ONNX + Core ML export)   | ✅ Complete |
+| 4.0b                      | ML model training (PyTorch MobileNetV3-Small, dual ONNX + Core ML export)    | ✅ Complete |
 | 4.0c                      | Model serving, client-side inference, telemetry, admin quality dashboard     | ✅ Complete |
 | 4.0d                      | Retraining pipeline documentation and quality gates                          | ✅ Complete |
 | 2.0                       | iOS app with on-device Core ML inference + barcode scanning                  | 🔜 Next     |
