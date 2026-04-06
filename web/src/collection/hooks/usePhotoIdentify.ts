@@ -126,5 +126,7 @@ export function usePhotoIdentify() {
     setActiveCategory('primary');
   }, []);
 
-  return { phase, activeCategory, identify, tryAltMode, reset };
+  const getCurrentFile = useCallback(() => fileRef.current, []);
+
+  return { phase, activeCategory, identify, tryAltMode, reset, getCurrentFile };
 }
