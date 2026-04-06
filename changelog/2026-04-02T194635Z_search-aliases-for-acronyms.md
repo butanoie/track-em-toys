@@ -73,17 +73,17 @@ The `search_vector @@ to_tsquery('simple', ...)` queries in `search/queries.ts` 
 
 ## Validation & Testing
 
-| Check | Result |
-|-------|--------|
-| API Tests | 809 passed, 42 skipped |
-| API Lint | 0 warnings |
-| API Typecheck | Clean (main + seed) |
-| API Build | Clean |
-| Web Tests | 758 passed |
-| Web Lint | Clean |
-| Web Typecheck | Clean |
-| Web Build | Clean |
-| Seed Validation | 66 passed |
+| Check           | Result                 |
+| --------------- | ---------------------- |
+| API Tests       | 809 passed, 42 skipped |
+| API Lint        | 0 warnings             |
+| API Typecheck   | Clean (main + seed)    |
+| API Build       | Clean                  |
+| Web Tests       | 758 passed             |
+| Web Lint        | Clean                  |
+| Web Typecheck   | Clean                  |
+| Web Build       | Clean                  |
+| Seed Validation | 66 passed              |
 
 ---
 

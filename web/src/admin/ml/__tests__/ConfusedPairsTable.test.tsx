@@ -7,7 +7,12 @@ describe('ConfusedPairsTable', () => {
     render(
       <ConfusedPairsTable
         pairs={[
-          { true_label: 'transformers__bumblebee', predicted_label: 'transformers__optimus-prime', count: 5, pct_of_true_class: 0.25 },
+          {
+            true_label: 'transformers__bumblebee',
+            predicted_label: 'transformers__optimus-prime',
+            count: 5,
+            pct_of_true_class: 0.25,
+          },
           { true_label: 'gi-joe__snake-eyes', predicted_label: 'gi-joe__scarlett', count: 3, pct_of_true_class: 0.15 },
         ]}
       />
@@ -29,9 +34,7 @@ describe('ConfusedPairsTable', () => {
 
   it('renders table headers', () => {
     render(
-      <ConfusedPairsTable
-        pairs={[{ true_label: 'a__b', predicted_label: 'a__c', count: 1, pct_of_true_class: 0.1 }]}
-      />
+      <ConfusedPairsTable pairs={[{ true_label: 'a__b', predicted_label: 'a__c', count: 1, pct_of_true_class: 0.1 }]} />
     );
 
     expect(screen.getByText('True Class')).toBeInTheDocument();

@@ -1,6 +1,6 @@
 ---
 paths:
-  - "api/src/**/*.test.ts"
+  - 'api/src/**/*.test.ts'
 ---
 
 # API Pre-Submission Checklist & Key Patterns
@@ -40,7 +40,7 @@ grep -rn "additionalProperties" src/auth/schemas.ts
 Every response schema object must have `additionalProperties: false` and `required: [...]`,
 including array item schemas.
 
-## 5. No SELECT * or RETURNING *
+## 5. No SELECT _ or RETURNING _
 
 ```bash
 grep -n "SELECT \*\|RETURNING \*\|u\.\*" src/db/queries.ts

@@ -19,7 +19,7 @@ const validMetricsJson = JSON.stringify({
   label_map: { '0': 'transformers__optimus-prime', '1': 'transformers__bumblebee', '2': 'gi-joe__snake-eyes' },
   per_class_accuracy: {
     'transformers__optimus-prime': 0.9,
-    'transformers__bumblebee': 0.8,
+    transformers__bumblebee: 0.8,
     'gi-joe__snake-eyes': 0.85,
   },
   confusion_matrix: [

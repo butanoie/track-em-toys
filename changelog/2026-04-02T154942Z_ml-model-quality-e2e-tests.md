@@ -95,15 +95,17 @@ New "Model Quality" section on `/admin/ml` showing training-derived metrics from
 
 ```json
 {
-  "models": [{
-    "name": "primary-classifier",
-    "accuracy": 0.85,
-    "top3_accuracy": 0.95,
-    "quality_gates": { "accuracy_pass": true, "size_pass": true },
-    "per_class_accuracy": [{ "label": "transformers__bumblebee", "accuracy": 0.8 }],
-    "confused_pairs": [{ "true_label": "...", "predicted_label": "...", "count": 2, "pct_of_true_class": 0.2 }],
-    "metrics_available": true
-  }]
+  "models": [
+    {
+      "name": "primary-classifier",
+      "accuracy": 0.85,
+      "top3_accuracy": 0.95,
+      "quality_gates": { "accuracy_pass": true, "size_pass": true },
+      "per_class_accuracy": [{ "label": "transformers__bumblebee", "accuracy": 0.8 }],
+      "confused_pairs": [{ "true_label": "...", "predicted_label": "...", "count": 2, "pct_of_true_class": 0.2 }],
+      "metrics_available": true
+    }
+  ]
 }
 ```
 
@@ -137,12 +139,14 @@ ML:      94 TypeScript + 12 Python tests passing
 ## Related Files
 
 ### Model Quality (API)
+
 - `api/src/ml/models/metrics-schema.ts`
 - `api/src/ml/models/quality-reader.ts`
 - `api/src/ml/models/quality-routes.ts`
 - `api/src/ml/models/quality-schemas.ts`
 
 ### Model Quality (Web)
+
 - `web/src/admin/ml/ModelQualitySection.tsx`
 - `web/src/admin/ml/PerClassAccuracyChart.tsx`
 - `web/src/admin/ml/ConfusedPairsTable.tsx`
@@ -150,11 +154,13 @@ ML:      94 TypeScript + 12 Python tests passing
 - `web/src/admin/ml/format-utils.ts`
 
 ### E2E Tests
+
 - `web/e2e/add-by-photo.spec.ts`
 - `web/e2e/admin-ml-stats.spec.ts`
 - `web/e2e/fixtures/ml-helpers.ts`
 
 ### Documentation
+
 - `ml/TRAINING.md`
 - `docs/test-scenarios/E2E_ML_PHOTO_IDENTIFICATION.md`
 

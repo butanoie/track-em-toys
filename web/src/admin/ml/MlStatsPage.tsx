@@ -81,12 +81,14 @@ export function MlStatsPage() {
           <StatCard
             title="Acceptance Rate"
             value={`${(summary.acceptance_rate * 100).toFixed(1)}%`}
-            subtitle={summary.by_model
-              .map((m) => {
-                const rate = m.scans > 0 ? ((m.accepted / m.scans) * 100).toFixed(0) : '0';
-                return `${m.model_name}: ${rate}%`;
-              })
-              .join(', ') || `${summary.predictions_accepted} accepted`}
+            subtitle={
+              summary.by_model
+                .map((m) => {
+                  const rate = m.scans > 0 ? ((m.accepted / m.scans) * 100).toFixed(0) : '0';
+                  return `${m.model_name}: ${rate}%`;
+                })
+                .join(', ') || `${summary.predictions_accepted} accepted`
+            }
           />
           <StatCard
             title="Error Rate"

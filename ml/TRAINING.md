@@ -117,13 +117,13 @@ Each step is idempotent and can be re-run independently.
 
 Retrain when any of the following occur:
 
-| Trigger | How to detect |
-|---------|---------------|
-| **New franchise or category added** | New class directories appear in seed-images that don't exist in the current model's label map |
+| Trigger                                | How to detect                                                                                               |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **New franchise or category added**    | New class directories appear in seed-images that don't exist in the current model's label map               |
 | **Photo count doubles for a category** | Compare `prepare-data` output count against the `data_dir` recorded in the current model's `*-metrics.json` |
-| **Accuracy drops on new test photos** | Run `validate-model` against a refreshed test set — if accuracy drops below the gate threshold, retrain |
-| **Significant new seed data batch** | After adding 50+ new images across multiple classes |
-| **Model architecture change** | Switching backbone, input size, or training hyperparameters |
+| **Accuracy drops on new test photos**  | Run `validate-model` against a refreshed test set — if accuracy drops below the gate threshold, retrain     |
+| **Significant new seed data batch**    | After adding 50+ new images across multiple classes                                                         |
+| **Model architecture change**          | Switching backbone, input size, or training hyperparameters                                                 |
 
 There is no automated trigger — retraining is manual. Run the full pipeline when a trigger condition is met.
 
@@ -210,13 +210,13 @@ The API auto-discovers models by scanning `ML_MODELS_PATH` for `*-metadata.json`
 
 Each training run is traceable through the following artifacts:
 
-| Artifact | What it records |
-|----------|-----------------|
-| **Model filename** | `{category}-classifier-{YYYYMMDD}-c{N}-a{acc}` — training date, class count, best validation accuracy |
-| **`*-metrics.json`** | `data_dir` (path to training data used), `trained_at` (ISO timestamp), `hyperparams` (lr, epochs, batch_size, etc.), `seed` (random seed for reproducibility) |
-| **`*-metadata.json`** | `label_map` (index → class name mapping), `class_count`, `accuracy`, `exported_at` |
-| **Seed data git history** | Private data repo tracks which photos were added/changed per commit |
-| **Prepare-data output** | `prepare-data` logs the source directory and augmentation counts to stdout |
+| Artifact                  | What it records                                                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Model filename**        | `{category}-classifier-{YYYYMMDD}-c{N}-a{acc}` — training date, class count, best validation accuracy                                                         |
+| **`*-metrics.json`**      | `data_dir` (path to training data used), `trained_at` (ISO timestamp), `hyperparams` (lr, epochs, batch_size, etc.), `seed` (random seed for reproducibility) |
+| **`*-metadata.json`**     | `label_map` (index → class name mapping), `class_count`, `accuracy`, `exported_at`                                                                            |
+| **Seed data git history** | Private data repo tracks which photos were added/changed per commit                                                                                           |
+| **Prepare-data output**   | `prepare-data` logs the source directory and augmentation counts to stdout                                                                                    |
 
 To reproduce a training run: check out the seed data repo at the commit that matches the training date, use the same `data_dir` path, and run `train.py` with the `hyperparams` from the metrics JSON and `--seed 42`.
 

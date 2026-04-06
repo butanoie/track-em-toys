@@ -9,7 +9,7 @@ const validMetrics = {
   top3_accuracy: 0.95,
   label_map: { '0': 'transformers__optimus-prime', '1': 'transformers__bumblebee' },
   label_hierarchy: { '0': { franchise: 'transformers', item: 'optimus-prime' } },
-  per_class_accuracy: { 'transformers__optimus-prime': 0.9, 'transformers__bumblebee': 0.8 },
+  per_class_accuracy: { 'transformers__optimus-prime': 0.9, transformers__bumblebee: 0.8 },
   confusion_matrix: [
     [9, 1],
     [2, 8],

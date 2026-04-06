@@ -21,10 +21,7 @@ import {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /** Set up all mocks needed for the Add by Photo flow with predictions. */
-async function setupPhotoFlow(
-  page: import('@playwright/test').Page,
-  state: MockCollectionState
-): Promise<void> {
+async function setupPhotoFlow(page: import('@playwright/test').Page, state: MockCollectionState): Promise<void> {
   await state.register(page);
   await mockMlModels(page);
   await mockMlEvents(page);

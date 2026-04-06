@@ -1,7 +1,7 @@
 ---
 paths:
-  - "web/e2e/**"
-  - "web/src/**/*.test.*"
+  - 'web/e2e/**'
+  - 'web/src/**/*.test.*'
 ---
 
 # Web Testing Patterns

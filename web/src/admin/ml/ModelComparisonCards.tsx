@@ -49,9 +49,7 @@ export function ModelComparisonCards({ models }: ModelComparisonCardsProps) {
               </Badge>
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              Trained {new Date(model.trained_at).toLocaleDateString()}
-            </p>
+            <p className="text-xs text-muted-foreground">Trained {new Date(model.trained_at).toLocaleDateString()}</p>
           </CardContent>
         </Card>
       ))}

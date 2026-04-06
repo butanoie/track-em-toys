@@ -88,7 +88,7 @@ export async function getSummaryStats(days: number): Promise<SummaryStats> {
          COUNT(*) FILTER (WHERE event_type = 'prediction_accepted')::integer AS predictions_accepted
        FROM ml_inference_events
        WHERE created_at > NOW() - ($1::integer * INTERVAL '1 day')`,
-      interval,
+      interval
     ),
     pool.query<ModelBreakdownRow>(
       `SELECT
@@ -100,11 +100,16 @@ export async function getSummaryStats(days: number): Promise<SummaryStats> {
          AND model_name IS NOT NULL
        GROUP BY model_name
        ORDER BY COUNT(*) DESC`,
-      interval,
+      interval
     ),
   ]);
 
-  const totals = totalsResult.rows[0] ?? { total_scans: 0, scans_completed: 0, scans_failed: 0, predictions_accepted: 0 };
+  const totals = totalsResult.rows[0] ?? {
+    total_scans: 0,
+    scans_completed: 0,
+    scans_failed: 0,
+    predictions_accepted: 0,
+  };
 
   return {
     ...totals,

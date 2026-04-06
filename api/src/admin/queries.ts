@@ -169,10 +169,7 @@ export async function gdprPurgeUser(client: QueryOnlyClient, userId: string): Pr
   await client.query('DELETE FROM collection_items WHERE user_id = $1', [userId]);
 
   // 5. Scrub attribution on contributed catalog photos (item_photos has no RLS)
-  await client.query(
-    'UPDATE item_photos SET uploaded_by = NULL, updated_at = NOW() WHERE uploaded_by = $1',
-    [userId]
-  );
+  await client.query('UPDATE item_photos SET uploaded_by = NULL, updated_at = NOW() WHERE uploaded_by = $1', [userId]);
 }
 
 /**

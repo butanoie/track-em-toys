@@ -43,7 +43,7 @@ const MOCK_SECONDARY_MODEL = {
   category: 'secondary',
   format: 'onnx',
   class_count: 5,
-  accuracy: 0.80,
+  accuracy: 0.8,
   input_shape: [1, 3, 224, 224],
   size_bytes: 1024,
   download_url: 'https://localhost:3010/ml/model-files/secondary-test.onnx',
@@ -108,10 +108,7 @@ export async function mockMlEvents(page: Page): Promise<void> {
  *
  * Call BEFORE page.goto() — uses addInitScript.
  */
-export async function injectTestPredictions(
-  page: Page,
-  predictions = MOCK_PREDICTIONS
-): Promise<void> {
+export async function injectTestPredictions(page: Page, predictions = MOCK_PREDICTIONS): Promise<void> {
   await page.addInitScript((preds) => {
     (window as unknown as Record<string, unknown>).__ML_TEST_PREDICTIONS__ = preds;
   }, predictions);
