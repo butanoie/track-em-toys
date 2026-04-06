@@ -30,7 +30,7 @@ export function ContributeDialog({ open, onOpenChange, photoUrl, onConfirm, isPe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Contribute Photo to Catalog</DialogTitle>
           <DialogDescription>Share this photo with the Track&apos;em Toys community.</DialogDescription>

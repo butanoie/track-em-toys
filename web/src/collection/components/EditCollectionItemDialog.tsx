@@ -95,7 +95,7 @@ export function EditCollectionItemDialog({ open, onOpenChange, item, mutations }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-sm font-medium text-muted-foreground">Edit Collection Item</DialogTitle>
           <p className="text-lg font-semibold text-foreground">
