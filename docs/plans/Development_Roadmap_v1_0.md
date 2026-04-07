@@ -271,13 +271,13 @@ Post-ML enhancements to the photo management system. These are not needed for ML
 
 **Issues:**
 
-| Issue | Title                                               | Priority | Effort |
-| ----- | --------------------------------------------------- | -------- | ------ |
-| #71   | Photo moderation: NSFW detection + approval         | High     | L      |
-| #72   | Approval notification dashboard                     | Medium   | M      |
-| #73   | Soft delete + 30-day recycle bin                    | Medium   | M      |
-| #74   | Caption editing                                     | Low      | S      |
-| #75   | Pending photo visibility (uploader-only with badge) | Medium   | M      |
+| Issue | Title                                               | Priority | Effort | Status |
+| ----- | --------------------------------------------------- | -------- | ------ | ------ |
+| #71   | Photo moderation: NSFW detection + approval         | High     | L      | Planned |
+| #72   | Approval notification dashboard ([plan](Photo_Approval_Dashboard_Plan.md)) — depends on [Phase 1.6 amendment](Photo_Contribution_Visibility_Plan.md) | Medium | M | 📐 Design locked |
+| #73   | Soft delete + 30-day recycle bin                    | Medium   | M      | Planned |
+| #74   | Caption editing                                     | Low      | S      | Planned |
+| #75   | Pending photo visibility (uploader-only with badge) | Medium   | M      | Planned |
 
 ---
 
@@ -394,7 +394,9 @@ This phase can be implemented at any point but **must ship before the app is use
 
 After ML identification is working, build out the collection management features:
 
-#### Phase 1.6: Collection Schema & API (Private, Authenticated)
+> **Status note (2026-04):** Phases 1.6 (collection schema & API), 1.8 (collection UI), and the **new** Phase 1.6 Collection Item Photos + Contribution epic (#136, slices #137–#140) have all shipped ahead of schedule. The "1.6" label was reused for the photo-contribution epic once the original collection schema work landed under the 1.8 label. Phase 1.9b (#72 Approval Dashboard) is currently **design-locked** pending implementation — see [`Photo_Approval_Dashboard_Plan.md`](Photo_Approval_Dashboard_Plan.md) and the required [Phase 1.6 amendment](Photo_Contribution_Visibility_Plan.md). Sections below preserve the original planning text for historical context.
+
+#### Phase 1.6: Collection Schema & API (Private, Authenticated) — ✅ SHIPPED (as Phase 1.8)
 
 User's private collection CRUD with Row-Level Security.
 
@@ -424,7 +426,7 @@ User's private collection CRUD with Row-Level Security.
 | DELETE | `/collection/tags/:id`         | Delete tag                                     |
 | PUT    | `/collection/items/:id/tags`   | Assign/remove tags                             |
 
-#### Phase 1.8: Web Collection Management UI
+#### Phase 1.8: Web Collection Management UI — ✅ SHIPPED
 
 - "Add to Collection" button/flow from catalog item detail
 - Collection dashboard: total count, total value, recent additions
