@@ -711,6 +711,8 @@ export const ReorderCollectionPhotosResponseSchema = z.object({
   photos: z.array(CollectionPhotoSchema),
 });
 
+export const ContributeIntentSchema = z.enum(['training_only', 'catalog_and_training']);
+
 export const ContributePhotoResponseSchema = z.object({
   contribution_id: z.string(),
 });
@@ -722,6 +724,7 @@ export const RevokeContributionResponseSchema = z.object({
 // Collection types
 export type CollectionPhoto = z.infer<typeof CollectionPhotoSchema>;
 export type CollectionPhotoListItem = z.infer<typeof CollectionPhotoListSchema>;
+export type ContributeIntent = z.infer<typeof ContributeIntentSchema>;
 export type PackageCondition = z.infer<typeof PackageConditionSchema>;
 export type CollectionItem = z.infer<typeof CollectionItemSchema>;
 export type CollectionItemList = z.infer<typeof CollectionItemListSchema>;

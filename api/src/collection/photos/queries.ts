@@ -89,12 +89,13 @@ export async function insertPendingCatalogPhoto(
     url: string;
     uploadedBy: string;
     dhash: string;
+    visibility: 'public' | 'training_only';
   }
 ): Promise<void> {
   await client.query(
-    `INSERT INTO item_photos (id, item_id, url, uploaded_by, sort_order, dhash, status)
-     VALUES ($1, $2, $3, $4, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM item_photos WHERE item_id = $2), $5, 'pending')`,
-    [params.id, params.itemId, params.url, params.uploadedBy, params.dhash]
+    `INSERT INTO item_photos (id, item_id, url, uploaded_by, sort_order, dhash, status, visibility)
+     VALUES ($1, $2, $3, $4, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM item_photos WHERE item_id = $2), $5, 'pending', $6)`,
+    [params.id, params.itemId, params.url, params.uploadedBy, params.dhash, params.visibility]
   );
 }
 
@@ -309,13 +310,14 @@ export async function insertContribution(
     contributedBy: string;
     itemId: string;
     consentVersion: string;
+    intent: 'training_only' | 'catalog_and_training';
   }
 ): Promise<{ id: string }> {
   const { rows } = await client.query<{ id: string }>(
-    `INSERT INTO photo_contributions (collection_item_photo_id, contributed_by, item_id, consent_version)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO photo_contributions (collection_item_photo_id, contributed_by, item_id, consent_version, intent)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING id`,
-    [params.collectionItemPhotoId, params.contributedBy, params.itemId, params.consentVersion]
+    [params.collectionItemPhotoId, params.contributedBy, params.itemId, params.consentVersion, params.intent]
   );
   return rows[0]!;
 }

@@ -130,6 +130,8 @@ See [`docs/plans/Development_Roadmap_v1_0.md`](docs/plans/Development_Roadmap_v1
 | 4.0b                      | ML model training (PyTorch MobileNetV3-Small, dual ONNX + Core ML export)    | ✅ Complete |
 | 4.0c                      | Model serving, client-side inference, telemetry, admin quality dashboard     | ✅ Complete |
 | 4.0d                      | Retraining pipeline documentation and quality gates                          | ✅ Complete |
+| 1.6                       | Collection item photos + catalog contribution flow (epic #136, slices 1–4)   | ✅ Complete |
+| 1.9b                      | Photo approval dashboard + contribution visibility (intent/visibility)       | 📐 Design locked ([dashboard plan](docs/plans/Photo_Approval_Dashboard_Plan.md), [amendment](docs/plans/Photo_Contribution_Visibility_Plan.md)) |
 | 2.0                       | iOS app with on-device Core ML inference + barcode scanning                  | 🔜 Next     |
 | **Parallel**              |                                                                              |             |
 | 1.12                      | Account security & GDPR compliance (account deletion, PII scrubbing)         | Planned     |

@@ -85,7 +85,13 @@ export async function testSigninRoutes(fastify: FastifyInstance, _opts: object):
     '/test-signin',
     {
       schema: testSigninSchema,
-      config: { rateLimit: { max: 100, timeWindow: '1 minute' } },
+      // Bumped from 100 → 200 because the full E2E suite (~114 tests, each
+      // calling freshTestSignin per-test via the e2e-fixtures custom test
+      // fixture) exhausted the 100/min budget mid-run, causing rate-limit 429s
+      // in admin-users.spec.ts. 200 gives ~75% headroom over the current
+      // total. Test infrastructure only — no production exposure (the route
+      // is registered inside `config.nodeEnv !== 'production'`).
+      config: { rateLimit: { max: 200, timeWindow: '1 minute' } },
     },
     async (request, reply) => {
       const { email, role, display_name } = request.body;

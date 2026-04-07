@@ -207,11 +207,12 @@ export const contributePhotoSchema = {
   params: collectionPhotoIdParams,
   body: {
     type: 'object',
-    required: ['consent_version', 'consent_acknowledged'],
+    required: ['consent_version', 'consent_acknowledged', 'intent'],
     additionalProperties: false,
     properties: {
       consent_version: { type: 'string', minLength: 1 },
       consent_acknowledged: { type: 'boolean' },
+      intent: { type: 'string', enum: ['training_only', 'catalog_and_training'] },
     },
   },
   response: {

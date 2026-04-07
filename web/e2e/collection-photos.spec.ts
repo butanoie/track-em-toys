@@ -11,11 +11,7 @@
  */
 
 import { test, expect } from './fixtures/e2e-fixtures';
-import {
-  MockCollectionState,
-  MockCollectionPhotoState,
-  makeCollectionItem,
-} from './fixtures/mock-helpers';
+import { MockCollectionState, MockCollectionPhotoState, makeCollectionItem } from './fixtures/mock-helpers';
 
 const COLLECTION_ITEM_ID = 'b0000000-0000-4000-a000-000000000001';
 
@@ -178,8 +174,17 @@ test.describe('Collection photos — contribution flow', () => {
     const sheet = page.getByRole('dialog');
     await sheet.getByLabel('Contribute photo to catalog').click();
 
-    const contributeDialog = page.getByRole('dialog', { name: /Contribute Photo to Catalog/ });
+    // Dialog title is now neutral ("Contribute Photo", not "Contribute Photo to Catalog")
+    // because the same dialog now covers both training_only and catalog_and_training intents.
+    const contributeDialog = page.getByRole('dialog', { name: /Contribute Photo/ });
     await expect(contributeDialog).toBeVisible();
+
+    // Default intent is training_only → button reads "Contribute to Training"
+    await expect(contributeDialog.getByRole('radio', { name: /Training only/ })).toBeChecked();
+    await expect(contributeDialog.getByRole('button', { name: /Contribute to Training/ })).toBeDisabled();
+
+    // Switch to catalog_and_training to exercise the button-label swap + superset path
+    await contributeDialog.getByRole('radio', { name: /Catalog \+ Training/ }).click();
     await expect(contributeDialog.getByRole('button', { name: /Contribute to Catalog/ })).toBeDisabled();
 
     await contributeDialog.getByRole('checkbox', { name: /I confirm/ }).click();
@@ -188,6 +193,29 @@ test.describe('Collection photos — contribution flow', () => {
     const toast = page.locator('[data-sonner-toast]').filter({ hasText: /Photo contributed for review/ });
     await expect(toast).toBeVisible({ timeout: 5_000 });
 
+    await expect(page.getByRole('status', { name: /Photo submitted for review/ })).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('Given a pending photo, When confirming with default training_only intent, Then it submits for review', async ({
+    page,
+  }) => {
+    const photoState = new MockCollectionPhotoState();
+    photoState.addPhoto(COLLECTION_ITEM_ID, { id: 'photo-1', contribution_status: null });
+    await setupCollectionWithPhotoState(page, photoState);
+    await openPhotoSheet(page);
+
+    const sheet = page.getByRole('dialog');
+    await sheet.getByLabel('Contribute photo to catalog').click();
+
+    const contributeDialog = page.getByRole('dialog', { name: /Contribute Photo/ });
+
+    // Default intent (no radio click needed) — button says "Contribute to Training"
+    await expect(contributeDialog.getByRole('radio', { name: /Training only/ })).toBeChecked();
+    await contributeDialog.getByRole('checkbox', { name: /I confirm/ }).click();
+    await contributeDialog.getByRole('button', { name: /Contribute to Training/ }).click();
+
+    const toast = page.locator('[data-sonner-toast]').filter({ hasText: /Photo contributed for review/ });
+    await expect(toast).toBeVisible({ timeout: 5_000 });
     await expect(page.getByRole('status', { name: /Photo submitted for review/ })).toBeVisible({ timeout: 5_000 });
   });
 

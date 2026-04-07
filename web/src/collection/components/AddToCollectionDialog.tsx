@@ -10,15 +10,24 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ConditionSelector } from '@/collection/components/ConditionSelector';
 import { ItemConditionSelector } from '@/collection/components/ItemConditionSelector';
 import { NotesField } from '@/collection/components/NotesField';
 import { DEFAULT_ITEM_CONDITION } from '@/collection/lib/item-condition-config';
 import { uploadCollectionPhoto, contributeCollectionPhoto } from '@/collection/photos/api';
-import type { PackageCondition } from '@/lib/zod-schemas';
+import { CONSENT_VERSION, DEFAULT_CONTRIBUTE_INTENT, LICENSE_GRANT_TEXT } from '@/collection/photos/consent';
+import type { PackageCondition, ContributeIntent } from '@/lib/zod-schemas';
 import type { CollectionMutations } from '@/collection/hooks/useCollectionMutations';
 
-const CONSENT_VERSION = '1.0';
+/**
+ * Tri-state contribution intent for AddToCollectionDialog.
+ *
+ * 'none' is a client-side sentinel: when the user keeps "Don't contribute"
+ * selected, the contribute API is never called. The wire format only accepts
+ * 'training_only' | 'catalog_and_training'.
+ */
+type ContributeIntentChoice = 'none' | ContributeIntent;
 
 interface AddToCollectionDialogProps {
   open: boolean;
@@ -51,7 +60,7 @@ export function AddToCollectionDialog({
   const [itemCondition, setItemCondition] = useState(DEFAULT_ITEM_CONDITION);
   const [notes, setNotes] = useState('');
   const [savePhoto, setSavePhoto] = useState(true);
-  const [contributePhoto, setContributePhoto] = useState(false);
+  const [contributeIntent, setContributeIntent] = useState<ContributeIntentChoice>(DEFAULT_CONTRIBUTE_INTENT);
   const [isChaining, setIsChaining] = useState(false);
 
   useEffect(() => {
@@ -60,10 +69,19 @@ export function AddToCollectionDialog({
       setItemCondition(DEFAULT_ITEM_CONDITION);
       setNotes('');
       setSavePhoto(true);
-      setContributePhoto(false);
+      setContributeIntent(DEFAULT_CONTRIBUTE_INTENT);
       setIsChaining(false);
     }
   }, [open]);
+
+  // Reset contribute intent to the default whenever "Save this photo" is turned
+  // off, so toggling save back on starts from the default (not a stale choice).
+  const handleSavePhotoChange = (checked: boolean) => {
+    setSavePhoto(checked);
+    if (!checked) {
+      setContributeIntent(DEFAULT_CONTRIBUTE_INTENT);
+    }
+  };
 
   // Object URL for photo preview thumbnail
   const previewUrl = useMemo(() => (photoFile ? URL.createObjectURL(photoFile) : null), [photoFile]);
@@ -101,9 +119,9 @@ export function AddToCollectionDialog({
             try {
               const uploaded = await uploadCollectionPhoto(createdItem.id, photoFile, () => {});
               const newPhoto = uploaded[0];
-              if (contributePhoto && newPhoto) {
+              if (contributeIntent !== 'none' && newPhoto) {
                 try {
-                  await contributeCollectionPhoto(createdItem.id, newPhoto.id, CONSENT_VERSION);
+                  await contributeCollectionPhoto(createdItem.id, newPhoto.id, CONSENT_VERSION, contributeIntent);
                   toast.success('Photo contributed for review');
                 } catch (err) {
                   const message = err instanceof Error ? err.message : 'Failed to contribute photo';
@@ -160,7 +178,7 @@ export function AddToCollectionDialog({
                 <Checkbox
                   id="save-photo"
                   checked={savePhoto}
-                  onCheckedChange={(checked) => setSavePhoto(checked === true)}
+                  onCheckedChange={(checked) => handleSavePhotoChange(checked === true)}
                   disabled={isPending}
                 />
                 <label htmlFor="save-photo" className="text-sm leading-tight cursor-pointer">
@@ -169,24 +187,46 @@ export function AddToCollectionDialog({
               </div>
 
               {savePhoto && (
-                <div className="flex items-start gap-2">
-                  <Checkbox
-                    id="contribute-photo"
-                    checked={contributePhoto}
-                    onCheckedChange={(checked) => setContributePhoto(checked === true)}
+                <div className="space-y-2 pl-6">
+                  <p className="text-sm font-medium text-foreground">How should this photo be shared?</p>
+                  <RadioGroup
+                    value={contributeIntent}
+                    onValueChange={(value) => setContributeIntent(value as ContributeIntentChoice)}
                     disabled={isPending}
-                  />
-                  <label htmlFor="contribute-photo" className="text-sm leading-tight cursor-pointer">
-                    Contribute this photo to the catalog
-                  </label>
+                    className="gap-2"
+                  >
+                    <div className="flex items-start gap-2">
+                      <RadioGroupItem value="none" id="contribute-none" className="mt-0.5" />
+                      <label htmlFor="contribute-none" className="text-sm leading-tight cursor-pointer">
+                        Don&apos;t contribute
+                      </label>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <RadioGroupItem value="training_only" id="contribute-training" className="mt-0.5" />
+                      <label htmlFor="contribute-training" className="text-sm leading-tight cursor-pointer">
+                        <span className="font-medium text-foreground">Training only</span>
+                        <span className="block text-xs text-muted-foreground">
+                          Used to train the ML model. Not shown in the public catalog.
+                        </span>
+                      </label>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <RadioGroupItem value="catalog_and_training" id="contribute-catalog" className="mt-0.5" />
+                      <label htmlFor="contribute-catalog" className="text-sm leading-tight cursor-pointer">
+                        <span className="font-medium text-foreground">Catalog + training</span>
+                        <span className="block text-xs text-muted-foreground">
+                          Visible in the public catalog AND used for ML training.
+                        </span>
+                      </label>
+                    </div>
+                  </RadioGroup>
                 </div>
               )}
 
-              {savePhoto && contributePhoto && (
+              {savePhoto && contributeIntent !== 'none' && (
                 <div className="rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
-                  By contributing, you grant Track&apos;em Toys a perpetual, non-exclusive, royalty-free license to use,
-                  display, and modify this photo for catalog and ML training. Contributions are pending curator review
-                  and can be revoked later.
+                  By contributing, {LICENSE_GRANT_TEXT}. Contributions are pending curator review and can be revoked
+                  later.
                 </div>
               )}
             </div>

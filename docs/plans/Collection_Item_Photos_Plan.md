@@ -242,7 +242,7 @@ Submit chains: (1) create collection item, (2) upload photo if checked, (3) cont
 - Max photos per collection item: **10**
 - Max per upload request: **10**
 - Max file size: **10 MB** (reuses `config.photos.maxSizeMb`)
-- Min dimension: **600px** shortest edge (reuses `processUpload` validation)
+- Min dimension: **400px** shortest edge (reuses `processUpload` validation)
 
 ## Dependencies
 

@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 
-export const MIN_DIMENSION = 600;
+export const MIN_DIMENSION = 400;
 
 export interface ProcessedPhoto {
   thumb: Buffer;
@@ -11,7 +11,7 @@ export interface ProcessedPhoto {
  * Process an uploaded image into two WebP variants:
  * thumb (200px longest edge, no crop, no upscale), original (1600px longest edge, no upscale).
  *
- * Rejects images whose smallest edge is under 600px.
+ * Rejects images whose smallest edge is under 400px.
  *
  * @param inputBuffer - Raw image buffer from the upload
  * @throws {DimensionError} if the smallest edge is under MIN_DIMENSION

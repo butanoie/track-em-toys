@@ -41,7 +41,7 @@ Two distinct photo types:
 - Photo routes live in `src/catalog/photos/` registered as a sub-plugin of `itemRoutes` at `/:slug/photos`
 - `@fastify/multipart` registered inside the photo plugin (scoped) — coexists with JSON body parsing (different content types, no conflict)
 - Upload route processes all files into memory buffers first, then writes to disk + inserts to DB (atomic batch)
-- Thumbnail pipeline: `sharp` converts to WebP at 2 sizes (200px thumb fit-inside, 1600px original fit-inside, both q80-85). Minimum 600px on shortest edge enforced via `DimensionError`
+- Thumbnail pipeline: `sharp` converts to WebP at 2 sizes (200px thumb fit-inside, 1600px original fit-inside, both q80-85). Minimum 400px on shortest edge enforced via `DimensionError`
 - File naming: `{itemId}/{photoId}-{size}.webp` (size: `thumb` | `original`), relative URL stored in DB
 - `@fastify/static` registered in development mode only (`config.nodeEnv === 'development'`) with `decorateReply: false, index: false`
 - `PHOTO_STORAGE_PATH` startup validation skips in test environment (`config.nodeEnv !== 'test'`)
@@ -119,8 +119,8 @@ Two distinct photo types:
 - Upserts user with `ON CONFLICT (LOWER(email))`, resets `deactivated_at`/`deleted_at` to NULL
 - Returns same shape as `POST /auth/signin`: `{ access_token, refresh_token: null, user }` + httpOnly cookie
 - No audit log entries — this is test infrastructure, not a production signin
-- Rate limit: `max: 100` (high — globalSetup calls it 3x per test run)
-- E2E tests call `/auth/test-signin` + `/auth/refresh` per test. With 70+ tests sharing one IP, rate limits must be high enough to avoid cascading 429 failures. Current limits: test-signin `max: 100`, refresh `max: 120`
+- Rate limit: `max: 200` (high — globalSetup calls it 3x per test run, plus the per-test fresh-auth fixture calls it once per test)
+- E2E tests call `/auth/test-signin` + `/auth/refresh` per test. With 100+ tests sharing one IP, rate limits must be high enough to avoid cascading 429 failures. Current limits: test-signin `max: 200`, refresh `max: 120`. The test-signin limit was bumped from 100 → 200 after `admin-users.spec.ts` started flaking on full-suite runs because the budget was exhausted by earlier tests in the same run.
 - Production guard: plugin throws at registration time if `config.nodeEnv === 'production'` (defense-in-depth)
 - `CORS_ORIGIN` supports comma-separated values (e.g., `https://host:5173,https://host:4173`) for multi-port dev/E2E setups. Parsed in `config.ts` `loadCorsOrigin()`, returns string or string[] to `@fastify/cors`
 

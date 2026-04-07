@@ -50,9 +50,12 @@ interface CollectionPhotoIdParams extends CollectionItemIdParams {
   photoId: string;
 }
 
+type ContributeIntent = 'training_only' | 'catalog_and_training';
+
 interface ContributeBody {
   consent_version: string;
   consent_acknowledged: boolean;
+  intent: ContributeIntent;
 }
 
 interface ReorderBody {
@@ -288,12 +291,17 @@ export async function collectionPhotoRoutes(fastify: FastifyInstance, _opts: obj
     { schema: contributePhotoSchema, preHandler: authPreHandler, config: writeRateLimit },
     async (request, reply) => {
       const { id: collectionItemId, photoId } = request.params;
-      const { consent_version, consent_acknowledged } = request.body;
+      const { consent_version, consent_acknowledged, intent } = request.body;
       const userId = request.user.sub;
 
       if (!consent_acknowledged) {
         return reply.code(400).send({ error: 'Consent must be acknowledged' });
       }
+
+      // Intent drives catalog visibility: catalog_and_training → 'public',
+      // training_only → 'training_only'. catalog_and_training is a superset —
+      // every contribution trains the model; intent only controls public display.
+      const visibility = intent === 'catalog_and_training' ? 'public' : 'training_only';
 
       return withTransaction(async (client) => {
         const itemRef = await photoQueries.getCollectionItemRef(client, collectionItemId);
@@ -313,6 +321,7 @@ export async function collectionPhotoRoutes(fastify: FastifyInstance, _opts: obj
           contributedBy: userId,
           itemId: catalogItemId,
           consentVersion: consent_version,
+          intent,
         });
 
         const newPhotoId = randomUUID();
@@ -342,6 +351,7 @@ export async function collectionPhotoRoutes(fastify: FastifyInstance, _opts: obj
           url: catalogUrl,
           uploadedBy: userId,
           dhash: photo.dhash,
+          visibility,
         });
 
         await photoQueries.updateContributionCopied(client, contribution.id, newPhotoId);

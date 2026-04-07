@@ -176,3 +176,132 @@ Scenario: Standard Add to Collection dialog has no photo options
   Then the dialog shows condition, condition grade, and notes fields
   But there are no "Photo Options" checkboxes
 ```
+
+## Contribution Intent (Phase 1.6 amendment #148)
+
+Scenarios covering the training-only vs catalog+training choice. Every contribution
+trains the ML model regardless of intent — `catalog_and_training` adds public catalog
+visibility on top of the same training donation.
+
+### Standalone ContributeDialog (from CollectionPhotoSheet)
+
+```gherkin
+Scenario: ContributeDialog opens with training_only default
+  Given the user opens the Contribute dialog on a private collection photo
+  Then the intent radio shows "Training only" selected by default
+  And the submit button reads "Contribute to Training"
+  And the consent checkbox is unchecked
+  And the submit button is disabled
+
+Scenario: Switching intent updates the submit button label
+  Given the dialog is open with the default training_only intent
+  When the user picks "Catalog + Training"
+  Then the submit button label changes to "Contribute to Catalog"
+
+Scenario: Consent checkbox is required regardless of intent
+  Given the dialog is open
+  When the user leaves the consent checkbox unchecked
+  Then the submit button stays disabled for both intents
+  And ticking the consent checkbox enables the button
+
+Scenario: Submitting with default intent sends training_only
+  Given the user has acknowledged consent on the default intent
+  When they click "Contribute to Training"
+  Then the parent receives onConfirm('training_only')
+  And the contribute API is called with intent='training_only'
+  And the success toast reads "Photo contributed for review"
+
+Scenario: Submitting with catalog_and_training sends the superset
+  Given the user picked "Catalog + Training" and acknowledged consent
+  When they click "Contribute to Catalog"
+  Then the parent receives onConfirm('catalog_and_training')
+  And the contribute API is called with intent='catalog_and_training'
+
+Scenario: Reopening the dialog resets intent and consent
+  Given the user previously picked "Catalog + Training" and acknowledged consent
+  When they close the dialog and reopen it on another photo
+  Then the intent radio is back to "Training only"
+  And the consent checkbox is unchecked
+  And the submit button is disabled
+```
+
+### AddToCollectionDialog (Add-by-Photo flow)
+
+```gherkin
+Scenario: AddToCollectionDialog from Add-by-Photo defaults to training_only
+  Given the user scans a photo and clicks "Add" on a prediction
+  When the AddToCollectionDialog opens
+  Then "Save this photo to your collection item" is checked
+  And the intent radio shows "Training only" selected
+  And the inline disclaimer is visible
+
+Scenario: Default submit contributes as training_only (behavior change)
+  Given the user lands on the dialog with default intent
+  When they click "Add to Collection"
+  Then the item is created
+  And the photo is uploaded
+  And the contribute API is called with intent='training_only'
+  And the "Photo contributed for review" toast appears
+
+Scenario: Picking "Don't contribute" skips the contribute API call
+  Given the user selected "Don't contribute"
+  When they click "Add to Collection"
+  Then the item is created
+  And the photo is uploaded
+  But the contribute API is NOT called
+  And no "Photo contributed for review" toast appears
+  And the inline disclaimer is hidden
+
+Scenario: Picking "Catalog + training" sends the superset intent
+  Given the user selected "Catalog + training"
+  When they click "Add to Collection"
+  Then the contribute API is called with intent='catalog_and_training'
+  And the "Photo contributed for review" toast appears
+
+Scenario: Unchecking "Save this photo" hides the intent radio
+  Given the user is on the dialog with default state
+  When they uncheck "Save this photo to your collection item"
+  Then the intent radio disappears entirely
+  And the inline disclaimer disappears
+  And submitting only creates the item (no upload, no contribute)
+
+Scenario: Re-checking "Save this photo" resets intent to training_only
+  Given the user picked "Catalog + training"
+  When they uncheck "Save this photo" and then re-check it
+  Then the intent radio reappears with "Training only" selected
+  And the previously-picked "Catalog + training" value is forgotten
+```
+
+### Server-side visibility derivation
+
+```gherkin
+Scenario: Contributing with training_only creates a training_only item_photos row
+  Given the user submits a contribution with intent='training_only'
+  When the API handles the request
+  Then item_photos.visibility is set to 'training_only'
+  And photo_contributions.intent is recorded as 'training_only'
+  And the photo does NOT appear in the public catalog list query
+
+Scenario: Contributing with catalog_and_training creates a public item_photos row
+  Given the user submits a contribution with intent='catalog_and_training'
+  When the API handles the request
+  Then item_photos.visibility is set to 'public'
+  And photo_contributions.intent is recorded as 'catalog_and_training'
+  And the photo will appear in the catalog list query after curator approval
+
+Scenario: Missing intent field returns 400
+  Given a contribute POST body with no intent field
+  When the API validates the body
+  Then the response is 400 with a schema validation error
+
+Scenario: Invalid intent enum value returns 400
+  Given a contribute POST body with intent='public' (not a valid enum value)
+  When the API validates the body
+  Then the response is 400 with a schema validation error
+
+Scenario: ML training exporter includes both visibility tiers
+  Given some contributed photos have visibility='training_only' and some have 'public'
+  When the ML export runs
+  Then both visibility tiers are included in the export
+  And no visibility filter is applied
+```

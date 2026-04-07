@@ -155,6 +155,26 @@ intact) coerce to `uploader = null` in the API response, identical to the case w
 `uploaded_by IS NULL`. The UI shows `[REDACTED — GDPR]` for both. There is no halfway
 state where the curator sees a partial record like `{ display_name: null, email: null }`.
 
+### Uploader Provenance Constraint (Amendment #148 follow-on)
+
+The contribution flow is architecturally gated on collection ownership: the only way for
+a non-curator user to land a row in `item_photos` is via `POST /collection/:id/photos/
+:photoId/contribute`, which requires a pre-existing `collection_items` row owned by the
+user and a `collection_item_photos` row on that collection item. There is no anonymous
+"donate a photo" entry point and no direct `POST /catalog/items/:slug/photos/contribute`
+endpoint. Therefore the dashboard's `uploader` field is always one of exactly three cases:
+
+1. **A real user** who currently owns (or at some point owned) a collection item for the
+   toy — the normal case
+2. **NULL because `uploaded_by IS NULL`** — GDPR-scrubbed on the `item_photos` row itself
+3. **NULL because the user was tombstoned** — `deleted_at IS NOT NULL`, coerced to NULL
+   by the LEFT JOIN above
+
+There is no "anonymous donor" or "curator-uploaded-on-behalf-of-someone" case to model.
+Direct curator uploads through the existing catalog photo UI produce `status='approved',
+visibility='public'` rows that never enter the approval queue — the dashboard only ever
+sees contributions that went through the collection-ownership gate.
+
 ### Single-Image Triage, Not a Grid
 
 The default (and v1's only) view is a single hero image with metadata sidebar and

@@ -58,10 +58,13 @@ Single-PR amendment. Covers:
 
 | Decision | Choice | Rationale |
 |---|---|---|
-| Default intent for new contributions | `training_only` | Privacy by default — contributor opts in to public catalog |
+| Default intent for new contributions | `training_only` | Privacy + editorial defaults — the catalog is curated, and `catalog_and_training` adds public visibility on top of the same training donation (it is a superset, not an alternative) |
 | Existing-row backfill | `training_only` | Consistent with the new default; no production users affected |
 | Curator override capability | Demote only (`public → training_only`); no promote | Demote is a strict subset of contributor consent; promote requires re-consent |
 | Where intent is stored | `photo_contributions.intent` (immutable audit) + `item_photos.visibility` (mutable curator-controlled) | Separates "what the contributor wanted" from "what the catalog actually shows" |
+| `ContributeDialog` consent model | Explicit checkbox, required before submit (unchanged) | Deliberate single-action consent moment |
+| `AddToCollectionDialog` consent model | Implicit in "Add to Collection" click; condensed inline disclaimer shown when intent ≠ `'none'` (unchanged from current behavior) | Consent is bundled with a broader action; the condensed disclaimer is notice enough |
+| `CONSENT_VERSION` | Stays at `'1.0'` | Pre-launch, no production users; the license grant text is unchanged (only the display-surface choice is new), so no audit boundary is needed |
 
 ## Database — Migration 037
 
@@ -160,11 +163,29 @@ Adds an **intent radio picker** between the photo preview and the consent checkb
 └─────────────────────────────────────┘
 ```
 
-- Default selection: `'training_only'` (privacy default)
+- Default selection: `'training_only'`. Rationale (same as `AddToCollectionDialog`): the
+  catalog is deliberately curated — `catalog_and_training` adds public catalog visibility
+  on top of the same training donation, it is not an alternative to it. Defaulting to
+  `training_only` keeps the curated surface lean while still contributing to the model.
+- **Dialog title** is softened from "Contribute Photo to Catalog" to "**Contribute Photo**"
+  (no "to Catalog") — the dialog no longer has a single implied destination, so the title
+  must be neutral. The E2E spec at `web/e2e/collection-photos.spec.ts:181` matches on
+  `/Contribute Photo to Catalog/` and must be updated.
+- **Dialog description** is softened from "Share this photo with the Track'em Toys
+  community." to "**Contribute this photo to Track'em Toys**" — the word "community"
+  implies a public/social surface, which is misleading for the `training_only` path.
 - Submit button label is dynamic: `"Contribute to Catalog"` when intent is
-  `catalog_and_training`, `"Contribute to Training"` when `training_only`
-- The licensing disclaimer text is **identical** for both intents (the underlying license
-  grant is the same — only the display surface differs)
+  `catalog_and_training`, `"Contribute to Training"` when `training_only`.
+- The licensing disclaimer text is **identical** for both intents — the underlying license
+  grant is the same regardless of intent. Only which surface(s) display the photo differs.
+- **Component seam:** `ContributeDialog` holds intent as internal state (default
+  `'training_only'`, reset on open via `useEffect`). The `onConfirm` callback signature
+  changes from `() => void` to `(intent: ContributeIntent) => void`. The parent
+  (`CollectionPhotoSheet`) reads the intent argument and passes it to
+  `contributeMutation.mutate({ photoId, intent })`. This preserves the existing
+  "dialog collects consent, parent owns the mutation" separation.
+- **`useCollectionPhotoMutations` variables type:** the contribute mutation's variables
+  change from `string` (just `photoId`) to `{ photoId: string; intent: ContributeIntent }`.
 
 ### `AddToCollectionDialog` (web/src/collection/components/AddToCollectionDialog.tsx)
 
@@ -181,17 +202,33 @@ Photo Options
 
 When save is checked:
   How should this photo be shared?
-  ◉ Don't contribute              ← default
-  ◯ Training only
+  ◯ Don't contribute
+  ◉ Training only                 ← default
   ◯ Catalog + training
 
   [conditional inline disclaimer when not "Don't contribute"]
 ```
 
-- The "Don't contribute" option replaces the current default-unchecked state
+- **Default = `training_only`.** Rationale: the catalog is deliberately curated (quality
+  over quantity). Every contributed photo trains the model regardless of intent —
+  `catalog_and_training` is a **superset** of `training_only` that adds public catalog
+  visibility on top of the same training donation, not a separate "catalog only" surface.
+  Defaulting to `training_only` steers users toward contributing training data without
+  flooding the curated public gallery. Catalog contributions are only wanted for items
+  that have zero or few existing photos. See also the standalone `ContributeDialog`
+  default (`training_only`) for the same reason.
+- The "Don't contribute" option replaces the current default-unchecked checkbox state,
+  but it is no longer the default — users who don't want to contribute must pick it
+  explicitly.
+- `'none'` is a **client-side sentinel only** — when the user keeps "Don't contribute"
+  selected, the contribute API is not called at all. The API's `intent` field remains
+  strictly `'training_only' | 'catalog_and_training'`; the server never sees `'none'`.
+- Unchecking "Save this photo" hides the intent radio and resets `contributeIntent` back
+  to the default (`training_only`).
 - Selecting either contribute option expands the inline disclaimer (same text as
-  ContributeDialog's callout but condensed)
-- Submit logic in the dialog's chained mutation chain branches on the intent value
+  ContributeDialog's callout but condensed).
+- Submit logic in the dialog's chained mutation branches on
+  `contributeIntent !== 'none'`.
 
 ## Catalog Photo List Query — Filter Update
 
@@ -245,20 +282,27 @@ new "Contribution Intent" section).
 ## Files Modified / Created
 
 ### New
-- `api/db/migrations/037_photo_contribution_visibility.sql`
+- `api/db/migrations/037_photo_contribution_visibility.sql` — migration with ALTER + backfill + partial index
+- `api/src/catalog/ml-export/queries.test.ts` — regression guards asserting `PHOTO_JOIN` contains `status='approved'`, does NOT contain `visibility`, and uses `LEFT JOIN`. Locks in the "training_only photos must flow into training data" invariant so a future edit adding `AND visibility='public'` to the JOIN fails loudly
+- `web/src/collection/photos/consent.ts` — shared module exporting `CONSENT_VERSION`, `DEFAULT_CONTRIBUTE_INTENT`, and `LICENSE_GRANT_TEXT`. Both `ContributeDialog` and `AddToCollectionDialog` import from here so the privacy default and the verbatim license grant sentence can never drift between surfaces
+- `web/src/components/ui/radio-group.tsx` — Shadcn-generated (via `npx shadcn@latest add radio-group`), with the standard `cn` import path fix
 
 ### Modified
-- `api/src/collection/photos/routes.ts` — contribute endpoint accepts `intent`
-- `api/src/collection/photos/queries.ts` — `insertPendingCatalogPhoto` derives visibility
-- `api/src/collection/photos/schemas.ts` — add `intent` to ContributeBody
-- `api/src/catalog/photos/queries.ts` — `listPhotos` filters `visibility = 'public'`
-- `web/src/collection/photos/ContributeDialog.tsx` — add intent radio
-- `web/src/collection/photos/api.ts` — pass intent to contribute call
-- `web/src/collection/photos/useCollectionPhotoMutations.ts` — accept intent parameter
-- `web/src/collection/components/AddToCollectionDialog.tsx` — replace checkbox with 3-state radio
-- `web/src/lib/zod-schemas.ts` — add intent enum to contribute request schema
-- `docs/test-scenarios/E2E_COLLECTION_PHOTOS.md` — append "Contribution Intent" section
-- Existing tests for `ContributeDialog`, `AddToCollectionDialog`, contribute API
+- `api/src/collection/photos/routes.ts` — contribute endpoint accepts `intent`; derives `visibility` from intent (`catalog_and_training → 'public'`, `training_only → 'training_only'`); passes visibility to `insertPendingCatalogPhoto`
+- `api/src/collection/photos/queries.ts` — `insertContribution` accepts `intent`; **`insertPendingCatalogPhoto` now REQUIRES a `visibility` parameter and includes it in the INSERT column list** (the DB default is `'public'` which is the wrong default for contributed photos — this fixes a latent bug that would have silently made every contribution publicly visible)
+- `api/src/collection/photos/schemas.ts` — `intent` added to `contributePhotoSchema.body.required` and `properties` (enum)
+- `api/src/catalog/photos/queries.ts` — `listPhotos()` adds `AND visibility = 'public'` filter; comment references the partial index `idx_item_photos_public_approved`
+- `api/src/catalog/ml-export/queries.ts` — `PHOTO_JOIN` is now `export`ed (for the regression test) with a long-form comment warning maintainers not to add a visibility filter
+- `web/src/collection/photos/ContributeDialog.tsx` — intent radio (default `training_only`), dynamic button label ("Contribute to Training" vs "Contribute to Catalog"), softened dialog title ("Contribute Photo"), softened description ("Contribute this photo to Track'em Toys"), `onConfirm` signature changed from `() => void` to `(intent: ContributeIntent) => void`. Imports `DEFAULT_CONTRIBUTE_INTENT` and `LICENSE_GRANT_TEXT` from `consent.ts`
+- `web/src/collection/photos/CollectionPhotoSheet.tsx` — `handleConfirmContribute` now receives the intent arg from the dialog and passes it to `contributeMutation.mutate({ photoId, intent })`
+- `web/src/collection/photos/useCollectionPhotoMutations.ts` — `contributeMutation` variables type changed from `string` to `{ photoId: string; intent: ContributeIntent }`. `CONSENT_VERSION` no longer defined here — imported from `consent.ts`
+- `web/src/collection/photos/api.ts` — `contributeCollectionPhoto` takes an `intent` 4th param, includes it in the JSON body
+- `web/src/collection/components/AddToCollectionDialog.tsx` — replaces the old `contributePhoto: boolean` state with `contributeIntent: 'none' | ContributeIntent` (3-state radio). Default is `'training_only'`. Toggling "Save this photo" off hides the radio and resets intent. `'none'` is a **client-side sentinel** — when selected, the contribute API is not called at all. Imports `CONSENT_VERSION`, `DEFAULT_CONTRIBUTE_INTENT`, and `LICENSE_GRANT_TEXT` from `consent.ts`. The condensed inline disclaimer interpolates `LICENSE_GRANT_TEXT` instead of hard-coding the sentence
+- `web/src/lib/zod-schemas.ts` — adds `ContributeIntentSchema = z.enum(['training_only', 'catalog_and_training'])` and exports `type ContributeIntent = z.infer<...>`. Used for UI state typing, mutation variables, and `api.ts` parameter types. The request body itself stays constructed inline (matches the existing pattern — no other endpoint validates outgoing request bodies with Zod)
+- `web/package.json` + `package-lock.json` — adds `@radix-ui/react-radio-group` dependency
+- `docs/test-scenarios/E2E_COLLECTION_PHOTOS.md` — appends "Contribution Intent" section (18 new Gherkin scenarios across `ContributeDialog`, `AddToCollectionDialog`, and server-side derivation)
+- `.claude/rules/web-components.md` — photo-domain section updated: documents the new intent radio + tri-state client sentinel, the shared `consent.ts` module, the server-side visibility derivation pattern, and the ML exporter no-filter rule
+- Existing tests updated: `api/src/collection/photos/routes.test.ts` (8 contribute tests, including 2 new intent-derivation assertions), `web/src/collection/photos/__tests__/ContributeDialog.test.tsx` (13 tests covering intent radio, dynamic label, `onConfirm(intent)` signature), `web/src/collection/components/__tests__/AddToCollectionDialog.test.tsx` (14 tests covering the 3-state radio, default intent, hide-on-save-off reset), `web/e2e/collection-photos.spec.ts` (adds a new training_only-default scenario, updates dialog title + button matchers), `web/e2e/add-by-photo.spec.ts` (5 photo-options-integration tests rewritten for the radio, adds a "Catalog + training" path test)
 
 ## Dependencies on Other Work
 

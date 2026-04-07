@@ -6,9 +6,13 @@ import {
   contributeCollectionPhoto,
   revokeCollectionPhotoContribution,
 } from './api';
-import type { CollectionPhoto } from '@/lib/zod-schemas';
+import { CONSENT_VERSION } from './consent';
+import type { CollectionPhoto, ContributeIntent } from '@/lib/zod-schemas';
 
-const CONSENT_VERSION = '1.0';
+interface ContributeVariables {
+  photoId: string;
+  intent: ContributeIntent;
+}
 
 export function useCollectionPhotoMutations(collectionItemId: string) {
   const queryClient = useQueryClient();
@@ -32,8 +36,8 @@ export function useCollectionPhotoMutations(collectionItemId: string) {
     onSuccess: invalidateCollection,
   });
 
-  const contributeMutation = useMutation<string, Error, string>({
-    mutationFn: (photoId) => contributeCollectionPhoto(collectionItemId, photoId, CONSENT_VERSION),
+  const contributeMutation = useMutation<string, Error, ContributeVariables>({
+    mutationFn: ({ photoId, intent }) => contributeCollectionPhoto(collectionItemId, photoId, CONSENT_VERSION, intent),
     onSuccess: invalidateCollection,
   });
 
