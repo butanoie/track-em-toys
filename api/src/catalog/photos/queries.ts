@@ -142,9 +142,12 @@ export async function reorderPhotos(
  * @param itemId - Item UUID
  */
 export async function listPhotos(itemId: string): Promise<PhotoWriteRow[]> {
+  // Public catalog gallery filters visibility='public' — training_only photos
+  // feed ML training but never appear in the public catalog (see migration 037).
+  // The partial index idx_item_photos_public_approved matches this predicate.
   const { rows } = await pool.query<PhotoWriteRow>(
     `SELECT ${PHOTO_COLUMNS} FROM item_photos
-     WHERE item_id = $1 AND status = 'approved'
+     WHERE item_id = $1 AND status = 'approved' AND visibility = 'public'
      ORDER BY ${APPROVED_ORDER}`,
     [itemId]
   );

@@ -10,7 +10,7 @@ import { ContributeDialog } from './ContributeDialog';
 import { useCollectionPhotoUpload } from './useCollectionPhotoUpload';
 import { useCollectionPhotoMutations } from './useCollectionPhotoMutations';
 import { listCollectionPhotos } from './api';
-import type { CollectionPhotoListItem } from '@/lib/zod-schemas';
+import type { CollectionPhotoListItem, ContributeIntent } from '@/lib/zod-schemas';
 
 interface CollectionPhotoSheetProps {
   open: boolean;
@@ -107,20 +107,26 @@ export function CollectionPhotoSheet({
     });
   }, [deleteTarget, deleteMutation, refreshPhotos]);
 
-  const handleConfirmContribute = useCallback(() => {
-    if (!contributeTarget) return;
-    contributeMutation.mutate(contributeTarget, {
-      onSuccess: () => {
-        setContributeTarget(null);
-        toast.success('Photo contributed for review');
-        void refreshPhotos();
-      },
-      onError: () => {
-        setContributeTarget(null);
-        toast.error('Failed to contribute photo');
-      },
-    });
-  }, [contributeTarget, contributeMutation, refreshPhotos]);
+  const handleConfirmContribute = useCallback(
+    (intent: ContributeIntent) => {
+      if (!contributeTarget) return;
+      contributeMutation.mutate(
+        { photoId: contributeTarget, intent },
+        {
+          onSuccess: () => {
+            setContributeTarget(null);
+            toast.success('Photo contributed for review');
+            void refreshPhotos();
+          },
+          onError: () => {
+            setContributeTarget(null);
+            toast.error('Failed to contribute photo');
+          },
+        }
+      );
+    },
+    [contributeTarget, contributeMutation, refreshPhotos]
+  );
 
   const contributePhotoUrl = contributeTarget ? (photos.find((p) => p.id === contributeTarget)?.url ?? null) : null;
 

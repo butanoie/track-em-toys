@@ -9,11 +9,7 @@
  */
 
 import { test, expect } from './fixtures/e2e-fixtures';
-import {
-  MockCollectionState,
-  MockCollectionPhotoState,
-  makeCollectionItem,
-} from './fixtures/mock-helpers';
+import { MockCollectionState, MockCollectionPhotoState, makeCollectionItem } from './fixtures/mock-helpers';
 import {
   mockMlModels,
   mockMlModelsEmpty,
@@ -223,7 +219,7 @@ test.describe('Add by Photo — photo options integration', () => {
     await firstAdd.click();
   }
 
-  test('Given Add to Collection dialog from Add-by-Photo, Then Photo Options section is shown with default state', async ({
+  test('Given Add to Collection dialog from Add-by-Photo, Then Photo Options shows intent radio defaulting to training_only', async ({
     page,
   }) => {
     await reachAddDialog(page);
@@ -231,10 +227,17 @@ test.describe('Add by Photo — photo options integration', () => {
     const dialog = page.getByRole('dialog', { name: /Add Another Copy|Add to Collection/ });
     await expect(dialog.getByText('Photo Options')).toBeVisible();
     await expect(dialog.getByLabel(/Save this photo/)).toBeChecked();
-    await expect(dialog.getByLabel(/Contribute this photo/)).not.toBeChecked();
+
+    // New: 3-state radio replacing the old boolean "Contribute this photo" checkbox
+    await expect(dialog.getByRole('radio', { name: /Don.?t contribute/ })).not.toBeChecked();
+    await expect(dialog.getByRole('radio', { name: /Training only/ })).toBeChecked();
+    await expect(dialog.getByRole('radio', { name: /Catalog \+ training/ })).not.toBeChecked();
+
+    // Disclaimer visible by default because default intent ≠ 'none'
+    await expect(dialog.getByText(/perpetual, non-exclusive, royalty-free license/)).toBeVisible();
   });
 
-  test('Given default checkboxes (save only), When submitting, Then item is created and photo is uploaded', async ({
+  test('Given default intent training_only, When submitting, Then item is created and photo contributes as training_only', async ({
     page,
   }) => {
     await reachAddDialog(page);
@@ -242,27 +245,51 @@ test.describe('Add by Photo — photo options integration', () => {
     const dialog = page.getByRole('dialog', { name: /Add Another Copy|Add to Collection/ });
     await dialog.getByRole('button', { name: 'Add to Collection' }).click();
 
-    const successToast = page.locator('[data-sonner-toast]').filter({
+    const addedToast = page.locator('[data-sonner-toast]').filter({
       hasText: /Legacy Bulkhead added to your collection/,
     });
-    await expect(successToast).toBeVisible({ timeout: 5_000 });
+    await expect(addedToast).toBeVisible({ timeout: 5_000 });
 
-    // Contribute toast should NOT appear when contribute is unchecked
+    // Default is training_only → contribute toast SHOULD appear (behavior change
+    // from the old boolean flow where contribute defaulted to off)
+    const contributeToast = page.locator('[data-sonner-toast]').filter({
+      hasText: /Photo contributed for review/,
+    });
+    await expect(contributeToast).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('Given "Don\'t contribute" selected, When submitting, Then item is created but no contribution toast appears', async ({
+    page,
+  }) => {
+    await reachAddDialog(page);
+
+    const dialog = page.getByRole('dialog', { name: /Add Another Copy|Add to Collection/ });
+    await dialog.getByRole('radio', { name: /Don.?t contribute/ }).click();
+
+    // Disclaimer hides when "Don't contribute" is picked
+    await expect(dialog.getByText(/perpetual, non-exclusive, royalty-free license/)).not.toBeVisible();
+
+    await dialog.getByRole('button', { name: 'Add to Collection' }).click();
+
+    const addedToast = page.locator('[data-sonner-toast]').filter({
+      hasText: /Legacy Bulkhead added to your collection/,
+    });
+    await expect(addedToast).toBeVisible({ timeout: 5_000 });
+
+    // Contribute toast should NOT appear when the user opts out
     const contributeToast = page.locator('[data-sonner-toast]').filter({
       hasText: /Photo contributed for review/,
     });
     await expect(contributeToast).not.toBeVisible();
   });
 
-  test('Given save and contribute checked, When submitting, Then both upload and contribute toasts fire', async ({
-    page,
-  }) => {
+  test('Given user picks "Catalog + training", When submitting, Then both toasts fire', async ({ page }) => {
     await reachAddDialog(page);
 
     const dialog = page.getByRole('dialog', { name: /Add Another Copy|Add to Collection/ });
-    await dialog.getByLabel(/Contribute this photo/).click();
+    await dialog.getByRole('radio', { name: /Catalog \+ training/ }).click();
 
-    // Inline disclaimer expands when contribute is checked
+    // Disclaimer still visible under catalog_and_training
     await expect(dialog.getByText(/perpetual, non-exclusive, royalty-free license/)).toBeVisible();
 
     await dialog.getByRole('button', { name: 'Add to Collection' }).click();
@@ -278,14 +305,16 @@ test.describe('Add by Photo — photo options integration', () => {
     await expect(contributeToast).toBeVisible({ timeout: 5_000 });
   });
 
-  test('Given save unchecked, Then contribute checkbox is hidden', async ({ page }) => {
+  test('Given save unchecked, Then intent radio is hidden', async ({ page }) => {
     await reachAddDialog(page);
 
     const dialog = page.getByRole('dialog', { name: /Add Another Copy|Add to Collection/ });
-    await expect(dialog.getByLabel(/Contribute this photo/)).toBeVisible();
+    await expect(dialog.getByRole('radio', { name: /Training only/ })).toBeVisible();
 
     await dialog.getByLabel(/Save this photo/).click();
-    await expect(dialog.getByLabel(/Contribute this photo/)).not.toBeVisible();
+    await expect(dialog.getByRole('radio', { name: /Training only/ })).not.toBeVisible();
+    await expect(dialog.getByRole('radio', { name: /Don.?t contribute/ })).not.toBeVisible();
+    await expect(dialog.getByRole('radio', { name: /Catalog \+ training/ })).not.toBeVisible();
   });
 
   test('Given Add to Collection from catalog item page (no photoFile), Then Photo Options section is hidden', async ({

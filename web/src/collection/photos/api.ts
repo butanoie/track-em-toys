@@ -11,6 +11,7 @@ import {
   DuplicatePhotoResponseSchema,
   type CollectionPhoto,
   type CollectionPhotoListItem,
+  type ContributeIntent,
 } from '@/lib/zod-schemas';
 
 export { buildPhotoUrl, PHOTO_BASE_URL } from '@/lib/photo-url';
@@ -154,14 +155,19 @@ export async function reorderCollectionPhotos(
 export async function contributeCollectionPhoto(
   collectionItemId: string,
   photoId: string,
-  consentVersion: string
+  consentVersion: string,
+  intent: ContributeIntent
 ): Promise<string> {
   const result = await apiFetchJson(
     `${collectionPhotoPath(collectionItemId)}/${encodeURIComponent(photoId)}/contribute`,
     ContributePhotoResponseSchema,
     {
       method: 'POST',
-      body: JSON.stringify({ consent_version: consentVersion, consent_acknowledged: true }),
+      body: JSON.stringify({
+        consent_version: consentVersion,
+        consent_acknowledged: true,
+        intent,
+      }),
     }
   );
   return result.contribution_id;

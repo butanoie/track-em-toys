@@ -17,7 +17,16 @@ const SELECT_COLUMNS = `
            fr.slug AS franchise_slug,
            ip.id AS photo_id`;
 
-const PHOTO_JOIN = `
+// IMPORTANT: Do NOT add `AND ip.visibility = 'public'` to this JOIN.
+// The ML training pipeline must include BOTH visibility tiers:
+//   - 'public' (catalog_and_training intent): visible in the catalog + trains
+//   - 'training_only' intent: hidden from the catalog but still trains
+// Adding a visibility filter here would silently exclude training_only
+// contributions from the training set, defeating the whole point of offering
+// the training_only intent to contributors. See migration 037 and issue #148.
+// This constant is `export`ed so a regression test can assert the absence of
+// the visibility filter (see queries.test.ts).
+export const PHOTO_JOIN = `
       LEFT JOIN item_photos ip ON ip.item_id = i.id AND ip.status = 'approved'`;
 
 const ORDER_BY = `

@@ -41,10 +41,7 @@ function makeMutations(overrides: Partial<{ addItem: CollectionItem }> = {}): Co
   const item = overrides.addItem ?? defaultItem;
   const add = {
     mutate: vi.fn(
-      (
-        _payload: unknown,
-        opts?: { onSuccess?: (data: CollectionItem) => void; onError?: (e: Error) => void }
-      ) => {
+      (_payload: unknown, opts?: { onSuccess?: (data: CollectionItem) => void; onError?: (e: Error) => void }) => {
         opts?.onSuccess?.(item);
       }
     ),
@@ -82,14 +79,16 @@ describe('AddToCollectionDialog', () => {
     expect(screen.queryByLabelText(/Save this photo/)).not.toBeInTheDocument();
   });
 
-  it('renders Photo Options with save checked and contribute unchecked by default', () => {
-    render(
-      <AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={makePhotoFile()} />
-    );
+  it('renders Photo Options with save checked and intent defaulting to training_only', () => {
+    render(<AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={makePhotoFile()} />);
 
     expect(screen.getByText('Photo Options')).toBeInTheDocument();
     expect(screen.getByLabelText(/Save this photo/)).toBeChecked();
-    expect(screen.getByLabelText(/Contribute this photo/)).not.toBeChecked();
+
+    // Default = 'training_only' (privacy + editorial defaults — the catalog is curated)
+    expect(screen.getByRole('radio', { name: /Training only/ })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /Don.?t contribute/ })).not.toBeChecked();
+    expect(screen.getByRole('radio', { name: /Catalog \+ training/ })).not.toBeChecked();
   });
 
   it('renders photo preview with filename and formatted size', () => {
@@ -106,26 +105,46 @@ describe('AddToCollectionDialog', () => {
     expect(screen.getByText('50 KB')).toBeInTheDocument();
   });
 
-  it('hides contribute checkbox when save is unchecked', async () => {
+  it('hides intent radio when save is unchecked and shows inline disclaimer by default (training_only)', async () => {
     const user = userEvent.setup();
-    render(
-      <AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={makePhotoFile()} />
-    );
+    render(<AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={makePhotoFile()} />);
 
-    expect(screen.getByLabelText(/Contribute this photo/)).toBeInTheDocument();
+    // Radio visible on open, disclaimer visible because default intent ≠ 'none'
+    expect(screen.getByRole('radio', { name: /Training only/ })).toBeInTheDocument();
+    expect(screen.getByText(/perpetual, non-exclusive, royalty-free license/)).toBeInTheDocument();
+
+    // Uncheck save → radio disappears
     await user.click(screen.getByLabelText(/Save this photo/));
-    expect(screen.queryByLabelText(/Contribute this photo/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: /Training only/ })).not.toBeInTheDocument();
+    expect(screen.queryByText(/perpetual, non-exclusive, royalty-free license/)).not.toBeInTheDocument();
   });
 
-  it('shows inline disclaimer only when contribute is checked', async () => {
+  it('hides inline disclaimer when user picks "Don\'t contribute"', async () => {
     const user = userEvent.setup();
-    render(
-      <AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={makePhotoFile()} />
-    );
+    render(<AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={makePhotoFile()} />);
 
-    expect(screen.queryByText(/perpetual, non-exclusive, royalty-free license/)).not.toBeInTheDocument();
-    await user.click(screen.getByLabelText(/Contribute this photo/));
+    // Default intent = training_only, disclaimer visible
     expect(screen.getByText(/perpetual, non-exclusive, royalty-free license/)).toBeInTheDocument();
+
+    // Pick "Don't contribute" → disclaimer hidden
+    await user.click(screen.getByRole('radio', { name: /Don.?t contribute/ }));
+    expect(screen.queryByText(/perpetual, non-exclusive, royalty-free license/)).not.toBeInTheDocument();
+  });
+
+  it('resets intent to training_only default when save is toggled back on', async () => {
+    const user = userEvent.setup();
+    render(<AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={makePhotoFile()} />);
+
+    // Switch to catalog_and_training
+    await user.click(screen.getByRole('radio', { name: /Catalog \+ training/ }));
+    expect(screen.getByRole('radio', { name: /Catalog \+ training/ })).toBeChecked();
+
+    // Uncheck save, then re-check → intent should be reset to training_only
+    await user.click(screen.getByLabelText(/Save this photo/));
+    await user.click(screen.getByLabelText(/Save this photo/));
+
+    expect(screen.getByRole('radio', { name: /Training only/ })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /Catalog \+ training/ })).not.toBeChecked();
   });
 
   it('creates item only (no upload) when no photoFile is provided', async () => {
@@ -142,21 +161,18 @@ describe('AddToCollectionDialog', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it('uploads photo after item creation when save is checked', async () => {
+  it('uploads photo after item creation when save is checked and user opts out of contribute', async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
     const file = makePhotoFile();
     mockUploadCollectionPhoto.mockResolvedValue([{ id: 'photo-1', url: 'collection/u/c/p-original.webp' }]);
 
     render(
-      <AddToCollectionDialog
-        {...baseProps}
-        onOpenChange={onOpenChange}
-        mutations={makeMutations()}
-        photoFile={file}
-      />
+      <AddToCollectionDialog {...baseProps} onOpenChange={onOpenChange} mutations={makeMutations()} photoFile={file} />
     );
 
+    // Explicit opt-out of contribution so only upload runs
+    await user.click(screen.getByRole('radio', { name: /Don.?t contribute/ }));
     await user.click(screen.getByRole('button', { name: 'Add to Collection' }));
 
     await waitFor(() => {
@@ -168,7 +184,7 @@ describe('AddToCollectionDialog', () => {
     });
   });
 
-  it('uploads then contributes when both checkboxes are checked', async () => {
+  it('uploads then contributes with training_only intent by default', async () => {
     const { toast } = await import('sonner');
     const user = userEvent.setup();
     const file = makePhotoFile();
@@ -177,13 +193,51 @@ describe('AddToCollectionDialog', () => {
 
     render(<AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={file} />);
 
-    await user.click(screen.getByLabelText(/Contribute this photo/));
+    // Default intent is training_only — no radio click needed
     await user.click(screen.getByRole('button', { name: 'Add to Collection' }));
 
     await waitFor(() => {
-      expect(mockContributeCollectionPhoto).toHaveBeenCalledWith('new-item-1', 'photo-1', '1.0');
+      expect(mockContributeCollectionPhoto).toHaveBeenCalledWith('new-item-1', 'photo-1', '1.0', 'training_only');
     });
     expect(toast.success).toHaveBeenCalledWith('Photo contributed for review');
+  });
+
+  it('uploads then contributes with catalog_and_training when user picks the superset', async () => {
+    const user = userEvent.setup();
+    const file = makePhotoFile();
+    mockUploadCollectionPhoto.mockResolvedValue([{ id: 'photo-1', url: 'collection/u/c/p-original.webp' }]);
+    mockContributeCollectionPhoto.mockResolvedValue('contribution-1');
+
+    render(<AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={file} />);
+
+    await user.click(screen.getByRole('radio', { name: /Catalog \+ training/ }));
+    await user.click(screen.getByRole('button', { name: 'Add to Collection' }));
+
+    await waitFor(() => {
+      expect(mockContributeCollectionPhoto).toHaveBeenCalledWith(
+        'new-item-1',
+        'photo-1',
+        '1.0',
+        'catalog_and_training'
+      );
+    });
+  });
+
+  it('uploads but does NOT contribute when user picks "Don\'t contribute"', async () => {
+    const user = userEvent.setup();
+    const file = makePhotoFile();
+    mockUploadCollectionPhoto.mockResolvedValue([{ id: 'photo-1', url: 'collection/u/c/p-original.webp' }]);
+
+    render(<AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={file} />);
+
+    await user.click(screen.getByRole('radio', { name: /Don.?t contribute/ }));
+    await user.click(screen.getByRole('button', { name: 'Add to Collection' }));
+
+    await waitFor(() => {
+      expect(mockUploadCollectionPhoto).toHaveBeenCalled();
+    });
+    // Contribute endpoint never called — 'none' is client-side-only
+    expect(mockContributeCollectionPhoto).not.toHaveBeenCalled();
   });
 
   it('skips upload when save is unchecked even with photoFile present', async () => {
@@ -207,12 +261,7 @@ describe('AddToCollectionDialog', () => {
     mockUploadCollectionPhoto.mockRejectedValue(new Error('Network error'));
 
     render(
-      <AddToCollectionDialog
-        {...baseProps}
-        onOpenChange={onOpenChange}
-        mutations={makeMutations()}
-        photoFile={file}
-      />
+      <AddToCollectionDialog {...baseProps} onOpenChange={onOpenChange} mutations={makeMutations()} photoFile={file} />
     );
 
     await user.click(screen.getByRole('button', { name: 'Add to Collection' }));
@@ -232,7 +281,7 @@ describe('AddToCollectionDialog', () => {
 
     render(<AddToCollectionDialog {...baseProps} mutations={makeMutations()} photoFile={file} />);
 
-    await user.click(screen.getByLabelText(/Contribute this photo/));
+    // Default intent = training_only → contribute fires automatically
     await user.click(screen.getByRole('button', { name: 'Add to Collection' }));
 
     await waitFor(() => {

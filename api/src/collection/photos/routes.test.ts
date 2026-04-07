@@ -551,7 +551,7 @@ describe('PATCH /collection/:id/photos/reorder', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('POST /collection/:id/photos/:photoId/contribute', () => {
-  it('should return 201 on successful contribution', async () => {
+  function setupSuccessfulMocks() {
     mockTx();
     mockCollectionItemExists();
     vi.mocked(photoQueries.getCollectionPhotoById).mockResolvedValue({
@@ -564,6 +564,10 @@ describe('POST /collection/:id/photos/:photoId/contribute', () => {
     vi.mocked(photoQueries.insertContribution).mockResolvedValue({ id: CONTRIBUTION_UUID });
     vi.mocked(photoQueries.insertPendingCatalogPhoto).mockResolvedValue(undefined);
     vi.mocked(photoQueries.updateContributionCopied).mockResolvedValue(undefined);
+  }
+
+  it('should return 201 on successful training_only contribution', async () => {
+    setupSuccessfulMocks();
 
     const res = await server.inject({
       method: 'POST',
@@ -575,12 +579,88 @@ describe('POST /collection/:id/photos/:photoId/contribute', () => {
       payload: {
         consent_version: '1.0',
         consent_acknowledged: true,
+        intent: 'training_only',
       },
     });
 
     expect(res.statusCode).toBe(201);
     const json = JSON.parse(res.payload) as { contribution_id: string };
     expect(json.contribution_id).toBe(CONTRIBUTION_UUID);
+  });
+
+  it('should persist intent=training_only and visibility=training_only on the new rows', async () => {
+    setupSuccessfulMocks();
+
+    await server.inject({
+      method: 'POST',
+      url: `${BASE_URL}/${PHOTO_UUID}/contribute`,
+      headers: { ...authHeaders(), 'content-type': 'application/json' },
+      payload: {
+        consent_version: '1.0',
+        consent_acknowledged: true,
+        intent: 'training_only',
+      },
+    });
+
+    const contribCall = vi.mocked(photoQueries.insertContribution).mock.calls[0];
+    expect(contribCall).toBeDefined();
+    expect(contribCall![1]).toMatchObject({ intent: 'training_only' });
+
+    const photoCall = vi.mocked(photoQueries.insertPendingCatalogPhoto).mock.calls[0];
+    expect(photoCall).toBeDefined();
+    expect(photoCall![1]).toMatchObject({ visibility: 'training_only' });
+  });
+
+  it('should persist intent=catalog_and_training and visibility=public on the new rows', async () => {
+    setupSuccessfulMocks();
+
+    await server.inject({
+      method: 'POST',
+      url: `${BASE_URL}/${PHOTO_UUID}/contribute`,
+      headers: { ...authHeaders(), 'content-type': 'application/json' },
+      payload: {
+        consent_version: '1.0',
+        consent_acknowledged: true,
+        intent: 'catalog_and_training',
+      },
+    });
+
+    const contribCall = vi.mocked(photoQueries.insertContribution).mock.calls[0];
+    expect(contribCall).toBeDefined();
+    expect(contribCall![1]).toMatchObject({ intent: 'catalog_and_training' });
+
+    const photoCall = vi.mocked(photoQueries.insertPendingCatalogPhoto).mock.calls[0];
+    expect(photoCall).toBeDefined();
+    expect(photoCall![1]).toMatchObject({ visibility: 'public' });
+  });
+
+  it('should return 400 when intent is missing', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: `${BASE_URL}/${PHOTO_UUID}/contribute`,
+      headers: { ...authHeaders(), 'content-type': 'application/json' },
+      payload: {
+        consent_version: '1.0',
+        consent_acknowledged: true,
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('should return 400 when intent is not a valid enum value', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: `${BASE_URL}/${PHOTO_UUID}/contribute`,
+      headers: { ...authHeaders(), 'content-type': 'application/json' },
+      payload: {
+        consent_version: '1.0',
+        consent_acknowledged: true,
+        intent: 'public',
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
   });
 
   it('should return 400 without consent', async () => {
@@ -594,6 +674,7 @@ describe('POST /collection/:id/photos/:photoId/contribute', () => {
       payload: {
         consent_version: '1.0',
         consent_acknowledged: false,
+        intent: 'training_only',
       },
     });
 
@@ -626,6 +707,7 @@ describe('POST /collection/:id/photos/:photoId/contribute', () => {
       payload: {
         consent_version: '1.0',
         consent_acknowledged: true,
+        intent: 'training_only',
       },
     });
 
@@ -647,6 +729,7 @@ describe('POST /collection/:id/photos/:photoId/contribute', () => {
       payload: {
         consent_version: '1.0',
         consent_acknowledged: true,
+        intent: 'training_only',
       },
     });
 

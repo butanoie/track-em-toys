@@ -6,6 +6,19 @@ paths:
 
 # API Database Detailed Patterns
 
+## Adding Columns to Tables With Existing INSERT Sites
+
+When a migration adds a NOT NULL column with a DEFAULT to an existing table, EVERY existing `INSERT` statement that doesn't explicitly set the new column will silently inherit the default. If the default is wrong for some callers — e.g. a privacy-sensitive column where most callers need a non-default value — this is a **latent bug that compiles, passes all existing tests, and ships**.
+
+**Protocol when adding such a column:**
+
+1. `grep -rn "INSERT INTO <table_name>" api/src/` to find every INSERT site.
+2. For each INSERT, decide whether the DB default is correct for that caller. If not, add the column to the INSERT column list with an explicit value.
+3. If the column's default is "safe for most callers but wrong for a specific flow," update the query function for the wrong-default caller to **require** the new column as a parameter. TypeScript will then force every call site to think about the value.
+4. Add a regression test asserting the explicit value is passed — not the default. Mocking-based tests that only assert "the function was called" are NOT sufficient; the test must inspect the actual parameter value passed to the query.
+
+**Historical example — Phase 1.6 amendment #148 (migration 037):** Added `item_photos.visibility TEXT NOT NULL DEFAULT 'public'`. The `insertPendingCatalogPhoto` query for contributed photos wasn't updated initially, so every contribution would have silently become `visibility='public'` — the exact opposite of the privacy-first intent. Caught in the architecture audit; fixed by making `visibility` a required parameter of `insertPendingCatalogPhoto` and deriving it server-side from the contributor's intent.
+
 ## Catalog & Seed Data
 
 - Catalog tables use UUID PKs with a unique `slug` column (e.g. `"optimus-prime"`) for stable references and URL-friendly routes

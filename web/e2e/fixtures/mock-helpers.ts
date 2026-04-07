@@ -614,7 +614,6 @@ export class MockCollectionPhotoState {
       this.revokeContribution(itemId, photoId);
       return route.fulfill(jsonResponse({ revoked: true }));
     });
-
   }
 }
 

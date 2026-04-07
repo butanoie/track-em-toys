@@ -448,7 +448,9 @@ CREATE TABLE public.item_photos (
     sort_order integer DEFAULT 0 NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     dhash text DEFAULT ''::text NOT NULL,
-    CONSTRAINT item_photos_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text])))
+    visibility text DEFAULT 'public'::text NOT NULL,
+    CONSTRAINT item_photos_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text]))),
+    CONSTRAINT item_photos_visibility_check CHECK ((visibility = ANY (ARRAY['public'::text, 'training_only'::text])))
 );
 
 
@@ -623,6 +625,8 @@ CREATE TABLE public.photo_contributions (
     status text DEFAULT 'pending'::text NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    intent text DEFAULT 'training_only'::text NOT NULL,
+    CONSTRAINT photo_contributions_intent_check CHECK ((intent = ANY (ARRAY['training_only'::text, 'catalog_and_training'::text]))),
     CONSTRAINT photo_contributions_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'revoked'::text])))
 );
 
@@ -1250,6 +1254,13 @@ CREATE INDEX idx_item_photos_item_sort ON public.item_photos USING btree (item_i
 --
 
 CREATE UNIQUE INDEX idx_item_photos_one_primary ON public.item_photos USING btree (item_id) WHERE (is_primary = true);
+
+
+--
+-- Name: idx_item_photos_public_approved; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_item_photos_public_approved ON public.item_photos USING btree (item_id, sort_order) WHERE ((visibility = 'public'::text) AND (status = 'approved'::text));
 
 
 --
@@ -2022,4 +2033,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('033'),
     ('034'),
     ('035'),
-    ('036');
+    ('036'),
+    ('037');
