@@ -56,15 +56,15 @@ Single-PR amendment. Covers:
 
 ## Decisions Locked
 
-| Decision | Choice | Rationale |
-|---|---|---|
-| Default intent for new contributions | `training_only` | Privacy + editorial defaults — the catalog is curated, and `catalog_and_training` adds public visibility on top of the same training donation (it is a superset, not an alternative) |
-| Existing-row backfill | `training_only` | Consistent with the new default; no production users affected |
-| Curator override capability | Demote only (`public → training_only`); no promote | Demote is a strict subset of contributor consent; promote requires re-consent |
-| Where intent is stored | `photo_contributions.intent` (immutable audit) + `item_photos.visibility` (mutable curator-controlled) | Separates "what the contributor wanted" from "what the catalog actually shows" |
-| `ContributeDialog` consent model | Explicit checkbox, required before submit (unchanged) | Deliberate single-action consent moment |
-| `AddToCollectionDialog` consent model | Implicit in "Add to Collection" click; condensed inline disclaimer shown when intent ≠ `'none'` (unchanged from current behavior) | Consent is bundled with a broader action; the condensed disclaimer is notice enough |
-| `CONSENT_VERSION` | Stays at `'1.0'` | Pre-launch, no production users; the license grant text is unchanged (only the display-surface choice is new), so no audit boundary is needed |
+| Decision                              | Choice                                                                                                                            | Rationale                                                                                                                                                                            |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Default intent for new contributions  | `training_only`                                                                                                                   | Privacy + editorial defaults — the catalog is curated, and `catalog_and_training` adds public visibility on top of the same training donation (it is a superset, not an alternative) |
+| Existing-row backfill                 | `training_only`                                                                                                                   | Consistent with the new default; no production users affected                                                                                                                        |
+| Curator override capability           | Demote only (`public → training_only`); no promote                                                                                | Demote is a strict subset of contributor consent; promote requires re-consent                                                                                                        |
+| Where intent is stored                | `photo_contributions.intent` (immutable audit) + `item_photos.visibility` (mutable curator-controlled)                            | Separates "what the contributor wanted" from "what the catalog actually shows"                                                                                                       |
+| `ContributeDialog` consent model      | Explicit checkbox, required before submit (unchanged)                                                                             | Deliberate single-action consent moment                                                                                                                                              |
+| `AddToCollectionDialog` consent model | Implicit in "Add to Collection" click; condensed inline disclaimer shown when intent ≠ `'none'` (unchanged from current behavior) | Consent is bundled with a broader action; the condensed disclaimer is notice enough                                                                                                  |
+| `CONSENT_VERSION`                     | Stays at `'1.0'`                                                                                                                  | Pre-launch, no production users; the license grant text is unchanged (only the display-surface choice is new), so no audit boundary is needed                                        |
 
 ## Database — Migration 037
 
@@ -117,7 +117,7 @@ Body gains `intent`:
 {
   consent_version: string;
   consent_acknowledged: boolean;
-  intent: 'training_only' | 'catalog_and_training';  // NEW, required
+  intent: 'training_only' | 'catalog_and_training'; // NEW, required
 }
 ```
 
@@ -269,12 +269,12 @@ it's eventually enhanced. Add a comment to that effect in the relevant query fil
 
 ## Test Plan
 
-| Layer | Coverage |
-|---|---|
-| API unit | Migration backfill correctness, intent validation in contribute endpoint, visibility derivation logic |
+| Layer           | Coverage                                                                                                                                                                                                                                                                          |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API unit        | Migration backfill correctness, intent validation in contribute endpoint, visibility derivation logic                                                                                                                                                                             |
 | API integration | Contribute with `training_only` → catalog list does NOT include the photo after approval; contribute with `catalog_and_training` → catalog list DOES include after approval; backfill verification (existing pending contributions have `intent='training_only'` after migration) |
-| Web unit | `ContributeDialog` intent radio + dynamic button label; `AddToCollectionDialog` 3-state radio + chained mutation correctly passes intent |
-| E2E | Contributor selects training-only → photo never appears in catalog; contributor selects catalog+training → photo appears in catalog after approval |
+| Web unit        | `ContributeDialog` intent radio + dynamic button label; `AddToCollectionDialog` 3-state radio + chained mutation correctly passes intent                                                                                                                                          |
+| E2E             | Contributor selects training-only → photo never appears in catalog; contributor selects catalog+training → photo appears in catalog after approval                                                                                                                                |
 
 Test scenarios in `docs/test-scenarios/E2E_COLLECTION_PHOTOS.md` (existing file, append
 new "Contribution Intent" section).
@@ -282,12 +282,14 @@ new "Contribution Intent" section).
 ## Files Modified / Created
 
 ### New
+
 - `api/db/migrations/037_photo_contribution_visibility.sql` — migration with ALTER + backfill + partial index
 - `api/src/catalog/ml-export/queries.test.ts` — regression guards asserting `PHOTO_JOIN` contains `status='approved'`, does NOT contain `visibility`, and uses `LEFT JOIN`. Locks in the "training_only photos must flow into training data" invariant so a future edit adding `AND visibility='public'` to the JOIN fails loudly
 - `web/src/collection/photos/consent.ts` — shared module exporting `CONSENT_VERSION`, `DEFAULT_CONTRIBUTE_INTENT`, and `LICENSE_GRANT_TEXT`. Both `ContributeDialog` and `AddToCollectionDialog` import from here so the privacy default and the verbatim license grant sentence can never drift between surfaces
 - `web/src/components/ui/radio-group.tsx` — Shadcn-generated (via `npx shadcn@latest add radio-group`), with the standard `cn` import path fix
 
 ### Modified
+
 - `api/src/collection/photos/routes.ts` — contribute endpoint accepts `intent`; derives `visibility` from intent (`catalog_and_training → 'public'`, `training_only → 'training_only'`); passes visibility to `insertPendingCatalogPhoto`
 - `api/src/collection/photos/queries.ts` — `insertContribution` accepts `intent`; **`insertPendingCatalogPhoto` now REQUIRES a `visibility` parameter and includes it in the INSERT column list** (the DB default is `'public'` which is the wrong default for contributed photos — this fixes a latent bug that would have silently made every contribution publicly visible)
 - `api/src/collection/photos/schemas.ts` — `intent` added to `contributePhotoSchema.body.required` and `properties` (enum)
@@ -325,7 +327,7 @@ the dashboard PR can assume the new fields are queryable.
   this codebase; the amendment doesn't introduce new precedent.
 - **R3 — The 3-state radio in `AddToCollectionDialog` is a breaking change to the prop
   shape**. The previous `contributePhoto: boolean` becomes `contributeIntent: 'none' |
-  'training_only' | 'catalog_and_training'`. Internal-only component, no consumers
+'training_only' | 'catalog_and_training'`. Internal-only component, no consumers
   outside the file.
 
 ## Out-of-Scope Followups

@@ -449,6 +449,11 @@ CREATE TABLE public.item_photos (
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     dhash text DEFAULT ''::text NOT NULL,
     visibility text DEFAULT 'public'::text NOT NULL,
+    rejection_reason_code text,
+    rejection_reason_text text,
+    CONSTRAINT item_photos_rejection_code_only_rejected CHECK (((rejection_reason_code IS NULL) OR (status = 'rejected'::text))),
+    CONSTRAINT item_photos_rejection_reason_code_check CHECK ((rejection_reason_code = ANY (ARRAY['blurry'::text, 'wrong_item'::text, 'nsfw'::text, 'duplicate'::text, 'poor_quality'::text, 'other'::text]))),
+    CONSTRAINT item_photos_rejection_text_only_other CHECK (((rejection_reason_text IS NULL) OR (rejection_reason_code = 'other'::text))),
     CONSTRAINT item_photos_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text]))),
     CONSTRAINT item_photos_visibility_check CHECK ((visibility = ANY (ARRAY['public'::text, 'training_only'::text])))
 );
@@ -1257,6 +1262,13 @@ CREATE UNIQUE INDEX idx_item_photos_one_primary ON public.item_photos USING btre
 
 
 --
+-- Name: idx_item_photos_pending_created; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_item_photos_pending_created ON public.item_photos USING btree (created_at) WHERE (status = 'pending'::text);
+
+
+--
 -- Name: idx_item_photos_public_approved; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2034,4 +2046,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('034'),
     ('035'),
     ('036'),
-    ('037');
+    ('037'),
+    ('038');

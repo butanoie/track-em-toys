@@ -183,6 +183,12 @@ export async function buildServer(): Promise<FastifyInstance> {
     // Dynamic import ensures the module is never loaded in production builds.
     const { testSigninRoutes } = await import('./auth/test-signin.js');
     await fastify.register(testSigninRoutes, { prefix: '/auth' });
+
+    // Test-only photo seed endpoint: seeds pending item_photos + contributions
+    // for Photo Approval Dashboard E2E tests (Phase 1.9b #72). Same non-prod
+    // gating pattern — dynamic import keeps it out of production builds.
+    const { testPhotosRoutes } = await import('./admin/test-photos.js');
+    await fastify.register(testPhotosRoutes, { prefix: '/admin/test-photos' });
   }
 
   // ─── Health check ──────────────────────────────────────────────────────

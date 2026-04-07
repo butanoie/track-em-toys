@@ -11,6 +11,7 @@ import {
   reactivateUserSchema,
   deleteUserSchema,
 } from './schemas.js';
+import { adminPhotoRoutes } from './photos/routes.js';
 import { HttpError } from '../auth/errors.js';
 import { ROLE_HIERARCHY } from '../auth/role.js';
 import type { UserRole } from '../types/index.js';
@@ -40,7 +41,6 @@ const adminRateLimitDelete = { rateLimit: { max: 5, timeWindow: '1 minute' } } a
  * @param fastify - Fastify instance for route registration
  * @param _opts - Fastify plugin options (unused)
  */
-// eslint-disable-next-line @typescript-eslint/require-await -- Fastify plugin contract requires async
 export async function adminRoutes(fastify: FastifyInstance, _opts: object): Promise<void> {
   // ─── Content-Type enforcement ─────────────────────────────────────────
   // Reject non-JSON POST/PATCH requests to any route in this plugin scope.
@@ -58,6 +58,18 @@ export async function adminRoutes(fastify: FastifyInstance, _opts: object): Prom
 
   // ─── Shared preHandler for all admin routes ─────────────────────────
   const adminPreHandler = [fastify.authenticate, fastify.requireRole('admin')];
+
+  // ─── Photo approval sub-plugin ────────────────────────────────────────
+  // Mounted first (before any /:id-style parameterized routes) so that the
+  // router doesn't greedily match /photos/* as /users/:id segments.
+  //
+  // NOTE: The photo approval routes intentionally use requireRole('curator'),
+  // NOT requireRole('admin') like the rest of this plugin. The URL prefix
+  // (/admin/*) is retained for UI consistency (admin sidebar), but photo
+  // approval is a curator workflow. Admins inherit access via the role
+  // hierarchy (admin >= curator). See photos/routes.ts for details.
+
+  await fastify.register(adminPhotoRoutes, { prefix: '/photos' });
 
   // ─── GET /users ─────────────────────────────────────────────────────────
 

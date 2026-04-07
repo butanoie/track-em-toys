@@ -29,6 +29,10 @@ cd api && npm run format:check # Prettier check (CI mode)
 - Array item schemas also need `additionalProperties: false` and `required`
 - NEVER use `void` before a synchronous method call — it suppresses errors silently
 
+### Doc comments (ESLint jsdoc plugin)
+
+- Literal `@word.word` patterns inside JSDoc prose (e.g. `@e2e.test`, `@ts-expect-error`) trigger `jsdoc/escape-inline-tags` warnings even when used as plain text. Write them without the `@` prefix (`e2e.test`, `ts-expect-error`) or wrap in backticks.
+
 ### CORS
 
 - `@fastify/cors` v11 defaults to `methods: 'GET,HEAD,POST'` only — PATCH, PUT, DELETE are NOT included by default

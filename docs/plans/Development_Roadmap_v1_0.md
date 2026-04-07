@@ -271,13 +271,13 @@ Post-ML enhancements to the photo management system. These are not needed for ML
 
 **Issues:**
 
-| Issue | Title                                               | Priority | Effort | Status |
-| ----- | --------------------------------------------------- | -------- | ------ | ------ |
-| #71   | Photo moderation: NSFW detection + approval         | High     | L      | Planned |
-| #72   | Approval notification dashboard ([plan](Photo_Approval_Dashboard_Plan.md)) — depends on [Phase 1.6 amendment](Photo_Contribution_Visibility_Plan.md) | Medium | M | 📐 Design locked |
-| #73   | Soft delete + 30-day recycle bin                    | Medium   | M      | Planned |
-| #74   | Caption editing                                     | Low      | S      | Planned |
-| #75   | Pending photo visibility (uploader-only with badge) | Medium   | M      | Planned |
+| Issue | Title                                                                                                                                                | Priority | Effort | Status           |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------ | ---------------- |
+| #71   | Photo moderation: NSFW detection + approval                                                                                                          | High     | L      | Planned          |
+| #72   | Approval notification dashboard ([plan](Photo_Approval_Dashboard_Plan.md)) — depends on [Phase 1.6 amendment](Photo_Contribution_Visibility_Plan.md) | Medium   | M      | 📐 Design locked |
+| #73   | Soft delete + 30-day recycle bin                                                                                                                     | Medium   | M      | Planned          |
+| #74   | Caption editing                                                                                                                                      | Low      | S      | Planned          |
+| #75   | Pending photo visibility (uploader-only with badge)                                                                                                  | Medium   | M      | Planned          |
 
 ---
 
@@ -720,13 +720,13 @@ Three templates in `.github/ISSUE_TEMPLATE/`:
 
 ### Phase 1.9b: Photo Enhancements (Post-ML) — 5 issues
 
-| Issue | Title                                       | Labels                     | Effort | Track   |
-| ----- | ------------------------------------------- | -------------------------- | ------ | ------- |
-| #71   | Photo moderation: NSFW detection + approval | `api`, `web`, `phase:1.9b` | L      | Post-ML |
+| Issue | Title                                                                                                                                                       | Labels                     | Effort | Track   |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------ | ------- |
+| #71   | Photo moderation: NSFW detection + approval                                                                                                                 | `api`, `web`, `phase:1.9b` | L      | Post-ML |
 | #72   | Approval notification dashboard ([plan](Photo_Approval_Dashboard_Plan.md)) — depends on Phase 1.6 amendment ([plan](Photo_Contribution_Visibility_Plan.md)) | `api`, `web`, `phase:1.9b` | M      | Post-ML |
-| #73   | Soft delete + 30-day recycle bin            | `api`, `web`, `phase:1.9b` | M      | Post-ML |
-| #74   | Caption editing                             | `api`, `web`, `phase:1.9b` | S      | Post-ML |
-| #75   | Pending photo visibility                    | `api`, `web`, `phase:1.9b` | M      | Post-ML |
+| #73   | Soft delete + 30-day recycle bin                                                                                                                            | `api`, `web`, `phase:1.9b` | M      | Post-ML |
+| #74   | Caption editing                                                                                                                                             | `api`, `web`, `phase:1.9b` | S      | Post-ML |
+| #75   | Pending photo visibility                                                                                                                                    | `api`, `web`, `phase:1.9b` | M      | Post-ML |
 
 ### Phase 1.12: Account Security & GDPR — 3 issues
 

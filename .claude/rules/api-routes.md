@@ -45,8 +45,8 @@ Two distinct photo types:
 - File naming: `{itemId}/{photoId}-{size}.webp` (size: `thumb` | `original`), relative URL stored in DB
 - `@fastify/static` registered in development mode only (`config.nodeEnv === 'development'`) with `decorateReply: false, index: false`
 - `PHOTO_STORAGE_PATH` startup validation skips in test environment (`config.nodeEnv !== 'test'`)
-- Adding a new required config property (e.g., `config.photos`) breaks ALL test files that mock `config.js` — add the property to every mock config across the test suite
-- `QueryOnlyClient` type exported from `db/pool.ts` — use `satisfies pool.QueryOnlyClient` in test mocks instead of `as unknown as PoolClient`
+- Adding a new required config property (e.g., `config.photos`) breaks ALL test files that mock `config.js` — add the property to every mock config across the test suite. The same applies when **registering a new admin sub-plugin**: any existing admin test file whose inline `config` mock is missing fields the sub-plugin reads (e.g. `photos.storagePath`, `ml.exportPath`) will crash at `buildServer()`. Sanity-check by running the full `npm test` immediately after adding the sub-plugin registration, not just the new test file.
+- `QueryOnlyClient` for function parameter types: import from `db/queries.js` (the hand-rolled interface) — NOT `db/pool.js`. The `Pick<PoolClient, 'query'>` definition in `db/pool.ts` includes a void-returning callback overload that breaks `vi.fn().mockResolvedValue(...)` in tests. Use `satisfies QueryOnlyClient` from `db/queries.js` for test mocks. See `api-testing.md` rule 7 for the full rationale.
 - Photo upload route tests use positional `mockResolvedValueOnce` — adding a new DB query to the handler requires updating the mock sequence in ALL existing upload tests (e.g., `getPhotoHashesByItem` was added before `getMaxSortOrder`)
 
 ## Photo Deduplication (dHash)

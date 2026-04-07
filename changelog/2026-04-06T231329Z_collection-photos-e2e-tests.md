@@ -39,16 +39,19 @@ Mirrors `MockCollectionState`'s closure-based pattern.
 ### 2. `web/e2e/collection-photos.spec.ts` (NEW, 11 tests)
 
 **Photo Upload (4)**
+
 - Upload single PNG → photo appears + success toast
 - Upload 3 files → all 3 appear in grid
 - Upload PDF → error toast, no upload
 - Duplicate upload (one-shot 409) → DuplicateUploadError toast
 
 **Photo Management (2)**
+
 - Set primary → star moves to clicked photo
 - Delete with confirm → photo removed + toast
 
 **Contribute Flow (5)**
+
 - Contribute happy path → consent → submit → "Submitted" badge
 - Submitted badge persists after sheet close + reopen
 - Submitted photos hide the contribute action
@@ -61,6 +64,7 @@ the API integration test. dnd-kit + Playwright drag is historically flaky.
 ### 3. `web/e2e/add-by-photo.spec.ts` (EXTENDED, +5 tests)
 
 New "Add by Photo — photo options integration" describe block:
+
 - Photo Options section renders with default state (save✓, contribute✗)
 - Default checkboxes (save only) → submit → upload mock fires, no contribute toast
 - Save + contribute → submit → both upload and contribute toasts fire
@@ -116,6 +120,7 @@ Scoped to this dialog only — not the shared shadcn `dialog.tsx` primitive.
 
 The architecture review caught these issues that required course correction during
 implementation:
+
 - **M2 (Schema split)**: Mock had to distinguish base vs extended shape per endpoint
 - **M3 (Route collision)**: Generic DELETE route had to register before suffix routes
 - **M4 (Duplicate trigger semantics)**: One-shot reset chosen over sticky

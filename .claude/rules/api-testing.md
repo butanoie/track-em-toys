@@ -74,7 +74,20 @@ grep -rn "as unknown as\|as never" src/ --include="*.ts"
 ```
 
 Must return zero results in all files including tests. Use `satisfies Pick<T, 'method'>`
-for mock objects. Export narrow types from source modules (e.g. `QueryOnlyClient`).
+for mock objects. Export narrow types from source modules. For database client
+narrowing specifically, import `QueryOnlyClient` from `db/queries.js` — NOT
+`db/pool.js`. The two have different definitions: `db/queries.ts` exports a
+hand-rolled interface that omits the void-returning callback overload, which is
+required for `vi.fn().mockResolvedValue(QueryResult<T>)` to work in tests. The
+`Pick<PoolClient, 'query'>` definition in `db/pool.ts` exists for a narrower
+purpose and will trigger TS2352 conversion errors in test mocks.
+
+When even the hand-rolled interface cannot express the type (e.g. mocking
+`pg.Pool.query` itself, whose overload set includes a void callback form that
+makes `Awaited<ReturnType<typeof pool.query>>` include `void`), use a
+`// @ts-expect-error` comment with an explanatory note. `@ts-expect-error` is
+NOT covered by this rule's `as unknown as` ban — it's a targeted suppression
+that removes itself when the underlying type becomes compatible.
 
 ## 8. No void on synchronous calls
 
@@ -276,6 +289,18 @@ grep -rn "column_name\|table_name" --include="*.md" --include="*.tsx" --include=
 Files that commonly need updating: `api/src/types/index.ts`, `docs/diagrams/toy-catalog-database-diagrams.jsx`,
 `docs/decisions/Schema_Design_Rationale.md`, `docs/decisions/Architecture_Research_*.md`
 
+## 29. Fastify schema validation strips, does not reject, extra properties
+
+Fastify with `additionalProperties: false` on a request body schema SILENTLY
+STRIPS unknown properties at ajv validation time — it does NOT reject the
+request with 400. Tests expecting `statusCode === 400` for extra fields will
+fail: the stripped body reaches the handler, which then succeeds (200) or
+fails for a different reason (500 if a downstream mock is unset).
+
+To test that extra fields are rejected, the handler itself must check the
+body shape after validation — or accept that extra fields are silently
+discarded and test against the stripped result.
+
 ---
 
 ## Key Patterns
@@ -390,9 +415,15 @@ request.log.warn({ tokenHashPrefix, userId }, 'Logout: refresh token not found i
 ### Test mocks — no double cast
 
 ```typescript
-// CORRECT — export a narrow type from source, use satisfies in tests
-export type QueryOnlyClient = Pick<PoolClient, 'query'>;
+// CORRECT — import the hand-rolled narrow interface from db/queries.ts,
+// use satisfies in tests. The interface intentionally omits pg's void-returning
+// callback overloads so vi.fn().mockResolvedValue(QueryResult<T>) works.
+import type { QueryOnlyClient } from '../db/queries.js';
 const mockClient = { query: vi.fn() } satisfies QueryOnlyClient;
+
+// WRONG — Pick<PoolClient, 'query'> includes the callback overload and
+// breaks mockResolvedValue. Do NOT import QueryOnlyClient from db/pool.js
+// for this purpose.
 ```
 
 ### Vitest module isolation

@@ -19,6 +19,22 @@ When a migration adds a NOT NULL column with a DEFAULT to an existing table, EVE
 
 **Historical example — Phase 1.6 amendment #148 (migration 037):** Added `item_photos.visibility TEXT NOT NULL DEFAULT 'public'`. The `insertPendingCatalogPhoto` query for contributed photos wasn't updated initially, so every contribution would have silently become `visibility='public'` — the exact opposite of the privacy-first intent. Caught in the architecture audit; fixed by making `visibility` a required parameter of `insertPendingCatalogPhoto` and deriving it server-side from the contributor's intent.
 
+## Mirroring Status Across Two Tables — Decision-Time Reads Must See Every State
+
+When a feature mirrors a status column across two tables (e.g. `item_photos.status` and `photo_contributions.status` in the Photo Approval Dashboard), the **list/display query and the decision-time query must use different filters**. The list query naturally hides terminal states (`revoked`, archived, etc.) so users only see actionable rows; the decision query must **see** terminal states so it can explicitly reject decisions on them.
+
+**Why:** if the decision query filters out a terminal state, the handler has nothing to guard against — the row appears null/absent — and any subsequent write silently no-ops or proceeds with stale state. The result is that user-initiated state transitions (e.g. consent revocation) can be silently routed around by a separate flow (e.g. a curator's undo).
+
+**Protocol when designing a "mirror status across two tables" feature:**
+
+1. **List query** filters out terminal states. Curators/users only see actionable rows. This is the existing pattern and is correct.
+2. **Decision query** loads the row regardless of status (no `WHERE status != 'X'` filters on the LATERAL/JOIN side). The handler then explicitly checks the loaded status and returns 409 (or whatever code is appropriate) if the row is in a state that's incompatible with the requested action.
+3. **Lock the mirrored row `FOR UPDATE`** for the duration of the decision transaction. This prevents a concurrent transition (e.g. user revokes while curator is mid-decision) from racing through after the load. The same pattern is used by `admin/queries.ts:findUserForAdmin` for last-admin protection.
+4. **Mirror UPDATEs that filter `status != 'X'`** must either: (a) explicitly check `rowCount` and raise if it doesn't match expectations, or (b) be paired with a load-time guard that prevents the UPDATE from running on rows in the filtered-out state. The "silent no-op" failure mode is the bug.
+5. **Test that the load returns rows in every status, including terminal ones**, and that the handler explicitly rejects decisions on terminal states. The integration test must assert that the write functions are NOT called when the row is in a terminal state — not just that the response code is right.
+
+**Historical example — Phase 1.9b #72 Photo Approval Dashboard:** The original `loadPhotoForDecision` query filtered `WHERE status != 'revoked' AND file_copied = true` on the LATERAL join to `photo_contributions`. The `mirrorContributionStatus` UPDATE also filtered `status != 'revoked'`. A curator could approve a photo, then the contributor revokes consent, then the curator hits Undo — `mirrorContributionStatus` silently no-ops (0 rows affected because the row is now `revoked`), `item_photos.status` flips back to `pending` while `photo_contributions.status` stays `revoked`. On the next decision attempt, the load returns `contribution = null` (filtered by the LATERAL join), so the self-approval guard has no contributor to compare against and a curator can approve a photo whose contributor has explicitly revoked consent. Caught in the Phase 6 architecture review; fixed by removing the load-time filters, adding `FOR UPDATE` to the LATERAL join, and adding an explicit revoked-contribution 409 guard in the handler before any decision logic runs.
+
 ## Catalog & Seed Data
 
 - Catalog tables use UUID PKs with a unique `slug` column (e.g. `"optimus-prime"`) for stable references and URL-friendly routes
