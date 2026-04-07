@@ -52,9 +52,9 @@ describe('processUpload', () => {
   });
 
   it('throws DimensionError when smallest edge is under minimum', async () => {
-    const input = await createTestImage(1000, 500);
+    const input = await createTestImage(1000, 300);
     await expect(processUpload(input)).rejects.toThrow(DimensionError);
-    await expect(processUpload(input)).rejects.toThrow(/1000x500/);
+    await expect(processUpload(input)).rejects.toThrow(/1000x300/);
     await expect(processUpload(input)).rejects.toThrow(new RegExp(`${MIN_DIMENSION}px`));
   });
 
@@ -66,7 +66,7 @@ describe('processUpload', () => {
   });
 
   it('throws DimensionError when both edges are too small', async () => {
-    const input = await createTestImage(400, 300);
+    const input = await createTestImage(300, 200);
     await expect(processUpload(input)).rejects.toThrow(DimensionError);
   });
 

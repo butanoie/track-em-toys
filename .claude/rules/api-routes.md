@@ -41,7 +41,7 @@ Two distinct photo types:
 - Photo routes live in `src/catalog/photos/` registered as a sub-plugin of `itemRoutes` at `/:slug/photos`
 - `@fastify/multipart` registered inside the photo plugin (scoped) — coexists with JSON body parsing (different content types, no conflict)
 - Upload route processes all files into memory buffers first, then writes to disk + inserts to DB (atomic batch)
-- Thumbnail pipeline: `sharp` converts to WebP at 2 sizes (200px thumb fit-inside, 1600px original fit-inside, both q80-85). Minimum 600px on shortest edge enforced via `DimensionError`
+- Thumbnail pipeline: `sharp` converts to WebP at 2 sizes (200px thumb fit-inside, 1600px original fit-inside, both q80-85). Minimum 400px on shortest edge enforced via `DimensionError`
 - File naming: `{itemId}/{photoId}-{size}.webp` (size: `thumb` | `original`), relative URL stored in DB
 - `@fastify/static` registered in development mode only (`config.nodeEnv === 'development'`) with `decorateReply: false, index: false`
 - `PHOTO_STORAGE_PATH` startup validation skips in test environment (`config.nodeEnv !== 'test'`)
