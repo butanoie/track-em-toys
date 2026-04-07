@@ -1,9 +1,9 @@
-import { Camera, Eye, Pencil, Package } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { buildPhotoUrl } from '@/catalog/photos/api';
 import { ConditionBadge } from '@/collection/components/ConditionBadge';
 import { ItemConditionBadge } from '@/collection/components/ItemConditionBadge';
+import { CollectionItemActions } from '@/collection/components/CollectionItemActions';
 import { formatRelativeDate } from '@/collection/lib/format-date';
 import type { CollectionItem } from '@/lib/zod-schemas';
 
@@ -129,33 +129,12 @@ export function CollectionTable({ items, isLoading, onEdit, onViewCatalog, onMan
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => onViewCatalog(item.franchise.slug, item.item_slug)}
-                    aria-label={`View catalog details for ${item.item_name}`}
-                  >
-                    <Eye className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => onEdit(item)}
-                    aria-label={`Edit ${item.item_name}`}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => onManagePhotos(item)}
-                    aria-label={`Manage photos for ${item.item_name}`}
-                  >
-                    <Camera className="h-3.5 w-3.5" />
-                  </Button>
+                  <CollectionItemActions
+                    item={item}
+                    onEdit={onEdit}
+                    onViewCatalog={onViewCatalog}
+                    onManagePhotos={onManagePhotos}
+                  />
                 </div>
               </TableCell>
             </TableRow>
