@@ -721,7 +721,7 @@ Three templates in `.github/ISSUE_TEMPLATE/`:
 | Issue | Title                                       | Labels                     | Effort | Track   |
 | ----- | ------------------------------------------- | -------------------------- | ------ | ------- |
 | #71   | Photo moderation: NSFW detection + approval | `api`, `web`, `phase:1.9b` | L      | Post-ML |
-| #72   | Approval notification dashboard             | `api`, `web`, `phase:1.9b` | M      | Post-ML |
+| #72   | Approval notification dashboard ([plan](Photo_Approval_Dashboard_Plan.md)) — depends on Phase 1.6 amendment ([plan](Photo_Contribution_Visibility_Plan.md)) | `api`, `web`, `phase:1.9b` | M      | Post-ML |
 | #73   | Soft delete + 30-day recycle bin            | `api`, `web`, `phase:1.9b` | M      | Post-ML |
 | #74   | Caption editing                             | `api`, `web`, `phase:1.9b` | S      | Post-ML |
 | #75   | Pending photo visibility                    | `api`, `web`, `phase:1.9b` | M      | Post-ML |
