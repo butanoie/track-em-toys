@@ -72,12 +72,12 @@ with confident judgments based on visual inspection.
 The rejection reason columns are protected at three layers — DB constraints, Fastify
 schema, and endpoint handler logic — to prevent invalid combinations:
 
-| Rule | DB constraint | API schema | Handler |
-|---|---|---|---|
-| Code only when status='rejected' | ✓ | ✓ | clears on undo |
-| Text only when code='other' | ✓ | ✓ | clears when code changes |
-| `rejection_reason_text` length | — | `maxLength: 500` | — |
-| Status transition validity | — | enum check | `expected_status` (see below) |
+| Rule                             | DB constraint | API schema       | Handler                       |
+| -------------------------------- | ------------- | ---------------- | ----------------------------- |
+| Code only when status='rejected' | ✓             | ✓                | clears on undo                |
+| Text only when code='other'      | ✓             | ✓                | clears when code changes      |
+| `rejection_reason_text` length   | —             | `maxLength: 500` | —                             |
+| Status transition validity       | —             | enum check       | `expected_status` (see below) |
 
 The endpoint handler always sets `rejection_reason_code = NULL, rejection_reason_text = NULL`
 in the same UPDATE statement when the target status is not `'rejected'`. This is required
@@ -197,20 +197,20 @@ All shortcuts cluster on the left side of a QWERTY keyboard so the curator's rig
 stays free for the mouse (or coffee). The chord pattern for reject (R-R within 500ms)
 prevents accidental destructive actions while keeping single-key approve.
 
-| Key | Action |
-|---|---|
-| `A` | Approve as-intended (uses contributor's `intent` to set visibility) |
-| `T` | Approve as **training only** (no-op for `training_only` contributions; **demotes** `catalog_and_training` contributions to `training_only`) |
-| `R R` (chord) | Reject (no reason) |
-| `1` | Reject — blurry |
-| `2` | Reject — wrong item |
-| `3` | Reject — NSFW |
-| `4` | Reject — duplicate |
-| `5` | Reject — poor quality |
-| `6` | Reject — other (opens free-text input) |
-| `S` | Previous photo |
-| `D` | Next photo / skip |
-| `Esc` | Close any open overlay |
+| Key           | Action                                                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `A`           | Approve as-intended (uses contributor's `intent` to set visibility)                                                                         |
+| `T`           | Approve as **training only** (no-op for `training_only` contributions; **demotes** `catalog_and_training` contributions to `training_only`) |
+| `R R` (chord) | Reject (no reason)                                                                                                                          |
+| `1`           | Reject — blurry                                                                                                                             |
+| `2`           | Reject — wrong item                                                                                                                         |
+| `3`           | Reject — NSFW                                                                                                                               |
+| `4`           | Reject — duplicate                                                                                                                          |
+| `5`           | Reject — poor quality                                                                                                                       |
+| `6`           | Reject — other (opens free-text input)                                                                                                      |
+| `S`           | Previous photo                                                                                                                              |
+| `D`           | Next photo / skip                                                                                                                           |
+| `Esc`         | Close any open overlay                                                                                                                      |
 
 **Approve vs Approve-as-Training-Only semantics:**
 
@@ -273,7 +273,7 @@ Rejected photos **keep their files** in v1. The `item_photos` row stays with
 - Allows curators to re-review rejected photos manually if they realize a mistake later
 - Defers the file-cleanup mechanism to a separate follow-up issue, which will introduce
   a background job that deletes files for `item_photos WHERE status='rejected' AND
-  updated_at < NOW() - INTERVAL '30 days'`
+updated_at < NOW() - INTERVAL '30 days'`
 
 ### No Pagination, No Polling
 
@@ -367,26 +367,26 @@ single-image triage view.
       url: string;
       caption: string | null;
       dhash: string;
-      visibility: 'public' | 'training_only';  // current visibility (curator may have demoted)
+      visibility: 'public' | 'training_only'; // current visibility (curator may have demoted)
     };
     uploader: {
       id: string;
       display_name: string;
       email: string;
-    } | null;  // null = uploaded_by IS NULL OR uploader is GDPR-tombstoned (deleted_at IS NOT NULL)
+    } | null; // null = uploaded_by IS NULL OR uploader is GDPR-tombstoned (deleted_at IS NOT NULL)
     contribution: {
       id: string;
       consent_version: string;
       consent_granted_at: string;
-      intent: 'training_only' | 'catalog_and_training';  // contributor's locked consent
-    } | null;  // null = direct curator upload (no contribution row); rare in v1, may not occur
+      intent: 'training_only' | 'catalog_and_training'; // contributor's locked consent
+    } | null; // null = direct curator upload (no contribution row); rare in v1, may not occur
     existing_photos: Array<{
       id: string;
       url: string;
-    }>;  // up to 3 most recent approved photos for the same item
+    }>; // up to 3 most recent approved photos for the same item
     created_at: string;
   }>;
-  total_count: number;  // unbounded count for the "200+" warning
+  total_count: number; // unbounded count for the "200+" warning
 }
 ```
 
@@ -399,7 +399,7 @@ The query is one big SELECT with:
   Additionally, `WHERE pc.file_copied = true OR pc.id IS NULL` excludes contributions
   whose underlying file copy hasn't completed yet (Phase 1.6 crash-recovery state)
 - `LEFT JOIN LATERAL (SELECT id, url FROM item_photos WHERE item_id = ip.item_id AND
-  status = 'approved' ORDER BY created_at DESC LIMIT 3)` for the existing-photos preview
+status = 'approved' ORDER BY created_at DESC LIMIT 3)` for the existing-photos preview
 - `WHERE ip.status = 'pending' ORDER BY ip.created_at ASC LIMIT 200`
 
 ### `PATCH /admin/photos/:id/status`
@@ -448,16 +448,18 @@ Decide a photo. Body:
 
   ```typescript
   // Pseudocode for the endpoint handler
-  const target_visibility = (status === 'approved')
-    ? (request.body.visibility === 'training_only'
-        ? 'training_only'                                        // T press: explicit demote
-        : (contribution?.intent === 'catalog_and_training'
-            ? 'public'                                           // A press, public intent
-            : 'training_only'))                                  // A press, training-only intent
-    : null;  // reject/pending: visibility unchanged
+  const target_visibility =
+    status === 'approved'
+      ? request.body.visibility === 'training_only'
+        ? 'training_only' // T press: explicit demote
+        : contribution?.intent === 'catalog_and_training'
+          ? 'public' // A press, public intent
+          : 'training_only' // A press, training-only intent
+      : null; // reject/pending: visibility unchanged
   ```
 
   Then the UPDATE:
+
   ```sql
   UPDATE item_photos
     SET status = $1,
@@ -475,15 +477,30 @@ Decide a photo. Body:
   `visibility = 'public'`.
   If 0 rows affected → 409 Conflict with `{ error: 'Photo state has changed', current_status: <actual> }`.
   Client refetches the queue.
+
 - Then:
+
   ```sql
   UPDATE photo_contributions
     SET status = $1, updated_at = NOW()
     WHERE item_photo_id = $2 AND status != 'revoked';
   ```
+
   Note: filters `!= 'revoked'`, NOT `= 'pending'`, so undo-and-redo flows work correctly.
 
+  > **Post-review amendment (D13.1):** the `!= 'revoked'` filter is correct on
+  > the mirror UPDATE itself, but the **load** query (`loadPhotoForDecision`)
+  > must NOT filter revoked rows — otherwise an undo issued after a concurrent
+  > revoke silently no-ops, leaving the photo `pending` while the contribution
+  > stays `revoked`, and a curator can subsequently approve a photo whose
+  > contributor revoked consent. The implementation in PR 1 loads contributions
+  > regardless of status, locks the row `FOR UPDATE`, and explicitly returns
+  > 409 when the contribution is `revoked` or has `file_copied = false` —
+  > before any decision logic runs. See `Photo_Approval_Dashboard_Plan_Amendment.md`
+  > section D13.1 for the full delta.
+
 **Response**: returns the updated base `item_photos` row:
+
 ```typescript
 {
   id: string;
@@ -505,28 +522,30 @@ Client invalidates the `['admin', 'photos', 'pending']` query and the
 Lightweight count for the nav notification dot.
 
 ```typescript
-{ count: number; }
+{
+  count: number;
+}
 ```
 
 `SELECT COUNT(*) FROM item_photos WHERE status = 'pending'`. No JOINs, no metadata.
 
 ## Web Components
 
-| File | Purpose |
-|---|---|
-| `web/src/admin/photos/PhotoApprovalPage.tsx` | Top-level page; owns active photo state, queue navigation, keyboard shortcuts |
-| `web/src/admin/photos/PhotoTriageView.tsx` | Hero image + sidebar layout |
-| `web/src/admin/photos/PhotoMetadataPanel.tsx` | Item link, uploader info, contribution audit (with intent badge), current visibility, existing-photos strip |
-| `web/src/admin/photos/ActionBar.tsx` | Approve / Approve as Training-Only / Reject / Skip buttons + reason dropdown. The "Approve as Training-Only" button is hidden when contribution intent is already `training_only`. |
-| `web/src/admin/photos/RejectReasonOverlay.tsx` | Numeric-keyed reason picker with free-text for "other" |
-| `web/src/admin/photos/FilmStripQueue.tsx` | Bottom queue navigation, click-to-jump, position indicator |
-| `web/src/admin/photos/KeyboardShortcutOverlay.tsx` | First-visit cheat sheet, dismissible, localStorage-persisted |
-| `web/src/admin/photos/usePhotoApprovalKeyboard.ts` | Keyboard handler hook (A, R-R chord, 1-6, S, D, Esc) |
-| `web/src/admin/photos/usePhotoApprovals.ts` | TanStack Query hook for `GET /admin/photos/pending` |
-| `web/src/admin/photos/usePhotoApprovalMutations.ts` | Approve/reject/undo mutations with toast feedback |
-| `web/src/admin/photos/usePendingPhotoCount.ts` | Lightweight count hook for the nav dot |
-| `web/src/admin/photos/api.ts` | API client functions |
-| `web/src/routes/_authenticated/admin/photo-approvals.tsx` | Route registration |
+| File                                                      | Purpose                                                                                                                                                                            |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `web/src/admin/photos/PhotoApprovalPage.tsx`              | Top-level page; owns active photo state, queue navigation, keyboard shortcuts                                                                                                      |
+| `web/src/admin/photos/PhotoTriageView.tsx`                | Hero image + sidebar layout                                                                                                                                                        |
+| `web/src/admin/photos/PhotoMetadataPanel.tsx`             | Item link, uploader info, contribution audit (with intent badge), current visibility, existing-photos strip                                                                        |
+| `web/src/admin/photos/ActionBar.tsx`                      | Approve / Approve as Training-Only / Reject / Skip buttons + reason dropdown. The "Approve as Training-Only" button is hidden when contribution intent is already `training_only`. |
+| `web/src/admin/photos/RejectReasonOverlay.tsx`            | Numeric-keyed reason picker with free-text for "other"                                                                                                                             |
+| `web/src/admin/photos/FilmStripQueue.tsx`                 | Bottom queue navigation, click-to-jump, position indicator                                                                                                                         |
+| `web/src/admin/photos/KeyboardShortcutOverlay.tsx`        | First-visit cheat sheet, dismissible, localStorage-persisted                                                                                                                       |
+| `web/src/admin/photos/usePhotoApprovalKeyboard.ts`        | Keyboard handler hook (A, R-R chord, 1-6, S, D, Esc)                                                                                                                               |
+| `web/src/admin/photos/usePhotoApprovals.ts`               | TanStack Query hook for `GET /admin/photos/pending`                                                                                                                                |
+| `web/src/admin/photos/usePhotoApprovalMutations.ts`       | Approve/reject/undo mutations with toast feedback                                                                                                                                  |
+| `web/src/admin/photos/usePendingPhotoCount.ts`            | Lightweight count hook for the nav dot                                                                                                                                             |
+| `web/src/admin/photos/api.ts`                             | API client functions                                                                                                                                                               |
+| `web/src/routes/_authenticated/admin/photo-approvals.tsx` | Route registration                                                                                                                                                                 |
 
 ### Modified files
 
@@ -568,10 +587,12 @@ export const PhotoApprovalItemSchema = z.object({
   }),
   uploader: PhotoApprovalUploaderSchema.nullable(),
   contribution: PhotoApprovalContributionSchema.nullable(),
-  existing_photos: z.array(z.object({
-    id: z.string().uuid(),
-    url: z.string(),
-  })),
+  existing_photos: z.array(
+    z.object({
+      id: z.string().uuid(),
+      url: z.string(),
+    })
+  ),
   created_at: z.string(),
 });
 
@@ -586,9 +607,7 @@ export const PhotoApprovalDecisionResponseSchema = z.object({
   url: z.string(),
   status: z.enum(['pending', 'approved', 'rejected']),
   visibility: z.enum(['public', 'training_only']),
-  rejection_reason_code: z.enum([
-    'blurry', 'wrong_item', 'nsfw', 'duplicate', 'poor_quality', 'other'
-  ]).nullable(),
+  rejection_reason_code: z.enum(['blurry', 'wrong_item', 'nsfw', 'duplicate', 'poor_quality', 'other']).nullable(),
   rejection_reason_text: z.string().nullable(),
   updated_at: z.string(),
 });
@@ -607,12 +626,12 @@ export type PhotoApprovalItem = z.infer<typeof PhotoApprovalItemSchema>;
 
 ## Test Plan
 
-| Layer | Coverage |
-|---|---|
-| API unit | Query functions: pending list shape, atomic flip, undo, count, validation |
-| API integration | Auth (401/403 for non-curator), happy paths, validation rejections (text without code='other', code without status='rejected'), atomic flip across both tables, undo round-trip |
-| Web unit | PhotoApprovalPage state machine, ActionBar callbacks, keyboard hook (A, **T (approve-as-training-only)**, R-R chord timing, 1-6, S, D, all four guards: modifier-held, input/textarea focus, in-flight mutation, overlay-open), FilmStripQueue navigation, "other" inline input flow (Enter/Esc), demote-on-approve flow (T on a public-intent photo updates visibility to training_only) |
-| E2E | Curator opens dashboard → approves with A → rejects with `1` → undoes via Sonner → demotes a public contribution with T → verifies it's no longer in the public catalog → empty state → notification dot disappears |
+| Layer           | Coverage                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API unit        | Query functions: pending list shape, atomic flip, undo, count, validation                                                                                                                                                                                                                                                                                                                 |
+| API integration | Auth (401/403 for non-curator), happy paths, validation rejections (text without code='other', code without status='rejected'), atomic flip across both tables, undo round-trip                                                                                                                                                                                                           |
+| Web unit        | PhotoApprovalPage state machine, ActionBar callbacks, keyboard hook (A, **T (approve-as-training-only)**, R-R chord timing, 1-6, S, D, all four guards: modifier-held, input/textarea focus, in-flight mutation, overlay-open), FilmStripQueue navigation, "other" inline input flow (Enter/Esc), demote-on-approve flow (T on a public-intent photo updates visibility to training_only) |
+| E2E             | Curator opens dashboard → approves with A → rejects with `1` → undoes via Sonner → demotes a public contribution with T → verifies it's no longer in the public catalog → empty state → notification dot disappears                                                                                                                                                                       |
 
 Test scenarios in `docs/test-scenarios/E2E_PHOTO_APPROVAL.md` (Gherkin format).
 

@@ -112,31 +112,31 @@ See [`docs/plans/Development_Roadmap_v1_0.md`](docs/plans/Development_Roadmap_v1
 
 ### Project Status
 
-| Phase                     | Description                                                                  | Status      |
-| ------------------------- | ---------------------------------------------------------------------------- | ----------- |
-| **Foundation (Complete)** |                                                                              |             |
-| 1.1                       | Database migrations (auth tables, RLS)                                       | ✅ Complete |
-| 1.2                       | API authentication (OAuth2, ES256 JWT, token rotation)                       | ✅ Complete |
-| 1.3                       | Web SPA authentication (Google + Apple Sign-In)                              | ✅ Complete |
-| —                         | Account settings UI, Apple webhooks, API docs (Swagger + Scalar)             | ✅ Complete |
-| **ML Track (Active)**     |                                                                              |             |
-| 1.4                       | Catalog schema & seed data (migrations 011–013, seed JSON, validation tests) | ✅ Complete |
-| 1.5                       | Catalog API routes (read-only REST with full-text search)                    | ✅ Complete |
-| 1.5b                      | User roles & admin foundation (user/curator/admin, requireRole middleware)   | ✅ Complete |
-| 1.7                       | Web catalog browsing UI (grid/list, detail pages, search)                    | ✅ Complete |
-| 1.8                       | Personal collection (browse, add/edit/remove, export/import)                 | ✅ Complete |
-| 1.9                       | Photo management (catalog photo upload, thumbnails, ML training export)      | ✅ Complete |
-| 4.0a                      | ML training data preparation (export, augmentation, balance analysis)        | ✅ Complete |
-| 4.0b                      | ML model training (PyTorch MobileNetV3-Small, dual ONNX + Core ML export)    | ✅ Complete |
-| 4.0c                      | Model serving, client-side inference, telemetry, admin quality dashboard     | ✅ Complete |
-| 4.0d                      | Retraining pipeline documentation and quality gates                          | ✅ Complete |
-| 1.6                       | Collection item photos + catalog contribution flow (epic #136, slices 1–4)   | ✅ Complete |
+| Phase                     | Description                                                                  | Status                                                                                                                                          |
+| ------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Foundation (Complete)** |                                                                              |                                                                                                                                                 |
+| 1.1                       | Database migrations (auth tables, RLS)                                       | ✅ Complete                                                                                                                                     |
+| 1.2                       | API authentication (OAuth2, ES256 JWT, token rotation)                       | ✅ Complete                                                                                                                                     |
+| 1.3                       | Web SPA authentication (Google + Apple Sign-In)                              | ✅ Complete                                                                                                                                     |
+| —                         | Account settings UI, Apple webhooks, API docs (Swagger + Scalar)             | ✅ Complete                                                                                                                                     |
+| **ML Track (Active)**     |                                                                              |                                                                                                                                                 |
+| 1.4                       | Catalog schema & seed data (migrations 011–013, seed JSON, validation tests) | ✅ Complete                                                                                                                                     |
+| 1.5                       | Catalog API routes (read-only REST with full-text search)                    | ✅ Complete                                                                                                                                     |
+| 1.5b                      | User roles & admin foundation (user/curator/admin, requireRole middleware)   | ✅ Complete                                                                                                                                     |
+| 1.7                       | Web catalog browsing UI (grid/list, detail pages, search)                    | ✅ Complete                                                                                                                                     |
+| 1.8                       | Personal collection (browse, add/edit/remove, export/import)                 | ✅ Complete                                                                                                                                     |
+| 1.9                       | Photo management (catalog photo upload, thumbnails, ML training export)      | ✅ Complete                                                                                                                                     |
+| 4.0a                      | ML training data preparation (export, augmentation, balance analysis)        | ✅ Complete                                                                                                                                     |
+| 4.0b                      | ML model training (PyTorch MobileNetV3-Small, dual ONNX + Core ML export)    | ✅ Complete                                                                                                                                     |
+| 4.0c                      | Model serving, client-side inference, telemetry, admin quality dashboard     | ✅ Complete                                                                                                                                     |
+| 4.0d                      | Retraining pipeline documentation and quality gates                          | ✅ Complete                                                                                                                                     |
+| 1.6                       | Collection item photos + catalog contribution flow (epic #136, slices 1–4)   | ✅ Complete                                                                                                                                     |
 | 1.9b                      | Photo approval dashboard + contribution visibility (intent/visibility)       | 📐 Design locked ([dashboard plan](docs/plans/Photo_Approval_Dashboard_Plan.md), [amendment](docs/plans/Photo_Contribution_Visibility_Plan.md)) |
-| 2.0                       | iOS app with on-device Core ML inference + barcode scanning                  | 🔜 Next     |
-| **Parallel**              |                                                                              |             |
-| 1.12                      | Account security & GDPR compliance (account deletion, PII scrubbing)         | Planned     |
-| **Post-ML (Deferred)**    |                                                                              |             |
-| 1.10                      | CSV import                                                                   | Deferred    |
-| 1.11                      | Basic reporting & dashboard                                                  | Deferred    |
-| 3.0                       | Pricing integration (eBay API, valuation, insurance reports)                 | Deferred    |
-| 5.0                       | Polish & expansion (object detection, Android, community features)           | Deferred    |
+| 2.0                       | iOS app with on-device Core ML inference + barcode scanning                  | 🔜 Next                                                                                                                                         |
+| **Parallel**              |                                                                              |                                                                                                                                                 |
+| 1.12                      | Account security & GDPR compliance (account deletion, PII scrubbing)         | Planned                                                                                                                                         |
+| **Post-ML (Deferred)**    |                                                                              |                                                                                                                                                 |
+| 1.10                      | CSV import                                                                   | Deferred                                                                                                                                        |
+| 1.11                      | Basic reporting & dashboard                                                  | Deferred                                                                                                                                        |
+| 3.0                       | Pricing integration (eBay API, valuation, insurance reports)                 | Deferred                                                                                                                                        |
+| 5.0                       | Polish & expansion (object detection, Android, community features)           | Deferred                                                                                                                                        |
