@@ -71,17 +71,27 @@ describe('listPendingPhotos', () => {
   it('passes the actor sub and limit into the data query', async () => {
     mockPoolQuery([], [{ count: 0 }]);
 
-    await listPendingPhotos({ actorId: ACTOR_UUID, limit: 200 });
+    await listPendingPhotos({ actorId: ACTOR_UUID, actorRole: 'curator', limit: 200 });
 
     const [sql, params] = findDataCall();
     expect(sql).toContain('item_photos');
-    expect(params).toEqual([ACTOR_UUID, 200]);
+    expect(params).toEqual([ACTOR_UUID, 200, 'curator']);
+  });
+
+  it('passes actorRole as the third parameter for the admin-bypass branch', async () => {
+    mockPoolQuery([], [{ count: 0 }]);
+
+    await listPendingPhotos({ actorId: ACTOR_UUID, actorRole: 'admin', limit: 200 });
+
+    const [sql, params] = findDataCall();
+    expect(sql).toContain("$3 = 'admin'");
+    expect(params).toEqual([ACTOR_UUID, 200, 'admin']);
   });
 
   it('filters the data query to pending status and orders ASC', async () => {
     mockPoolQuery([], [{ count: 0 }]);
 
-    await listPendingPhotos({ actorId: ACTOR_UUID, limit: 200 });
+    await listPendingPhotos({ actorId: ACTOR_UUID, actorRole: 'curator', limit: 200 });
 
     const [sql] = findDataCall();
     expect(sql).toContain("WHERE ip.status = 'pending'");
@@ -91,7 +101,7 @@ describe('listPendingPhotos', () => {
   it('includes the can_decide computation in the SELECT', async () => {
     mockPoolQuery([], [{ count: 0 }]);
 
-    await listPendingPhotos({ actorId: ACTOR_UUID, limit: 200 });
+    await listPendingPhotos({ actorId: ACTOR_UUID, actorRole: 'curator', limit: 200 });
 
     const [sql] = findDataCall();
     expect(sql).toContain('can_decide');
@@ -103,7 +113,7 @@ describe('listPendingPhotos', () => {
   it('filters the existing_photos subquery by visibility=public AND status=approved', async () => {
     mockPoolQuery([], [{ count: 0 }]);
 
-    await listPendingPhotos({ actorId: ACTOR_UUID, limit: 200 });
+    await listPendingPhotos({ actorId: ACTOR_UUID, actorRole: 'curator', limit: 200 });
 
     const [sql] = findDataCall();
     // The existing_photos LATERAL subquery must include the visibility filter
@@ -116,7 +126,7 @@ describe('listPendingPhotos', () => {
   it('tombstone-filters the uploader JOIN', async () => {
     mockPoolQuery([], [{ count: 0 }]);
 
-    await listPendingPhotos({ actorId: ACTOR_UUID, limit: 200 });
+    await listPendingPhotos({ actorId: ACTOR_UUID, actorRole: 'curator', limit: 200 });
 
     const [sql] = findDataCall();
     expect(sql).toContain('LEFT JOIN users u ON u.id = ip.uploaded_by AND u.deleted_at IS NULL');
@@ -125,7 +135,7 @@ describe('listPendingPhotos', () => {
   it('uses LATERAL with LIMIT 1 for the contribution JOIN', async () => {
     mockPoolQuery([], [{ count: 0 }]);
 
-    await listPendingPhotos({ actorId: ACTOR_UUID, limit: 200 });
+    await listPendingPhotos({ actorId: ACTOR_UUID, actorRole: 'curator', limit: 200 });
 
     const [sql] = findDataCall();
     // The contribution LATERAL defends against a rare race where two

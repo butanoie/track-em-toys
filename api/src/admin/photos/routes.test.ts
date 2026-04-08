@@ -674,6 +674,42 @@ describe('admin photo approval routes', () => {
       expect(res.statusCode).toBe(403);
     });
 
+    it('should bypass the self-approval guard when actor is admin', async () => {
+      mockTx();
+      vi.mocked(photoQueries.loadPhotoForDecision).mockResolvedValue({
+        id: PHOTO_UUID,
+        status: 'pending',
+        visibility: 'training_only',
+        // Contributor is the admin themselves — allowed.
+        contribution: {
+          contributed_by: ADMIN_UUID,
+          intent: 'training_only',
+          status: 'pending',
+          file_copied: true,
+        },
+      });
+      vi.mocked(photoQueries.decidePhoto).mockResolvedValue({
+        id: PHOTO_UUID,
+        item_id: ITEM_UUID,
+        url: 'items/abc/photo-1.webp',
+        status: 'approved',
+        visibility: 'training_only',
+        rejection_reason_code: null,
+        rejection_reason_text: null,
+        updated_at: '2026-04-08T10:00:00.000Z',
+      });
+
+      const res = await server.inject({
+        method: 'PATCH',
+        url: patchUrl(),
+        headers: { authorization: `Bearer ${adminToken()}`, 'content-type': 'application/json' },
+        payload: { status: 'approved' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(vi.mocked(photoQueries.decidePhoto)).toHaveBeenCalledTimes(1);
+    });
+
     it('should return 403 for reject when curator is the contributor', async () => {
       mockTx();
       vi.mocked(photoQueries.loadPhotoForDecision).mockResolvedValue({

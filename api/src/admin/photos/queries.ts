@@ -120,11 +120,14 @@ const PENDING_COUNT_SQL = `SELECT COUNT(*)::int AS count FROM item_photos WHERE 
  * No RLS on item_photos — uses pool.query() directly, no transaction needed.
  *
  * @param params - Listing parameters: `actorId` (the requesting curator's UUID,
- *   used to compute `can_decide` — false when actor == contributor) and `limit`
- *   (max photos to return; amendment caps at 200).
+ *   used to compute `can_decide` — false when actor == contributor), `actorRole`
+ *   (when `'admin'`, bypasses the self-approval guard — admins can decide on
+ *   their own contributions), and `limit` (max photos to return; amendment
+ *   caps at 200).
  */
 export async function listPendingPhotos(params: {
   actorId: string;
+  actorRole: 'user' | 'curator' | 'admin';
   limit: number;
 }): Promise<{ rows: PendingPhotoRow[]; totalCount: number }> {
   const dataQuery = `
@@ -148,7 +151,7 @@ export async function listPendingPhotos(params: {
       pc.consent_granted_at,
       pc.intent       AS contribution_intent,
       COALESCE(ep.photos, '[]'::json) AS existing_photos,
-      (pc.contributed_by IS NULL OR LOWER(pc.contributed_by::text) != LOWER($1::text)) AS can_decide
+      ($3 = 'admin' OR pc.contributed_by IS NULL OR LOWER(pc.contributed_by::text) != LOWER($1::text)) AS can_decide
     FROM item_photos ip
     INNER JOIN items i ON i.id = ip.item_id
     INNER JOIN franchises fr ON fr.id = i.franchise_id
@@ -187,7 +190,7 @@ export async function listPendingPhotos(params: {
   `;
 
   const [dataResult, countResult] = await Promise.all([
-    pool.query<PendingPhotoRow>(dataQuery, [params.actorId, params.limit]),
+    pool.query<PendingPhotoRow>(dataQuery, [params.actorId, params.limit, params.actorRole]),
     pool.query<{ count: number }>(PENDING_COUNT_SQL),
   ]);
 
