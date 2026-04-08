@@ -3,32 +3,54 @@ import { useEffect, useRef } from 'react';
 import { useAuth } from '@/auth/useAuth';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Button } from '@/components/ui/button';
-import { Users, BarChart3, ArrowLeft } from 'lucide-react';
+import { Users, BarChart3, ArrowLeft, ImageIcon } from 'lucide-react';
+import { usePendingPhotoCount } from '@/admin/hooks/usePendingPhotoCount';
+import type { UserRole } from '@/lib/zod-schemas';
 
 export const Route = createFileRoute('/_authenticated/admin')({
   component: AdminLayout,
 });
 
-const NAV_ITEMS = [
-  { to: '/admin/ml' as const, label: 'ML Stats', icon: BarChart3 },
-  { to: '/admin/users' as const, label: 'Users', icon: Users },
+interface NavItem {
+  to: '/admin/photo-approvals' | '/admin/ml' | '/admin/users';
+  label: string;
+  icon: typeof BarChart3;
+  /** Roles allowed to see this item. */
+  roles: readonly UserRole[];
+}
+
+const NAV_ITEMS: readonly NavItem[] = [
+  {
+    to: '/admin/photo-approvals',
+    label: 'Photo Approvals',
+    icon: ImageIcon,
+    roles: ['curator', 'admin'],
+  },
+  { to: '/admin/ml', label: 'ML Stats', icon: BarChart3, roles: ['admin'] },
+  { to: '/admin/users', label: 'Users', icon: Users, roles: ['admin'] },
 ] as const;
 
 function AdminLayout() {
   const { user, isLoading, logout } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const { data: pendingCount } = usePendingPhotoCount();
 
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
 
+  const isAllowed = !!user && (user.role === 'admin' || user.role === 'curator');
+
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== 'admin')) {
+    if (!isLoading && !isAllowed) {
       void navigateRef.current({ to: '/' });
     }
-  }, [isLoading, user]);
+  }, [isLoading, isAllowed]);
 
-  if (isLoading || !user || user.role !== 'admin') return <LoadingSpinner className="flex-1" />;
+  if (isLoading || !user || !isAllowed) return <LoadingSpinner className="flex-1" />;
+
+  const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(user.role));
+  const pendingBadge = pendingCount?.count ?? 0;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -42,19 +64,29 @@ function AdminLayout() {
             <span className="text-sm font-semibold text-foreground">Admin</span>
             {/* Mobile nav links — visible when sidebar is hidden */}
             <div className="flex items-center gap-3 md:hidden">
-              {NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`text-sm transition-colors ${
-                    pathname.startsWith(item.to)
-                      ? 'text-foreground font-medium'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {visibleItems.map((item) => {
+                const isActive = pathname.startsWith(item.to);
+                const showBadge = item.to === '/admin/photo-approvals' && pendingBadge > 0;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`text-sm transition-colors ${
+                      isActive
+                        ? 'text-foreground font-medium'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {item.label}
+                    {showBadge && (
+                      <span
+                        className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-red-500"
+                        aria-label={`${pendingBadge} pending photos`}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -76,9 +108,10 @@ function AdminLayout() {
         {/* Sidebar */}
         <aside className="hidden md:flex w-56 flex-col border-r border-border bg-card">
           <nav className="flex-1 p-2 space-y-1" aria-label="Admin navigation">
-            {NAV_ITEMS.map((item) => {
+            {visibleItems.map((item) => {
               const isActive = pathname.startsWith(item.to);
               const Icon = item.icon;
+              const showBadge = item.to === '/admin/photo-approvals' && pendingBadge > 0;
               return (
                 <Link
                   key={item.to}
@@ -90,7 +123,13 @@ function AdminLayout() {
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  {item.label}
+                  <span className="flex-1">{item.label}</span>
+                  {showBadge && (
+                    <span
+                      className="inline-block h-2 w-2 rounded-full bg-red-500"
+                      aria-label={`${pendingBadge} pending photos`}
+                    />
+                  )}
                 </Link>
               );
             })}
