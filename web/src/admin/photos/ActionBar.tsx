@@ -3,6 +3,13 @@ import { Button } from '@/components/ui/button';
 interface ActionBarProps {
   /** When false, the curator contributed this photo and cannot decide it. */
   canDecide: boolean;
+  /**
+   * When false, the contributor chose `training_only` intent, so the
+   * plain "Approve" button (which would promote to the public catalog
+   * by honoring intent) is disabled. Promotion requires re-consent.
+   * The "Approve training only" button remains enabled.
+   */
+  canApprovePublic: boolean;
   /** True while a decision mutation is in flight for the active photo. */
   isPending: boolean;
   onApprove: () => void;
@@ -14,6 +21,8 @@ interface ActionBarProps {
 }
 
 const SELF_REVIEW_TOOLTIP = 'You contributed this photo — another curator must review it';
+const TRAINING_ONLY_TOOLTIP =
+  'Contributor chose training-only — promoting to the public catalog would require re-consent';
 
 /**
  * The action bar sits below the hero image. Buttons carry
@@ -23,9 +32,15 @@ const SELF_REVIEW_TOOLTIP = 'You contributed this photo — another curator must
  * with the tooltip explaining why. Navigation (S/D) and the help
  * shortcut (?) remain enabled — the curator should still be able to
  * skip past their own contributions.
+ *
+ * When `canApprovePublic` is false (contributor chose training_only),
+ * the plain "Approve" button is disabled with an explanatory tooltip.
+ * "Approve training only" and "Reject" remain enabled — those are the
+ * only valid decisions for a training_only contribution.
  */
 export function ActionBar({
   canDecide,
+  canApprovePublic,
   isPending,
   onApprove,
   onApproveTrainingOnly,
@@ -36,6 +51,12 @@ export function ActionBar({
 }: ActionBarProps) {
   const decisionDisabled = !canDecide || isPending;
   const decisionTitle = canDecide ? undefined : SELF_REVIEW_TOOLTIP;
+  const approvePublicDisabled = decisionDisabled || !canApprovePublic;
+  const approvePublicTitle = !canDecide
+    ? SELF_REVIEW_TOOLTIP
+    : !canApprovePublic
+      ? TRAINING_ONLY_TOOLTIP
+      : undefined;
 
   return (
     <div
@@ -48,8 +69,8 @@ export function ActionBar({
         variant="default"
         aria-keyshortcuts="A"
         onClick={onApprove}
-        disabled={decisionDisabled}
-        title={decisionTitle}
+        disabled={approvePublicDisabled}
+        title={approvePublicTitle}
       >
         Approve <span className="ml-1 text-xs opacity-70">A</span>
       </Button>

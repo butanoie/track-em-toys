@@ -66,6 +66,11 @@ export function PhotoApprovalPage() {
   }, [activePhotoId]);
 
   const canDecide = activePhoto?.can_decide ?? false;
+  // A training_only contribution cannot be promoted to public without
+  // re-consent from the contributor (server enforces via 422), so the
+  // plain "Approve" button is disabled for such photos. Direct curator
+  // uploads (no contribution row) default to public and remain enabled.
+  const canApprovePublic = activePhoto?.contribution?.intent !== 'training_only';
   const keyboardDisabled = overlayOpen || conflict !== null || mutation.isPending;
 
   const decide = useCallback(
@@ -127,7 +132,12 @@ export function PhotoApprovalPage() {
   const decideEnabled = !keyboardDisabled && canDecide;
   const navEnabled = !keyboardDisabled && queueLength > 0;
 
-  useHotkeys('a', approvePublic, { enabled: decideEnabled }, [approvePublic, decideEnabled]);
+  useHotkeys(
+    'a',
+    approvePublic,
+    { enabled: decideEnabled && canApprovePublic },
+    [approvePublic, decideEnabled, canApprovePublic],
+  );
   useHotkeys('t', approveTrainingOnly, { enabled: decideEnabled }, [
     approveTrainingOnly,
     decideEnabled,
@@ -228,6 +238,7 @@ export function PhotoApprovalPage() {
                 positionLabel={positionLabel}
                 isMutationPending={mutation.isPending}
                 rejectPickerOpen={rejectPickerOpen}
+                canApprovePublic={canApprovePublic}
                 onApprove={approvePublic}
                 onApproveTrainingOnly={approveTrainingOnly}
                 onRejectButtonClick={openRejectPicker}

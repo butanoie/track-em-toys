@@ -10,6 +10,8 @@ interface PhotoTriageViewProps {
   positionLabel: string;
   isMutationPending: boolean;
   rejectPickerOpen: boolean;
+  /** False when the contributor chose training_only — disables the public approve button. */
+  canApprovePublic: boolean;
   onApprove: () => void;
   onApproveTrainingOnly: () => void;
   onRejectButtonClick: () => void;
@@ -41,6 +43,7 @@ export function PhotoTriageView({
   positionLabel,
   isMutationPending,
   rejectPickerOpen,
+  canApprovePublic,
   onApprove,
   onApproveTrainingOnly,
   onRejectButtonClick,
@@ -78,6 +81,7 @@ export function PhotoTriageView({
 
         <ActionBar
           canDecide={photo.can_decide}
+          canApprovePublic={canApprovePublic}
           isPending={isMutationPending}
           onApprove={onApprove}
           onApproveTrainingOnly={onApproveTrainingOnly}

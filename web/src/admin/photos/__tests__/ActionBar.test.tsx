@@ -12,7 +12,15 @@ function renderActionBar(props: Partial<React.ComponentProps<typeof ActionBar>> 
     onNext: vi.fn(),
     onShowShortcuts: vi.fn(),
   };
-  render(<ActionBar canDecide={true} isPending={false} {...handlers} {...props} />);
+  render(
+    <ActionBar
+      canDecide={true}
+      canApprovePublic={true}
+      isPending={false}
+      {...handlers}
+      {...props}
+    />,
+  );
   return handlers;
 }
 
@@ -59,6 +67,21 @@ describe('ActionBar', () => {
     expect(screen.getByRole('button', { name: /Reject R$/ })).toBeDisabled();
     expect(screen.getByRole('button', { name: /Prev S$/ })).toBeDisabled();
     expect(screen.getByRole('button', { name: /Next D$/ })).toBeDisabled();
+  });
+
+  it('disables the plain Approve button when canApprovePublic is false (training_only intent)', () => {
+    renderActionBar({ canApprovePublic: false });
+
+    const approve = screen.getByRole('button', { name: /Approve A$/ });
+    const approveT = screen.getByRole('button', { name: /Approve training only T$/ });
+    const reject = screen.getByRole('button', { name: /Reject R$/ });
+
+    expect(approve).toBeDisabled();
+    expect(approve.getAttribute('title')).toMatch(/training-only/i);
+    // The training-only approve and reject must stay enabled — those are
+    // the only valid decisions for a training_only contribution.
+    expect(approveT).toBeEnabled();
+    expect(reject).toBeEnabled();
   });
 
   it('exposes aria-keyshortcuts on every shortcut-bound button', () => {

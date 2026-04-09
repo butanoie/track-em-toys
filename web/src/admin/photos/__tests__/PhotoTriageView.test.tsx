@@ -35,6 +35,7 @@ function renderTriage(overrides: Partial<React.ComponentProps<typeof PhotoTriage
     positionLabel: '1 of 5',
     isMutationPending: false,
     rejectPickerOpen: false,
+    canApprovePublic: true,
     onApprove: vi.fn(),
     onApproveTrainingOnly: vi.fn(),
     onRejectButtonClick: vi.fn(),
