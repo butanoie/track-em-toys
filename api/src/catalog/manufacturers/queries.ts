@@ -148,7 +148,8 @@ function buildManufacturerItemsQuery(
       LEFT JOIN item_photos ip
           ON ip.item_id = i.id
          AND ip.is_primary = true
-         AND ip.status = 'approved'`;
+         AND ip.status = 'approved'
+         AND ip.visibility = 'public'`;
 
   return { joins, whereClause: clauses.join(' AND '), params };
 }

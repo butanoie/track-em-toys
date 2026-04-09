@@ -143,7 +143,8 @@ export function buildItemsQuery(
       LEFT JOIN item_photos ip
           ON ip.item_id = i.id
          AND ip.is_primary = true
-         AND ip.status = 'approved'`;
+         AND ip.status = 'approved'
+         AND ip.visibility = 'public'`;
 
   return { joins, whereClause: clauses.join(' AND '), params };
 }
@@ -365,6 +366,7 @@ export async function getItemBySlug(franchiseSlug: string, itemSlug: string): Pr
           ON ip.item_id = i.id
          AND ip.is_primary = true
          AND ip.status = 'approved'
+         AND ip.visibility = 'public'
      WHERE fr.slug = $1 AND i.slug = $2`;
 
   const { rows: baseRows } = await pool.query<ItemBaseRow>(baseQuery, [franchiseSlug, itemSlug]);
@@ -388,7 +390,7 @@ export async function getItemBySlug(franchiseSlug: string, itemSlug: string): Pr
     pool.query<PhotoRow>(
       `SELECT id, url, caption, is_primary, sort_order
          FROM item_photos
-        WHERE item_id = $1 AND status = 'approved'
+        WHERE item_id = $1 AND status = 'approved' AND visibility = 'public'
         ORDER BY is_primary DESC, sort_order ASC, created_at ASC`,
       [base.id]
     ),
