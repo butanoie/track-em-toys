@@ -35,7 +35,7 @@ interface ShortcutRow {
 const SHORTCUTS: readonly ShortcutRow[] = [
   { keys: 'A', action: 'Approve as-intended' },
   { keys: 'T', action: 'Approve as training only' },
-  { keys: 'R R', action: 'Reject (no reason)' },
+  { keys: 'R', action: 'Reject — open reason picker' },
   { keys: '1', action: 'Reject — blurry' },
   { keys: '2', action: 'Reject — wrong item' },
   { keys: '3', action: 'Reject — NSFW' },

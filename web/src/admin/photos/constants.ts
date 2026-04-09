@@ -1,13 +1,6 @@
 import type { RejectionReasonCode } from '@/lib/zod-schemas';
 
 /**
- * Maximum delay between the two `R` presses of the reject chord, in
- * milliseconds. Imported by `useRejectChord` and (via `REJECT_CHORD_WINDOW_MS`)
- * by tests so the value lives in exactly one place.
- */
-export const REJECT_CHORD_WINDOW_MS = 500;
-
-/**
  * The pending queue API caps `photos` at 200; `total_count` is unbounded
  * and drives the `PendingQueueBanner` warning when more than 200 are
  * actually pending.

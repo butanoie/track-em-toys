@@ -23,7 +23,7 @@ describe('ActionBar', () => {
 
     await user.click(screen.getByRole('button', { name: /Approve A$/ }));
     await user.click(screen.getByRole('button', { name: /Approve training only T$/ }));
-    await user.click(screen.getByRole('button', { name: /Reject R R$/ }));
+    await user.click(screen.getByRole('button', { name: /Reject R$/ }));
     await user.click(screen.getByRole('button', { name: /Prev S$/ }));
     await user.click(screen.getByRole('button', { name: /Next D$/ }));
     await user.click(screen.getByRole('button', { name: /Show keyboard shortcuts/ }));
@@ -41,7 +41,7 @@ describe('ActionBar', () => {
 
     const approve = screen.getByRole('button', { name: /Approve A$/ });
     const approveT = screen.getByRole('button', { name: /Approve training only T$/ });
-    const reject = screen.getByRole('button', { name: /Reject R R$/ });
+    const reject = screen.getByRole('button', { name: /Reject R$/ });
 
     expect(approve).toBeDisabled();
     expect(approveT).toBeDisabled();
@@ -56,7 +56,7 @@ describe('ActionBar', () => {
   it('disables decision buttons while a mutation is in flight', () => {
     renderActionBar({ isPending: true });
     expect(screen.getByRole('button', { name: /Approve A$/ })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /Reject R R$/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Reject R$/ })).toBeDisabled();
     expect(screen.getByRole('button', { name: /Prev S$/ })).toBeDisabled();
     expect(screen.getByRole('button', { name: /Next D$/ })).toBeDisabled();
   });
@@ -67,9 +67,9 @@ describe('ActionBar', () => {
       'aria-keyshortcuts',
       'A',
     );
-    expect(screen.getByRole('button', { name: /Reject R R$/ })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /Reject R$/ })).toHaveAttribute(
       'aria-keyshortcuts',
-      'R R',
+      'R',
     );
   });
 });

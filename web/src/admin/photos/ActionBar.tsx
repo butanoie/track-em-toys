@@ -66,12 +66,12 @@ export function ActionBar({
       <Button
         type="button"
         variant="destructive"
-        aria-keyshortcuts="R R"
+        aria-keyshortcuts="R"
         onClick={onReject}
         disabled={decisionDisabled}
         title={decisionTitle}
       >
-        Reject <span className="ml-1 text-xs opacity-70">R R</span>
+        Reject <span className="ml-1 text-xs opacity-70">R</span>
       </Button>
 
       <div className="ml-auto flex items-center gap-2">

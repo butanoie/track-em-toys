@@ -7,7 +7,6 @@ import { FilmStripQueue } from './FilmStripQueue';
 import { KeyboardShortcutOverlay } from './KeyboardShortcutOverlay';
 import { useAdminPhotoApprovals } from './hooks/useAdminPhotoApprovals';
 import { usePhotoDecisionMutation } from './hooks/usePhotoDecisionMutation';
-import { useRejectChord } from './hooks/useRejectChord';
 import { REJECTION_REASONS } from './constants';
 import type { DecidePhotoBody } from './api';
 import type { PhotoApprovalItem, RejectionReasonCode } from '@/lib/zod-schemas';
@@ -121,7 +120,10 @@ export function PhotoApprovalPage() {
     [activeIndex, queueLength],
   );
 
-  // Simple keyboard bindings — the R-R chord lives in `useRejectChord`.
+  // Simple keyboard bindings. R opens the reject reason picker directly
+  // (the old R-R chord was a "reject + confirm" gesture from before
+  // rejection reasons existed — the reason picker itself now serves as
+  // the confirmation step, so the chord is redundant).
   const decideEnabled = !keyboardDisabled && canDecide;
   const navEnabled = !keyboardDisabled && queueLength > 0;
 
@@ -130,6 +132,12 @@ export function PhotoApprovalPage() {
     approveTrainingOnly,
     decideEnabled,
   ]);
+  useHotkeys(
+    'r',
+    openRejectPicker,
+    { enabled: decideEnabled && !rejectPickerOpen },
+    [openRejectPicker, decideEnabled, rejectPickerOpen],
+  );
 
   // Reason hotkeys — only active while the reject picker is open. Bound
   // as a single combined listener so the number of hook calls stays
@@ -173,11 +181,6 @@ export function PhotoApprovalPage() {
     { enabled: !overlayOpen, enableOnFormTags: true },
     [overlayOpen],
   );
-
-  useRejectChord({
-    enabled: decideEnabled && !rejectPickerOpen,
-    onChord: openRejectPicker,
-  });
 
   return (
     <div className="space-y-6">
