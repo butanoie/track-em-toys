@@ -43,7 +43,7 @@ export interface PendingPhotoRow {
   consent_granted_at: string | null;
   contribution_intent: ContributionIntent | null;
 
-  existing_photos: Array<{ id: string; url: string }>;
+  existing_photos: Array<{ id: string; url: string; distance: number | null }>;
   can_decide: boolean;
 }
 
@@ -174,13 +174,36 @@ export async function listPendingPhotos(params: {
       LIMIT 1
     ) pc ON true
     LEFT JOIN LATERAL (
-      SELECT json_agg(json_build_object('id', ep_inner.id, 'url', ep_inner.url)) AS photos
+      -- Per-item lookup of existing approved photos, ordered by perceptual
+      -- similarity to the pending photo. bit_count requires PG14+ and
+      -- counts set bits in the XOR of the two 64-bit dHashes (Hamming
+      -- distance). Rows with an empty or non-standard dHash get NULL
+      -- distance and fall to the end via NULLS LAST.
+      SELECT COALESCE(
+        json_agg(
+          json_build_object('id', id, 'url', url, 'distance', distance)
+          ORDER BY distance NULLS LAST, created_at DESC
+        ),
+        '[]'::json
+      ) AS photos
       FROM (
-        SELECT id, url FROM item_photos
+        SELECT id, url, created_at,
+          CASE
+            WHEN length(dhash) = 16 AND length(ip.dhash) = 16
+            THEN bit_count(('x' || ip.dhash)::bit(64) # ('x' || dhash)::bit(64))::int
+            ELSE NULL
+          END AS distance
+        FROM item_photos
         WHERE item_id = ip.item_id
           AND status = 'approved'
           AND visibility = 'public'
-        ORDER BY created_at DESC
+        ORDER BY
+          CASE
+            WHEN length(dhash) = 16 AND length(ip.dhash) = 16
+            THEN bit_count(('x' || ip.dhash)::bit(64) # ('x' || dhash)::bit(64))
+            ELSE 999
+          END ASC,
+          created_at DESC
         LIMIT 3
       ) ep_inner
     ) ep ON true

@@ -110,6 +110,20 @@ describe('listPendingPhotos', () => {
     expect(sql).toContain('LOWER($1::text)');
   });
 
+  it('computes Hamming distance via bit_count and orders existing_photos by similarity', async () => {
+    mockPoolQuery([], [{ count: 0 }]);
+
+    await listPendingPhotos({ actorId: ACTOR_UUID, actorRole: 'curator', limit: 200 });
+
+    const [sql] = findDataCall();
+    // The existing_photos LATERAL must use bit_count for Hamming distance
+    // and order by distance ASC NULLS LAST so the closest approved photos
+    // surface first.
+    expect(sql).toContain('bit_count');
+    expect(sql).toContain('distance NULLS LAST');
+    expect(sql).toMatch(/length\(ip\.dhash\)\s*=\s*16/);
+  });
+
   it('filters the existing_photos subquery by visibility=public AND status=approved', async () => {
     mockPoolQuery([], [{ count: 0 }]);
 

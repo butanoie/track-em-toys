@@ -81,6 +81,43 @@ describe('PhotoTriageView', () => {
     expect(screen.queryByRole('group', { name: /Select rejection reason/ })).not.toBeInTheDocument();
   });
 
+  it('shows a near-duplicate warning when an existing photo has distance ≤ 4', () => {
+    renderTriage({
+      photo: makePhotoApprovalItem({
+        existing_photos: [
+          { id: '55555555-5555-4555-8555-555555555555', url: 'transformers/op-1.webp', distance: 2 },
+          { id: '66666666-6666-4666-8666-666666666666', url: 'transformers/op-2.webp', distance: 30 },
+        ],
+      }),
+    });
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent(/Possible duplicate/);
+    expect(alert).toHaveTextContent(/distance 2/);
+  });
+
+  it('does NOT show the near-duplicate warning when all distances exceed 4', () => {
+    renderTriage({
+      photo: makePhotoApprovalItem({
+        existing_photos: [
+          { id: '55555555-5555-4555-8555-555555555555', url: 'transformers/op-1.webp', distance: 12 },
+          { id: '66666666-6666-4666-8666-666666666666', url: 'transformers/op-2.webp', distance: 30 },
+        ],
+      }),
+    });
+    expect(screen.queryByText(/Possible duplicate/)).not.toBeInTheDocument();
+  });
+
+  it('does NOT show the near-duplicate warning when distance is null (legacy dHash)', () => {
+    renderTriage({
+      photo: makePhotoApprovalItem({
+        existing_photos: [
+          { id: '55555555-5555-4555-8555-555555555555', url: 'transformers/op-1.webp', distance: null },
+        ],
+      }),
+    });
+    expect(screen.queryByText(/Possible duplicate/)).not.toBeInTheDocument();
+  });
+
   it('renders the photo caption when present', () => {
     renderTriage({
       photo: makePhotoApprovalItem({

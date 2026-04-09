@@ -8,6 +8,17 @@ import type { RejectionReasonCode } from '@/lib/zod-schemas';
 export const MAX_QUEUE_SIZE = 200;
 
 /**
+ * Hamming distance threshold below which an existing approved photo is
+ * considered a near-duplicate of the pending photo. Matches the curator's
+ * expectation that "≤4 bits different" means "basically the same image,
+ * probably a cropped/rescaled variant". The upload pipeline uses a looser
+ * threshold (≤10) for hard-rejecting duplicates; at review time we use a
+ * tighter threshold because same-item dupes are not automatically a
+ * reject — sometimes the curator wants multiple angles.
+ */
+export const NEAR_DUPLICATE_DISTANCE = 4;
+
+/**
  * localStorage key for the first-visit shortcut overlay. Stays without
  * the `trackem:` prefix per D8: it's a UI preference, not a security
  * flag, and the base plan + amendment use this exact key name.

@@ -32,8 +32,8 @@ export function makePhotoApprovalItem(overrides: Partial<PhotoApprovalItem> = {}
       intent: 'catalog_and_training',
     },
     existing_photos: [
-      { id: '55555555-5555-4555-8555-555555555555', url: 'transformers/op-1.webp' },
-      { id: '66666666-6666-4666-8666-666666666666', url: 'transformers/op-2.webp' },
+      { id: '55555555-5555-4555-8555-555555555555', url: 'transformers/op-1.webp', distance: null },
+      { id: '66666666-6666-4666-8666-666666666666', url: 'transformers/op-2.webp', distance: null },
     ],
     can_decide: true,
     created_at: '2026-04-05T10:00:00.000Z',

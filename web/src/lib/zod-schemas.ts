@@ -742,6 +742,8 @@ export const PhotoApprovalContributionSchema = z.object({
 export const PhotoApprovalExistingPhotoSchema = z.object({
   id: z.string().uuid(),
   url: z.string(),
+  /** Hamming distance (0-64) from the pending photo's dHash, or null when unknown. */
+  distance: z.number().int().nullable(),
 });
 
 export const PhotoApprovalItemSchema = z.object({

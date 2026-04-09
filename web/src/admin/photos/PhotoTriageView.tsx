@@ -2,6 +2,7 @@ import { buildPhotoUrl } from '@/lib/photo-url';
 import { ActionBar } from './ActionBar';
 import { PhotoMetadataPanel } from './PhotoMetadataPanel';
 import { RejectReasonPicker } from './RejectReasonPicker';
+import { NEAR_DUPLICATE_DISTANCE } from './constants';
 import type { PhotoApprovalItem, RejectionReasonCode } from '@/lib/zod-schemas';
 
 interface PhotoTriageViewProps {
@@ -54,6 +55,9 @@ export function PhotoTriageView({
   onShowShortcuts,
 }: PhotoTriageViewProps) {
   const showRejectPicker = rejectPickerOpen && photo.can_decide;
+  const nearDuplicate = photo.existing_photos.find(
+    (ep) => ep.distance !== null && ep.distance <= NEAR_DUPLICATE_DISTANCE,
+  );
 
   return (
     <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" aria-label="Photo triage">
@@ -77,6 +81,17 @@ export function PhotoTriageView({
 
         {photo.photo.caption && (
           <p className="text-sm italic text-muted-foreground">“{photo.photo.caption}”</p>
+        )}
+
+        {nearDuplicate && (
+          <div
+            role="alert"
+            className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+          >
+            <strong className="font-semibold">Possible duplicate.</strong> An existing approved
+            photo for <em>{photo.item.name}</em> looks nearly identical to this one (Hamming
+            distance {nearDuplicate.distance}). Check the sidebar before approving.
+          </div>
         )}
 
         <ActionBar

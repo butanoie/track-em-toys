@@ -134,7 +134,7 @@ const mockPendingRow = {
   consent_version: 'v1.0',
   consent_granted_at: '2026-04-01T09:00:00Z',
   contribution_intent: 'training_only' as const,
-  existing_photos: [{ id: 'ep1', url: 'items/abc/existing-1.webp' }],
+  existing_photos: [{ id: 'ep1', url: 'items/abc/existing-1.webp', distance: null }],
   can_decide: true,
 };
 
