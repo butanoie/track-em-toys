@@ -857,3 +857,110 @@ different intended scopes. Renamed in the child plugin:
 - **M4 — `consent_granted_at` Date-vs-string typing**: project-wide
   convention. Fixing locally would create inconsistency with existing admin
   queries. Belongs in a project-wide audit, not this PR.
+
+## D14 — PR 2 (web UI) design and review
+
+PR 2 implements the curator-facing dashboard against the PR 1 API. Decisions
+locked during the second `/feature-dev:feature-dev` cycle:
+
+### D14.1 — Locked design decisions
+
+1. **Admin layout role guard**: relax to `curator | admin`. Page-level
+   admin-only guards on `MlStatsPage` and `AdminUsersPage` (render fallback,
+   sit above any `useQuery` calls). Sidebar `NAV_ITEMS` becomes role-aware —
+   curators see only "Photo Approvals". `/admin` index redirect reads
+   `sessionStorage.getItem('trackem:user')` in `beforeLoad` and routes
+   `curator → /admin/photos`, `admin → /admin/ml`.
+2. **Pending-count badge**: `refetchOnWindowFocus: true` override on the
+   count query only. First use of focus-refetch in the codebase. No interval
+   timer. `usePendingPhotoCount` lives in `web/src/admin/hooks/` (not
+   `admin/photos/`) so the layout import direction stays correct.
+3. **Keyboard layer**: `react-hotkeys-hook` for the simple bindings (`A`,
+   `T`, `1-6`, `S`, `D`, `Esc`); custom `useRejectChord` adapter for the R-R
+   500ms chord. Both gated by a shared `enabled` flag (false when mutation
+   in flight, any overlay open, focus in input/textarea, or `can_decide ===
+   false` for the decision keys; navigation keys `S/D/?` use a separate
+   looser gate). `enableOnFormTags` left at `react-hotkeys-hook`'s default
+   `false` to satisfy the input-focus guard for free.
+4. **Self-approval**: ineligible photos (`can_decide: false`) are **shown**
+   in the queue. ActionBar buttons render disabled with a tooltip ("You
+   contributed this photo — another curator must review it"). Decision
+   keystrokes are inert. The 403 from PR 1's server-side guard is treated as
+   a defensive fallback that surfaces an `ErrorBanner` if it ever fires.
+   `can_decide` is read directly from the API response — never re-derived
+   client-side.
+5. **E2E cleanup**: new `POST /admin/test-photos/cleanup` endpoint (sibling
+   of seed) takes `{ item_photo_ids: string[] }` and runs
+   `DELETE FROM item_photos WHERE id = ANY($1) AND url LIKE 'test-pending/%'`
+   inside `withTransaction` (contributions first, then item_photos). The
+   url-prefix guard is mandatory — without it, an unauthenticated cleanup
+   endpoint in non-prod could delete arbitrary photos.
+6. **Page state**: 4× `useState` (`activeIndex`, `overlayOpen`,
+   `rejectOverlayOpen`, `conflictBannerVisible`). No reducer — codebase has
+   zero `useReducer` usage and the state machine is shallow enough.
+7. **409 conflict handling**: `decidePhoto()` in `admin/photos/api.ts` uses
+   `apiFetch` (not `apiFetchJson`) and branches on `response.status === 409`,
+   returning a typed `DecideResult` discriminated union. Preserves
+   `current_status` in the type system (would otherwise be stripped by
+   `ApiErrorSchema`). Mirrors the `gdprPurgeUser` pattern.
+8. **Helper extraction**: `isBannerError` and `getMutationErrorMessage`
+   move from `web/src/admin/users/types.ts` to a new
+   `web/src/admin/lib/api-errors.ts`. PR 2 needs them, so the extraction is
+   timing-justified, not speculative. `users/types.ts` re-exports for the
+   one existing import site.
+9. **Schema location**: append the photo approval section to the existing
+   `web/src/lib/zod-schemas.ts` (no sub-file split). Follows every other
+   domain's convention.
+
+### D14.2 — Architecture review findings (medium severity)
+
+Four medium findings caught in the self-review pass before implementation:
+
+1. **`activeIndex` clamp on refetch**: when the queue refetches after a
+   decision, the new array may be shorter than the previous `activeIndex`.
+   `PhotoApprovalPage` runs a `useEffect` on `data` that clamps
+   `activeIndex` to `Math.max(0, data.photos.length - 1)` whenever the index
+   exceeds the new length.
+2. **No auto-advance on success**: the page must NOT increment `activeIndex`
+   in the mutation `onSuccess` callback. The refetch implicitly removes the
+   decided photo from the array, so the existing `activeIndex` already
+   points at what *was* the next photo. Auto-advancing would skip a photo.
+3. **409 conflict banner with keyboard gate**: when a 409 fires, render an
+   inline `ErrorBanner` ("Photo state has changed — queue refreshed") and
+   set `conflictBannerVisible: true` to disable the keyboard. Banner has a
+   "Dismiss" button. Without this gate, a 409 in a fast-keyboard workflow
+   can cause an unintended decision when the queue refetches and the user's
+   next keystroke acts on a different photo than they were looking at.
+4. **Cleanup endpoint url-prefix guard**: covered in D14.1 #5 above. The
+   `url LIKE 'test-pending/%'` check is mandatory for an unauthenticated
+   non-prod endpoint.
+
+### D14.3 — Low-severity decisions applied during implementation
+
+- localStorage key for the keyboard shortcut overlay:
+  `trackem:admin:photo-approvals:shortcuts-seen` (matches the project
+  `trackem:` namespace prefix from web `CLAUDE.md`).
+- Helpers extraction destination: `web/src/admin/lib/api-errors.ts` (more
+  specific than `errors.ts`).
+- Empty queue state and >200 warning banner are inlined in
+  `PhotoApprovalPage` — not extracted to separate components. ~10 lines of
+  JSX each, single call site.
+- R-R chord state resets on `activeIndex` change (the page calls
+  `resetChord()` in S/D navigation handlers).
+- Page-level admin guards in `MlStatsPage` and `AdminUsersPage` sit at the
+  top of the component, before any `useQuery` calls — prevents data fetches
+  before the role check.
+- `react-hotkeys-hook` added to `web/package.json` `dependencies` (runtime
+  library, ships to production).
+- New test scenarios doc: `docs/test-scenarios/E2E_PHOTO_APPROVAL.md`,
+  index updated in `docs/test-scenarios/README.md`.
+
+### D14.4 — Out of scope for PR 2
+
+Confirmed deferred to follow-up issues, NOT in PR 2:
+
+- R6: gate `@fastify/static` for pending photo files (separate issue).
+- NSFW auto-mod (#71), bulk approve, audit log, file-cleanup background
+  job, approval history view.
+- Admin-only sidebar reorganization beyond the conditional hide of ML/Users
+  for curators.

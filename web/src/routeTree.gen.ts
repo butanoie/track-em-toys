@@ -19,6 +19,7 @@ import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedCatalogSearchRouteImport } from './routes/_authenticated/catalog/search'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedAdminPhotoApprovalsRouteImport } from './routes/_authenticated/admin/photo-approvals'
 import { Route as AuthenticatedAdminMlRouteImport } from './routes/_authenticated/admin/ml'
 import { Route as AuthenticatedCatalogManufacturersIndexRouteImport } from './routes/_authenticated/catalog/manufacturers/index'
 import { Route as AuthenticatedCatalogFranchiseIndexRouteImport } from './routes/_authenticated/catalog/$franchise/index'
@@ -80,6 +81,12 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminPhotoApprovalsRoute =
+  AuthenticatedAdminPhotoApprovalsRouteImport.update({
+    id: '/photo-approvals',
+    path: '/photo-approvals',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMlRoute = AuthenticatedAdminMlRouteImport.update({
   id: '/ml',
   path: '/ml',
@@ -141,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/collection': typeof AuthenticatedCollectionRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/admin/ml': typeof AuthenticatedAdminMlRoute
+  '/admin/photo-approvals': typeof AuthenticatedAdminPhotoApprovalsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/catalog/search': typeof AuthenticatedCatalogSearchRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -160,6 +168,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/ml': typeof AuthenticatedAdminMlRoute
+  '/admin/photo-approvals': typeof AuthenticatedAdminPhotoApprovalsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/catalog/search': typeof AuthenticatedCatalogSearchRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -182,6 +191,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/ml': typeof AuthenticatedAdminMlRoute
+  '/_authenticated/admin/photo-approvals': typeof AuthenticatedAdminPhotoApprovalsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/catalog/search': typeof AuthenticatedCatalogSearchRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/collection'
     | '/settings'
     | '/admin/ml'
+    | '/admin/photo-approvals'
     | '/admin/users'
     | '/catalog/search'
     | '/admin/'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/admin/ml'
+    | '/admin/photo-approvals'
     | '/admin/users'
     | '/catalog/search'
     | '/admin'
@@ -244,6 +256,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/'
     | '/_authenticated/admin/ml'
+    | '/_authenticated/admin/photo-approvals'
     | '/_authenticated/admin/users'
     | '/_authenticated/catalog/search'
     | '/_authenticated/admin/'
@@ -335,6 +348,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/photo-approvals': {
+      id: '/_authenticated/admin/photo-approvals'
+      path: '/photo-approvals'
+      fullPath: '/admin/photo-approvals'
+      preLoaderRoute: typeof AuthenticatedAdminPhotoApprovalsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/ml': {
       id: '/_authenticated/admin/ml'
       path: '/ml'
@@ -403,12 +423,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMlRoute: typeof AuthenticatedAdminMlRoute
+  AuthenticatedAdminPhotoApprovalsRoute: typeof AuthenticatedAdminPhotoApprovalsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminMlRoute: AuthenticatedAdminMlRoute,
+  AuthenticatedAdminPhotoApprovalsRoute: AuthenticatedAdminPhotoApprovalsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }

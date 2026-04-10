@@ -69,6 +69,29 @@ export function makeAdminAuthContext(overrides: Partial<AuthContextValue> = {}):
   };
 }
 
+export const mockCuratorAuthUser = {
+  id: '770e8400-e29b-41d4-a716-446655440000',
+  email: 'curator@example.com',
+  display_name: 'Curator User',
+  avatar_url: null,
+  role: 'curator' as const,
+};
+
+export function makeCuratorAuthContext(
+  overrides: Partial<AuthContextValue> = {},
+): AuthContextValue {
+  return {
+    user: mockCuratorAuthUser,
+    isAuthenticated: true,
+    isLoading: false,
+    sessionExpired: false,
+    signInWithGoogle: vi.fn(),
+    signInWithApple: vi.fn(),
+    logout: vi.fn(),
+    ...overrides,
+  };
+}
+
 export function createTestWrapper(ctx?: AuthContextValue) {
   const authCtx = ctx ?? makeAdminAuthContext();
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });

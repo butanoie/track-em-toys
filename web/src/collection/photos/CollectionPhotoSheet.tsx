@@ -10,6 +10,7 @@ import { ContributeDialog } from './ContributeDialog';
 import { useCollectionPhotoUpload } from './useCollectionPhotoUpload';
 import { useCollectionPhotoMutations } from './useCollectionPhotoMutations';
 import { listCollectionPhotos } from './api';
+import { getMutationErrorMessage } from '@/lib/api-errors';
 import type { CollectionPhotoListItem, ContributeIntent } from '@/lib/zod-schemas';
 
 interface CollectionPhotoSheetProps {
@@ -118,9 +119,11 @@ export function CollectionPhotoSheet({
             toast.success('Photo contributed for review');
             void refreshPhotos();
           },
-          onError: () => {
+          onError: (err) => {
             setContributeTarget(null);
-            toast.error('Failed to contribute photo');
+            // Surface the server-provided message (e.g. "This photo has
+            // already been contributed") instead of a generic failure.
+            toast.error(getMutationErrorMessage(err));
           },
         }
       );

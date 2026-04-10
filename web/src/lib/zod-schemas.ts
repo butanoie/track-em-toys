@@ -711,6 +711,97 @@ export const ReorderCollectionPhotosResponseSchema = z.object({
   photos: z.array(CollectionPhotoSchema),
 });
 
+// ---------------------------------------------------------------------------
+// Photo Approval Dashboard (admin) — Phase 1.9b
+// ---------------------------------------------------------------------------
+
+export const RejectionReasonCodeSchema = z.enum([
+  'blurry',
+  'wrong_item',
+  'nsfw',
+  'duplicate',
+  'poor_quality',
+  'other',
+]);
+export type RejectionReasonCode = z.infer<typeof RejectionReasonCodeSchema>;
+
+export const PhotoApprovalUploaderSchema = z.object({
+  id: z.string().uuid(),
+  display_name: z.string().nullable(),
+  email: z.string().nullable(),
+});
+
+export const PhotoApprovalContributionSchema = z.object({
+  id: z.string().uuid(),
+  consent_version: z.string(),
+  consent_granted_at: z.string(),
+  intent: z.enum(['training_only', 'catalog_and_training']),
+  contributed_by: z.string().uuid(),
+});
+
+export const PhotoApprovalExistingPhotoSchema = z.object({
+  id: z.string().uuid(),
+  url: z.string(),
+  /** Hamming distance (0-64) from the pending photo's dHash, or null when unknown. */
+  distance: z.number().int().nullable(),
+});
+
+export const PhotoApprovalItemSchema = z.object({
+  id: z.string().uuid(),
+  item: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    slug: z.string(),
+    franchise_slug: z.string(),
+    thumbnail_url: z.string().nullable(),
+  }),
+  photo: z.object({
+    url: z.string(),
+    caption: z.string().nullable(),
+    visibility: z.enum(['public', 'training_only']),
+  }),
+  uploader: PhotoApprovalUploaderSchema.nullable(),
+  contribution: PhotoApprovalContributionSchema.nullable(),
+  existing_photos: z.array(PhotoApprovalExistingPhotoSchema),
+  can_decide: z.boolean(),
+  created_at: z.string(),
+});
+
+export const PhotoApprovalListResponseSchema = z.object({
+  photos: z.array(PhotoApprovalItemSchema),
+  total_count: z.number().int().nonnegative(),
+});
+
+export const PhotoApprovalDecisionResponseSchema = z.object({
+  id: z.string().uuid(),
+  item_id: z.string().uuid(),
+  url: z.string(),
+  status: z.enum(['pending', 'approved', 'rejected']),
+  visibility: z.enum(['public', 'training_only']),
+  rejection_reason_code: RejectionReasonCodeSchema.nullable(),
+  rejection_reason_text: z.string().nullable(),
+  updated_at: z.string(),
+});
+
+export const PhotoApprovalConflictResponseSchema = z.object({
+  error: z.string(),
+  current_status: z.enum(['pending', 'approved', 'rejected']),
+});
+
+export const PhotoApprovalCountResponseSchema = z.object({
+  count: z.number().int().nonnegative(),
+});
+
+export type PhotoApprovalUploader = z.infer<typeof PhotoApprovalUploaderSchema>;
+export type PhotoApprovalContribution = z.infer<typeof PhotoApprovalContributionSchema>;
+export type PhotoApprovalItem = z.infer<typeof PhotoApprovalItemSchema>;
+export type PhotoApprovalListResponse = z.infer<typeof PhotoApprovalListResponseSchema>;
+export type PhotoApprovalDecisionResponse = z.infer<typeof PhotoApprovalDecisionResponseSchema>;
+export type PhotoApprovalConflictResponse = z.infer<typeof PhotoApprovalConflictResponseSchema>;
+export type PhotoApprovalCountResponse = z.infer<typeof PhotoApprovalCountResponseSchema>;
+
+// ---------------------------------------------------------------------------
+
 export const ContributeIntentSchema = z.enum(['training_only', 'catalog_and_training']);
 
 export const ContributePhotoResponseSchema = z.object({

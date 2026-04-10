@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { useAuth } from '@/auth/useAuth';
 import { Route } from '@/routes/_authenticated/admin/users';
 import { useAdminUsers } from '@/admin/hooks/useAdminUsers';
 import { useAdminUserMutations } from '@/admin/hooks/useAdminUserMutations';
@@ -93,8 +94,16 @@ function pendingActionDescription(action: PendingAction): string {
 export function AdminUsersPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const { user: currentAuthUser } = useAuth();
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  // Admin-only page. Curators landing here via direct URL get redirected.
+  useEffect(() => {
+    if (currentAuthUser && currentAuthUser.role !== 'admin') {
+      void navigate({ to: '/admin/photo-approvals', replace: true });
+    }
+  }, [currentAuthUser, navigate]);
 
   const limit = search.limit ?? DEFAULT_LIMIT;
   const offset = search.offset ?? 0;

@@ -144,8 +144,10 @@ export async function adminPhotoRoutes(fastify: FastifyInstance, _opts: object):
     { schema: listPendingPhotosSchema, preHandler: curatorPreHandler, config: pendingQueueRateLimit },
     async (request) => {
       const actorId = request.user.sub;
+      const actorRole = request.user.role;
       const { rows, totalCount } = await photoQueries.listPendingPhotos({
         actorId,
+        actorRole,
         limit: PENDING_QUEUE_LIMIT,
       });
       return {
@@ -224,11 +226,17 @@ export async function adminPhotoRoutes(fastify: FastifyInstance, _opts: object):
           });
         }
 
-        // Self-approval guard: the curator cannot decide on their own contribution
-        // (in any direction — approve, reject, or undo). UUIDs are lowercased on
-        // both sides because the JWT sub may arrive in either case while Postgres
-        // UUID columns always output lowercase.
-        if (existing.contribution && existing.contribution.contributed_by.toLowerCase() === actorId.toLowerCase()) {
+        // Self-approval guard: curators cannot decide on their own contribution
+        // (in any direction — approve, reject, or undo). Admins bypass this
+        // guard by design: they are the ultimate catalog authority and may
+        // need to resolve edge cases on photos they themselves contributed.
+        // UUIDs are lowercased on both sides because the JWT sub may arrive
+        // in either case while Postgres UUID columns always output lowercase.
+        if (
+          request.user.role !== 'admin' &&
+          existing.contribution &&
+          existing.contribution.contributed_by.toLowerCase() === actorId.toLowerCase()
+        ) {
           throw new HttpError(403, { error: 'Cannot decide on your own contribution' });
         }
 

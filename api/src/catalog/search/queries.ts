@@ -135,6 +135,7 @@ export async function searchCatalog(params: SearchParams): Promise<SearchResult>
             ON ip.item_id = i.id
            AND ip.is_primary = true
            AND ip.status = 'approved'
+           AND ip.visibility = 'public'
        WHERE (i.search_vector @@ to_tsquery('simple', $1)
               OR ch.search_vector @@ to_tsquery('simple', $1))
          AND ($2::text IS NULL OR fr.slug = $2)

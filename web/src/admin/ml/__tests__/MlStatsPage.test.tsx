@@ -40,6 +40,18 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
 }));
 
+vi.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({
+    user: { id: 'admin-1', role: 'admin', email: 'admin@example.com', display_name: 'Admin', avatar_url: null },
+    isAuthenticated: true,
+    isLoading: false,
+    sessionExpired: false,
+    signInWithGoogle: vi.fn(),
+    signInWithApple: vi.fn(),
+    logout: vi.fn(),
+  }),
+}));
+
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   LineChart: () => <div data-testid="line-chart" />,

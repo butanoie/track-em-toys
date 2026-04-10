@@ -35,14 +35,20 @@ const contributionObjectSchema = {
   },
 } as const;
 
-/** Existing-photo sidebar item shape (3 most recent public-approved photos per item). */
+/**
+ * Existing-photo sidebar item shape (top 3 public-approved photos per item,
+ * ranked by dHash similarity to the pending photo). `distance` is the Hamming
+ * distance (0-64) between the pending photo's dHash and this photo's dHash,
+ * or null when either side has an empty/legacy dHash.
+ */
 const existingPhotoItemSchema = {
   type: 'object',
-  required: ['id', 'url'],
+  required: ['id', 'url', 'distance'],
   additionalProperties: false,
   properties: {
     id: { type: 'string' },
     url: { type: 'string' },
+    distance: { type: ['integer', 'null'] },
   },
 } as const;
 

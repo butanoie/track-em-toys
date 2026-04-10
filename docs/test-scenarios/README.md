@@ -46,7 +46,7 @@ See [TESTING_SCENARIOS.md](../guides/TESTING_SCENARIOS.md) for the scenario-driv
 | [E2E_ML_PHOTO_IDENTIFICATION.md](E2E_ML_PHOTO_IDENTIFICATION.md)   | `web/e2e/add-by-photo.spec.ts`, `web/e2e/admin-ml-stats.spec.ts`                                                                                              | ✅ Implemented                          |
 | [INT_COLLECTION_PHOTOS.md](INT_COLLECTION_PHOTOS.md)               | `api/src/collection/photos/routes.test.ts`                                                                                                                    | ✅ Implemented                          |
 | [E2E_COLLECTION_PHOTOS.md](E2E_COLLECTION_PHOTOS.md)               | `web/e2e/collection-photos.spec.ts`                                                                                                                           | Scenarios written                       |
-| [E2E_PHOTO_APPROVAL.md](E2E_PHOTO_APPROVAL.md)                     | `web/e2e/photo-approval.spec.ts` (planned)                                                                                                                    | Scenarios written                       |
+| [E2E_PHOTO_APPROVAL.md](E2E_PHOTO_APPROVAL.md)                     | `web/e2e/curator-photo-approvals.spec.ts`                                                                                                                     | 5b.5 subset implemented; remainder deferred |
 
 ## Creating a New Scenario
 

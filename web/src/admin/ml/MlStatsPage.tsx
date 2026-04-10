@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { useAuth } from '@/auth/useAuth';
 import {
   LineChart,
   Line,
@@ -33,7 +34,18 @@ const DAYS_OPTIONS = [
 export function MlStatsPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const days = search.days ?? 7;
+
+  // Admin-only page. Curators reaching this via direct URL are bounced
+  // to their own landing page. Hooks below still execute during the race
+  // between first render and the redirect — the API returns 403 and the
+  // user never sees the error because the layout reroutes first.
+  useEffect(() => {
+    if (user && user.role !== 'admin') {
+      void navigate({ to: '/admin/photo-approvals', replace: true });
+    }
+  }, [user, navigate]);
 
   const { data: summary, isPending: summaryLoading } = useMlStatsSummary(days);
   const { data: daily, isPending: dailyLoading } = useMlStatsDaily(days);

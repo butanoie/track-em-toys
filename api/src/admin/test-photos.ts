@@ -12,6 +12,44 @@ const errorResponse = {
   properties: { error: { type: 'string' } },
 } as const;
 
+/** Fastify route schema for POST /admin/test-photos/cleanup. */
+const cleanupPendingPhotosSchema = {
+  description:
+    'Test-only endpoint: deletes seeded item_photos rows (and their photo_contributions) by id. Only available in non-production environments. Requires every id to belong to a row whose url begins with "test-pending/" — this prefix guard prevents accidental deletion of real catalog photos.',
+  tags: ['admin', 'test'],
+  summary: 'Cleanup pending photos (non-production only)',
+  body: {
+    type: 'object',
+    required: ['item_photo_ids'],
+    additionalProperties: false,
+    properties: {
+      item_photo_ids: {
+        type: 'array',
+        minItems: 1,
+        maxItems: 100,
+        items: { type: 'string', format: 'uuid' },
+      },
+    },
+  },
+  response: {
+    200: {
+      type: 'object',
+      required: ['deleted_item_photo_count', 'deleted_contribution_count'],
+      additionalProperties: false,
+      properties: {
+        deleted_item_photo_count: { type: 'integer' },
+        deleted_contribution_count: { type: 'integer' },
+      },
+    },
+    400: errorResponse,
+    500: errorResponse,
+  },
+} as const;
+
+interface CleanupPendingPhotosBody {
+  item_photo_ids: string[];
+}
+
 /** Fastify route schema for POST /admin/test-photos/seed. */
 const seedPendingPhotoSchema = {
   description:
@@ -172,6 +210,61 @@ export async function testPhotosRoutes(fastify: FastifyInstance, _opts: object):
       } catch (err) {
         fastify.log.error({ err }, 'test-photos/seed failed');
         return reply.code(500).send({ error: 'Seed failed' });
+      }
+    }
+  );
+
+  fastify.post<{ Body: CleanupPendingPhotosBody }>(
+    '/cleanup',
+    {
+      schema: cleanupPendingPhotosSchema,
+      config: { rateLimit: { max: 100, timeWindow: '1 minute' } },
+    },
+    async (request, reply) => {
+      const { item_photo_ids } = request.body;
+
+      try {
+        const result = await withTransaction(async (client) => {
+          // Delete photo_contributions FIRST. The 1:N child rows must go before
+          // the parent item_photos rows or the item_photo_id FK would either
+          // fail (RESTRICT) or leave dangling references.
+          //
+          // The url-prefix guard on the parent table (below) is the primary
+          // safety net — only test-shaped rows are deletable. We rely on the
+          // join through item_photo_id to scope the contribution delete.
+          const { rowCount: contribCount } = await client.query(
+            `DELETE FROM photo_contributions
+             WHERE item_photo_id = ANY($1::uuid[])
+               AND item_photo_id IN (
+                 SELECT id FROM item_photos
+                 WHERE id = ANY($1::uuid[])
+                   AND url LIKE 'test-pending/%'
+               )`,
+            [item_photo_ids]
+          );
+
+          // CRITICAL: the `url LIKE 'test-pending/%'` predicate is what
+          // prevents this unauthenticated endpoint from being used to wipe
+          // real catalog photos. The seed endpoint always writes URLs of the
+          // form `test-pending/{uuid}-original.webp`; any row outside this
+          // prefix is non-test data and must not be touched.
+          const { rowCount: photoCount } = await client.query(
+            `DELETE FROM item_photos
+             WHERE id = ANY($1::uuid[])
+               AND url LIKE 'test-pending/%'`,
+            [item_photo_ids]
+          );
+
+          return {
+            deleted_item_photo_count: photoCount ?? 0,
+            deleted_contribution_count: contribCount ?? 0,
+          };
+        });
+
+        return result;
+      } catch (err) {
+        fastify.log.error({ err }, 'test-photos/cleanup failed');
+        return reply.code(500).send({ error: 'Cleanup failed' });
       }
     }
   );
