@@ -617,6 +617,162 @@ export class MockCollectionPhotoState {
   }
 }
 
+// ─── MockPhotoApprovalState ──────────────────────────────────────────────────
+
+/**
+ * Shape of a pending photo row returned by `GET /admin/photos/pending`.
+ *
+ * This interface intentionally mirrors `PhotoApprovalItemSchema` in
+ * `web/src/lib/zod-schemas.ts`. The e2e/ directory is outside the `@/*`
+ * path alias, so the type is duplicated rather than imported — the
+ * mitigation is that the SPA parses every mock response via Zod at
+ * request time, so any drift fails loudly during the test run.
+ */
+export interface MockPhotoApprovalItem {
+  id: string;
+  item: {
+    id: string;
+    name: string;
+    slug: string;
+    franchise_slug: string;
+    thumbnail_url: string | null;
+  };
+  photo: {
+    url: string;
+    caption: string | null;
+    visibility: 'public' | 'training_only';
+  };
+  uploader: {
+    id: string;
+    display_name: string | null;
+    email: string | null;
+  } | null;
+  contribution: {
+    id: string;
+    consent_version: string;
+    consent_granted_at: string;
+    intent: 'training_only' | 'catalog_and_training';
+    contributed_by: string;
+  } | null;
+  existing_photos: Array<{
+    id: string;
+    url: string;
+    distance: number | null;
+  }>;
+  can_decide: boolean;
+  created_at: string;
+}
+
+/**
+ * Stateful mock for the photo approval dashboard API endpoints.
+ *
+ * Installs route handlers for:
+ *   GET  /admin/photos/pending        → { photos: _queue, total_count }
+ *   GET  /admin/photos/pending-count  → { count: _queue.length }
+ *   PATCH /admin/photos/:id/status    → one-shot override OR splice + success
+ *
+ * Closure-based: the handlers read from `_queue` at request time, so
+ * queue mutations are reflected in subsequent GETs without re-registering
+ * routes. This drives the queue-shrink behavior after a decision.
+ *
+ * **409 injection**: `setNextDecideResponse()` primes the next PATCH to
+ * return the given (status, body) pair verbatim, then self-clears. Use it
+ * to exercise the `DecideResult` conflict branch in `usePhotoDecisionMutation`.
+ */
+export class MockPhotoApprovalState {
+  private _queue: MockPhotoApprovalItem[];
+  private _nextDecideResponse: { status: number; body: unknown } | null = null;
+
+  constructor(photos: MockPhotoApprovalItem[]) {
+    this._queue = [...photos];
+  }
+
+  /**
+   * One-shot override for the next PATCH /admin/photos/:id/status request.
+   * Cleared after use. Primarily used to inject 409 conflict responses.
+   */
+  setNextDecideResponse(response: { status: number; body: unknown }): void {
+    this._nextDecideResponse = response;
+  }
+
+  async register(page: Page): Promise<void> {
+    // 1. Catch-all for /admin/photos/** — lowest priority. Fulfills (not
+    //    continues) so unhandled paths don't fall through to the real API.
+    await page.route('**/admin/photos/**', (route) => {
+      if (isDocRequest(route)) return route.continue();
+      return route.fulfill(jsonResponse({ photos: [], total_count: 0 }));
+    });
+
+    // 2. GET /admin/photos/pending
+    await page.route(/\/admin\/photos\/pending(\?.*)?$/, (route) => {
+      if (isDocRequest(route)) return route.continue();
+      if (route.request().method() !== 'GET') return route.fallback();
+      return route.fulfill(
+        jsonResponse({
+          photos: this._queue,
+          total_count: this._queue.length,
+        })
+      );
+    });
+
+    // 3. GET /admin/photos/pending-count — drives the sidebar badge.
+    //    Auto-derived from queue length so post-decision refetches remain
+    //    accurate without any caller ceremony.
+    await page.route(/\/admin\/photos\/pending-count(\?.*)?$/, (route) => {
+      if (isDocRequest(route)) return route.continue();
+      if (route.request().method() !== 'GET') return route.fallback();
+      return route.fulfill(jsonResponse({ count: this._queue.length }));
+    });
+
+    // 4. PATCH /admin/photos/:id/status — decision endpoint.
+    //    Order matters: this is registered AFTER the /pending and
+    //    /pending-count handlers so those more-specific paths win. Within
+    //    this handler, the one-shot override takes priority over the
+    //    happy path, so scenario S8 (409) can pre-prime a conflict.
+    await page.route(/\/admin\/photos\/[0-9a-f-]{36}\/status$/, (route) => {
+      if (isDocRequest(route)) return route.continue();
+      if (route.request().method() !== 'PATCH') return route.fallback();
+
+      if (this._nextDecideResponse) {
+        const response = this._nextDecideResponse;
+        this._nextDecideResponse = null;
+        return route.fulfill(jsonResponse(response.body, response.status));
+      }
+
+      // Happy path: splice from queue, return a minimal decision response
+      // matching PhotoApprovalDecisionResponseSchema.
+      const id = new URL(route.request().url()).pathname.split('/').at(-2)!;
+      const target = this._queue.find((p) => p.id === id);
+      this._queue = this._queue.filter((p) => p.id !== id);
+
+      const body = route.request().postDataJSON() as {
+        status: 'approved' | 'rejected' | 'pending';
+        visibility?: 'training_only';
+        rejection_reason_code?: string;
+        rejection_reason_text?: string;
+      };
+
+      const visibility: 'public' | 'training_only' =
+        body.visibility === 'training_only'
+          ? 'training_only'
+          : (target?.photo.visibility ?? 'public');
+
+      return route.fulfill(
+        jsonResponse({
+          id,
+          item_id: target?.item.id ?? '00000000-0000-4000-a000-000000000000',
+          url: target?.photo.url ?? '',
+          status: body.status,
+          visibility,
+          rejection_reason_code: body.rejection_reason_code ?? null,
+          rejection_reason_text: body.rejection_reason_text ?? null,
+          updated_at: new Date().toISOString(),
+        })
+      );
+    });
+  }
+}
+
 // ─── Catalog mocks for "add from catalog" flow ───────────────────────────────
 
 const MOCK_FRANCHISE_DETAIL = {
