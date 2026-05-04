@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Item Detail — Price Display (Chosen Design)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.137 0.036 258.526);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.137 0.036 258.526);
+    --primary: oklch(0.546 0.215 262.872);
+    --primary-foreground: oklch(0.984 0.003 247.858);
+    --secondary: oklch(0.968 0.007 247.895);
+    --secondary-foreground: oklch(0.208 0.04 265.727);
+    --muted: oklch(0.968 0.007 247.895);
+    --muted-foreground: oklch(0.555 0.041 257.44);
+    --border: oklch(0.929 0.013 255.532);
+    --radius: 0.5rem;
+    --price-green: oklch(0.55 0.16 145);
+    --price-amber: oklch(0.65 0.16 75);
+    --price-stale: oklch(0.65 0.10 25);
+    --acq-accent: oklch(0.55 0.14 55);
+    --font-body: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'DM Mono', ui-monospace, monospace;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: oklch(0.97 0.005 260);
+    color: var(--foreground);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: 2rem 1rem;
+  }
+
+  .mockup-container {
+    max-width: 44rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+  }
+  .page-subtitle {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    margin-bottom: 1.5rem;
+  }
+
+  .mockup-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-foreground);
+    background: var(--muted);
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+  }
+
+  .item-detail-sim {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+
+  .metadata-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .meta-label {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+  }
+  .meta-value { font-size: 0.875rem; margin-top: 0.125rem; }
+
+  .separator {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* ══════════════════════════════════════════════ */
+  /* PRICING SECTION                                */
+  /* ══════════════════════════════════════════════ */
+
+  .pricing-section { margin-top: 1.25rem; }
+
+  .pricing-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+  }
+  .pricing-header-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--muted-foreground);
+    flex-shrink: 0;
+  }
+  .pricing-header-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted-foreground);
+  }
+
+  /* ── Price row ── */
+  .price-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0.625rem 0;
+  }
+  .price-row + .price-row,
+  .price-row + .expand-wrapper,
+  .expand-wrapper + .price-row {
+    border-top: 1px solid color-mix(in oklch, var(--border), transparent 50%);
+  }
+
+  .price-row-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .price-tier-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .price-country {
+    font-size: 0.625rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted-foreground);
+    background: var(--muted);
+    padding: 0.0625rem 0.375rem;
+    border-radius: 3px;
+  }
+
+  .price-row-right {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    text-align: right;
+  }
+  .price-row-right.stacked {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+
+  .price-amount {
+    font-family: var(--font-mono);
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--foreground);
+    line-height: 1;
+  }
+  .price-amount .currency {
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+    font-weight: 400;
+    margin-right: 0.125rem;
+  }
+
+  .price-amount-secondary {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--muted-foreground);
+    line-height: 1;
+  }
+  .price-amount-secondary .currency { font-size: 0.6875rem; }
+
+  /* ── Freshness ── */
+  .price-freshness {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .freshness-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .freshness-dot.fresh { background: var(--price-green); }
+  .freshness-dot.aging { background: var(--price-amber); }
+  .freshness-dot.stale { background: var(--price-stale); }
+
+  /* ── Market value extras ── */
+  .market-meta {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.125rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .market-range {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    margin-top: 0.25rem;
+  }
+  .market-range-bar {
+    flex: 1;
+    height: 3px;
+    background: linear-gradient(90deg,
+      var(--price-green) 0%,
+      var(--price-amber) 50%,
+      var(--price-stale) 100%);
+    border-radius: 2px;
+    width: 80px;
+    position: relative;
+  }
+  .market-range-marker {
+    position: absolute;
+    top: -3px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--foreground);
+    border: 2px solid var(--card);
+    box-shadow: 0 0 0 1px var(--border);
+  }
+
+  /* ── Expando ── */
+  .expand-wrapper {
+    padding: 0.25rem 0 0.375rem;
+  }
+  .price-expand-trigger {
+    font-size: 0.6875rem;
+    color: var(--primary);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+    padding: 0.125rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .price-expand-trigger:hover { text-decoration: underline; }
+  .price-expand-trigger svg {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.15s;
+  }
+  .price-expand-trigger.open svg { transform: rotate(180deg); }
+
+  .price-other-currencies {
+    padding: 0.5rem 0 0.25rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    animation: slideDown 0.15s ease-out;
+  }
+  .price-other-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  /* ── Acquisition (you paid) ── */
+  .acquisition-row {
+    border-top: 1px dashed var(--border) !important;
+    padding-top: 0.75rem;
+    margin-top: 0.25rem;
+  }
+  .acquisition-row .price-tier-label {
+    color: var(--acq-accent);
+  }
+  .acquisition-meta {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    margin-top: 0.125rem;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Legend for mockup ── */
+  .legend {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    font-size: 0.8125rem;
+  }
+  .legend dt {
+    font-weight: 600;
+    color: var(--foreground);
+    margin-top: 0.5rem;
+  }
+  .legend dt:first-child { margin-top: 0; }
+  .legend dd {
+    color: var(--muted-foreground);
+    margin-left: 0;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-container">
+
+<div>
+  <h1 class="page-title">Item Detail — Pricing Section</h1>
+  <p class="page-subtitle">Chosen design: three-tier display with expandable regional data for MSRP and Market Value.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- STATE 1: Collapsed (default)                    -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div>
+  <span class="mockup-label">State 1 — Default (both expandos collapsed)</span>
+  <div class="item-detail-sim">
+    <div class="metadata-grid">
+      <div><div class="meta-label">Manufacturer</div><div class="meta-value" style="color:var(--primary)">Fans Toys</div></div>
+      <div><div class="meta-label">Toy Line</div><div class="meta-value" style="color:var(--primary)">Fans Toys Mainline</div></div>
+      <div><div class="meta-label">Year Released</div><div class="meta-value">2020</div></div>
+      <div><div class="meta-label">Product Code</div><div class="meta-value">FT-44</div></div>
+    </div>
+
+    <hr class="separator">
+
+    <div class="pricing-section">
+      <div class="pricing-header">
+        <svg class="pricing-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span class="pricing-header-label">Pricing</span>
+      </div>
+
+      <!-- MSRP: primary (user's region first) -->
+      <div class="price-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">
+            MSRP
+            <span class="price-country">CA</span>
+          </div>
+          <div class="price-freshness">
+            <span class="freshness-dot fresh"></span>
+            Apr 12, 2026
+          </div>
+        </div>
+        <div class="price-row-right">
+          <span class="price-amount"><span class="currency">USD</span>206.99</span>
+        </div>
+      </div>
+
+      <!-- MSRP expando trigger (collapsed) -->
+      <div class="expand-wrapper">
+        <button class="price-expand-trigger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          3 other regions
+        </button>
+      </div>
+
+      <!-- Market Value: primary -->
+      <div class="price-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">
+            Market Value
+            <span class="price-country">CA</span>
+          </div>
+          <div class="market-meta">
+            <span>median of 132 listings</span>
+            <span class="price-freshness" style="display:inline-flex">
+              <span class="freshness-dot fresh"></span>
+              Apr 12
+            </span>
+          </div>
+        </div>
+        <div class="price-row-right stacked">
+          <span class="price-amount"><span class="currency">CAD</span>357.48</span>
+          <div class="market-range">
+            <span>293</span>
+            <div class="market-range-bar">
+              <div class="market-range-marker" style="left: 48%;"></div>
+            </div>
+            <span>380</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Market Value expando trigger (collapsed) -->
+      <div class="expand-wrapper">
+        <button class="price-expand-trigger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          2 other regions
+        </button>
+      </div>
+
+      <!-- Acquisition: only when viewed in collection context -->
+      <div class="price-row acquisition-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">You Paid</div>
+          <div class="acquisition-meta">
+            Jun 2022 · Ages Three and Up
+          </div>
+        </div>
+        <div class="price-row-right">
+          <span class="price-amount"><span class="currency">CAD</span>279.99</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- STATE 2: MSRP expanded                          -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div>
+  <span class="mockup-label">State 2 — MSRP expando open</span>
+  <div class="item-detail-sim">
+    <div class="metadata-grid">
+      <div><div class="meta-label">Manufacturer</div><div class="meta-value" style="color:var(--primary)">Fans Toys</div></div>
+      <div><div class="meta-label">Toy Line</div><div class="meta-value" style="color:var(--primary)">Fans Toys Mainline</div></div>
+      <div><div class="meta-label">Year Released</div><div class="meta-value">2020</div></div>
+      <div><div class="meta-label">Product Code</div><div class="meta-value">FT-44</div></div>
+    </div>
+
+    <hr class="separator">
+
+    <div class="pricing-section">
+      <div class="pricing-header">
+        <svg class="pricing-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span class="pricing-header-label">Pricing</span>
+      </div>
+
+      <div class="price-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">
+            MSRP
+            <span class="price-country">CA</span>
+          </div>
+          <div class="price-freshness">
+            <span class="freshness-dot fresh"></span>
+            Apr 12, 2026
+          </div>
+        </div>
+        <div class="price-row-right">
+          <span class="price-amount"><span class="currency">USD</span>206.99</span>
+        </div>
+      </div>
+
+      <div class="expand-wrapper">
+        <button class="price-expand-trigger open">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          3 other regions
+        </button>
+        <div class="price-other-currencies">
+          <div class="price-other-row">
+            <div class="price-tier-label">
+              MSRP
+              <span class="price-country">US</span>
+            </div>
+            <span class="price-amount-secondary"><span class="currency">USD</span>199.99</span>
+          </div>
+          <div class="price-other-row">
+            <div class="price-tier-label">
+              MSRP
+              <span class="price-country">GB</span>
+            </div>
+            <span class="price-amount-secondary"><span class="currency">GBP</span>179.99</span>
+          </div>
+          <div class="price-other-row">
+            <div class="price-tier-label">
+              MSRP
+              <span class="price-country">DE</span>
+            </div>
+            <span class="price-amount-secondary"><span class="currency">EUR</span>219.99</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="price-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">
+            Market Value
+            <span class="price-country">CA</span>
+          </div>
+          <div class="market-meta">
+            <span>median of 132 listings</span>
+            <span class="price-freshness" style="display:inline-flex">
+              <span class="freshness-dot fresh"></span>
+              Apr 12
+            </span>
+          </div>
+        </div>
+        <div class="price-row-right stacked">
+          <span class="price-amount"><span class="currency">CAD</span>357.48</span>
+          <div class="market-range">
+            <span>293</span>
+            <div class="market-range-bar">
+              <div class="market-range-marker" style="left: 48%;"></div>
+            </div>
+            <span>380</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="expand-wrapper">
+        <button class="price-expand-trigger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          2 other regions
+        </button>
+      </div>
+
+      <div class="price-row acquisition-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">You Paid</div>
+          <div class="acquisition-meta">
+            Jun 2022 · Ages Three and Up
+          </div>
+        </div>
+        <div class="price-row-right">
+          <span class="price-amount"><span class="currency">CAD</span>279.99</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- STATE 3: Market Value expanded                  -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div>
+  <span class="mockup-label">State 3 — Market Value expando open (shows range + listing count per region)</span>
+  <div class="item-detail-sim">
+    <div class="metadata-grid">
+      <div><div class="meta-label">Manufacturer</div><div class="meta-value" style="color:var(--primary)">Fans Toys</div></div>
+      <div><div class="meta-label">Toy Line</div><div class="meta-value" style="color:var(--primary)">Fans Toys Mainline</div></div>
+      <div><div class="meta-label">Year Released</div><div class="meta-value">2020</div></div>
+      <div><div class="meta-label">Product Code</div><div class="meta-value">FT-44</div></div>
+    </div>
+
+    <hr class="separator">
+
+    <div class="pricing-section">
+      <div class="pricing-header">
+        <svg class="pricing-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span class="pricing-header-label">Pricing</span>
+      </div>
+
+      <div class="price-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">
+            MSRP
+            <span class="price-country">CA</span>
+          </div>
+          <div class="price-freshness">
+            <span class="freshness-dot fresh"></span>
+            Apr 12, 2026
+          </div>
+        </div>
+        <div class="price-row-right">
+          <span class="price-amount"><span class="currency">USD</span>206.99</span>
+        </div>
+      </div>
+
+      <div class="expand-wrapper">
+        <button class="price-expand-trigger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          3 other regions
+        </button>
+      </div>
+
+      <div class="price-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">
+            Market Value
+            <span class="price-country">CA</span>
+          </div>
+          <div class="market-meta">
+            <span>median of 132 listings</span>
+            <span class="price-freshness" style="display:inline-flex">
+              <span class="freshness-dot fresh"></span>
+              Apr 12
+            </span>
+          </div>
+        </div>
+        <div class="price-row-right stacked">
+          <span class="price-amount"><span class="currency">CAD</span>357.48</span>
+          <div class="market-range">
+            <span>293</span>
+            <div class="market-range-bar">
+              <div class="market-range-marker" style="left: 48%;"></div>
+            </div>
+            <span>380</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="expand-wrapper">
+        <button class="price-expand-trigger open">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          2 other regions
+        </button>
+        <div class="price-other-currencies">
+          <!-- US market value -->
+          <div class="price-other-row">
+            <div>
+              <div class="price-tier-label">
+                Market Value
+                <span class="price-country">US</span>
+              </div>
+              <div class="market-meta" style="margin-top: 0.0625rem;">
+                <span>median of 360 listings · Apr 12</span>
+              </div>
+            </div>
+            <div class="price-row-right stacked">
+              <span class="price-amount-secondary"><span class="currency">USD</span>239.66</span>
+              <div class="market-range" style="font-size: 0.6875rem;">
+                <span>178</span>
+                <div class="market-range-bar" style="width: 60px;">
+                  <div class="market-range-marker" style="left: 42%;"></div>
+                </div>
+                <span>274</span>
+              </div>
+            </div>
+          </div>
+          <!-- GB market value -->
+          <div class="price-other-row">
+            <div>
+              <div class="price-tier-label">
+                Market Value
+                <span class="price-country">GB</span>
+              </div>
+              <div class="market-meta" style="margin-top: 0.0625rem;">
+                <span>median of 28 listings · Apr 11</span>
+              </div>
+            </div>
+            <div class="price-row-right stacked">
+              <span class="price-amount-secondary"><span class="currency">GBP</span>189.00</span>
+              <div class="market-range" style="font-size: 0.6875rem;">
+                <span>149</span>
+                <div class="market-range-bar" style="width: 60px;">
+                  <div class="market-range-marker" style="left: 55%;"></div>
+                </div>
+                <span>225</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="price-row acquisition-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">You Paid</div>
+          <div class="acquisition-meta">
+            Jun 2022 · Ages Three and Up
+          </div>
+        </div>
+        <div class="price-row-right">
+          <span class="price-amount"><span class="currency">CAD</span>279.99</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- STATE 4: No other regions (no expandos)         -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div>
+  <span class="mockup-label">State 4 — Single region only (no expandos rendered)</span>
+  <div class="item-detail-sim">
+    <div class="metadata-grid">
+      <div><div class="meta-label">Manufacturer</div><div class="meta-value" style="color:var(--primary)">NewAge</div></div>
+      <div><div class="meta-label">Toy Line</div><div class="meta-value" style="color:var(--primary)">NewAge H-Series</div></div>
+      <div><div class="meta-label">Year Released</div><div class="meta-value">2020</div></div>
+      <div><div class="meta-label">Product Code</div><div class="meta-value">H13</div></div>
+    </div>
+
+    <hr class="separator">
+
+    <div class="pricing-section">
+      <div class="pricing-header">
+        <svg class="pricing-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span class="pricing-header-label">Pricing</span>
+      </div>
+
+      <div class="price-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">MSRP</div>
+          <div class="price-freshness">
+            <span class="freshness-dot fresh"></span>
+            Apr 12, 2026
+          </div>
+        </div>
+        <div class="price-row-right">
+          <span class="price-amount"><span class="currency">USD</span>85.00</span>
+        </div>
+      </div>
+
+      <div class="price-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">Market Value</div>
+          <div class="market-meta">
+            <span>median of 82 listings</span>
+            <span class="price-freshness" style="display:inline-flex">
+              <span class="freshness-dot fresh"></span>
+              Apr 12
+            </span>
+          </div>
+        </div>
+        <div class="price-row-right stacked">
+          <span class="price-amount"><span class="currency">USD</span>72.17</span>
+          <div class="market-range">
+            <span>53</span>
+            <div class="market-range-bar">
+              <div class="market-range-marker" style="left: 62%;"></div>
+            </div>
+            <span>84</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="price-row acquisition-row">
+        <div class="price-row-left">
+          <div class="price-tier-label">You Paid</div>
+          <div class="acquisition-meta">
+            Sep 2020 · Chosen Prime
+          </div>
+        </div>
+        <div class="price-row-right">
+          <span class="price-amount"><span class="currency">USD</span>75.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- Legend                                          -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div>
+  <span class="mockup-label">Reading the design</span>
+  <div class="legend">
+    <dl>
+      <dt>Primary region</dt>
+      <dd>The user's country (from settings) is always shown first at full size. Country badge (e.g., <code style="background:var(--muted);padding:1px 4px;border-radius:2px;font-size:0.75rem">CA</code>) is only rendered when other regions exist.</dd>
+      <dt>Regional expando</dt>
+      <dd>Appears only if data exists for regions beyond the user's. Shows count: "3 other regions". Applies independently to MSRP and Market Value tiers.</dd>
+      <dt>Market Value range bar</dt>
+      <dd>Gradient (green → amber → red) indicates price-distribution position. Marker shows where the median sits between the min and max. Compact version in expando shows only min/max numbers and a shorter bar.</dd>
+      <dt>Freshness indicator</dt>
+      <dd>Green dot = &lt; 7 days (market value) or &lt; 30 days (MSRP). Amber = aging. Red = stale.</dd>
+      <dt>"You Paid" row</dt>
+      <dd>Only visible when the item is in the user's collection. Dashed top border separates private data from shared catalog data. Amber/earth tone accent on the label distinguishes it from automated pricing.</dd>
+    </dl>
+  </div>
+</div>
+
+</div>
+
+</body>
+</html>

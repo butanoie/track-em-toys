@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collection Valuation — Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.137 0.036 258.526);
+    --card: oklch(1 0 0);
+    --primary: oklch(0.546 0.215 262.872);
+    --primary-foreground: oklch(0.984 0.003 247.858);
+    --secondary: oklch(0.968 0.007 247.895);
+    --muted: oklch(0.968 0.007 247.895);
+    --muted-foreground: oklch(0.555 0.041 257.44);
+    --border: oklch(0.929 0.013 255.532);
+    --radius: 0.5rem;
+    --gain: oklch(0.55 0.16 145);
+    --gain-bg: oklch(0.96 0.03 145);
+    --loss: oklch(0.58 0.18 25);
+    --loss-bg: oklch(0.96 0.03 25);
+    --warn: oklch(0.65 0.16 75);
+    --acq-accent: oklch(0.55 0.14 55);
+    --font-body: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'DM Mono', ui-monospace, monospace;
+    --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: oklch(0.97 0.005 260);
+    color: var(--foreground);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: 2rem 1rem;
+  }
+
+  .mockup-container {
+    max-width: 64rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .mockup-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-foreground);
+    background: var(--muted);
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+  }
+
+  h1.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  h2.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* SURFACE 1 — Summary card (on /collection)   */
+  /* ═══════════════════════════════════════════ */
+
+  .valuation-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .valuation-card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .valuation-card-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted-foreground);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .valuation-card-link {
+    font-size: 0.75rem;
+    color: var(--primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .valuation-card-link:hover { text-decoration: underline; }
+  .valuation-card-link svg { width: 12px; height: 12px; }
+
+  .valuation-tiers {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1.5rem;
+    align-items: end;
+  }
+  @media (max-width: 640px) {
+    .valuation-tiers { grid-template-columns: 1fr; gap: 1rem; }
+  }
+
+  .tier {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .tier-label {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  .tier-amount {
+    font-family: var(--font-mono);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--foreground);
+  }
+  /* Trailing ISO code: appears AFTER the amount, smaller + muted */
+  .iso {
+    font-size: 0.5em;
+    font-weight: 400;
+    color: var(--muted-foreground);
+    margin-left: 0.35em;
+    letter-spacing: 0.04em;
+    vertical-align: 0.15em;
+  }
+  /* In smaller contexts, scale ISO appropriately */
+  .breakdown-table .iso,
+  .currency-rows .iso {
+    font-size: 0.75em;
+    vertical-align: 0;
+  }
+  .tier-meta .iso { font-size: 0.875em; }
+  .tier-amount.primary { font-size: 2rem; font-weight: 500; }
+  .tier-amount.secondary { font-size: 1.25rem; font-weight: 500; }
+
+  .tier-meta {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    margin-top: 0.125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .delta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+  }
+  .delta.gain { color: var(--gain); background: var(--gain-bg); }
+  .delta.loss { color: var(--loss); background: var(--loss-bg); }
+  .delta svg { width: 10px; height: 10px; }
+
+  .valuation-coverage {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid color-mix(in oklch, var(--border), transparent 50%);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+  }
+  .coverage-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--muted);
+    border-radius: 2px;
+    margin: 0 0.75rem;
+    position: relative;
+    top: 0.5rem;
+    max-width: 160px;
+    overflow: hidden;
+  }
+  .coverage-bar-fill {
+    height: 100%;
+    background: var(--gain);
+    border-radius: 2px;
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* SURFACE 2 — Dedicated valuation page        */
+  /* ═══════════════════════════════════════════ */
+
+  .page-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── Hero: three tiers ── */
+  .hero-tiers {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: oklch(0.99 0.003 260);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  @media (max-width: 640px) {
+    .hero-tiers { grid-template-columns: 1fr; }
+  }
+
+  .hero-tier {
+    border-left: 2px solid var(--border);
+    padding-left: 1rem;
+  }
+  .hero-tier.primary {
+    border-left-color: var(--primary);
+  }
+  .hero-tier.acq {
+    border-left-color: var(--acq-accent);
+  }
+
+  .hero-tier-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted-foreground);
+  }
+  .hero-tier-amount {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin-top: 0.25rem;
+  }
+  .hero-tier-amount.primary {
+    font-size: 2.5rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+  }
+  /* Hero's trailing ISO uses monospace for alignment */
+  .hero-tier-amount .iso {
+    font-family: var(--font-mono);
+  }
+
+  /* ── FX disclaimer ── */
+  .fx-disclaimer {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    background: oklch(0.96 0.02 75);
+    border: 1px solid oklch(0.9 0.05 75);
+    border-left: 3px solid var(--warn);
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .fx-disclaimer svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--warn);
+  }
+
+  /* ── Currency breakdown ── */
+  .currency-breakdown {
+    margin-bottom: 2rem;
+  }
+  .currency-rows {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    row-gap: 0.5rem;
+    column-gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+  .currency-row {
+    display: contents;
+  }
+  .currency-label {
+    color: var(--muted-foreground);
+  }
+  .currency-bar-track {
+    background: var(--muted);
+    border-radius: 2px;
+    height: 14px;
+    overflow: hidden;
+    align-self: center;
+    position: relative;
+  }
+  .currency-bar-fill {
+    height: 100%;
+    background: var(--primary);
+    opacity: 0.8;
+  }
+  .currency-amount {
+    text-align: right;
+  }
+
+  /* ── Export buttons ── */
+  .export-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: calc(var(--radius) * 0.8);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-family: inherit;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--foreground);
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn:hover { background: var(--muted); }
+  .btn svg { width: 14px; height: 14px; }
+
+  /* ── Item breakdown table ── */
+  .breakdown {
+    margin-top: 2rem;
+  }
+  .breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+  .breakdown-table th {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .breakdown-table th.num { text-align: right; }
+  .breakdown-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid color-mix(in oklch, var(--border), transparent 50%);
+    vertical-align: middle;
+  }
+  .breakdown-table td.num {
+    font-family: var(--font-mono);
+    text-align: right;
+    white-space: nowrap;
+  }
+  /* Legacy class, kept for backward compat — not used in new markup */
+  .breakdown-table td .curr {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    margin-right: 0.125rem;
+  }
+  /* Amounts in table cells: right-aligned numeric with trailing ISO */
+  .breakdown-table td.num .iso {
+    font-size: 0.6875rem;
+    margin-left: 0.25rem;
+  }
+  .breakdown-table tr:hover td {
+    background: oklch(0.99 0.003 260);
+  }
+
+  .item-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+  .item-thumb {
+    width: 36px;
+    height: 36px;
+    background: var(--muted);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-foreground);
+    font-size: 0.625rem;
+  }
+  .item-cell-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .item-cell-name {
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1.2;
+  }
+  .item-cell-meta {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+  }
+
+  .missing-cell {
+    color: var(--muted-foreground);
+    font-style: italic;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+  }
+
+  .delta-inline {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    margin-left: 0.375rem;
+  }
+  .delta-inline.gain { color: var(--gain); }
+  .delta-inline.loss { color: var(--loss); }
+
+  /* ── Empty states ── */
+  .empty-card {
+    background: var(--card);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+  .empty-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.375rem;
+  }
+  .empty-card-body {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    margin-bottom: 1rem;
+    max-width: 28rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Filter toggles on valuation page ── */
+  .filters-inline {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    margin-bottom: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .filter-chip {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    background: var(--muted);
+    color: var(--muted-foreground);
+    border: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .filter-chip.active {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+  }
+
+</style>
+</head>
+<body>
+
+<div class="mockup-container">
+
+<div>
+  <h1 class="page-title">Collection Valuation — Design</h1>
+  <p class="page-subtitle" style="margin-top:0.25rem">Two surfaces: compact summary card on the main collection page, dedicated page for the full breakdown.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SURFACE 1: Summary card on /collection         -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div>
+  <span class="mockup-label">Surface 1 — Summary card (shown between stats bar and filters)</span>
+
+  <div class="valuation-card">
+    <div class="valuation-card-header">
+      <span class="valuation-card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
+        Collection Valuation
+      </span>
+      <a href="#" class="valuation-card-link">
+        View full breakdown
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+    <div class="valuation-tiers">
+      <div class="tier">
+        <span class="tier-label">Market Value</span>
+        <span class="tier-amount primary">$12,847<span class="iso">CAD</span></span>
+        <div class="tier-meta">
+          estimated total · 23 of 28 items
+          <span class="delta gain">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            +24%
+          </span>
+        </div>
+      </div>
+
+      <div class="tier">
+        <span class="tier-label">MSRP Total</span>
+        <span class="tier-amount secondary">$9,320<span class="iso">CAD</span></span>
+        <div class="tier-meta">25 of 28 items</div>
+      </div>
+
+      <div class="tier">
+        <span class="tier-label">You Paid</span>
+        <span class="tier-amount secondary">$10,356<span class="iso">CAD</span></span>
+        <div class="tier-meta">18 of 28 items</div>
+      </div>
+    </div>
+
+    <div class="valuation-coverage">
+      <span>Pricing coverage</span>
+      <div class="coverage-bar"><div class="coverage-bar-fill" style="width:82%"></div></div>
+      <span style="font-family:var(--font-mono)">82%</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SURFACE 2: Dedicated valuation page            -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div>
+  <span class="mockup-label">Surface 2 — Full page at /collection/valuation</span>
+
+  <div class="page-container">
+    <div class="page-header">
+      <h1 style="font-family:var(--font-display); font-size:1.875rem; font-weight:500; letter-spacing:-0.02em">Collection Valuation</h1>
+      <div class="export-row">
+        <button class="btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Export PDF
+        </button>
+        <button class="btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+    <p class="page-subtitle">Estimated insurance value of your collection — observed prices from catalog and market sources. As of April 12, 2026.</p>
+
+    <!-- ── Hero ── -->
+    <div class="hero-tiers">
+      <div class="hero-tier primary">
+        <div class="hero-tier-label">Market Value</div>
+        <div class="hero-tier-amount primary">$12,847<span class="iso">CAD</span></div>
+        <div class="tier-meta" style="margin-top:0.5rem">
+          estimated total
+          <span class="delta gain">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            +24% vs paid
+          </span>
+        </div>
+      </div>
+
+      <div class="hero-tier">
+        <div class="hero-tier-label">MSRP Total</div>
+        <div class="hero-tier-amount">$9,320<span class="iso">CAD</span></div>
+        <div class="tier-meta" style="margin-top:0.5rem">25 of 28 items</div>
+      </div>
+
+      <div class="hero-tier acq">
+        <div class="hero-tier-label">You Paid</div>
+        <div class="hero-tier-amount">$10,356<span class="iso">CAD</span></div>
+        <div class="tier-meta" style="margin-top:0.5rem">18 of 28 items</div>
+      </div>
+    </div>
+
+    <!-- ── FX disclaimer ── -->
+    <div class="fx-disclaimer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div>
+        <strong>Totals are estimates.</strong> Prices observed in USD, GBP, and EUR were converted to CAD using exchange rates from Apr 12, 2026 (1 USD = 1.35 CAD, 1 GBP = 1.72 CAD, 1 EUR = 1.45 CAD). For insurance purposes, use the observed amounts in the per-item breakdown below.
+      </div>
+    </div>
+
+    <!-- ── Currency breakdown ── -->
+    <div class="currency-breakdown">
+      <h2 class="section-title">Market Value by Observed Currency</h2>
+      <div class="currency-rows">
+        <div class="currency-row">
+          <span class="currency-label">USD</span>
+          <div class="currency-bar-track"><div class="currency-bar-fill" style="width:58%"></div></div>
+          <span class="currency-amount">$5,492<span class="iso">USD</span> <span style="color:var(--muted-foreground); font-size:0.6875rem">· $7,414<span class="iso">CAD</span></span></span>
+        </div>
+        <div class="currency-row">
+          <span class="currency-label">CAD</span>
+          <div class="currency-bar-track"><div class="currency-bar-fill" style="width:28%"></div></div>
+          <span class="currency-amount">$3,597<span class="iso">CAD</span></span>
+        </div>
+        <div class="currency-row">
+          <span class="currency-label">GBP</span>
+          <div class="currency-bar-track"><div class="currency-bar-fill" style="width:10%"></div></div>
+          <span class="currency-amount">£749<span class="iso">GBP</span> <span style="color:var(--muted-foreground); font-size:0.6875rem">· $1,288<span class="iso">CAD</span></span></span>
+        </div>
+        <div class="currency-row">
+          <span class="currency-label">EUR</span>
+          <div class="currency-bar-track"><div class="currency-bar-fill" style="width:4%"></div></div>
+          <span class="currency-amount">€378<span class="iso">EUR</span> <span style="color:var(--muted-foreground); font-size:0.6875rem">· $548<span class="iso">CAD</span></span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Filter toggles ── -->
+    <div class="filters-inline">
+      <button class="filter-chip active">All items (28)</button>
+      <button class="filter-chip">With market value (23)</button>
+      <button class="filter-chip">Missing pricing (5)</button>
+      <button class="filter-chip">With gain (14)</button>
+      <button class="filter-chip">With loss (4)</button>
+    </div>
+
+    <!-- ── Per-item breakdown table ── -->
+    <div class="breakdown">
+      <h2 class="section-title">Per-Item Breakdown</h2>
+      <table class="breakdown-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Condition</th>
+            <th class="num">You Paid</th>
+            <th class="num">MSRP</th>
+            <th class="num">Market Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="item-cell">
+                <div class="item-thumb">IMG</div>
+                <div class="item-cell-text">
+                  <span class="item-cell-name">Thomas [FT-44]</span>
+                  <span class="item-cell-meta">Fans Toys · 2020</span>
+                </div>
+              </div>
+            </td>
+            <td style="font-size:0.75rem; color:var(--muted-foreground)">MISB · C9</td>
+            <td class="num">
+              $279.99<span class="iso">CAD</span>
+            </td>
+            <td class="num">
+              $206.99<span class="iso">USD</span>
+            </td>
+            <td class="num">
+              $357.48<span class="iso">CAD</span>
+              <span class="delta-inline gain">+28%</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="item-cell">
+                <div class="item-thumb">IMG</div>
+                <div class="item-cell-text">
+                  <span class="item-cell-name">Lucifer [H13]</span>
+                  <span class="item-cell-meta">NewAge · 2020</span>
+                </div>
+              </div>
+            </td>
+            <td style="font-size:0.75rem; color:var(--muted-foreground)">Loose · C8</td>
+            <td class="num">
+              $75.00<span class="iso">USD</span>
+            </td>
+            <td class="num">
+              $85.00<span class="iso">USD</span>
+            </td>
+            <td class="num">
+              $72.17<span class="iso">USD</span>
+              <span class="delta-inline loss">−4%</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="item-cell">
+                <div class="item-thumb">IMG</div>
+                <div class="item-cell-text">
+                  <span class="item-cell-name">Metroplex [05791]</span>
+                  <span class="item-cell-meta">Hasbro · 1986</span>
+                </div>
+              </div>
+            </td>
+            <td style="font-size:0.75rem; color:var(--muted-foreground)">OC · C7</td>
+            <td class="num missing-cell">not entered</td>
+            <td class="num missing-cell">no data</td>
+            <td class="num">
+              $129.99<span class="iso">USD</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="item-cell">
+                <div class="item-thumb">IMG</div>
+                <div class="item-cell-text">
+                  <span class="item-cell-name">Snake Eyes [00]</span>
+                  <span class="item-cell-meta">Hasbro · 2020</span>
+                </div>
+              </div>
+            </td>
+            <td style="font-size:0.75rem; color:var(--muted-foreground)">MISB · C10</td>
+            <td class="num">
+              $19.99<span class="iso">USD</span>
+            </td>
+            <td class="num">
+              $19.99<span class="iso">USD</span>
+            </td>
+            <td class="num">
+              $39.99<span class="iso">USD</span>
+              <span class="delta-inline gain">+100%</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="item-cell">
+                <div class="item-thumb">IMG</div>
+                <div class="item-cell-text">
+                  <span class="item-cell-name">FT-03 Quake Wave</span>
+                  <span class="item-cell-meta">Fans Toys · 2013</span>
+                </div>
+              </div>
+            </td>
+            <td style="font-size:0.75rem; color:var(--muted-foreground)">Loose · C6</td>
+            <td class="num missing-cell">not entered</td>
+            <td class="num missing-cell">no data</td>
+            <td class="num missing-cell">no data</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr style="background:oklch(0.98 0.003 260)">
+            <td colspan="2" style="font-weight:600; font-size:0.8125rem">Totals (estimated in CAD)</td>
+            <td class="num" style="font-weight:600">$10,356<span class="iso">CAD</span></td>
+            <td class="num" style="font-weight:600">$9,320<span class="iso">CAD</span></td>
+            <td class="num" style="font-weight:600">$12,847<span class="iso">CAD</span></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SURFACE 3: Empty/unconfigured state            -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div>
+  <span class="mockup-label">Empty states</span>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+    <div class="empty-card">
+      <div class="empty-card-title">No location set</div>
+      <div class="empty-card-body">Set your country in Settings to see collection valuation in your local currency.</div>
+      <button class="btn" style="border-color:var(--primary); color:var(--primary)">Go to Settings</button>
+    </div>
+    <div class="empty-card">
+      <div class="empty-card-title">Collection valuation unavailable</div>
+      <div class="empty-card-body">None of the items in your collection have pricing data yet. Add items from the catalog to see your collection value.</div>
+      <button class="btn">Browse Catalog</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- Legend                                          -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div>
+  <span class="mockup-label">Reading the design</span>
+  <div style="background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; font-size: 0.8125rem;">
+    <dl style="display: flex; flex-direction: column; gap: 0.625rem">
+      <div>
+        <dt style="font-weight: 600">Currency formatting (locale + ISO)</dt>
+        <dd style="color: var(--muted-foreground); margin-top:0.125rem">Symbol position follows the user's locale (English: <code style="background:var(--muted);padding:1px 4px;border-radius:2px;font-size:0.75rem">$279.99</code>; German: <code style="background:var(--muted);padding:1px 4px;border-radius:2px;font-size:0.75rem">279,99 €</code>), and the ISO code always trails as a smaller muted suffix to disambiguate (CAD vs USD vs HKD all use <code style="background:var(--muted);padding:1px 4px;border-radius:2px;font-size:0.75rem">$</code>). Production code uses <code style="background:var(--muted);padding:1px 4px;border-radius:2px;font-size:0.75rem">Intl.NumberFormat</code> with <code style="background:var(--muted);padding:1px 4px;border-radius:2px;font-size:0.75rem">currencyDisplay: 'narrowSymbol'</code>, then renders the ISO code as a separate trailing element.</dd>
+      </div>
+
+      <div>
+        <dt style="font-weight: 600">Three tiers, three weights</dt>
+        <dd style="color: var(--muted-foreground); margin-top:0.125rem">Market Value is the largest number (insurance is the primary use case). MSRP and You Paid are equal secondary tiers. The serif Fraunces display font is used ONLY on the hero Market Value — treats the insurance-relevant number like a signature figure in a financial statement.</dd>
+      </div>
+      <div>
+        <dt style="font-weight: 600">Coverage transparency</dt>
+        <dd style="color: var(--muted-foreground); margin-top:0.125rem">Every tier shows "X of Y items" and the summary card exposes an overall coverage percentage bar. This is load-bearing trust: collectors need to know the estimate is incomplete if only half their items have data.</dd>
+      </div>
+      <div>
+        <dt style="font-weight: 600">FX disclaimer as first-class UI</dt>
+        <dd style="color: var(--muted-foreground); margin-top:0.125rem">The amber-bordered notice is not a footnote — it's positioned directly under the hero so users cannot miss it. For insurance documentation, the per-item observed amounts are the authoritative source; the aggregate is a convenience.</dd>
+      </div>
+      <div>
+        <dt style="font-weight: 600">Per-item row honesty</dt>
+        <dd style="color: var(--muted-foreground); margin-top:0.125rem">"not entered" and "no data" are italicized muted text, not dashes — tells the user whether data is missing because they haven't entered it (actionable) or because the source didn't have it (not actionable). Different wording, different user response.</dd>
+      </div>
+      <div>
+        <dt style="font-weight: 600">Delta chips (gain/loss)</dt>
+        <dd style="color: var(--muted-foreground); margin-top:0.125rem">Gain/loss shown only vs "You Paid" (the tier the user directly controls). Intentionally not shown vs MSRP — that comparison is less meaningful for collectors since many pay above MSRP for secondary-market items.</dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+</div>
+
+</body>
+</html>
