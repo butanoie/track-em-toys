@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — Location Fields Design</title>
+<style>
+  /* ── Reset & Theme (matching Track'em Toys oklch palette) ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.137 0.036 258.526);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.137 0.036 258.526);
+    --primary: oklch(0.546 0.215 262.872);
+    --primary-foreground: oklch(0.984 0.003 247.858);
+    --secondary: oklch(0.968 0.007 247.895);
+    --secondary-foreground: oklch(0.208 0.04 265.727);
+    --muted: oklch(0.968 0.007 247.895);
+    --muted-foreground: oklch(0.555 0.041 257.44);
+    --accent: oklch(0.968 0.007 247.895);
+    --border: oklch(0.929 0.013 255.532);
+    --input: oklch(0.929 0.013 255.532);
+    --ring: oklch(0.546 0.215 262.872);
+    --radius: 0.5rem;
+    --destructive: oklch(0.637 0.208 25.326);
+    --font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--background);
+    color: var(--foreground);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Page Layout (mirrors SettingsPage.tsx) ── */
+  .page { min-height: 100vh; background: var(--background); }
+
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .header-title {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .nav {
+    border-bottom: 1px solid var(--border);
+    padding: 0 1rem;
+    display: flex;
+    gap: 1.5rem;
+  }
+  .nav a {
+    padding: 0.625rem 0;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .nav a.active { color: var(--foreground); border-bottom-color: var(--primary); }
+
+  .main {
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* ── Card (Shadcn style) ── */
+  .card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    overflow: hidden;
+  }
+  .card-header { padding: 1.25rem 1.5rem 0.5rem; }
+  .card-title { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
+  .card-desc { font-size: 0.875rem; color: var(--muted-foreground); margin-top: 0.125rem; }
+  .card-content { padding: 0.75rem 1.5rem 1.5rem; }
+  .card-footer {
+    padding: 0.75rem 1.5rem 1.25rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  /* ── Form Fields ── */
+  .field-group { display: flex; flex-direction: column; gap: 1rem; }
+
+  .field-row-static {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 0.375rem; }
+  .field-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--foreground);
+  }
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    margin-top: -0.125rem;
+  }
+  .field-label-static {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+  .field-value {
+    font-size: 0.875rem;
+    color: var(--foreground);
+  }
+
+  /* ── Select (Shadcn style) ── */
+  .select-trigger {
+    display: flex;
+    height: 2.5rem;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: calc(var(--radius) * 0.8);
+    border: 1px solid var(--input);
+    background: var(--background);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none;
+    outline: none;
+  }
+  .select-trigger:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--ring), transparent 75%);
+  }
+  .select-trigger.placeholder { color: var(--muted-foreground); }
+
+  .select-wrapper {
+    position: relative;
+  }
+  .select-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--muted-foreground);
+    pointer-events: none;
+  }
+
+  /* ── Separator ── */
+  .separator {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0.25rem 0;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(var(--radius) * 0.8);
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: inherit;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s, box-shadow 0.15s;
+    border: none;
+    outline: none;
+    height: 2.25rem;
+  }
+  .btn:focus-visible {
+    box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--foreground);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { background: var(--accent); }
+
+  /* ── Location section transition ── */
+  .location-fields {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1.5fr;
+    gap: 1rem;
+    animation: slideDown 0.2s ease-out;
+  }
+  /* Two-field variant (no subdivision): country + currency */
+  .location-fields.two-field {
+    grid-template-columns: 2fr 1.5fr;
+  }
+
+  @media (max-width: 560px) {
+    .location-fields,
+    .location-fields.two-field { grid-template-columns: 1fr; }
+  }
+
+  /* ── Currency auto-fill hint ── */
+  .field-derived-hint {
+    font-size: 0.6875rem;
+    color: oklch(0.55 0.14 220);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.0625rem;
+  }
+  .field-derived-hint svg { width: 10px; height: 10px; }
+
+  .subdivision-field {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ── Saved indicator ── */
+  .saved-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    color: oklch(0.55 0.15 145);
+    animation: fadeIn 0.3s ease-out;
+  }
+  .saved-indicator svg { width: 14px; height: 14px; }
+
+  /* ── Badge ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+    border: 1px solid var(--border);
+  }
+  .badge-linked {
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+  }
+
+  /* ── Optional tag ── */
+  .optional-tag {
+    font-size: 0.6875rem;
+    font-weight: 400;
+    color: var(--muted-foreground);
+    margin-left: 0.25rem;
+  }
+
+  /* ── State indicators ── */
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+    padding-bottom: 0.25rem;
+  }
+
+  /* ── Map pin icon inline ── */
+  .icon-inline {
+    display: inline;
+    vertical-align: -0.125em;
+    width: 14px;
+    height: 14px;
+    margin-right: 0.25rem;
+  }
+
+  /* ── Linked account row ── */
+  .linked-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) * 0.8);
+    padding: 0.75rem;
+  }
+  .linked-row-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .linked-row-left .provider {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .linked-row-left .email {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+
+  /* ── Dirty indicator ── */
+  .dirty-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: inline-block;
+    margin-left: 0.375rem;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- STATE 1: Default (no location set yet)                  -->
+<!-- ════════════════════════════════════════════════════════ -->
+
+<div class="page">
+  <div class="header">
+    <span class="header-title">Track'em Toys</span>
+  </div>
+  <nav class="nav">
+    <a href="#">Dashboard</a>
+    <a href="#">Catalog</a>
+    <a href="#">My Collection</a>
+  </nav>
+
+  <main class="main">
+    <h2 style="font-size:1.25rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:-0.5rem;">State 1: Empty (no location or currency set)</h2>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Profile</div>
+        <div class="card-desc">Your account information</div>
+      </div>
+      <div class="card-content">
+        <div class="field-group">
+          <!-- Read-only fields -->
+          <div class="field-row-static">
+            <span class="field-label-static">Name</span>
+            <span class="field-value">Sing Chan</span>
+          </div>
+          <div class="field-row-static">
+            <span class="field-label-static">Email</span>
+            <span class="field-value">sing@example.com</span>
+          </div>
+
+          <hr class="separator">
+
+          <!-- Location fields -->
+          <div class="location-fields">
+            <div class="field">
+              <label class="field-label">
+                <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 1.892.402 3.13 1.5 4.5L12 22l6.5-7.5c1.098-1.37 1.5-2.608 1.5-4.5a8 8 0 0 0-8-8z"/></svg>
+                Country<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger placeholder">
+                  <option value="" selected>Select country...</option>
+                  <option>Australia</option>
+                  <option>Canada</option>
+                  <option>United Kingdom</option>
+                  <option>United States</option>
+                </select>
+              </div>
+              <span class="field-hint">Used for regional pricing and marketplace preferences</span>
+            </div>
+
+            <div class="field" style="opacity: 0.4; pointer-events: none;">
+              <label class="field-label">
+                Region<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger placeholder" disabled>
+                  <option value="">Select country first</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label">
+                Currency<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger placeholder">
+                  <option value="" selected>Select currency...</option>
+                  <option>CAD — Canadian Dollar</option>
+                  <option>USD — US Dollar</option>
+                  <option>GBP — British Pound</option>
+                  <option>EUR — Euro</option>
+                  <option>AUD — Australian Dollar</option>
+                  <option>JPY — Japanese Yen</option>
+                </select>
+              </div>
+              <span class="field-hint">Valuation display currency</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-primary" disabled>Save</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <!-- STATE 2: Country selected, subdivision visible       -->
+    <!-- ════════════════════════════════════════════════════ -->
+
+    <h2 style="font-size:1.25rem; font-weight:700; letter-spacing:-0.02em; margin-top:1.5rem; margin-bottom:-0.5rem;">State 2: Canada selected — currency auto-cascades to CAD (dirty form)</h2>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Profile<span class="dirty-dot"></span></div>
+        <div class="card-desc">Your account information</div>
+      </div>
+      <div class="card-content">
+        <div class="field-group">
+          <div class="field-row-static">
+            <span class="field-label-static">Name</span>
+            <span class="field-value">Sing Chan</span>
+          </div>
+          <div class="field-row-static">
+            <span class="field-label-static">Email</span>
+            <span class="field-value">sing@example.com</span>
+          </div>
+
+          <hr class="separator">
+
+          <div class="location-fields">
+            <div class="field">
+              <label class="field-label">
+                <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 1.892.402 3.13 1.5 4.5L12 22l6.5-7.5c1.098-1.37 1.5-2.608 1.5-4.5a8 8 0 0 0-8-8z"/></svg>
+                Country<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger">
+                  <option>Canada</option>
+                </select>
+              </div>
+              <span class="field-hint">Used for regional pricing and marketplace preferences</span>
+            </div>
+
+            <div class="field subdivision-field">
+              <label class="field-label">
+                Province<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger placeholder">
+                  <option value="" selected>Select province...</option>
+                  <option>Alberta</option>
+                  <option>British Columbia</option>
+                  <option>Manitoba</option>
+                  <option>New Brunswick</option>
+                  <option>Newfoundland and Labrador</option>
+                  <option>Northwest Territories</option>
+                  <option>Nova Scotia</option>
+                  <option>Nunavut</option>
+                  <option>Ontario</option>
+                  <option>Prince Edward Island</option>
+                  <option>Quebec</option>
+                  <option>Saskatchewan</option>
+                  <option>Yukon</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label">
+                Currency<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger">
+                  <option>CAD — Canadian Dollar</option>
+                </select>
+              </div>
+              <span class="field-derived-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                matches country
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-primary">Save</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <!-- STATE 3: Saved — US with state selected              -->
+    <!-- ════════════════════════════════════════════════════ -->
+
+    <h2 style="font-size:1.25rem; font-weight:700; letter-spacing:-0.02em; margin-top:1.5rem; margin-bottom:-0.5rem;">State 3: US + California + USD saved</h2>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Profile</div>
+        <div class="card-desc">Your account information</div>
+      </div>
+      <div class="card-content">
+        <div class="field-group">
+          <div class="field-row-static">
+            <span class="field-label-static">Name</span>
+            <span class="field-value">Sing Chan</span>
+          </div>
+          <div class="field-row-static">
+            <span class="field-label-static">Email</span>
+            <span class="field-value">sing@example.com</span>
+          </div>
+
+          <hr class="separator">
+
+          <div class="location-fields">
+            <div class="field">
+              <label class="field-label">
+                <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 1.892.402 3.13 1.5 4.5L12 22l6.5-7.5c1.098-1.37 1.5-2.608 1.5-4.5a8 8 0 0 0-8-8z"/></svg>
+                Country<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger">
+                  <option>United States</option>
+                </select>
+              </div>
+              <span class="field-hint">Used for regional pricing and marketplace preferences</span>
+            </div>
+
+            <div class="field">
+              <label class="field-label">
+                State<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger">
+                  <option>California</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label">
+                Currency<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger">
+                  <option>USD — US Dollar</option>
+                </select>
+              </div>
+              <span class="field-derived-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                matches country
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="saved-indicator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Saved
+        </span>
+        <button class="btn btn-primary" disabled>Save</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <!-- STATE 4: Country without subdivisions (Germany)      -->
+    <!-- ════════════════════════════════════════════════════ -->
+
+    <h2 style="font-size:1.25rem; font-weight:700; letter-spacing:-0.02em; margin-top:1.5rem; margin-bottom:-0.5rem;">State 4: Germany (no subdivisions) + EUR</h2>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Profile<span class="dirty-dot"></span></div>
+        <div class="card-desc">Your account information</div>
+      </div>
+      <div class="card-content">
+        <div class="field-group">
+          <div class="field-row-static">
+            <span class="field-label-static">Name</span>
+            <span class="field-value">Sing Chan</span>
+          </div>
+          <div class="field-row-static">
+            <span class="field-label-static">Email</span>
+            <span class="field-value">sing@example.com</span>
+          </div>
+
+          <hr class="separator">
+
+          <div class="location-fields two-field">
+            <div class="field">
+              <label class="field-label">
+                <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 1.892.402 3.13 1.5 4.5L12 22l6.5-7.5c1.098-1.37 1.5-2.608 1.5-4.5a8 8 0 0 0-8-8z"/></svg>
+                Country<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger">
+                  <option>Germany</option>
+                </select>
+              </div>
+              <span class="field-hint">Used for regional pricing and marketplace preferences</span>
+            </div>
+
+            <div class="field">
+              <label class="field-label">
+                Currency<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger">
+                  <option>EUR — Euro</option>
+                </select>
+              </div>
+              <span class="field-derived-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                matches country
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-primary">Save</button>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════ -->
+    <!-- STATE 5: Full Linked Accounts card (context)         -->
+    <!-- ════════════════════════════════════════════════════ -->
+
+    <h2 style="font-size:1.25rem; font-weight:700; letter-spacing:-0.02em; margin-top:1.5rem; margin-bottom:-0.5rem;">Full page context (both cards) — currency manually overridden to USD</h2>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Profile</div>
+        <div class="card-desc">Your account information</div>
+      </div>
+      <div class="card-content">
+        <div class="field-group">
+          <div class="field-row-static">
+            <span class="field-label-static">Name</span>
+            <span class="field-value">Sing Chan</span>
+          </div>
+          <div class="field-row-static">
+            <span class="field-label-static">Email</span>
+            <span class="field-value">sing@example.com</span>
+          </div>
+
+          <hr class="separator">
+
+          <div class="location-fields">
+            <div class="field">
+              <label class="field-label">
+                <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 1.892.402 3.13 1.5 4.5L12 22l6.5-7.5c1.098-1.37 1.5-2.608 1.5-4.5a8 8 0 0 0-8-8z"/></svg>
+                Country<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger">
+                  <option>Canada</option>
+                </select>
+              </div>
+              <span class="field-hint">Used for regional pricing and marketplace preferences</span>
+            </div>
+
+            <div class="field">
+              <label class="field-label">
+                Province<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger">
+                  <option>British Columbia</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label">
+                Currency<span class="optional-tag">optional</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="select-trigger">
+                  <option>USD — US Dollar</option>
+                </select>
+              </div>
+              <span class="field-hint" style="color: oklch(0.55 0.14 55)">preferred — overrides country default (CAD)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="saved-indicator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Saved
+        </span>
+        <button class="btn btn-primary" disabled>Save</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Linked Accounts</div>
+        <div class="card-desc">Connect multiple sign-in providers to your account</div>
+      </div>
+      <div class="card-content" style="display:flex; flex-direction:column; gap:0.75rem;">
+        <div class="linked-row">
+          <div class="linked-row-left">
+            <span class="provider">Google</span>
+            <span class="email">sing@gmail.com</span>
+          </div>
+          <span class="badge badge-linked">Linked</span>
+        </div>
+        <div class="linked-row">
+          <div class="linked-row-left">
+            <span class="provider">Apple</span>
+            <span class="email">sing@icloud.com</span>
+          </div>
+          <span class="badge badge-linked">Linked</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
